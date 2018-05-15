@@ -22,11 +22,11 @@ as well as your own custom defined services. In addition, kuber allows for alert
 
 Using Kuber is simple and similar to the declarative philosphy adpated by Kubeernetes and kubectl
 ```
-kubectl plugin kuber get_cost label app=my-web-ui
+kuber get_cost label app=my-web-ui
 ```
 Would get you the monthly aggregated cost of kubernetes PODs labeled with 'app=my-web-ui'
 ```
-kubectl plugin kuber set_limit namespace bakend-auto-scaling-group month limit 2400 action alert email backend devops@org.com
+kuber set_limit namespace bakend-auto-scaling-group month limit 2400 action alert email backend devops@org.com
 ```
 Would set a monthly limit of 2400$ on resources in the 'backend-auto-scaling-group' and if the cost this group breaches the limit, send an email to devops@org.com
 with cost details
