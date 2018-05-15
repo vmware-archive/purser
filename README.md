@@ -18,6 +18,8 @@ over time ranges that match with budget planning.
 Kuber is a CLI extension to Kubernetes. More specifically, it is a ``kubectl`` plugin that helps you query for cost based on native Kubernetes artifacts
 as well as your own custom defined services. In addition, kuber allows for alerting on budget adherence and helps enforce budgets and savings.
 
+Kuber currently supports Kubernetes deployments on Amazon Web Services. Support for VMware vSphere, Azure, Google Compute AEngine and other platforms are planned.
+
 ## How does it work
 
 Using Kuber is simple and similar to the declarative philosphy adpated by Kubeernetes and kubectl
@@ -48,6 +50,7 @@ Instructions to install and start using Kuber plugin.
 
 You must have ``kubectl`` installed and configured. Sere [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
+
 ### Installing
 
 Kuber is currently supported on Linux [Add Flavors and Versions] and OS X. Windows support is currently in development.
@@ -67,6 +70,41 @@ kuber get_cost label <kubernetes label>
 
 ## Advanced Usage
 
+### Kuber options
+
+```
+kuber {get_cost|set_limit} _options_
+
+get_cost {label|namespace|node-label|name|service|app} <_variable_> {history=<_duration_>[_range_]|projection=<_duration_>} {hourly|daily|weekly|monthly}
+
+set_limit {label|namespace|node-label|name|service|app} <_variable_> {hourly|daily|weekly|monthly} action {email=<_variable_>|hard_enforce|save_enforce}
+```
+
+### Defining custom groups
+
+my_service.yaml
+```
+service:
+    name: backend-data-microservice
+    label:
+        grp=data-pipeline
+        rep_set=backend-map-resuce
+```
+
+my_app.yaml
+```
+ app:
+     name: my_application
+     namespace:
+         elastic-loadbalancers
+         api-gateway
+     label:
+         grp=web-portal
+         grp=admin-portal
+     service:
+         backend-data-microservice
+```
+         
 
 
 
