@@ -15,7 +15,7 @@ incorporate your budgeting and cost savings at a level of control that was entir
 Kuber provides cost visibility of services, microservices and applications deployed with Kubernetes in a cloud neutral manner. It does so at a granular level and
 over time ranges that match with budget planning.
 
-Kuber is a CLI extension to Kubernetes. More specifically, it is a kubectl plugin that helps you query for cost based on native Kubernetes artifacts
+Kuber is a CLI extension to Kubernetes. More specifically, it is a ``kubectl`` plugin that helps you query for cost based on native Kubernetes artifacts
 as well as your own custom defined services. In addition, kuber allows for alerting on budget adherence and helps enforce budgets and savings.
 
 ## How does it work
@@ -35,18 +35,35 @@ with cost details
 
 * Query cost associated with Kubernetes native groups
 * Extend Kuber with YAML based declarative custom service, microservice and applicatin definitions
-* Control over time range for cost query
+* Capability for control over time range for cost query
+* Capacbility for cost analysis based on resource Usage or Allocation
 * Set budget limits on Kubernetes native or custom defined groups
-* Cost analysis based on reosurce Usage or Allocation
+* Capability to enforce budget and cost saving for Kubernetes native or custom defined groups
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Instructions to install and start using Kuber plugin.
 
 ### Prerequisites
 
+You must have ``kubectl`` installed and configured. Sere [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### Installing
+
+Kuber is currently supported on Linux [Add Flavors and Versions]. Windows support is currently in development.
+
+1. _Download Kuber [installer](https://fillInURl)_ 
+2. _Run kuber_install.sh_
+
+Kuber will install and register as a plugin with the local ``kubectl`` instance. Kuber will automtically be configured to talk to the ``kubectl`` configured clusters
+
+### Usage
+
+```
+kuber get_cost label <kubernetes label>
+```
+
+
 
 
 
