@@ -28,7 +28,7 @@ kuber get_cost label app=my-web-ui
 ```
 Would get you the monthly aggregated cost of kubernetes PODs labeled with 'app=my-web-ui'
 ```
-kuber set_limit namespace bakend-auto-scaling-group month limit 2400 action alert email backend devops@org.com
+kuber set_limit namespace backend-auto-scaling-group month limit 2400 action alert email backend devops@org.com
 ```
 Would set a monthly limit of 2400$ on resources in the 'backend-auto-scaling-group' and if the cost this group breaches the limit, send an email to devops@org.com
 with cost details
@@ -49,7 +49,6 @@ Instructions to install and start using Kuber plugin.
 ### Prerequisites
 
 You must have ``kubectl`` installed and configured. Sere [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-
 
 ### Installing
 
