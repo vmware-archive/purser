@@ -50,7 +50,7 @@ You must have ``kubectl`` installed and configured. Sere [here](https://kubernet
 
 ### Installing
 
-Kuber is currently supported on Linux [Add Flavors and Versions]. Windows support is currently in development.
+Kuber is currently supported on Linux [Add Flavors and Versions] and OS X. Windows support is currently in development.
 
 1. _Download Kuber [installer](https://fillInURl)_ 
 2. _Run kuber_install.sh_
@@ -62,6 +62,10 @@ Kuber will install and register as a plugin with the local ``kubectl`` instance.
 ```
 kuber get_cost label <kubernetes label>
 ```
+
+![](Kuber_getting_started.png)
+
+## Advanced Usage
 
 
 
