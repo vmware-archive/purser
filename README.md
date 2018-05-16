@@ -1,10 +1,10 @@
 # Kuber plugin for K8s
 
-Cost visbility for Kubernetes based Container Native Applications
+Cost visbility for Kubernetes based Cloud Native Applications
 
 ## Why?
 
-Today, cost visibility in the world of Container Native Applications is very limited. It is mostly restricted to cost of cloud infrastructure at a
+Today, cost visibility in the world of Cloud Native Applications is very limited. It is mostly restricted to cost of cloud infrastructure at a
 high level and usually involves a lot of manual steps or custom scripting.
 
 Wouldn't it be great if you know the cost of you Kuberentes deployed applications, not matter the cloud of your choice? Don't you wish there was an easy way to
