@@ -36,7 +36,7 @@ with cost details
 ## Features
 
 * Query cost associated with Kubernetes native groups
-* Extend Kuber with YAML based declarative custom service, microservice and applicatin definitions
+* Extend Kuber with YAML based declarative custom service, microservice and application definitions
 * Capability for control over time range for cost query
 * Capacbility for cost analysis based on resource Usage or Allocation
 * Set budget limits on Kubernetes native or custom defined groups
@@ -48,7 +48,7 @@ Instructions to install and start using Kuber plugin.
 
 ### Prerequisites
 
-You must have ``kubectl`` installed and configured. Sere [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+You must have ``kubectl`` installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### Installing
 
