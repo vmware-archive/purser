@@ -13,13 +13,24 @@ import (
 
 const (
 	getPodsCommand = "kubectl --kubeconfig=%s get pods -l app=%s -o json"
+	getNodeCommand = "kubectl --kubeconfig=%s get node %s -o json"
 )
+
+func getNodeDetails(nodeName string) Node {
+	node := Node{}
+	command := fmt.Sprintf(getNodeCommand, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), nodeName)
+	bytes := executeCommand(command)
+	json := string(bytes)
+	node.name = nodeName
+	node.instanceType = gjson.Get(json, "metadata.labels.beta\\.kubernetes\\.io/instance-type").Str
+	return node
+}
 
 func getPodsForLabel(label string) []Pod {
 	pods := []Pod{}
 	command := fmt.Sprintf(getPodsCommand, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), label)
-	b := executeCommand(command)
-	json := string(b)
+	bytes := executeCommand(command)
+	json := string(bytes)
 	items := gjson.Get(json, "items")
 
 	items.ForEach(func(key, value gjson.Result) bool {
@@ -52,8 +63,18 @@ func printPodDetails(pods []Pod) {
 	}
 }
 
+func printNodeDetails(nodes []Node) {
+	fmt.Println("===Node Details===")
+	fmt.Println("Node Name \t\t\t InstanceType")
+	for _, value := range nodes {
+		fmt.Println(value.name + " \t" + value.instanceType)
+	}
+}
+
 func main() {
 	inputs := os.Args[1:]
 	pods := getPodsForLabel(inputs[1])
 	printPodDetails(pods)
+	node := getNodeDetails(pods[0].nodeName)
+	printNodeDetails([]Node{node})
 }
