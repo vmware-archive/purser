@@ -12,14 +12,15 @@ import (
 )
 
 const (
-	getPodsCommand      = "kubectl --kubeconfig=%s get pods -l %s -o json"
-	getNodeCommand      = "kubectl --kubeconfig=%s get node %s -o json"
+	getPodsByLabel      = "kubectl --kubeconfig=%s get pods -l %s -o json"
+	getPodByName        = "kubectl --kubeconfig=%s get pod %s -o json"
+	getNodeByName       = "kubectl --kubeconfig=%s get node %s -o json"
 	nodeDescribeCommand = "kubectl --kubeconfig=%s describe node %s"
 )
 
 func getNodeDetails(nodeName string) Node {
 	node := Node{}
-	command := fmt.Sprintf(getNodeCommand, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), nodeName)
+	command := fmt.Sprintf(getNodeByName, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), nodeName)
 	bytes := executeCommand(command)
 	json := string(bytes)
 	node.name = nodeName
@@ -29,7 +30,7 @@ func getNodeDetails(nodeName string) Node {
 
 func getPodsForLabel(label string) []Pod {
 	pods := []Pod{}
-	command := fmt.Sprintf(getPodsCommand, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), label)
+	command := fmt.Sprintf(getPodsByLabel, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), label)
 	bytes := executeCommand(command)
 	json := string(bytes)
 	items := gjson.Get(json, "items")
@@ -91,7 +92,7 @@ func calculateCost(pods []Pod, nodes map[string]*Node) []Pod {
 	for i <= len(pods)-1 {
 		node := nodes[pods[i].nodeName]
 		pods[i].nodeCostPercentage = (float64)(node.getPodResourcePercentage(pods[i].name))
-		totalCost, cpuCost, memoryCost := 10.0, 3.0, 7.0
+		totalCost, cpuCost, memoryCost := getMonthlyPriceForInstance(node.instanceType)
 		podCost := Cost{}
 		podCost.totalCost = pods[i].nodeCostPercentage * totalCost
 		podCost.cpuCost = pods[i].nodeCostPercentage * cpuCost
