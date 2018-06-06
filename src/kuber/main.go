@@ -108,11 +108,11 @@ func printPodsVerbose(pods []Pod) {
 	for i <= len(pods)-1 {
 		fmt.Printf("%-25s%s\n", "Pod Name:", pods[i].name)
 		fmt.Printf("%-25s%s\n", "Node:", pods[i].nodeName)
-		fmt.Printf("%-25s%f\n", "Pod Cost Percentage:", pods[i].nodeCostPercentage)
+		fmt.Printf("%-25s%.2f\n", "Pod Cost Percentage:", pods[i].nodeCostPercentage*100.0)
 		fmt.Printf("%-25s\n", "Cost:")
-		fmt.Printf("    %-21s%f\n", "Total Cost:", pods[i].cost.totalCost)
-		fmt.Printf("    %-21s%f\n", "CPU Cost:", pods[i].cost.cpuCost)
-		fmt.Printf("    %-21s%f\n", "Memory Cost:", pods[i].cost.memoryCost)
+		fmt.Printf("    %-21s%f$\n", "Total Cost:", pods[i].cost.totalCost)
+		fmt.Printf("    %-21s%f$\n", "CPU Cost:", pods[i].cost.cpuCost)
+		fmt.Printf("    %-21s%f$\n", "Memory Cost:", pods[i].cost.memoryCost)
 		fmt.Printf("\n")
 		i++
 	}
@@ -145,7 +145,6 @@ func main() {
 	} else {
 		printHelp()
 	}
-
 }
 
 func printHelp() {

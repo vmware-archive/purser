@@ -13,8 +13,6 @@ func (node *Node) getPodResourcePercentage(pod string) float64 {
 	if podMetrics == nil {
 		return 0.0
 	}
-	//fmt.Printf("Pod cpu request = %f, node cpu request %f\n", podMetrics.cpuRequest, node.allocatedResources.cpuRequest)
-	//fmt.Printf("Percentage %f\n", podMetrics.cpuRequest/(float64)(node.allocatedResources.cpuRequest))
 	return podMetrics.cpuRequest / (float64)(node.allocatedResources.cpuRequest)
 }
 
