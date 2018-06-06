@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -71,10 +72,24 @@ func printNodeDetails(nodes []Node) {
 	}
 }
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func testNodeDescribe() {
+	dat, err := ioutil.ReadFile("/Users/gurusreekanthc/sources/kuber-plugin/node.output")
+	check(err)
+	parseNodeDescribe(dat)
+	//fmt.Print(string(dat))
+}
+
 func main() {
-	inputs := os.Args[1:]
+	/*inputs := os.Args[1:]
 	pods := getPodsForLabel(inputs[1])
 	printPodDetails(pods)
 	node := getNodeDetails(pods[0].nodeName)
-	printNodeDetails([]Node{node})
+	printNodeDetails([]Node{node})*/
+	testNodeDescribe()
 }
