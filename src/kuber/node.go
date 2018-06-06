@@ -1,10 +1,21 @@
 package main
 
+// Metric details
 type Metric struct {
-	cpuRequest    string
-	cpuLimit      string
-	memoryRequest string
-	memoryLimit   string
+	cpuRequest    float64
+	cpuLimit      float64
+	memoryRequest float64
+	memoryLimit   float64
+}
+
+func (node *Node) getPodResourcePercentage(pod string) float64 {
+	podMetrics := node.podsResources[pod]
+	if podMetrics == nil {
+		return 0.0
+	}
+	//fmt.Printf("Pod cpu request = %f, node cpu request %f\n", podMetrics.cpuRequest, node.allocatedResources.cpuRequest)
+	//fmt.Printf("Percentage %f\n", podMetrics.cpuRequest/(float64)(node.allocatedResources.cpuRequest))
+	return podMetrics.cpuRequest / (float64)(node.allocatedResources.cpuRequest)
 }
 
 // Node Information

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -17,10 +18,9 @@ const (
 	endOfCollection
 )
 
-func parseNodeDescribe(bytes []byte) {
+func parseNodeDescribe(bytes []byte) Node {
 	input := string(bytes)
 	lines := strings.Split(input, "\n")
-	fmt.Println(len(lines))
 	node := Node{}
 
 	flag := begin
@@ -60,23 +60,55 @@ func parseNodeDescribe(bytes []byte) {
 			} else {
 				words := strings.Fields(val)
 				metric := Metric{}
-				metric.cpuRequest = words[2]
-				metric.cpuLimit = words[4]
-				metric.memoryRequest = words[6]
-				metric.memoryLimit = words[8]
+				metric.cpuRequest = convertToMillis(words[2])
+				metric.cpuLimit = convertToMillis(words[4])
+				metric.memoryRequest = convertToMi(words[6])
+				metric.memoryLimit = convertToMi(words[8])
 				podsResources[words[1]] = &metric
 			}
 		} else if flag == collectAllocatedResources {
 			words := strings.Fields(val)
 			metric := Metric{}
-			metric.cpuRequest = words[0]
-			metric.cpuLimit = words[2]
-			metric.memoryRequest = words[4]
-			metric.memoryLimit = words[6]
+			metric.cpuRequest = convertToMillis(words[0])
+			metric.cpuLimit = convertToMillis(words[2])
+			metric.memoryRequest = convertToMi(words[4])
+			metric.memoryLimit = convertToMi(words[6])
 			node.allocatedResources = &metric
 			flag = endOfCollection
 		}
 		i++
 	}
-	fmt.Println(node)
+	return node
+}
+
+func convertToMillis(input string) float64 {
+	number := input
+	if strings.HasSuffix(input, "m") {
+		number = input[:len(input)-2]
+	}
+	s, err := strconv.ParseFloat(number, 64)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return s
+}
+
+func convertToMi(input string) float64 {
+	divisor := 1024.0 * 1024.0
+	number := input
+	if strings.HasSuffix(input, "Mi") {
+		number = input[:len(input)-2]
+		divisor = 1.0
+	} else if strings.HasSuffix(input, "Gi") {
+		number = input[:len(input)-2]
+		divisor = 1 / (1024.0)
+	} else if strings.HasSuffix(input, "Ki") {
+		number = input[:len(input)-2]
+		divisor = 1024.0
+	}
+	s, err := strconv.ParseFloat(number, 64)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return s / divisor
 }

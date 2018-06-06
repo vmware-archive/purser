@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -13,8 +12,9 @@ import (
 )
 
 const (
-	getPodsCommand = "kubectl --kubeconfig=%s get pods -l app=%s -o json"
-	getNodeCommand = "kubectl --kubeconfig=%s get node %s -o json"
+	getPodsCommand      = "kubectl --kubeconfig=%s get pods -l %s -o json"
+	getNodeCommand      = "kubectl --kubeconfig=%s get node %s -o json"
+	nodeDescribeCommand = "kubectl --kubeconfig=%s describe node %s"
 )
 
 func getNodeDetails(nodeName string) Node {
@@ -72,24 +72,85 @@ func printNodeDetails(nodes []Node) {
 	}
 }
 
-func check(e error) {
-	if e != nil {
-		panic(e)
+func getNodeDetailsFromNodeDescribe(nodeName string) Node {
+	command := fmt.Sprintf(nodeDescribeCommand, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), nodeName)
+	bytes := executeCommand(command)
+	return parseNodeDescribe(bytes)
+}
+
+func collectNodes(nodes map[string]*Node) map[string]*Node {
+	for key := range nodes {
+		node := getNodeDetailsFromNodeDescribe(key)
+		nodes[key] = &node
+	}
+	return nodes
+}
+
+func calculateCost(pods []Pod, nodes map[string]*Node) []Pod {
+	i := 0
+	for i <= len(pods)-1 {
+		node := nodes[pods[i].nodeName]
+		pods[i].nodeCostPercentage = (float64)(node.getPodResourcePercentage(pods[i].name))
+		totalCost, cpuCost, memoryCost := 10.0, 3.0, 7.0
+		podCost := Cost{}
+		podCost.totalCost = pods[i].nodeCostPercentage * totalCost
+		podCost.cpuCost = pods[i].nodeCostPercentage * cpuCost
+		podCost.memoryCost = pods[i].nodeCostPercentage * memoryCost
+		pods[i].cost = podCost
+		i++
+	}
+	return pods
+}
+
+func printPodsVerbose(pods []Pod) {
+	i := 0
+	fmt.Printf("==Pods Cost Details==\n")
+	for i <= len(pods)-1 {
+		fmt.Printf("%-25s%s\n", "Pod Name:", pods[i].name)
+		fmt.Printf("%-25s%s\n", "Node:", pods[i].nodeName)
+		fmt.Printf("%-25s%f\n", "Pod Cost Percentage:", pods[i].nodeCostPercentage)
+		fmt.Printf("%-25s\n", "Cost:")
+		fmt.Printf("    %-21s%f\n", "Total Cost:", pods[i].cost.totalCost)
+		fmt.Printf("    %-21s%f\n", "CPU Cost:", pods[i].cost.cpuCost)
+		fmt.Printf("    %-21s%f\n", "Memory Cost:", pods[i].cost.memoryCost)
+		fmt.Printf("\n")
+		i++
 	}
 }
 
-func testNodeDescribe() {
-	dat, err := ioutil.ReadFile("/Users/gurusreekanthc/sources/kuber-plugin/node.output")
-	check(err)
-	parseNodeDescribe(dat)
-	//fmt.Print(string(dat))
+func getPodsCostForLabel(label string) {
+	pods := getPodsForLabel(label)
+	nodes := map[string]*Node{}
+	for _, val := range pods {
+		nodes[val.nodeName] = nil
+	}
+	nodes = collectNodes(nodes)
+	pods = calculateCost(pods, nodes)
+	printPodsVerbose(pods)
 }
 
 func main() {
-	/*inputs := os.Args[1:]
-	pods := getPodsForLabel(inputs[1])
-	printPodDetails(pods)
-	node := getNodeDetails(pods[0].nodeName)
-	printNodeDetails([]Node{node})*/
-	testNodeDescribe()
+	inputs := os.Args[1:]
+	inputs = inputs[1:]
+	if len(inputs) >= 4 && inputs[0] == "get" && inputs[1] == "cost" {
+		if inputs[2] == "label" {
+			getPodsCostForLabel(inputs[3])
+		} else if inputs[2] == "pod" {
+			fmt.Println("Work In Progress...")
+		} else if inputs[2] == "node" {
+			fmt.Println("Work In Progress...")
+		} else {
+			printHelp()
+		}
+	} else {
+		printHelp()
+	}
+
+}
+
+func printHelp() {
+	fmt.Printf("Try one of the following commands...\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost label <key=val>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost pod <pod name>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost node <node name>\n")
 }
