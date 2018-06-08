@@ -1,11 +1,18 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
-func main() {
+// ClientSetInstance helps in accessing kubernetes apis through client.
+var ClientSetInstance *kubernetes.Clientset
+
+func main1() {
 	inputs := os.Args[1:]
 	inputs = inputs[1:]
 	if len(inputs) >= 4 && inputs[0] == "get" && inputs[1] == "cost" {
@@ -21,6 +28,28 @@ func main() {
 	} else {
 		printHelp()
 	}
+}
+
+func main() {
+	//collectPersistentVolume("pvc-22197ba2-6a10-11e8-9bc2-0270c9080a70")
+	collectPersistentVolumeClaim("vrbc-adapter-volume-1-1-569-vrbc-adapter-statefulset-1-1-569-2")
+}
+
+func init() {
+	var kubeconfig *string
+	kubeconfig = flag.String("kubeconfig", "/Users/gurusreekanthc/staging-config-1.9", "/Users/gurusreekanthc/staging-config-1.9")
+	flag.Parse()
+
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+	ClientSetInstance = clientset
 }
 
 func printHelp() {
