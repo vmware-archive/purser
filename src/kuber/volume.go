@@ -24,6 +24,14 @@ type PersistentVolumeClaim struct {
 	pv                  *PersistentVolume
 }
 
+func collectPersistentVolumeClaims(pvcs map[string]*PersistentVolumeClaim) map[string]*PersistentVolumeClaim {
+	for key := range pvcs {
+		pvc := collectPersistentVolumeClaim(key)
+		pvcs[key] = pvc
+	}
+	return pvcs
+}
+
 func collectPersistentVolumeClaim(claimName string) *PersistentVolumeClaim {
 	pvc, err := ClientSetInstance.CoreV1().PersistentVolumeClaims("default").Get(claimName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {
@@ -45,7 +53,7 @@ func collectPersistentVolumeClaim(claimName string) *PersistentVolumeClaim {
 		capacity := pvc.Status.Capacity["storage"].DeepCopy()
 		// TODO: consider quantity format(Gi,Mi,G,etc.) into consideration.
 		claim.capacityAllotedInGB = (float64)(capacity.Value()) / (float64)(1024.0*1024.0*1024.0)
-		fmt.Println(claim)
+		//fmt.Println(claim)
 		return &claim
 	}
 }
@@ -67,7 +75,7 @@ func collectPersistentVolume(volName string) *PersistentVolume {
 		q := pv.Spec.Capacity["storage"].DeepCopy()
 		// TODO: consider quantity format(Gi,Mi,G,etc.) into consideration.
 		persistentVolume.capacityInGB = (float64)(q.Value()) / (float64)(1024.0*1024.0*1024.0)
-		fmt.Println(persistentVolume)
+		//fmt.Println(persistentVolume)
 		return &persistentVolume
 	}
 }

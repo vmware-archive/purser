@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/tidwall/gjson"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Metric details
@@ -43,6 +45,25 @@ func getNodeDetails(nodeName string) Node {
 	return node
 }
 
+func getNodeDetailsFromClient(nodeName string) *Node {
+	node, err := ClientSetInstance.CoreV1().Nodes().Get(nodeName, metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		fmt.Printf("Node %s not found\n", nodeName)
+		return nil
+	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
+		fmt.Printf("Error getting Node %s : %v\n", nodeName, statusError.ErrStatus.Message)
+		return nil
+	} else if err != nil {
+		panic(err.Error())
+	} else {
+		var n Node
+		n.name = node.GetObjectMeta().GetName()
+		n.instanceType = node.GetObjectMeta().GetLabels()["beta.kubernetes.io/instance-type"]
+		//fmt.Println(n)
+		return &n
+	}
+}
+
 func printNodeDetails(nodes []Node) {
 	fmt.Println("===Node Details===")
 	fmt.Println("Node Name \t\t\t InstanceType")
@@ -51,7 +72,7 @@ func printNodeDetails(nodes []Node) {
 	}
 }
 
-func getNodeDetailsFromNodeDescribe(nodeName string) Node {
+func getNodeDetailsFromNodeDescribe(nodeName string) *Node {
 	command := fmt.Sprintf(nodeDescribeCommand, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), nodeName)
 	bytes := executeCommand(command)
 	return parseNodeDescribe(bytes)
@@ -60,7 +81,7 @@ func getNodeDetailsFromNodeDescribe(nodeName string) Node {
 func collectNodes(nodes map[string]*Node) map[string]*Node {
 	for key := range nodes {
 		node := getNodeDetailsFromNodeDescribe(key)
-		nodes[key] = &node
+		nodes[key] = node
 	}
 	return nodes
 }
@@ -77,7 +98,7 @@ const (
 	endOfCollection
 )
 
-func parseNodeDescribe(bytes []byte) Node {
+func parseNodeDescribe(bytes []byte) *Node {
 	input := string(bytes)
 	lines := strings.Split(input, "\n")
 	node := Node{}
@@ -137,7 +158,7 @@ func parseNodeDescribe(bytes []byte) Node {
 		}
 		i++
 	}
-	return node
+	return &node
 }
 
 func convertToMillis(input string) float64 {

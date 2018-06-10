@@ -12,7 +12,7 @@ import (
 // ClientSetInstance helps in accessing kubernetes apis through client.
 var ClientSetInstance *kubernetes.Clientset
 
-func main1() {
+func main() {
 	inputs := os.Args[1:]
 	inputs = inputs[1:]
 	if len(inputs) >= 4 && inputs[0] == "get" && inputs[1] == "cost" {
@@ -30,9 +30,13 @@ func main1() {
 	}
 }
 
-func main() {
+func main2() {
 	//collectPersistentVolume("pvc-22197ba2-6a10-11e8-9bc2-0270c9080a70")
-	collectPersistentVolumeClaim("vrbc-adapter-volume-1-1-569-vrbc-adapter-statefulset-1-1-569-2")
+	//collectPersistentVolumeClaim("vrbc-adapter-volume-1-1-569-vrbc-adapter-statefulset-1-1-569-2")
+	//getPodsForLabelThroughClient("app=vrbc-transformer")
+	//pods := getPodsForLabelThroughClient("app=vrbc-adapter")
+	//printPodsVerbose(pods)
+	getNodeDetailsFromClient("ip-172-20-34-236.ec2.internal")
 }
 
 func init() {
