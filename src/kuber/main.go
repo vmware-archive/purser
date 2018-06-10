@@ -30,18 +30,10 @@ func main() {
 	}
 }
 
-func main2() {
-	//collectPersistentVolume("pvc-22197ba2-6a10-11e8-9bc2-0270c9080a70")
-	//collectPersistentVolumeClaim("vrbc-adapter-volume-1-1-569-vrbc-adapter-statefulset-1-1-569-2")
-	//getPodsForLabelThroughClient("app=vrbc-transformer")
-	//pods := getPodsForLabelThroughClient("app=vrbc-adapter")
-	//printPodsVerbose(pods)
-	getNodeDetailsFromClient("ip-172-20-34-236.ec2.internal")
-}
-
 func init() {
 	var kubeconfig *string
-	kubeconfig = flag.String("kubeconfig", "/Users/gurusreekanthc/staging-config-1.9", "/Users/gurusreekanthc/staging-config-1.9")
+	//fmt.Println(os.Environ())
+	kubeconfig = flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"))
 	flag.Parse()
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)

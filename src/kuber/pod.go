@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/labels"
-
 	"github.com/tidwall/gjson"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 // Cost details
@@ -68,6 +68,10 @@ func getPodsForLabelThroughClient(label string) []*Pod {
 		panic(err.Error())
 	}
 
+	return createPodObjects(pods)
+}
+
+func createPodObjects(pods *v1.PodList) []*Pod {
 	i := 0
 	ps := []*Pod{}
 	for i < len(pods.Items) {
@@ -89,6 +93,15 @@ func getPodsForLabelThroughClient(label string) []*Pod {
 		i++
 	}
 	return ps
+}
+
+func getAllPodsThroughClient() []*Pod {
+	pods, err := ClientSetInstance.CoreV1().Pods("").List(metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Printf("Total pods = %d\n", len(pods.Items))
+	return createPodObjects(pods)
 }
 
 func printPodsVerbose(pods []*Pod) {
