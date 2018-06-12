@@ -19,9 +19,10 @@ func main() {
 		if inputs[2] == "label" {
 			getPodsCostForLabel(inputs[3])
 		} else if inputs[2] == "pod" {
-			fmt.Println("Work In Progress...")
+			getPodCost(inputs[3])
 		} else if inputs[2] == "node" {
-			fmt.Println("Work In Progress...")
+			getAllNodesCost()
+			//fmt.Println("Work In Progress...")
 		} else {
 			printHelp()
 		}

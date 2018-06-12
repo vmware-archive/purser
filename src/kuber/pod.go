@@ -7,6 +7,7 @@ import (
 
 	"github.com/tidwall/gjson"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
@@ -24,7 +25,7 @@ type Pod struct {
 	name               string
 	nodeName           string
 	nodeCostPercentage float64
-	cost               Cost
+	cost               *Cost
 	pvcs               []*string
 }
 
@@ -54,6 +55,34 @@ func getPodsForLabel(label string) []Pod {
 		return true
 	})
 	return pods
+}
+
+func getPodDetailsFromClient(podName string) *Pod {
+	pod, err := ClientSetInstance.CoreV1().Pods("default").Get(podName, metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		fmt.Printf("Node %s not found\n", podName)
+		return nil
+	} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
+		fmt.Printf("Error getting Node %s : %v\n", podName, statusError.ErrStatus.Message)
+		return nil
+	} else if err != nil {
+		panic(err.Error())
+	} else {
+		var p Pod
+		p.name = pod.GetObjectMeta().GetName()
+		p.nodeName = pod.Spec.NodeName
+		j := 0
+		podVolumes := []*string{}
+		for j < len(pod.Spec.Volumes) {
+			vol := pod.Spec.Volumes[j]
+			if vol.PersistentVolumeClaim != nil {
+				podVolumes = append(podVolumes, &vol.PersistentVolumeClaim.ClaimName)
+			}
+			j++
+		}
+		p.pvcs = podVolumes
+		return &p
+	}
 }
 
 func getPodsForLabelThroughClient(label string) []*Pod {
@@ -124,8 +153,9 @@ func printPodsVerbose(pods []*Pod) {
 		}
 		fmt.Printf("%-30s\n", "Cost:")
 		fmt.Printf("    %-21s%f$\n", "Total Cost:", pods[i].cost.totalCost)
-		fmt.Printf("    %-21s%f$\n", "CPU Cost:", pods[i].cost.cpuCost)
-		fmt.Printf("    %-21s%f$\n", "Memory Cost:", pods[i].cost.memoryCost)
+		//fmt.Printf("    %-21s%f$\n", "CPU Cost:", pods[i].cost.cpuCost)
+		//fmt.Printf("    %-21s%f$\n", "Memory Cost:", pods[i].cost.memoryCost)
+		fmt.Printf("    %-21s%f$\n", "Compute Cost:", pods[i].cost.cpuCost+pods[i].cost.memoryCost)
 		fmt.Printf("    %-21s%f$\n", "Storage Cost:", pods[i].cost.storageCost)
 		fmt.Printf("\n")
 
@@ -137,8 +167,9 @@ func printPodsVerbose(pods []*Pod) {
 	}
 	fmt.Printf("%-30s\n", "Total Cost Summary:")
 	fmt.Printf("    %-21s%f$\n", "Total Cost:", totalCost)
-	fmt.Printf("    %-21s%f$\n", "CPU Cost:", totalCPUCost)
-	fmt.Printf("    %-21s%f$\n", "Memory Cost:", totalMemoryCost)
+	//fmt.Printf("    %-21s%f$\n", "CPU Cost:", totalCPUCost)
+	//fmt.Printf("    %-21s%f$\n", "Memory Cost:", totalMemoryCost)
+	fmt.Printf("    %-21s%f$\n", "Compute Cost:", totalCPUCost+totalMemoryCost)
 	fmt.Printf("    %-21s%f$\n", "Storage Cost:", totalStorageCost)
 }
 

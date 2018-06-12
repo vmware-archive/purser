@@ -24,15 +24,25 @@ func calculateCost(pods []*Pod, nodes map[string]*Node, pvcs map[string]*Persist
 		podCost.cpuCost = pods[i].nodeCostPercentage * cpuCost
 		podCost.memoryCost = pods[i].nodeCostPercentage * memoryCost
 		podCost.storageCost = totalStorageCost
-		pods[i].cost = podCost
+		pods[i].cost = &podCost
 		i++
 	}
 	return pods
 }
 
 func getPodsCostForLabel(label string) {
-	//pods := getPodsForLabel(label)
 	pods := getPodsForLabelThroughClient(label)
+	pods = getPodsCost(pods)
+	printPodsVerbose(pods)
+}
+
+func getPodCost(podName string) {
+	pod := getPodDetailsFromClient(podName)
+	pods := getPodsCost([]*Pod{pod})
+	printPodsVerbose(pods)
+}
+
+func getPodsCost(pods []*Pod) []*Pod {
 	nodes := map[string]*Node{}
 	pvcs := map[string]*PersistentVolumeClaim{}
 	for _, pod := range pods {
@@ -44,5 +54,22 @@ func getPodsCostForLabel(label string) {
 	nodes = collectNodes(nodes)
 	pvcs = collectPersistentVolumeClaims(pvcs)
 	pods = calculateCost(pods, nodes, pvcs)
-	printPodsVerbose(pods)
+	//printPodsVerbose(pods)
+	return pods
+}
+
+func getAllNodesCost() {
+	nodes := getAllNodeDetailsFromClient()
+	i := 0
+	for i < len(nodes) {
+		totalComputeCost, cpuCost, memoryCost := getMonthToDateCostForInstanceType(nodes[i].instanceType)
+		nodeCost := Cost{}
+		nodeCost.totalCost = totalComputeCost
+		nodeCost.cpuCost = cpuCost
+		nodeCost.memoryCost = memoryCost
+		nodes[i].cost = &nodeCost
+		i++
+	}
+	printNodeDetails(nodes)
+	//fmt.Println(nodes)
 }

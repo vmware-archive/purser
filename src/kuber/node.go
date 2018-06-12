@@ -33,6 +33,7 @@ type Node struct {
 	instanceType       string
 	allocatedResources *Metric
 	podsResources      map[string]*Metric
+	cost               *Cost
 }
 
 func getNodeDetails(nodeName string) Node {
@@ -64,11 +65,30 @@ func getNodeDetailsFromClient(nodeName string) *Node {
 	}
 }
 
-func printNodeDetails(nodes []Node) {
-	fmt.Println("===Node Details===")
-	fmt.Println("Node Name \t\t\t InstanceType")
+func getAllNodeDetailsFromClient() []*Node {
+	nodes, err := ClientSetInstance.CoreV1().Nodes().List(metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	//fmt.Printf("Total nodes = %d\n", len(nodes.Items))
+
+	allNodes := []*Node{}
+	i := 0
+	for i < len(nodes.Items) {
+		node := nodes.Items[i]
+		n := Node{}
+		n.name = node.GetObjectMeta().GetName()
+		n.instanceType = node.GetObjectMeta().GetLabels()["beta.kubernetes.io/instance-type"]
+		allNodes = append(allNodes, &n)
+		i++
+	}
+	return allNodes
+}
+
+func printNodeDetails(nodes []*Node) {
+	fmt.Printf("%-40s%-20s%-30s\n", "NODE NAME", "INSTANCE TYPE", "TOTAL COST")
 	for _, value := range nodes {
-		fmt.Println(value.name + " \t" + value.instanceType)
+		fmt.Printf("%-40s%-20s%f$\n", value.name, value.instanceType, value.cost.totalCost)
 	}
 }
 
