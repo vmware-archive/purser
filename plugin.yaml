@@ -1,0 +1,5 @@
+name: "kuber"
+shortDesc: "Cost Insight integration with kubernetes"
+longDesc: >
+  Kuber gives cost insights of kubernetes deployments.
+command: kuber $@
