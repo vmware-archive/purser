@@ -19,8 +19,8 @@
 1. Create the directory `kuber-plugin` in your home directory for `kuber-plugin` 
    development.
    
-1. Inside `kuber-plugin` directory run the following to get the `kuber-plugin`
-    code.
+1. Inside `kuber-plugin` directory run the following command to get the 
+    `kuber-plugin` code.
 
         git clone git@gitlab.eng.vmware.com:kuber/kuber-plugin.git .
 
