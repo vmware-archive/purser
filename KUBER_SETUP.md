@@ -8,11 +8,11 @@
 
 1. Verify that they were properly installed.
 
-   `go version`, should be at least 1.7
-
-   `git version`
-
-   `docker version`
+    `go version`, should be at least 1.7
+    
+    `git version`
+    
+    `docker version`
 
 ## Compiling the binaries locally ##
 
@@ -21,12 +21,12 @@
    
 1. Inside `kuber-plugin` directory run the following to get the `kuber-plugin`
     code.
-     `git clone git@gitlab.eng.vmware.com:kuber/kuber-plugin.git .`
+        `git clone git@gitlab.eng.vmware.com:kuber/kuber-plugin.git .`
 
 1. Run the following commands to set the go environment variables.
-	`export GOPATH=$HOME/kuber-plugin`
-	`export GOBIN=$HOME/kuber-plugin/bin`
-	`export PATH=$PATH:GOBIN`
+    `export GOPATH=$HOME/kuber-plugin`
+    `export GOBIN=$HOME/kuber-plugin/bin`
+    `export PATH=$PATH:GOBIN`
 	
 	Optionally add the above exports to your `.bash_profile` to persist across 
 	console sessions.
