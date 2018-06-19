@@ -34,7 +34,7 @@ The following are the main componenets installed in kubernetes for Kuber.
 
 # Work Flow
 
-1. User has to install Custom Controller, CRON Job, CRDs in kubernetes.
+1. Kuber installation steps creates Custom Controller, CRON Job, CRDs in kubernetes.
 
 2. Once installed Custom controller collects all the inventory(pods, nodes, pv, etc.)  
    and stores in CRDs, later it watches for any changes in inventory and stores  
