@@ -11,6 +11,6 @@ spec:
     spec:
       containers:
       - name: kuber-controller
-        image: kuber-controller:1.7.9
+        image: kuber-controller:1.0.0
         ports:
         - containerPort: 80
