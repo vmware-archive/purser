@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kuber-deployment
+  name: kuber-controller
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: nginx
+        app: kuber
     spec:
       containers:
       - name: kuber-controller
