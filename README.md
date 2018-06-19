@@ -53,8 +53,8 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 ### Installing
 
 1. Installing CRDs(Custom Resource Definitions)
-    * wget the CRD yaml file
-    * use kubectl command to install CRD
+    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
+    * kubectl create -f crd.yaml
 2. Installing custom controller
     * download yaml file
     * install container using kubectl
@@ -74,9 +74,6 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 1. Get cost of pods having label "app=heimdall"
 
         * kubectl --kubeconfig=/Users/abc/prod kuber get cost label app=heimdall
-        
-        By default above command returns monthly cost.
-
 
 2. Get cost of all nodes
 
