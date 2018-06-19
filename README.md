@@ -56,11 +56,11 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
     * kubectl create -f crd.yaml
 2. Installing custom controller
-    * download yaml file
-    * install container using kubectl
+    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/custom_controller.yaml
+    * kubectl create -f custom_controller.yaml
 3. Installing API extension server
-    * download yaml file for api extension server
-    * install the container
+    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/api_extension_server.yaml
+    * kubectl create -f api_extension_server.yaml
 
 
 ### Usage
