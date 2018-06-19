@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: kuber-controller
+        image: kuber-controller:1.7.9
+        ports:
+        - containerPort: 80
