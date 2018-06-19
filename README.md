@@ -52,58 +52,89 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 
 ### Installing
 
-Kuber is currently supported on Linux [Add Flavors and Versions] and OS X. Windows support is currently in development.
+1. Installing CRDs(Custom Resource Definitions)
+    * wget the CRD yaml file
+    * use kubectl command to install CRD
+2. Installing controller
+    * download yaml file
+    * install container using kubectl
+3. Installing API extension server
+    * download yaml file for api extension server
+    * install the container
 
-1. _Download Kuber [installer](https://fillInURl)_ 
-2. _Run kuber_install.sh_
-
-Kuber will install and register as a plugin with the local ``kubectl`` instance. Kuber will automtically be configured to talk to the ``kubectl`` configured clusters
 
 ### Usage
 
-```
-kuber get_cost label <kubernetes label>
-```
 
-![](Kuber_getting_started.png)
+**kubectl --kubeconfig=<path to kubeconfig> kuber get cost {label|pod|node|group} <variable> [duration=hourly|weekly|monthly]**
+
+**Examples:**
+
+
+1. Get cost of pods having label "app=heimdall"
+
+        * kubectl --kubeconfig=/Users/abc/prod kuber get cost label app=heimdall
+        
+        By default above command returns monthly cost.
+
+
+2. Get cost of all nodes
+
+        kubectl --kubeconfig=/Users/abc/prod kuber get cost node all
+
+3. Get weekly cost of a pod
+
+        kubectl --kubeconfig=/Users/abc/prod kuber get cost pod pod-name
 
 ## Advanced Usage
 
-### Kuber options
-
-```
-kuber {get_cost|set_limit} _options_
-
-get_cost {label|namespace|node-label|name|service|app} <_variable_> {history=<_duration_>[_range_]|projection=<_duration_>} {hourly|daily|weekly|monthly}
-
-set_limit {label|namespace|node-label|name|service|app} <_variable_> {hourly|daily|weekly|monthly} action {email=<_variable_>|hard_enforce|save_enforce}
-```
+Users can create advanced groups using kubernetes CRDs(Custom Resource Definitions) and query the cost using group name.
 
 ### Defining custom groups
+Group .yaml format
 
-my_service.yaml
 ```
-service:
-    name: backend-data-microservice
-    label:
-        grp=data-pipeline
-        rep_set=backend-map-resuce
+Kind: Group
+Metadata:
+    name: <name of the group>
+Spec:
+    labels:
+        <label1>
+        ....
+        <labelN>
+    namespace:
+        <namespace1,...namespaceN>
 ```
+**Example:**
 
-my_app.yaml
-```
- app:
-     name: my_application
-     namespace:
-         elastic-loadbalancers
-         api-gateway
-     label:
-         grp=web-portal
-         grp=admin-portal
-     service:
-         backend-data-microservice
-```
-         
+Query the cost of Cost Insight infrastructure deployed in "default" namespace
+
+1. CRD file definition
+    
+    The following is the ci.yaml definition.
+
+    ```
+    Kind: Group
+    Metadata:
+        name: CI
+    Spec:
+        labels:
+            app=vrbc-transformer
+            app=vrbc-adapter
+            app=vrbc-showback
+            app=vrbc-ui
+            app=ci-lambda
+        namespace:
+            default
+    ```
+2. Create the CRD in kubernetes
+
+        kubectl --kubeconfig=/Users/abc/prod create -f ci.yaml
+
+3. Get the cost of CI group.
+
+        kubectl --kubeconfig=/Users/abc/prod kuber get cost group CI
+
 
 
 
