@@ -66,7 +66,7 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 ### Usage
 
 
-**kubectl --kubeconfig=<path to kubeconfig> kuber get cost {label|pod|node|group} <_variable> [duration=hourly|weekly|monthly]**
+**kubectl --kubeconfig=<-path to kubeconfig> kuber get cost {label|pod|node|group} <_variable> [duration=hourly|weekly|monthly]**
 
 **Examples:**
 
