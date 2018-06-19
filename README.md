@@ -120,7 +120,11 @@ Query the cost of Cost Insight infrastructure deployed in "default" namespace
 
         kubectl get cost group CI
 
-## Enbaling historic cost
+### Uninstalling
+
+Not convinced? Uninstalling cleans up everything Kuber and leaves your cluster in it's original state: [kuber_uninstall.sh] ()
+
+## Enabling historic cost
 
 ## Utilization based cost
 
