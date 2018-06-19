@@ -1,4 +1,4 @@
-# Kuber plugin for K8s
+# Kuber extension for K8s
 
 Cost visbility for Kubernetes based Cloud Native Applications
 
@@ -15,32 +15,21 @@ incorporate your budgeting and cost savings at a level of control that was entir
 Kuber provides cost visibility of services, microservices and applications deployed with Kubernetes in a cloud neutral manner. It does so at a granular level and
 over time ranges that match with budget planning.
 
-Kuber is a CLI extension to Kubernetes. More specifically, it is a ``kubectl`` plugin that helps you query for cost based on native Kubernetes artifacts
-as well as your own custom defined services. In addition, kuber allows for alerting on budget adherence and helps enforce budgets and savings.
+Kuber is an extension to Kubernetes. More specifically, it is a tool interfacing with ``kubectl`` that helps you query for cost based on native Kubernetes artifacts
+as well as your own custom defined services. In addition, Kuber allows for alerting on budget adherence and helps enforce budgets and savings.
 
-Kuber currently supports Kubernetes deployments on Amazon Web Services. Support for VMware vSphere, Azure, Google Compute AEngine and other platforms are planned.
+Kuber currently supports Kubernetes deployments on Amazon Web Services. Support for VMware vSphere, Azure, Google Compute Engine are planned.
 
-## How does it work
-
-Using Kuber is simple and similar to the declarative philosphy adpated by Kubeernetes and kubectl
-```
-kuber get_cost label app=my-web-ui
-```
-Would get you the monthly aggregated cost of kubernetes PODs labeled with 'app=my-web-ui'
-```
-kuber set_limit namespace backend-auto-scaling-group month limit 2400 action alert email backend devops@org.com
-```
-Would set a monthly limit of 2400$ on resources in the 'backend-auto-scaling-group' and if the cost this group breaches the limit, send an email to devops@org.com
-with cost details
 
 ## Features
 
 * Query cost associated with Kubernetes native groups
 * Extend Kuber with YAML based declarative custom service, microservice and application definitions
 * Capability for control over time range for cost query
-* Capacbility for cost analysis based on resource Usage or Allocation
+* Capability for cost analysis based on resource Usage or Allocation
+* Visibility into Cost savings oppurtunities
 * Set budget limits on Kubernetes native or custom defined groups
-* Capability to enforce budget and cost saving for Kubernetes native or custom defined groups
+* Capability to enforce budget for Kubernetes native or custom defined groups
 
 ## Getting Started
 
@@ -48,9 +37,16 @@ Instructions to install and start using Kuber plugin.
 
 ### Prerequisites
 
-You must have ``kubectl`` installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+* Kubernetes version 1.8 or greater
+* ``kubectl`` installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### Installing
+
+Installing is as simple as downloading and executing a shell script: [kuber_install.sh] ()
+
+#### What does the installation do?
+
+Installing Kuber creates a few Kubernetes supported extensions on your cluster. This enables install once, query from anywhere using ``kubectl``
 
 1. Installing CRDs(Custom Resource Definitions)
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
@@ -65,27 +61,21 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 
 ### Usage
 
-
-**kubectl --kubeconfig=<-path to kubeconfig> kuber get cost {label|pod|node|group} <_variable> [duration=hourly|weekly|monthly]**
+Once installed, Kuber is ready for use right away. You can query using native Kubernetes grouping artifacts
 
 **Examples:**
 
 
 1. Get cost of pods having label "app=heimdall"
 
-        kubectl --kubeconfig=/Users/abc/prod kuber get cost label app=heimdall
+        kubectl kuber get cost label app=heimdall
 
 2. Get cost of all nodes
 
-        kubectl --kubeconfig=/Users/abc/prod kuber get cost node all
+        kubectl kuber get cost node all
 
-3. Get weekly cost of a pod
 
-        kubectl --kubeconfig=/Users/abc/prod kuber get cost pod pod-name
-
-## Advanced Usage
-
-Users can create advanced groups using kubernetes CRDs(Custom Resource Definitions) and query the cost using group name.
+Next, define higher level groupings to define your business, logical or application constructs
 
 ### Defining custom groups
 Group .yaml format
@@ -106,9 +96,7 @@ Spec:
 
 Query the cost of Cost Insight infrastructure deployed in "default" namespace
 
-1. CRD file definition
-    
-    The following is the ci.yaml definition.
+1. The following is the ci.yaml definition which groups a few native Kubernetes labels into a business/application construct
 
     ```
     Kind: Group
@@ -124,13 +112,17 @@ Query the cost of Cost Insight infrastructure deployed in "default" namespace
         namespace:
             default
     ```
-2. Create the CRD in kubernetes
+2. Create the construct defined above
 
-        kubectl --kubeconfig=/Users/abc/prod create -f ci.yaml
+        kubectl create -f ci.yaml
 
-3. Get the cost of CI group.
+3. Get the cost of CI group
 
-        kubectl --kubeconfig=/Users/abc/prod kuber get cost group CI
+        kubectl get cost group CI
+
+## Enbaling historic cost
+
+## Utilization based cost
 
 
 
