@@ -8,5 +8,3 @@ spec:
   names:
     singular: kuber
     kind: Kuber
-    shortNames:
-    - kuber
