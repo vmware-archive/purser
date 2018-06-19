@@ -55,7 +55,7 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 1. Installing CRDs(Custom Resource Definitions)
     * wget the CRD yaml file
     * use kubectl command to install CRD
-2. Installing controller
+2. Installing custom controller
     * download yaml file
     * install container using kubectl
 3. Installing API extension server
@@ -66,7 +66,7 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 ### Usage
 
 
-**kubectl --kubeconfig=<path to kubeconfig> kuber get cost {label|pod|node|group} <variable> [duration=hourly|weekly|monthly]**
+**kubectl --kubeconfig=<path to kubeconfig> kuber get cost {label|pod|node|group} <_variable> [duration=hourly|weekly|monthly]**
 
 **Examples:**
 
