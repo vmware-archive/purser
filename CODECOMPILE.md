@@ -1,5 +1,3 @@
-# Kuber Setup #
-
 ## Dependencies ##
 
 1. Install [Go](https://golang.org/dl/), [git](https://git-scm.com/downloads),
@@ -50,14 +48,3 @@
 1. Run the following command to check working of kuber plugin locally.
 
         kubectl --kubeconfig=<absolute path to kubeconfig file> plugin kuber help
-        
-## Docker builds ##
-
-The kuber plugin repository also contains a `Dockerfile` and `docker-compose` 
-configuration that allows you to build Kuber Docker containers and run them 
-conveniently without installing a Go build environment.
-
-If you have `docker` and `docker-compose` installed, it's as simple as running
-`docker-compose up`
-
-< Work in progress >
