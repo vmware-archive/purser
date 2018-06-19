@@ -73,7 +73,7 @@ You must have ``kubectl`` installed and configured. See [here](https://kubernete
 
 1. Get cost of pods having label "app=heimdall"
 
-        * kubectl --kubeconfig=/Users/abc/prod kuber get cost label app=heimdall
+        kubectl --kubeconfig=/Users/abc/prod kuber get cost label app=heimdall
 
 2. Get cost of all nodes
 
