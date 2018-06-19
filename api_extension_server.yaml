@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-api-server
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kuber-api
+    spec:
+      containers:
+      - name: kuber-api-server
+        image: kuber-api-server:1.0.0
+        ports:
+        - containerPort: 80
