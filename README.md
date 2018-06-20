@@ -66,9 +66,46 @@ Once installed, Kuber is ready for use right away. You can query using native Ku
 **Examples:**
 
 
-1. Get cost of pods having label "app=heimdall"
+1. Get cost of pods having label "app=vrbc-adapter"
 
-        kubectl kuber get cost label app=heimdall
+
+        $ kubectl kuber get cost label app=vrbc-adapter
+            ===Pods Cost Details===
+            Pod Name:                     vrbc-adapter-statefulset-1-1-577-0
+            Node:                         ip-172-20-40-248.ec2.internal
+            Pod Compute Cost Percentage:  7.03
+            Persistent Volume Claims:     
+                vrbc-adapter-volume-1-1-577-vrbc-adapter-statefulset-1-1-577-0
+            Cost:                         
+            Total Cost:          108.092667$
+            Compute Cost:        69.426000$
+            Storage Cost:        38.666667$
+
+            Pod Name:                     vrbc-adapter-statefulset-1-1-577-1
+            Node:                         ip-172-20-41-91.ec2.internal
+            Pod Compute Cost Percentage:  6.96
+            Persistent Volume Claims:     
+                vrbc-adapter-volume-1-1-577-vrbc-adapter-statefulset-1-1-577-1
+            Cost:                         
+                Total Cost:          107.412371$
+                Compute Cost:        68.745704$
+                Storage Cost:        38.666667$
+
+            Pod Name:                     vrbc-adapter-statefulset-1-1-577-2
+            Node:                         ip-172-20-52-245.ec2.internal
+            Pod Compute Cost Percentage:  5.86
+            Persistent Volume Claims:     
+                vrbc-adapter-volume-1-1-577-vrbc-adapter-statefulset-1-1-577-2
+            Cost:                         
+                Total Cost:          96.496567$
+                Compute Cost:        57.829900$
+                Storage Cost:        38.666667$
+                
+            Total Cost Summary:           
+                Total Cost:          312.001604$
+                Compute Cost:        196.001604$
+                Storage Cost:        116.000000$
+
 
 2. Get cost of all nodes
 
