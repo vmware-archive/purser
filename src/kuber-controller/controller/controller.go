@@ -68,6 +68,29 @@ func Start(conf *config.Config) {
 
 		go c.Run(stopCh)
 	}
+
+	if conf.Resource.Node {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.CoreV1().Nodes().List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.CoreV1().Nodes().Watch(options)
+				},
+			},
+			&api_v1.Node{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "node")
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
 	sigterm := make(chan os.Signal, 1)
 	signal.Notify(sigterm, syscall.SIGTERM)
 	signal.Notify(sigterm, syscall.SIGINT)
@@ -190,7 +213,10 @@ func (c *Controller) processItem(newEvent Event) error {
 		switch obj.(type) {
 		case *api_v1.Pod:
 			count++
-			fmt.Printf("Node type is pod and count =  %d\n", count)
+			fmt.Printf("Event type is pod and count =  %d\n", count)
+		case *api_v1.Node:
+			count++
+			fmt.Printf("Event type is node and count =  %d\n", count)
 		}
 		return nil
 	case "update":

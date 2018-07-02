@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"kuber-controller/controller"
 	"kuber-controller/config"
+	"kuber-controller/controller"
 )
 
 func main() {
 	fmt.Println("Hello World")
 
-	conf := config.Config{Resource: config.Resource{Pod: true}}
+	conf := config.Config{Resource: config.Resource{Node: true}}
 	controller.Start(&conf)
 }
