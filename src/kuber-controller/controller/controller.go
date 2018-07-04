@@ -14,7 +14,9 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+	"kuber-controller/client"
 	"kuber-controller/config"
+	"kuber-controller/metrics"
 	"kuber-controller/utils"
 	"os"
 	"os/signal"
@@ -38,6 +40,7 @@ type Event struct {
 }
 
 var serverStartTime time.Time
+var crdclient *client.Crdclient
 
 func TestCrdFlow() {
 	crdclient := GetApiExtensionClient()
@@ -51,6 +54,9 @@ func TestCrdFlow() {
 }
 
 func Start(conf *config.Config) {
+	// initialize client for api extension server
+	crdclient = GetApiExtensionClient()
+
 	//var kubeClient kubernetes.Interface
 	var kubeClient *kubernetes.Clientset
 	_, err := rest.InClusterConfig()
@@ -225,8 +231,11 @@ func (c *Controller) processItem(newEvent Event) error {
 	case "create":
 		switch obj.(type) {
 		case *api_v1.Pod:
-			count++
-			fmt.Printf("Event type is pod and count =  %d\n", count)
+			pod := obj.(*api_v1.Pod)
+			met := metrics.CalculatePodStatsFromContainers(pod)
+			//metrics.PrintPodStats(pod, met)
+			UpdateNamespaceGroupCrd(crdclient, pod.Namespace, "namespace", pod.Name, met)
+
 		case *api_v1.Node:
 			count++
 			fmt.Printf("Event type is node and count =  %d\n", count)

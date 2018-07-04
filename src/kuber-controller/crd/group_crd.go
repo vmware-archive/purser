@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
+	"kuber-controller/metrics"
 )
 
 const (
@@ -53,9 +54,10 @@ type Group struct {
 	Status             GroupStatus `json:"status,omitempty"`
 }
 type GroupSpec struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-	// Add metrics fields
+	Name               string                      `json:"name"`
+	Type               string                      `json:"type"`
+	AllocatedResources *metrics.Metrics            `json:"metrics,omitempty"`
+	PodsMetrics        map[string]*metrics.Metrics `json:"pods,omitempty"`
 }
 
 type GroupStatus struct {

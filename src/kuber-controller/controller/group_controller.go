@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"kuber-controller/client"
 	"kuber-controller/crd"
+	"kuber-controller/metrics"
 	"time"
 )
 
@@ -58,7 +59,7 @@ func GetApiExtensionClient() *client.Crdclient {
 	return crdclient
 }
 
-func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType string) {
+func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType string) *crd.Group {
 	// Create a new Example object and write to k8s
 	example := &crd.Group{
 		ObjectMeta: meta_v1.ObjectMeta{
@@ -83,6 +84,7 @@ func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType 
 	} else {
 		panic(err)
 	}
+	return result
 }
 
 func ListCrdInstances(crdclient *client.Crdclient) {
@@ -92,4 +94,39 @@ func ListCrdInstances(crdclient *client.Crdclient) {
 		panic(err)
 	}
 	fmt.Printf("List:\n%s\n", items)
+}
+
+func GetCrdByName(crdclient *client.Crdclient, groupName string, groupType string) *crd.Group {
+	group, err := crdclient.Get(groupName)
+
+	if err == nil {
+		return group
+	} else if apierrors.IsNotFound(err) {
+		// create group if not exist
+		return CreateCRDInstance(crdclient, groupName, groupType)
+	} else {
+		panic(err)
+	}
+}
+
+func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, groupType string, pod string,
+	metric *metrics.Metrics) {
+
+	group := GetCrdByName(crdclient, groupName, groupType)
+	existingPods := group.Spec.PodsMetrics
+
+	if existingPods == nil {
+		existingPods = map[string]*metrics.Metrics{}
+	}
+
+	existingPods[pod] = metric
+	group.Spec.PodsMetrics = existingPods
+	// sum metrics and put one aggregated metric.
+
+	fmt.Println(group)
+	_, err := crdclient.Update(group)
+
+	if err != nil {
+		panic(err)
+	}
 }
