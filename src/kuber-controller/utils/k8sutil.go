@@ -1,20 +1,20 @@
 package utils
 
 import (
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"os"
-	"k8s.io/client-go/tools/clientcmd"
 	"github.com/Sirupsen/logrus"
 	apps_v1 "k8s.io/api/apps/v1"
 	batch_v1 "k8s.io/api/batch/v1"
 	api_v1 "k8s.io/api/core/v1"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"os"
 )
 
 // GetClient returns a k8s clientset to the request from inside of cluster
-func GetClient() kubernetes.Interface {
+func GetClient() *kubernetes.Clientset {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		logrus.Fatalf("Can not get kubernetes config: %v", err)
@@ -37,7 +37,8 @@ func buildOutOfClusterConfig() (*rest.Config, error) {
 }
 
 // GetClientOutOfCluster returns a k8s clientset to the request from outside of cluster
-func GetClientOutOfCluster() kubernetes.Interface {
+//func GetClientOutOfCluster() kubernetes.Interface {
+func GetClientOutOfCluster() *kubernetes.Clientset {
 	config, err := buildOutOfClusterConfig()
 	if err != nil {
 		logrus.Fatalf("Can not get kubernetes config: %v", err)

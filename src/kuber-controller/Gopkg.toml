@@ -24,17 +24,29 @@
 #   go-tests = true
 #   unused-packages = true
 
+
 [[constraint]]
-  revision = "11147472b7c934c474a2c484af3c0c5210b7a3af"
+  name = "github.com/Sirupsen/logrus"
+  version = "1.0.5"
+
+[[constraint]]
+  #branch = "master"
+  revision = "655e4e87cb5a855657ad325d1a615cf870870c9d"
   name = "k8s.io/api"
 
 [[constraint]]
-  revision = "180eddb345a5be3a157cea1c624700ad5bd27b8f"
+  branch = "master"
+  name = "k8s.io/apiextensions-apiserver"
+
+[[constraint]]
+  #branch = "master"
+  revision = "49fb9c9ee47ede1ead7dc90a697c0652526b072c"
   name = "k8s.io/apimachinery"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  revision = "78700dec6369ba22221b72770783300f143df150"
+  #version = "8.0.0"
+  revision = "82b3a5753636104067ccc0759f33c870d17686dd"
 
 [prune]
   go-tests = true

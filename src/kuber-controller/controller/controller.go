@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	api_v1 "k8s.io/api/core/v1"
+
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -19,7 +20,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	//"kubewatch/pkg/event"
 )
 
 type Controller struct {
@@ -39,14 +39,27 @@ type Event struct {
 
 var serverStartTime time.Time
 
+func TestCrdFlow() {
+	crdclient := GetApiExtensionClient()
+	CreateCRDInstance(crdclient, "xyz", "namespace")
+	ListCrdInstances(crdclient)
+
+	sigterm := make(chan os.Signal, 1)
+	signal.Notify(sigterm, syscall.SIGTERM)
+	signal.Notify(sigterm, syscall.SIGINT)
+	<-sigterm
+}
+
 func Start(conf *config.Config) {
-	var kubeClient kubernetes.Interface
+	//var kubeClient kubernetes.Interface
+	var kubeClient *kubernetes.Clientset
 	_, err := rest.InClusterConfig()
 	if err != nil {
 		kubeClient = utils.GetClientOutOfCluster()
 	} else {
 		kubeClient = utils.GetClient()
 	}
+
 	if conf.Resource.Pod {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
