@@ -6,6 +6,7 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
+	//"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 )
@@ -34,7 +35,10 @@ func (f *Crdclient) Create(obj *crd.Group) (*crd.Group, error) {
 
 func (f *Crdclient) Update(obj *crd.Group) (*crd.Group, error) {
 	var result crd.Group
-	err := f.cl.Put().
+	err := f.cl.
+		//Put().
+		Put().Name((obj.Name)).
+		//Patch(types.JSONPatchType).Name(obj.Name).
 		Namespace(f.ns).Resource(f.plural).
 		Body(obj).Do().Into(&result)
 	return &result, err

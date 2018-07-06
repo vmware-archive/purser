@@ -5,6 +5,7 @@ import (
 	"fmt"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -121,12 +122,35 @@ func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, grou
 
 	existingPods[pod] = metric
 	group.Spec.PodsMetrics = existingPods
-	// sum metrics and put one aggregated metric.
+	group.Spec.AllocatedResources = calculatedAggregatedPodMetric(existingPods)
+	group.Name = groupName
 
-	fmt.Println(group)
+	//fmt.Println(group)
 	_, err := crdclient.Update(group)
 
 	if err != nil {
+		fmt.Printf("There is a panic while updating the crd for group = %s\n", groupName)
 		panic(err)
+	} else {
+		fmt.Printf("Updating the crd for group = %s is successful\n", groupName)
+	}
+}
+
+func calculatedAggregatedPodMetric(met map[string]*metrics.Metrics) *metrics.Metrics {
+	cpuLimit := &resource.Quantity{}
+	memoryLimit := &resource.Quantity{}
+	cpuRequest := &resource.Quantity{}
+	memoryRequest := &resource.Quantity{}
+	for _, c := range met {
+		cpuLimit.Add(*c.CpuLimit)
+		memoryLimit.Add(*c.MemoryLimit)
+		cpuRequest.Add(*c.CpuRequest)
+		memoryRequest.Add(*c.MemoryRequest)
+	}
+	return &metrics.Metrics{
+		CpuLimit:      cpuLimit,
+		MemoryLimit:   memoryLimit,
+		CpuRequest:    cpuRequest,
+		MemoryRequest: memoryRequest,
 	}
 }
