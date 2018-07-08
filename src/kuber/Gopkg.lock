@@ -182,8 +182,8 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb"
+  version = "v2.2.0"
 
 [[projects]]
   name = "k8s.io/api"
@@ -220,6 +220,18 @@
     "storage/v1beta1"
   ]
   revision = "655e4e87cb5a855657ad325d1a615cf870870c9d"
+
+[[projects]]
+  branch = "master"
+  name = "k8s.io/apiextensions-apiserver"
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/scheme",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+  ]
+  revision = "8ddbc06afaeea86d2944d71a90901a619657068a"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -324,6 +336,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b98dbecfe1fd8687732ac09f485e5fdc77df5e7c10b64ad44baab4ff3667c827"
+  inputs-digest = "1ee7fb60ee1dd67470cd1799c7cf801917b205d3225306214f96390a009df4b4"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -60,6 +60,34 @@ func GetApiExtensionClient() *client.Crdclient {
 	return crdclient
 }
 
+func GetApiExtensionClient2() *client.Crdclient {
+	//TODO: replace config with --kubeconfig parameter
+	kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
+	flag.Parse()
+
+	config, err := GetClientConfig(*kubeconf)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// create clientset and create our CRD, this only need to run once
+	_, err = apiextcs.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Create a new clientset which include our CRD schema
+	crdcs, scheme, err := crd.NewClient(config)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create a CRD client interface
+	crdclient := client.CrdClient(crdcs, scheme, "default")
+
+	return crdclient
+}
+
 func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType string) *crd.Group {
 	// Create a new Example object and write to k8s
 	example := &crd.Group{

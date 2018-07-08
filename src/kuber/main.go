@@ -7,12 +7,17 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	//"kuber-controller/controller"
+	//"kuber-controller/client"
+	"kuber/client"
+	"kuber/controller"
 )
 
 // ClientSetInstance helps in accessing kubernetes apis through client.
 var ClientSetInstance *kubernetes.Clientset
+var crdclient  *client.Crdclient
 
-func main() {
+func main2() {
 	inputs := os.Args[1:]
 	inputs = inputs[1:]
 	if len(inputs) >= 4 && inputs[0] == "get" && inputs[1] == "cost" {
@@ -31,7 +36,15 @@ func main() {
 	}
 }
 
+func main()  {
+	controller.ListCrdInstances(crdclient)
+}
+
 func init() {
+	crdclient = controller.GetApiExtensionClient2()
+}
+
+func init2() {
 	var kubeconfig *string
 	//fmt.Println(os.Environ())
 	kubeconfig = flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"))
@@ -47,6 +60,8 @@ func init() {
 		panic(err.Error())
 	}
 	ClientSetInstance = clientset
+
+	//crdclient = controller.GetApiExtensionClient2()
 }
 
 func printHelp() {
