@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-controller
+  labels:
+    app: kuber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kuber
+  template:
+    metadata:
+      labels:
+        app: kuber
+    spec:
+      containers:
+      - name: kuber-controller
+        image: gurusreekanth/kuber-controller-amd64:1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080

@@ -37,7 +37,15 @@ func main2() {
 }
 
 func main()  {
-	controller.ListCrdInstances(crdclient)
+	//controller.ListCrdInstances(crdclient)
+	groupName := "apundlik1"
+	group := controller.GetCrdByName(crdclient, groupName, "")
+	//fmt.Println(group)
+	if group != nil {
+		controller.PrintGroup(group)
+	} else {
+		fmt.Printf("Group %s is not present\n", groupName)
+	}
 }
 
 func init() {

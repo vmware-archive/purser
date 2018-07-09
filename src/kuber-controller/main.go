@@ -1,15 +1,17 @@
 package main
 
 import (
+	//"fmt"
+	"kuber-controller/controller"
 	"fmt"
+	"log"
 	//"kuber-controller/config"
 	"kuber-controller/config"
-	"kuber-controller/controller"
 )
 
 func main() {
-	fmt.Println("Hello World")
-
+	fmt.Println("Hello world")
+	log.Println("Hello world")
 	conf := config.Config{Resource: config.Resource{Pod: true}}
 	controller.Start(&conf)
 	//controller.CreateCRDDefinition()

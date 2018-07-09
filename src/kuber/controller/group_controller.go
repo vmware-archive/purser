@@ -107,8 +107,18 @@ func GetCrdByName(crdclient *client.Crdclient, groupName string, groupType strin
 	} else if apierrors.IsNotFound(err) {
 		// create group if not exist
 		//return CreateCRDInstance(crdclient, groupName, groupType)
+		//fmt.Printf("Group %s is not present\n", groupName)
 		return nil
 	} else {
 		panic(err)
 	}
+}
+
+func PrintGroup(group *crd.Group) {
+	fmt.Printf("%-25s%s\n", "Group Name:", group.Name)
+	fmt.Printf("%-25s\n", "Resources:")
+	fmt.Printf("             %-25s%s\n", "Cpu Limit:", group.Spec.AllocatedResources.CpuLimit)
+	fmt.Printf("             %-25s%s\n", "Memory Limit:", group.Spec.AllocatedResources.MemoryLimit)
+	fmt.Printf("             %-25s%s\n", "Cpu Request:", group.Spec.AllocatedResources.CpuRequest)
+	fmt.Printf("             %-25s%s\n", "Memory Request:", group.Spec.AllocatedResources.MemoryRequest)
 }

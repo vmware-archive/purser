@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"flag"
+	//"flag"
 	"fmt"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -13,6 +13,8 @@ import (
 	"kuber-controller/crd"
 	"kuber-controller/metrics"
 	"time"
+	"github.com/Sirupsen/logrus"
+	"log"
 )
 
 // return rest config, if path not specified assume in cluster config
@@ -20,16 +22,20 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 	if kubeconfig != "" {
 		return clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
+	log.Println("Using In cluster config.")
+	logrus.Info("Using In cluster config.")
 	return rest.InClusterConfig()
 }
 
 func GetApiExtensionClient() *client.Crdclient {
 	//TODO: replace config with --kubeconfig parameter
-	kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
+	/*kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
 	flag.Parse()
+	config, err := GetClientConfig(*kubeconf)*/
 
-	config, err := GetClientConfig(*kubeconf)
+	config, err := GetClientConfig("")
 	if err != nil {
+		log.Println(err)
 		panic(err.Error())
 	}
 
@@ -47,34 +53,6 @@ func GetApiExtensionClient() *client.Crdclient {
 
 	// Wait for the CRD to be created before we use it (only needed if its a new one)
 	time.Sleep(3 * time.Second)
-
-	// Create a new clientset which include our CRD schema
-	crdcs, scheme, err := crd.NewClient(config)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create a CRD client interface
-	crdclient := client.CrdClient(crdcs, scheme, "default")
-
-	return crdclient
-}
-
-func GetApiExtensionClient2() *client.Crdclient {
-	//TODO: replace config with --kubeconfig parameter
-	kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
-	flag.Parse()
-
-	config, err := GetClientConfig(*kubeconf)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// create clientset and create our CRD, this only need to run once
-	_, err = apiextcs.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
 
 	// Create a new clientset which include our CRD schema
 	crdcs, scheme, err := crd.NewClient(config)

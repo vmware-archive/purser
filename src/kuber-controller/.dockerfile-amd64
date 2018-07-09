@@ -1,0 +1,9 @@
+FROM alpine
+
+MAINTAINER VMware <gurusreekanthc@vmware.com>
+
+ADD bin/amd64/kuber-controller /kuber-controller
+
+USER nobody:nobody
+
+ENTRYPOINT ["/kuber-controller"]

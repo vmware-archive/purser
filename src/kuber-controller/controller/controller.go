@@ -22,6 +22,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	log "log"
 )
 
 type Controller struct {
@@ -41,6 +42,18 @@ type Event struct {
 
 var serverStartTime time.Time
 var crdclient *client.Crdclient
+
+func init2()  {
+	file, err := os.OpenFile("/tmp/kuber_controller.log", os.O_CREATE|os.O_WRONLY, 0777)
+	if err == nil {
+		log.Println("Using log file")
+		logrus.SetOutput(file)
+	} else {
+		log.Println(err)
+		logrus.Info(err)
+		logrus.Info("Failed to log to file, using default stderr")
+	}
+}
 
 func TestCrdFlow() {
 	crdclient := GetApiExtensionClient()
