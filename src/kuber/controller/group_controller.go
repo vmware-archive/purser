@@ -9,12 +9,9 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	//"kuber-controller/client"
-	//"kuber-controller/crd"
-	//"kuber-controller/metrics"
-	"time"
 	"kuber/client"
 	"kuber/crd"
+	"os"
 )
 
 // return rest config, if path not specified assume in cluster config
@@ -26,45 +23,7 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 }
 
 func GetApiExtensionClient() *client.Crdclient {
-	//TODO: replace config with --kubeconfig parameter
-	kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
-	flag.Parse()
-
-	config, err := GetClientConfig(*kubeconf)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// create clientset and create our CRD, this only need to run once
-	clientset, err := apiextcs.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// note: if the CRD exist our CreateCRD function is set to exit without an error
-	err = crd.CreateCRD(clientset)
-	if err != nil {
-		panic(err)
-	}
-
-	// Wait for the CRD to be created before we use it (only needed if its a new one)
-	time.Sleep(3 * time.Second)
-
-	// Create a new clientset which include our CRD schema
-	crdcs, scheme, err := crd.NewClient(config)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create a CRD client interface
-	crdclient := client.CrdClient(crdcs, scheme, "default")
-
-	return crdclient
-}
-
-func GetApiExtensionClient2() *client.Crdclient {
-	//TODO: replace config with --kubeconfig parameter
-	kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
+	kubeconf := flag.String("kubeconf", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), "path to Kubernetes config file")
 	flag.Parse()
 
 	config, err := GetClientConfig(*kubeconf)
@@ -99,15 +58,12 @@ func ListCrdInstances(crdclient *client.Crdclient) {
 	fmt.Printf("List:\n%s\n", items)
 }
 
-func GetCrdByName(crdclient *client.Crdclient, groupName string, groupType string) *crd.Group {
+func GetCrdByName(crdclient *client.Crdclient, groupName string) *crd.Group {
 	group, err := crdclient.Get(groupName)
 
 	if err == nil {
 		return group
 	} else if apierrors.IsNotFound(err) {
-		// create group if not exist
-		//return CreateCRDInstance(crdclient, groupName, groupType)
-		//fmt.Printf("Group %s is not present\n", groupName)
 		return nil
 	} else {
 		panic(err)

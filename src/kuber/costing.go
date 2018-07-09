@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"kuber/metrics"
 )
 
 func calculateCost(pods []*Pod, nodes map[string]*Node, pvcs map[string]*PersistentVolumeClaim) []*Pod {
@@ -34,6 +35,31 @@ func getPodsCostForLabel(label string) {
 	pods := getPodsForLabelThroughClient(label)
 	pods = getPodsCost(pods)
 	printPodsVerbose(pods)
+}
+
+/*func getClusterPods() {
+	pods := GetClusterPods()
+	fmt.Printf("Total number of pods = %d\n", len(pods))
+	//printPodsVerbose(pods)
+}*/
+
+func getClusterSummary() {
+	pods := GetClusterPods()
+	podMetrics := metrics.CalculatePodStatsFromContainers(pods)
+
+	fmt.Printf("===Cluster Details===\n")
+	fmt.Printf("Provision:\n")
+	fmt.Printf("\tCpu Limit = %s\n", podMetrics.CpuLimit.String())
+	fmt.Printf("\tMemory Limit = %s\n", podMetrics.MemoryLimit.String())
+	fmt.Printf("\tCpu Request = %s\n", podMetrics.CpuRequest.String())
+	fmt.Printf("\tMemory Request = %s\n", podMetrics.MemoryRequest.String())
+
+	nodes := GetClusterNodes()
+	nodeMetrics := metrics.CalculateNodeStats(nodes)
+	fmt.Printf("Capacity:\n")
+	fmt.Printf("\tCpu Limit = %s\n", nodeMetrics.CpuLimit.String())
+	fmt.Printf("\tMemory Limit = %s\n", nodeMetrics.MemoryLimit.String())
+
 }
 
 func getPodCost(podName string) {

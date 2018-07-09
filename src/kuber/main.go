@@ -7,8 +7,6 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	//"kuber-controller/controller"
-	//"kuber-controller/client"
 	"kuber/client"
 	"kuber/controller"
 )
@@ -17,29 +15,45 @@ import (
 var ClientSetInstance *kubernetes.Clientset
 var crdclient  *client.Crdclient
 
-func main2() {
+func main1()  {
+	//getClusterPods()
+}
+
+func main() {
 	inputs := os.Args[1:]
 	inputs = inputs[1:]
-	if len(inputs) >= 4 && inputs[0] == "get" && inputs[1] == "cost" {
+	if len(inputs) == 4 && inputs[0] == "get" && inputs[1] == "cost" {
 		if inputs[2] == "label" {
 			getPodsCostForLabel(inputs[3])
 		} else if inputs[2] == "pod" {
 			getPodCost(inputs[3])
 		} else if inputs[2] == "node" {
 			getAllNodesCost()
-			//fmt.Println("Work In Progress...")
 		} else {
 			printHelp()
+		}
+	} else if (len(inputs) == 3 && inputs[0] == "get") {
+		if inputs[1] == "group" {
+			group := controller.GetCrdByName(crdclient, inputs[2])
+			if group != nil {
+				controller.PrintGroup(group)
+			} else {
+				fmt.Printf("Group %s is not present\n", inputs[2])
+			}
+		}
+	} else if (len(inputs) == 2 && inputs[0] == "get") {
+		if inputs[1] == "summary" {
+			getClusterSummary()
 		}
 	} else {
 		printHelp()
 	}
 }
 
-func main()  {
+func main2()  {
 	//controller.ListCrdInstances(crdclient)
 	groupName := "apundlik1"
-	group := controller.GetCrdByName(crdclient, groupName, "")
+	group := controller.GetCrdByName(crdclient, groupName)
 	//fmt.Println(group)
 	if group != nil {
 		controller.PrintGroup(group)
@@ -48,11 +62,11 @@ func main()  {
 	}
 }
 
-func init() {
-	crdclient = controller.GetApiExtensionClient2()
+func init2() {
+	crdclient = controller.GetApiExtensionClient()
 }
 
-func init2() {
+func init() {
 	var kubeconfig *string
 	//fmt.Println(os.Environ())
 	kubeconfig = flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"))
@@ -69,11 +83,14 @@ func init2() {
 	}
 	ClientSetInstance = clientset
 
-	//crdclient = controller.GetApiExtensionClient2()
+	// Crd client
+	crdclient = controller.GetApiExtensionClient()
 }
 
 func printHelp() {
 	fmt.Printf("Try one of the following commands...\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get summary\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get group <group-name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost label <key=val>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost pod <pod name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost node <node name>\n")

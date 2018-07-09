@@ -9,6 +9,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	//api_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
@@ -98,6 +99,15 @@ func getPodsForLabelThroughClient(label string) []*Pod {
 	}
 
 	return createPodObjects(pods)
+}
+
+func GetClusterPods() []v1.Pod {
+	pods, err := ClientSetInstance.CoreV1().Pods("").List(metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	return pods.Items
+	//return createPodObjects(pods)
 }
 
 func createPodObjects(pods *v1.PodList) []*Pod {

@@ -3,6 +3,7 @@ package metrics
 import (
 	"fmt"
 	api_v1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
@@ -13,23 +14,42 @@ type Metrics struct {
 	MemoryRequest *resource.Quantity
 }
 
-func CalculatePodStatsFromContainers(pod *api_v1.Pod) *Metrics {
+func CalculatePodStatsFromContainers(pods []v1.Pod) *Metrics {
 	cpuLimit := &resource.Quantity{}
 	memoryLimit := &resource.Quantity{}
 	cpuRequest := &resource.Quantity{}
 	memoryRequest := &resource.Quantity{}
-	for _, c := range pod.Spec.Containers {
-		limits := c.Resources.Limits
-		if limits != nil {
-			cpuLimit.Add(*limits.Cpu())
-			memoryLimit.Add(*limits.Memory())
-		}
+	for _, pod := range pods {
+		for _, c := range pod.Spec.Containers {
+			limits := c.Resources.Limits
+			if limits != nil {
+				cpuLimit.Add(*limits.Cpu())
+				memoryLimit.Add(*limits.Memory())
+			}
 
-		requests := c.Resources.Requests
-		if requests != nil {
-			cpuRequest.Add(*requests.Cpu())
-			memoryRequest.Add(*requests.Memory())
+			requests := c.Resources.Requests
+			if requests != nil {
+				cpuRequest.Add(*requests.Cpu())
+				memoryRequest.Add(*requests.Memory())
+			}
 		}
+	}
+	return &Metrics{
+		CpuLimit:      cpuLimit,
+		MemoryLimit:   memoryLimit,
+		CpuRequest:    cpuRequest,
+		MemoryRequest: memoryRequest,
+	}
+}
+
+func CalculateNodeStats(nodes []v1.Node) *Metrics {
+	cpuLimit := &resource.Quantity{}
+	memoryLimit := &resource.Quantity{}
+	cpuRequest := &resource.Quantity{}
+	memoryRequest := &resource.Quantity{}
+	for _, node := range nodes {
+		cpuLimit.Add(*node.Status.Capacity.Cpu())
+		memoryLimit.Add(*node.Status.Capacity.Memory())
 	}
 	return &Metrics{
 		CpuLimit:      cpuLimit,
