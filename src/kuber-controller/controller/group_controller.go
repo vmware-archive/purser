@@ -7,6 +7,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	api_v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"kuber-controller/client"
@@ -15,6 +16,8 @@ import (
 	"time"
 	"github.com/Sirupsen/logrus"
 	"log"
+	"flag"
+	"strings"
 )
 
 // return rest config, if path not specified assume in cluster config
@@ -29,11 +32,11 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 
 func GetApiExtensionClient() *client.Crdclient {
 	//TODO: replace config with --kubeconfig parameter
-	/*kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
+	kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
 	flag.Parse()
-	config, err := GetClientConfig(*kubeconf)*/
+	config, err := GetClientConfig(*kubeconf)
 
-	config, err := GetClientConfig("")
+	//config, err := GetClientConfig("")
 	if err != nil {
 		log.Println(err)
 		panic(err.Error())
@@ -139,6 +142,43 @@ func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, grou
 		panic(err)
 	} else {
 		fmt.Printf("Updating the crd for group = %s is successful\n", groupName)
+	}
+}
+
+func createGroupNameFromLabel(key string, val string) string {
+	groupName := key + "." + val
+	if strings.Contains(groupName, "/") {
+		groupName = strings.Replace(groupName, "/", "-", -1)
+	}
+	groupName = strings.ToLower(groupName)
+	return groupName
+}
+
+func UpdateLabelGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, pod *api_v1.Pod) {
+	for key, val := range pod.Labels {
+		groupName := createGroupNameFromLabel(key, val)
+		//fmt.Printf("Label group = %s\n", groupName)
+		group := GetCrdByName(crdclient, groupName, "label")
+		existingPods := group.Spec.PodsMetrics
+
+		if existingPods == nil {
+			existingPods = map[string]*metrics.Metrics{}
+		}
+
+		existingPods[pod.Name] = metric
+		group.Spec.PodsMetrics = existingPods
+		group.Spec.AllocatedResources = calculatedAggregatedPodMetric(existingPods)
+		group.Name = groupName
+
+		//fmt.Println(group)
+		_, err := crdclient.Update(group)
+
+		if err != nil {
+			fmt.Printf("There is a panic while updating the crd for group = %s\n", groupName)
+			panic(err)
+		} else {
+			fmt.Printf("Updating the crd for group = %s is successful\n", groupName)
+		}
 	}
 }
 

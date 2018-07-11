@@ -248,6 +248,7 @@ func (c *Controller) processItem(newEvent Event) error {
 			met := metrics.CalculatePodStatsFromContainers(pod)
 			//metrics.PrintPodStats(pod, met)
 			UpdateNamespaceGroupCrd(crdclient, pod.Namespace, "namespace", pod.Name, met)
+			UpdateLabelGroupCrd(crdclient, met, pod)
 
 		case *api_v1.Node:
 			count++

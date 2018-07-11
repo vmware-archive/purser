@@ -47,8 +47,8 @@ func getClusterSummary() {
 	pods := GetClusterPods()
 	podMetrics := metrics.CalculatePodStatsFromContainers(pods)
 
-	fmt.Printf("===Cluster Details===\n")
-	fmt.Printf("Provision:\n")
+	fmt.Printf("Cluster Details:\n")
+	fmt.Printf("Provisioned Resources:\n")
 	fmt.Printf("\tCpu Limit = %s\n", podMetrics.CpuLimit.String())
 	fmt.Printf("\tMemory Limit = %s\n", podMetrics.MemoryLimit.String())
 	fmt.Printf("\tCpu Request = %s\n", podMetrics.CpuRequest.String())
@@ -56,7 +56,7 @@ func getClusterSummary() {
 
 	nodes := GetClusterNodes()
 	nodeMetrics := metrics.CalculateNodeStats(nodes)
-	fmt.Printf("Capacity:\n")
+	fmt.Printf("Total Capacity:\n")
 	fmt.Printf("\tCpu Limit = %s\n", nodeMetrics.CpuLimit.String())
 	fmt.Printf("\tMemory Limit = %s\n", nodeMetrics.MemoryLimit.String())
 

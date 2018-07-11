@@ -9,6 +9,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"kuber/client"
 	"kuber/controller"
+	"strings"
 )
 
 // ClientSetInstance helps in accessing kubernetes apis through client.
@@ -32,13 +33,23 @@ func main() {
 		} else {
 			printHelp()
 		}
-	} else if (len(inputs) == 3 && inputs[0] == "get") {
-		if inputs[1] == "group" {
-			group := controller.GetCrdByName(crdclient, inputs[2])
+	} else if (len(inputs) == 4 && inputs[0] == "get" && inputs[1] == "resources") {
+		if inputs[2] == "namespace" {
+			group := controller.GetCrdByName(crdclient, inputs[3])
 			if group != nil {
 				controller.PrintGroup(group)
 			} else {
-				fmt.Printf("Group %s is not present\n", inputs[2])
+				fmt.Printf("Group %s is not present\n", inputs[3])
+			}
+		} else if inputs[2] == "label" {
+			if (!strings.Contains(inputs[3], "=")) {
+				printHelp()
+			}
+			group := controller.GetCrdByName(crdclient, createGroupNameFromLabel(inputs[3]))
+			if group != nil {
+				controller.PrintGroup(group)
+			} else {
+				fmt.Printf("Group %s is not present\n", inputs[3])
 			}
 		}
 	} else if (len(inputs) == 2 && inputs[0] == "get") {
@@ -48,6 +59,18 @@ func main() {
 	} else {
 		printHelp()
 	}
+}
+
+func createGroupNameFromLabel(input string) string {
+	inp := strings.Split(input, "=")
+	key := inp[0]
+	val := inp[1]
+	groupName := key + "." + val
+	if strings.Contains(groupName, "/") {
+		groupName = strings.Replace(groupName, "/", "-", -1)
+	}
+	groupName = strings.ToLower(groupName)
+	return groupName
 }
 
 func main2()  {
@@ -90,7 +113,8 @@ func init() {
 func printHelp() {
 	fmt.Printf("Try one of the following commands...\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get summary\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get group <group-name>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get resources namespace <Namespace>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get resources label <key=val>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost label <key=val>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost pod <pod name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost node <node name>\n")
