@@ -40,24 +40,23 @@ Instructions to install and start using Kuber plugin.
 * Kubernetes version 1.8 or greater
 * ``kubectl`` installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-### Installing
+### Installation
 
-Installing is as simple as downloading and executing a shell script: [kuber_install.sh] ()
+#### Server side installation
 
-#### What does the installation do?
+The following two steps installs kuber controller and custom resource definitions for user groups in kubernetes cluster.
 
-Installing Kuber creates a few Kubernetes supported extensions on your cluster. This enables install once, query from anywhere using ``kubectl``
-
-1. Installing CRDs(Custom Resource Definitions)
-    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
-    * kubectl create -f crd.yaml
-2. Installing custom controller
+1. Installing kuber custom controller
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/custom_controller.yaml
     * kubectl apply -f custom_controller.yaml
-3. Installing API extension server
-    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/api_extension_server.yaml
-    * kubectl apply -f api_extension_server.yaml
 
+2. Installing CRDs(Custom Resource Definitions) for custom groups.
+    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
+    * kubectl create -f crd.yaml
+    
+    Note: The above CRD is also created by kuber custom controller, if CRD is already by controller then kubectl displays resource already exist error.
+
+#### Client side installation
 
 ### Usage
 
