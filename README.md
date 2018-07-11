@@ -60,10 +60,11 @@ The following two steps installs kuber controller and custom resource definition
 
 The following two steps installs the necessary components on client side.
 
-1. Downloading plugin yaml file
+1. Downloading kubectl plugin yaml file
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/plugin.yaml
     * copy the plugin.yaml file into one of the paths specified in `Plugin loader` section in [link](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/)
-2. Downloading plugin binary
+
+2. Downloading kubectl plugin binary
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/bin/kuber
     * export the path of above binary into PATH variable.
 
