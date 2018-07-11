@@ -55,7 +55,9 @@ type Group struct {
 }
 type GroupSpec struct {
 	Name               string                      `json:"name"`
-	Type               string                      `json:"type"`
+	CustomGroup			bool						`json:"custom,omitempty"`
+	Type               string                      `json:"type,omitempty"`
+	Labels				map[string]string			`json:"labels,omitempty"`
 	AllocatedResources *metrics.Metrics            `json:"metrics,omitempty"`
 	PodsMetrics        map[string]*metrics.Metrics `json:"pods,omitempty"`
 }

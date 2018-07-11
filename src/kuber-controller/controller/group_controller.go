@@ -98,7 +98,6 @@ func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType 
 }
 
 func ListCrdInstances(crdclient *client.Crdclient) {
-	// List all Example objects
 	items, err := crdclient.List(meta_v1.ListOptions{})
 	if err != nil {
 		panic(err)
@@ -117,6 +116,55 @@ func GetCrdByName(crdclient *client.Crdclient, groupName string, groupType strin
 	} else {
 		panic(err)
 	}
+}
+
+func GetAllCustomGroups(crdclient *client.Crdclient) []crd.Group{
+	items, err := crdclient.List(meta_v1.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	userGroups := []crd.Group{}
+	for _, group := range items.Items {
+		if group.Spec.CustomGroup {
+			userGroups = append(userGroups, group)
+		}
+	}
+	return userGroups
+}
+
+func UpdateCustomGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, pod *api_v1.Pod) {
+	fmt.Printf("Started updating User Created Groups for pod {} update.\n", pod.Name)
+	userGroups := GetAllCustomGroups(crdclient)
+	for _, group := range userGroups {
+		for gkey, gval := range group.Spec.Labels {
+			for pkey, pval := range pod.Labels {
+				if gkey == pkey && gval == pval {
+					fmt.Printf("Updating the user group {} with pod {} details\n", group.Spec.Name, pod.Name)
+
+					existingPods := group.Spec.PodsMetrics
+
+					if existingPods == nil {
+						existingPods = map[string]*metrics.Metrics{}
+					}
+
+					existingPods[pod.Name] = metric
+					group.Spec.PodsMetrics = existingPods
+					group.Spec.AllocatedResources = calculatedAggregatedPodMetric(existingPods)
+
+					//fmt.Println(group)
+					_, err := crdclient.Update(&group)
+
+					if err != nil {
+						fmt.Printf("There is a panic while updating the crd for group = %s\n", group.Name)
+						panic(err)
+					} else {
+						fmt.Printf("Updating the crd for group = %s is successful\n", group.Name)
+					}
+				}
+			}
+		}
+	}
+	fmt.Printf("Completed updating User Created Groups for pod {} update.\n", pod.Name)
 }
 
 func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, groupType string, pod string,
