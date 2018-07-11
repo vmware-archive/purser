@@ -54,9 +54,18 @@ The following two steps installs kuber controller and custom resource definition
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
     * kubectl create -f crd.yaml
     
-    Note: The above CRD is also created by kuber custom controller, if CRD is already by controller then kubectl displays resource already exist error.
+    Note: The above CRD is also created by kuber custom controller, if CRD is already by controller then kubectl displays resource already exist message.
 
 #### Client side installation
+
+The following two steps installs the necessary components on client side.
+
+1. Downloading plugin yaml file
+    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/plugin.yaml
+    * copy the plugin.yaml file into one of the paths specified in `Plugin loader` section in [link](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/)
+2. Downloading plugin binary
+    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/bin/kuber
+    * export the path of above binary into PATH variable.
 
 ### Usage
 
