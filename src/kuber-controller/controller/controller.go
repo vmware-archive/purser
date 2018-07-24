@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"fmt"
-	"github.com/Sirupsen/logrus"
 	api_v1 "k8s.io/api/core/v1"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,17 +14,19 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"kuber-controller/client"
 	"kuber-controller/config"
-	"kuber-controller/metrics"
 	"kuber-controller/utils"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	log "log"
+	log "github.com/Sirupsen/logrus"
+	"kuber-controller/buffering"
+	"kuber-controller/uploader"
+	"sync"
+	"fmt"
 )
 
 type Controller struct {
-	logger    *logrus.Entry
 	clientset kubernetes.Interface
 	queue     workqueue.RateLimitingInterface
 	informer  cache.SharedIndexInformer
@@ -42,17 +42,10 @@ type Event struct {
 
 var serverStartTime time.Time
 var crdclient *client.Crdclient
+var ringBuffer *buffering.RingBuffer
 
-func init2()  {
-	file, err := os.OpenFile("/tmp/kuber_controller.log", os.O_CREATE|os.O_WRONLY, 0777)
-	if err == nil {
-		log.Println("Using log file")
-		logrus.SetOutput(file)
-	} else {
-		log.Println(err)
-		logrus.Info(err)
-		logrus.Info("Failed to log to file, using default stderr")
-	}
+func init()  {
+	ringBuffer = &buffering.RingBuffer{Size:2000, Mutex:&sync.Mutex{}}
 }
 
 func TestCrdFlow() {
@@ -69,6 +62,8 @@ func TestCrdFlow() {
 func Start(conf *config.Config) {
 	// initialize client for api extension server
 	crdclient = GetApiExtensionClient()
+
+	go uploader.UploadData(ringBuffer)
 
 	//var kubeClient kubernetes.Interface
 	var kubeClient *kubernetes.Clientset
@@ -138,7 +133,7 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 			newEvent.key, err = cache.MetaNamespaceKeyFunc(obj)
 			newEvent.eventType = "create"
 			newEvent.resourceType = resourceType
-			logrus.WithField("pkg", "kubewatch-"+resourceType).Infof("Processing add to %v: %s", resourceType, newEvent.key)
+			log.Printf("Processing add to %v: %s", resourceType, newEvent.key)
 			if err == nil {
 				queue.Add(newEvent)
 			}
@@ -147,17 +142,18 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 			newEvent.key, err = cache.MetaNamespaceKeyFunc(old)
 			newEvent.eventType = "update"
 			newEvent.resourceType = resourceType
-			logrus.WithField("pkg", "kubewatch-"+resourceType).Infof("Processing update to %v: %s", resourceType, newEvent.key)
+			log.Printf("Processing update to %v: %s", resourceType, newEvent.key)
 			if err == nil {
 				queue.Add(newEvent)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
+			log.Printf("Delete object: %s\n", obj)
 			newEvent.key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 			newEvent.eventType = "delete"
 			newEvent.resourceType = resourceType
 			newEvent.namespace = utils.GetObjectMetaData(obj).Namespace
-			logrus.WithField("pkg", "kubewatch-"+resourceType).Infof("Processing delete to %v: %s", resourceType, newEvent.key)
+			log.Printf("Processing delete to %v: %s", resourceType, newEvent.key)
 			if err == nil {
 				queue.Add(newEvent)
 			}
@@ -165,7 +161,6 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 	})
 
 	return &Controller{
-		logger:    logrus.WithField("pkg", "kubewatch-"+resourceType),
 		clientset: client,
 		informer:  informer,
 		queue:     queue,
@@ -177,7 +172,7 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()
 
-	c.logger.Info("Starting kubewatch controller")
+	log.Println("Starting kubewatch controller")
 	serverStartTime = time.Now().Local()
 
 	go c.informer.Run(stopCh)
@@ -187,7 +182,7 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 		return
 	}
 
-	c.logger.Info("Kubewatch controller synced and ready")
+	log.Println("Kubewatch controller synced and ready")
 	wait.Until(c.runWorker, time.Second, stopCh)
 }
 
@@ -222,8 +217,7 @@ func (c *Controller) processNextItem() bool {
 		c.logger.Errorf("Error processing %s (will retry): %v", newEvent.(Event).key, err)
 		c.queue.AddRateLimited(newEvent)*/
 	} else {
-		// err != nil and too many retries
-		c.logger.Errorf("Error processing %s (giving up): %v", newEvent.(Event).key, err)
+		log.Printf("Error processing %s (giving up): %v", newEvent.(Event).key, err)
 		c.queue.Forget(newEvent)
 		utilruntime.HandleError(err)
 	}
@@ -244,22 +238,31 @@ func (c *Controller) processItem(newEvent Event) error {
 	case "create":
 		switch obj.(type) {
 		case *api_v1.Pod:
-			pod := obj.(*api_v1.Pod)
-			met := metrics.CalculatePodStatsFromContainers(pod)
+			//pod := obj.(*api_v1.Pod)
+			payload := &uploader.Payload{Key:newEvent.key, EventType:newEvent.eventType, Namespace:newEvent.namespace,
+			ResourceType:newEvent.resourceType, Data:&obj}
+			ringBuffer.Put(payload)
+
+			//met := metrics.CalculatePodStatsFromContainers(pod)
 			//metrics.PrintPodStats(pod, met)
 			//UpdateNamespaceGroupCrd(crdclient, pod.Namespace, "namespace", pod.Name, met)
 			//UpdateLabelGroupCrd(crdclient, met, pod)
-			UpdateCustomGroupCrd(crdclient, met, pod)
+			//UpdateCustomGroupCrd(crdclient, met, pod)
 
 		case *api_v1.Node:
 			count++
-			fmt.Printf("Event type is node and count =  %d\n", count)
+			log.Printf("Event type is node and count =  %d\n", count)
 		}
 		return nil
 	case "update":
+		// Decide on what needs to be propagated.
 		return nil
 	case "delete":
+		payload := &uploader.Payload{Key:newEvent.key, EventType:newEvent.eventType, Namespace:newEvent.namespace,
+			ResourceType:newEvent.resourceType, Data:&obj}
+		ringBuffer.Put(payload)
 		return nil
 	}
 	return nil
 }
+

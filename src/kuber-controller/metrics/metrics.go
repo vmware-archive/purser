@@ -1,9 +1,9 @@
 package metrics
 
 import (
-	"fmt"
 	api_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	log "github.com/Sirupsen/logrus"
 )
 
 type Metrics struct {
@@ -40,9 +40,9 @@ func CalculatePodStatsFromContainers(pod *api_v1.Pod) *Metrics {
 }
 
 func PrintPodStats(pod *api_v1.Pod, metrics *Metrics) {
-	fmt.Printf("Pod:\t%s\n", pod.Name)
-	fmt.Printf("\tCpu Limit = %s\n", metrics.CpuLimit.String())
-	fmt.Printf("\tMemory Limit = %s\n", metrics.MemoryLimit.String())
-	fmt.Printf("\tCpu Request = %s\n", metrics.CpuRequest.String())
-	fmt.Printf("\tMemory Request = %s\n", metrics.MemoryRequest.String())
+	log.Printf("Pod:\t%s\n", pod.Name)
+	log.Printf("\tCpu Limit = %s\n", metrics.CpuLimit.String())
+	log.Printf("\tMemory Limit = %s\n", metrics.MemoryLimit.String())
+	log.Printf("\tCpu Request = %s\n", metrics.CpuRequest.String())
+	log.Printf("\tMemory Request = %s\n", metrics.MemoryRequest.String())
 }

@@ -1,32 +1,36 @@
 package buffering
 
-import "sync"
+import (
+	"sync"
+	//"log"
+	log "github.com/Sirupsen/logrus"
+)
 
 const BUFFER_SIZE uint32 = 1000
 
 type RingBuffer struct {
-	start, end, size uint32
-	buffer [BUFFER_SIZE]*interface{}
-	mutex *sync.Mutex
+	start, end, Size uint32
+	buffer           [BUFFER_SIZE]*interface{}
+	Mutex            *sync.Mutex
 }
 
 /*
  * Puts the item into buffer if there is room in buffer.
  * returns true if item is buffered otherwise false.
  */
-func(r *RingBuffer) Put(inp *interface{}) bool {
+func(r *RingBuffer) Put(inp interface{}) bool {
 	ret := false
-	r.mutex.Lock()
+	r.Mutex.Lock()
 
 	if r.isFull() {
 		ret = false
 	} else {
-		next := next(r.end, r.size)
-		r.buffer[next] = inp
-		r.start = next
+		next := next(r.end, r.Size)
+		r.buffer[r.end] = &inp
+		r.end = next
 		ret = true
 	}
-	r.mutex.Unlock()
+	r.Mutex.Unlock()
 	return ret
 }
 
@@ -35,12 +39,12 @@ func(r *RingBuffer) Put(inp *interface{}) bool {
  * If buffer is empty then it returns nil.
  */
 func(r *RingBuffer) Get() *interface{} {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	r.Mutex.Lock()
+	defer r.Mutex.Unlock()
 	if r.isEmpty() {
 		return nil
 	} else {
-		next := next(r.start, r.size)
+		next := next(r.start, r.Size)
 		curval := r.buffer[r.start]
 		r.buffer[r.start] = nil
 		r.start = next
@@ -53,8 +57,8 @@ func(r *RingBuffer) Get() *interface{} {
  * Returns elements and number of elements read.
  */
 func(r *RingBuffer) ReadN(n uint32) ([]*interface{}, uint32){
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	r.Mutex.Lock()
+	defer r.Mutex.Unlock()
 	var elements []*interface{}
 	i := uint32(0)
 	start := r.start
@@ -63,7 +67,7 @@ func(r *RingBuffer) ReadN(n uint32) ([]*interface{}, uint32){
 			break
 		}
 		elements = append(elements, r.buffer[start])
-		start = next(start, r.size)
+		start = next(start, r.Size)
 		i++
 	}
 	return elements, uint32(len(elements))
@@ -73,8 +77,8 @@ func(r *RingBuffer) ReadN(n uint32) ([]*interface{}, uint32){
  * Removes the first n elements from the buffer.
  */
 func(r *RingBuffer) RemoveN(n uint32) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	r.Mutex.Lock()
+	defer r.Mutex.Unlock()
 	i := uint32(0)
 	start := r.start
 	for i < n {
@@ -82,7 +86,7 @@ func(r *RingBuffer) RemoveN(n uint32) {
 			break
 		}
 		r.buffer[start] = nil
-		start = next(start, r.size)
+		start = next(start, r.Size)
 		r.start = start
 		i++
 	}
@@ -93,9 +97,16 @@ func(r *RingBuffer) isEmpty() bool {
 }
 
 func(r *RingBuffer) isFull() bool {
-	return next(r.end, r.size) == r.start
+	return next(r.end, r.Size) == r.start
 }
 
 func next(cur uint32, size uint32) uint32 {
 	return (cur + 1) % size
+}
+
+// For debugging purpose
+func (r *RingBuffer) PrintDetails() {
+	log.Printf("Start Position = %d\n", r.start)
+	log.Printf("End Position = %d\n", r.end)
+	log.Printf("Buffer Size = %d\n", r.Size)
 }

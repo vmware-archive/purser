@@ -1,8 +1,6 @@
 package controller
 
 import (
-	//"flag"
-	"fmt"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -14,9 +12,7 @@ import (
 	"kuber-controller/crd"
 	"kuber-controller/metrics"
 	"time"
-	"github.com/Sirupsen/logrus"
-	"log"
-	"flag"
+	log "github.com/Sirupsen/logrus"
 	"strings"
 )
 
@@ -26,17 +22,17 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 		return clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
 	log.Println("Using In cluster config.")
-	logrus.Info("Using In cluster config.")
+	//logrus.Info("Using In cluster config.")
 	return rest.InClusterConfig()
 }
 
 func GetApiExtensionClient() *client.Crdclient {
 	//TODO: replace config with --kubeconfig parameter
-	kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
-	flag.Parse()
-	config, err := GetClientConfig(*kubeconf)
+	//kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
+	//flag.Parse()
+	//config, err := GetClientConfig(*kubeconf)
 
-	//config, err := GetClientConfig("")
+	config, err := GetClientConfig("")
 	if err != nil {
 		log.Println(err)
 		panic(err.Error())
@@ -88,9 +84,9 @@ func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType 
 
 	result, err := crdclient.Create(example)
 	if err == nil {
-		fmt.Printf("CREATED: %#v\n", result)
+		log.Printf("CREATED: %#v\n", result)
 	} else if apierrors.IsAlreadyExists(err) {
-		fmt.Printf("ALREADY EXISTS: %#v\n", result)
+		log.Printf("ALREADY EXISTS: %#v\n", result)
 	} else {
 		panic(err)
 	}
@@ -102,7 +98,7 @@ func ListCrdInstances(crdclient *client.Crdclient) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("List:\n%s\n", items)
+	log.Printf("List:\n%s\n", items)
 }
 
 func GetCrdByName(crdclient *client.Crdclient, groupName string, groupType string) *crd.Group {
@@ -133,13 +129,13 @@ func GetAllCustomGroups(crdclient *client.Crdclient) []crd.Group{
 }
 
 func UpdateCustomGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, pod *api_v1.Pod) {
-	fmt.Printf("Started updating User Created Groups for pod {} update.\n", pod.Name)
+	log.Printf("Started updating User Created Groups for pod {} update.\n", pod.Name)
 	userGroups := GetAllCustomGroups(crdclient)
 	for _, group := range userGroups {
 		for gkey, gval := range group.Spec.Labels {
 			for pkey, pval := range pod.Labels {
 				if gkey == pkey && gval == pval {
-					fmt.Printf("Updating the user group {} with pod {} details\n", group.Spec.Name, pod.Name)
+					log.Printf("Updating the user group {} with pod {} details\n", group.Spec.Name, pod.Name)
 
 					existingPods := group.Spec.PodsMetrics
 
@@ -155,16 +151,16 @@ func UpdateCustomGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, 
 					_, err := crdclient.Update(&group)
 
 					if err != nil {
-						fmt.Printf("There is a panic while updating the crd for group = %s\n", group.Name)
+						log.Printf("There is a panic while updating the crd for group = %s\n", group.Name)
 						panic(err)
 					} else {
-						fmt.Printf("Updating the crd for group = %s is successful\n", group.Name)
+						log.Printf("Updating the crd for group = %s is successful\n", group.Name)
 					}
 				}
 			}
 		}
 	}
-	fmt.Printf("Completed updating User Created Groups for pod {} update.\n", pod.Name)
+	log.Printf("Completed updating User Created Groups for pod {} update.\n", pod.Name)
 }
 
 func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, groupType string, pod string,
@@ -186,10 +182,10 @@ func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, grou
 	_, err := crdclient.Update(group)
 
 	if err != nil {
-		fmt.Printf("There is a panic while updating the crd for group = %s\n", groupName)
+		log.Printf("There is a panic while updating the crd for group = %s\n", groupName)
 		panic(err)
 	} else {
-		fmt.Printf("Updating the crd for group = %s is successful\n", groupName)
+		log.Printf("Updating the crd for group = %s is successful\n", groupName)
 	}
 }
 
@@ -222,10 +218,10 @@ func UpdateLabelGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, p
 		_, err := crdclient.Update(group)
 
 		if err != nil {
-			fmt.Printf("There is a panic while updating the crd for group = %s\n", groupName)
+			log.Printf("There is a panic while updating the crd for group = %s\n", groupName)
 			panic(err)
 		} else {
-			fmt.Printf("Updating the crd for group = %s is successful\n", groupName)
+			log.Printf("Updating the crd for group = %s is successful\n", groupName)
 		}
 	}
 }
