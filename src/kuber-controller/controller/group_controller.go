@@ -14,7 +14,10 @@ import (
 	"time"
 	log "github.com/Sirupsen/logrus"
 	"strings"
+	"flag"
 )
+
+const environment = "dev"
 
 // return rest config, if path not specified assume in cluster config
 func GetClientConfig(kubeconfig string) (*rest.Config, error) {
@@ -22,17 +25,20 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 		return clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
 	log.Println("Using In cluster config.")
-	//logrus.Info("Using In cluster config.")
 	return rest.InClusterConfig()
 }
 
-func GetApiExtensionClient() *client.Crdclient {
-	//TODO: replace config with --kubeconfig parameter
-	//kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
-	//flag.Parse()
-	//config, err := GetClientConfig(*kubeconf)
+func GetApiExtensionClient() *client.GroupCrdClient {
+	var config *rest.Config
+	var err error
+	if environment == "dev" {
+		kubeconf := flag.String("kubeconf", "/Users/gurusreekanthc/.kube/config", "path to Kubernetes config file")
+		flag.Parse()
+		config, err = GetClientConfig(*kubeconf)
+	} else {
+		config, err = GetClientConfig("")
+	}
 
-	config, err := GetClientConfig("")
 	if err != nil {
 		log.Println(err)
 		panic(err.Error())
@@ -44,8 +50,8 @@ func GetApiExtensionClient() *client.Crdclient {
 		panic(err.Error())
 	}
 
-	// note: if the CRD exist our CreateCRD function is set to exit without an error
-	err = crd.CreateCRD(clientset)
+	// note: if the CRD exist our CreateGroupCRD function is set to exit without an error
+	err = crd.CreateGroupCRD(clientset)
 	if err != nil {
 		panic(err)
 	}
@@ -60,12 +66,12 @@ func GetApiExtensionClient() *client.Crdclient {
 	}
 
 	// Create a CRD client interface
-	crdclient := client.CrdClient(crdcs, scheme, "default")
+	crdclient := client.CreateGroupCrdClient(crdcs, scheme, "default")
 
 	return crdclient
 }
 
-func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType string) *crd.Group {
+func CreateCRDInstance(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
 	// Create a new Example object and write to k8s
 	example := &crd.Group{
 		ObjectMeta: meta_v1.ObjectMeta{
@@ -82,7 +88,7 @@ func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType 
 		},
 	}
 
-	result, err := crdclient.Create(example)
+	result, err := crdclient.CreateGroup(example)
 	if err == nil {
 		log.Printf("CREATED: %#v\n", result)
 	} else if apierrors.IsAlreadyExists(err) {
@@ -93,16 +99,16 @@ func CreateCRDInstance(crdclient *client.Crdclient, groupName string, groupType 
 	return result
 }
 
-func ListCrdInstances(crdclient *client.Crdclient) {
-	items, err := crdclient.List(meta_v1.ListOptions{})
+func ListCrdInstances(crdclient *client.GroupCrdClient) {
+	items, err := crdclient.ListGroup(meta_v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
 	log.Printf("List:\n%s\n", items)
 }
 
-func GetCrdByName(crdclient *client.Crdclient, groupName string, groupType string) *crd.Group {
-	group, err := crdclient.Get(groupName)
+func GetCrdByName(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
+	group, err := crdclient.GetGroup(groupName)
 
 	if err == nil {
 		return group
@@ -114,8 +120,8 @@ func GetCrdByName(crdclient *client.Crdclient, groupName string, groupType strin
 	}
 }
 
-func GetAllCustomGroups(crdclient *client.Crdclient) []crd.Group{
-	items, err := crdclient.List(meta_v1.ListOptions{})
+func GetAllCustomGroups(crdclient *client.GroupCrdClient) []crd.Group {
+	items, err := crdclient.ListGroup(meta_v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
@@ -128,7 +134,7 @@ func GetAllCustomGroups(crdclient *client.Crdclient) []crd.Group{
 	return userGroups
 }
 
-func UpdateCustomGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, pod *api_v1.Pod) {
+func UpdateCustomGroupCrd(crdclient *client.GroupCrdClient, metric *metrics.Metrics, pod *api_v1.Pod) {
 	log.Printf("Started updating User Created Groups for pod {} update.\n", pod.Name)
 	userGroups := GetAllCustomGroups(crdclient)
 	for _, group := range userGroups {
@@ -148,7 +154,7 @@ func UpdateCustomGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, 
 					group.Spec.AllocatedResources = calculatedAggregatedPodMetric(existingPods)
 
 					//fmt.Println(group)
-					_, err := crdclient.Update(&group)
+					_, err := crdclient.UpdateGroup(&group)
 
 					if err != nil {
 						log.Printf("There is a panic while updating the crd for group = %s\n", group.Name)
@@ -163,7 +169,7 @@ func UpdateCustomGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, 
 	log.Printf("Completed updating User Created Groups for pod {} update.\n", pod.Name)
 }
 
-func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, groupType string, pod string,
+func UpdateNamespaceGroupCrd(crdclient *client.GroupCrdClient, groupName string, groupType string, pod string,
 	metric *metrics.Metrics) {
 
 	group := GetCrdByName(crdclient, groupName, groupType)
@@ -179,7 +185,7 @@ func UpdateNamespaceGroupCrd(crdclient *client.Crdclient, groupName string, grou
 	group.Name = groupName
 
 	//fmt.Println(group)
-	_, err := crdclient.Update(group)
+	_, err := crdclient.UpdateGroup(group)
 
 	if err != nil {
 		log.Printf("There is a panic while updating the crd for group = %s\n", groupName)
@@ -198,7 +204,7 @@ func createGroupNameFromLabel(key string, val string) string {
 	return groupName
 }
 
-func UpdateLabelGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, pod *api_v1.Pod) {
+func UpdateLabelGroupCrd(crdclient *client.GroupCrdClient, metric *metrics.Metrics, pod *api_v1.Pod) {
 	for key, val := range pod.Labels {
 		groupName := createGroupNameFromLabel(key, val)
 		//fmt.Printf("Label group = %s\n", groupName)
@@ -215,7 +221,7 @@ func UpdateLabelGroupCrd(crdclient *client.Crdclient, metric *metrics.Metrics, p
 		group.Name = groupName
 
 		//fmt.Println(group)
-		_, err := crdclient.Update(group)
+		_, err := crdclient.UpdateGroup(group)
 
 		if err != nil {
 			log.Printf("There is a panic while updating the crd for group = %s\n", groupName)

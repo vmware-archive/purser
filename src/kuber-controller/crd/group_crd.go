@@ -1,11 +1,7 @@
 package crd
 
 import (
-	"reflect"
-
-	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -15,49 +11,25 @@ import (
 )
 
 const (
-	CRDPlural   string = "groups"
-	CRDGroup    string = "vmware.kuber"
-	CRDVersion  string = "v1"
-	FullCRDName string = CRDPlural + "." + CRDGroup
+	GroupPlural   string = "groups"
+	GroupGroup    string = "vmware.kuber"
+	GroupVersion  string = "v1"
+	GroupFullName string = GroupPlural + "." + GroupGroup
 )
-
-// Create the CRD resource, ignore error if it already exists
-func CreateCRD(clientset apiextcs.Interface) error {
-	crd := &apiextv1beta1.CustomResourceDefinition{
-		ObjectMeta: meta_v1.ObjectMeta{Name: FullCRDName},
-		Spec: apiextv1beta1.CustomResourceDefinitionSpec{
-			Group:   CRDGroup,
-			Version: CRDVersion,
-			//TODO: make cluster scoped?
-			Scope: apiextv1beta1.NamespaceScoped,
-			Names: apiextv1beta1.CustomResourceDefinitionNames{
-				Plural: CRDPlural,
-				Kind:   reflect.TypeOf(Group{}).Name(),
-			},
-		},
-	}
-
-	_, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
-	if err != nil && apierrors.IsAlreadyExists(err) {
-		return nil
-	}
-	return err
-
-	// Note the original apiextensions example adds logic to wait for creation and exception handling
-}
 
 // Definition of our CRD Group class
 type Group struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
-	Spec               GroupSpec   `json:"spec"`
-	Status             GroupStatus `json:"status,omitempty"`
+	Spec   GroupSpec   `json:"spec"`
+	Status GroupStatus `json:"status,omitempty"`
 }
+
 type GroupSpec struct {
 	Name               string                      `json:"name"`
-	CustomGroup			bool						`json:"custom,omitempty"`
+	CustomGroup        bool                        `json:"custom,omitempty"`
 	Type               string                      `json:"type,omitempty"`
-	Labels				map[string]string			`json:"labels,omitempty"`
+	Labels             map[string]string           `json:"labels,omitempty"`
 	AllocatedResources *metrics.Metrics            `json:"metrics,omitempty"`
 	PodsMetrics        map[string]*metrics.Metrics `json:"pods,omitempty"`
 }
@@ -70,11 +42,48 @@ type GroupStatus struct {
 type GroupList struct {
 	meta_v1.TypeMeta `json:",inline"`
 	meta_v1.ListMeta `json:"metadata"`
-	Items            []Group `json:"items"`
+	Items []Group    `json:"items"`
 }
 
 // Create a  Rest client with the new CRD Schema
-var SchemeGroupVersion = schema.GroupVersion{Group: CRDGroup, Version: CRDVersion}
+var SchemeGroupVersion = schema.GroupVersion{Group: GroupGroup, Version: GroupVersion}
+
+func CreateGroupCRD(clientset apiextcs.Interface) error {
+	return CreateCRD(clientset, GroupFullName, GroupGroup, GroupVersion, GroupPlural)
+}
+
+// DeepCopyInto copies all properties of this object into another object of the
+// same type that is provided as a pointer.
+func (in *Group) DeepCopyInto(out *Group) {
+	out.TypeMeta = in.TypeMeta
+	out.ObjectMeta = in.ObjectMeta
+	out.Spec = in.Spec
+	out.Status = in.Status
+}
+
+// DeepCopyObject returns a generically typed copy of an object
+func (in *Group) DeepCopyObject() runtime.Object {
+	out := Group{}
+	in.DeepCopyInto(&out)
+
+	return &out
+}
+
+// DeepCopyObject returns a generically typed copy of an object
+func (in *GroupList) DeepCopyObject() runtime.Object {
+	out := GroupList{}
+	out.TypeMeta = in.TypeMeta
+	out.ListMeta = in.ListMeta
+
+	if in.Items != nil {
+		out.Items = make([]Group, len(in.Items))
+		for i := range in.Items {
+			in.Items[i].DeepCopyInto(&out.Items[i])
+		}
+	}
+
+	return &out
+}
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,

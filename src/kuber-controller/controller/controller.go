@@ -24,6 +24,7 @@ import (
 	"kuber-controller/uploader"
 	"sync"
 	"fmt"
+	"kuber-controller/metrics"
 )
 
 type Controller struct {
@@ -41,11 +42,11 @@ type Event struct {
 }
 
 var serverStartTime time.Time
-var crdclient *client.Crdclient
+var groupcrdclient *client.GroupCrdClient
 var ringBuffer *buffering.RingBuffer
 
-func init()  {
-	ringBuffer = &buffering.RingBuffer{Size:2000, Mutex:&sync.Mutex{}}
+func init() {
+	ringBuffer = &buffering.RingBuffer{Size: buffering.BUFFER_SIZE, Mutex: &sync.Mutex{}}
 }
 
 func TestCrdFlow() {
@@ -61,9 +62,9 @@ func TestCrdFlow() {
 
 func Start(conf *config.Config) {
 	// initialize client for api extension server
-	crdclient = GetApiExtensionClient()
+	groupcrdclient = GetApiExtensionClient()
 
-	go uploader.UploadData(ringBuffer)
+	//go uploader.UploadData(ringBuffer)
 
 	//var kubeClient kubernetes.Interface
 	var kubeClient *kubernetes.Clientset
@@ -238,14 +239,14 @@ func (c *Controller) processItem(newEvent Event) error {
 	case "create":
 		switch obj.(type) {
 		case *api_v1.Pod:
-			//pod := obj.(*api_v1.Pod)
-			payload := &uploader.Payload{Key:newEvent.key, EventType:newEvent.eventType, Namespace:newEvent.namespace,
-			ResourceType:newEvent.resourceType, Data:&obj}
+			pod := obj.(*api_v1.Pod)
+			payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
+				ResourceType: newEvent.resourceType, Data: &obj}
 			ringBuffer.Put(payload)
 
-			//met := metrics.CalculatePodStatsFromContainers(pod)
+			met := metrics.CalculatePodStatsFromContainers(pod)
 			//metrics.PrintPodStats(pod, met)
-			//UpdateNamespaceGroupCrd(crdclient, pod.Namespace, "namespace", pod.Name, met)
+			UpdateNamespaceGroupCrd(groupcrdclient, pod.Namespace, "namespace", pod.Name, met)
 			//UpdateLabelGroupCrd(crdclient, met, pod)
 			//UpdateCustomGroupCrd(crdclient, met, pod)
 
@@ -258,11 +259,10 @@ func (c *Controller) processItem(newEvent Event) error {
 		// Decide on what needs to be propagated.
 		return nil
 	case "delete":
-		payload := &uploader.Payload{Key:newEvent.key, EventType:newEvent.eventType, Namespace:newEvent.namespace,
-			ResourceType:newEvent.resourceType, Data:&obj}
+		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
+			ResourceType: newEvent.resourceType, Data: &obj}
 		ringBuffer.Put(payload)
 		return nil
 	}
 	return nil
 }
-

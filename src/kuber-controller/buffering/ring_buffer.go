@@ -2,11 +2,10 @@ package buffering
 
 import (
 	"sync"
-	//"log"
 	log "github.com/Sirupsen/logrus"
 )
 
-const BUFFER_SIZE uint32 = 1000
+const BUFFER_SIZE uint32 = 500
 
 type RingBuffer struct {
 	start, end, Size uint32
@@ -18,7 +17,7 @@ type RingBuffer struct {
  * Puts the item into buffer if there is room in buffer.
  * returns true if item is buffered otherwise false.
  */
-func(r *RingBuffer) Put(inp interface{}) bool {
+func (r *RingBuffer) Put(inp interface{}) bool {
 	ret := false
 	r.Mutex.Lock()
 
@@ -38,7 +37,7 @@ func(r *RingBuffer) Put(inp interface{}) bool {
  * Returns the elements in FIFO manner.
  * If buffer is empty then it returns nil.
  */
-func(r *RingBuffer) Get() *interface{} {
+func (r *RingBuffer) Get() *interface{} {
 	r.Mutex.Lock()
 	defer r.Mutex.Unlock()
 	if r.isEmpty() {
@@ -56,7 +55,7 @@ func(r *RingBuffer) Get() *interface{} {
  * Reads the next n available elements in the buffer.
  * Returns elements and number of elements read.
  */
-func(r *RingBuffer) ReadN(n uint32) ([]*interface{}, uint32){
+func (r *RingBuffer) ReadN(n uint32) ([]*interface{}, uint32) {
 	r.Mutex.Lock()
 	defer r.Mutex.Unlock()
 	var elements []*interface{}
@@ -76,7 +75,7 @@ func(r *RingBuffer) ReadN(n uint32) ([]*interface{}, uint32){
 /*
  * Removes the first n elements from the buffer.
  */
-func(r *RingBuffer) RemoveN(n uint32) {
+func (r *RingBuffer) RemoveN(n uint32) {
 	r.Mutex.Lock()
 	defer r.Mutex.Unlock()
 	i := uint32(0)
@@ -92,11 +91,11 @@ func(r *RingBuffer) RemoveN(n uint32) {
 	}
 }
 
-func(r *RingBuffer) isEmpty() bool {
+func (r *RingBuffer) isEmpty() bool {
 	return r.start == r.end
 }
 
-func(r *RingBuffer) isFull() bool {
+func (r *RingBuffer) isFull() bool {
 	return next(r.end, r.Size) == r.start
 }
 
@@ -106,7 +105,7 @@ func next(cur uint32, size uint32) uint32 {
 
 // For debugging purpose
 func (r *RingBuffer) PrintDetails() {
-	log.Printf("Start Position = %d\n", r.start)
-	log.Printf("End Position = %d\n", r.end)
-	log.Printf("Buffer Size = %d\n", r.Size)
+	log.Printf("Start Position = %d", r.start)
+	log.Printf("End Position = %d", r.end)
+	log.Printf("Buffer Size = %d", r.Size)
 }

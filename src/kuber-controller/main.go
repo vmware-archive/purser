@@ -7,16 +7,17 @@ import (
 	"os"
 )
 
-func init()  {
+func init() {
 	setlogFile()
 }
 
 func setlogFile() {
-	f, err := os.OpenFile("log1.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile("log.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.SetOutput(f)
+	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
 }
 
