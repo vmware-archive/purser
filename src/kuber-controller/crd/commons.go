@@ -1,14 +1,14 @@
 package crd
 
 import (
-	"reflect"
+	//"reflect"
 	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateCRD(clientset apiextcs.Interface, fullName string, group string, version string, plural string) error {
+func CreateCRD(clientset apiextcs.Interface, fullName string, group string, version string, plural string, kind string) error {
 	crd := &apiextv1beta1.CustomResourceDefinition{
 		ObjectMeta: meta_v1.ObjectMeta{Name: fullName},
 		Spec: apiextv1beta1.CustomResourceDefinitionSpec{
@@ -18,7 +18,7 @@ func CreateCRD(clientset apiextcs.Interface, fullName string, group string, vers
 			Scope: apiextv1beta1.NamespaceScoped,
 			Names: apiextv1beta1.CustomResourceDefinitionNames{
 				Plural: plural,
-				Kind:   reflect.TypeOf(Group{}).Name(),
+				Kind:   kind,
 			},
 		},
 	}

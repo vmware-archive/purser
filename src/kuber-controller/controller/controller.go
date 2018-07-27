@@ -50,9 +50,13 @@ func init() {
 }
 
 func TestCrdFlow() {
-	crdclient := GetApiExtensionClient()
-	CreateCRDInstance(crdclient, "xyz", "namespace")
-	ListCrdInstances(crdclient)
+	_, subcrdclient := GetApiExtensionClient()
+	//groupcrdclient, subcrdclient := GetApiExtensionClient()
+	//CreateGroupCRDInstance(groupcrdclient, "xyz", "namespace")
+	//ListGroupCrdInstances(groupcrdclient)
+
+	//CreateSubscriberCRDInstance(subcrdclient, "ci",)
+	ListSubscriberCrdInstances(subcrdclient)
 
 	sigterm := make(chan os.Signal, 1)
 	signal.Notify(sigterm, syscall.SIGTERM)
@@ -62,7 +66,7 @@ func TestCrdFlow() {
 
 func Start(conf *config.Config) {
 	// initialize client for api extension server
-	groupcrdclient = GetApiExtensionClient()
+	groupcrdclient, _ = GetApiExtensionClient()
 
 	//go uploader.UploadData(ringBuffer)
 

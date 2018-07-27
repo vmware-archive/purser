@@ -28,7 +28,7 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func GetApiExtensionClient() *client.GroupCrdClient {
+func GetApiExtensionClient() (*client.GroupCrdClient, *client.SubscriberCrdClient) {
 	var config *rest.Config
 	var err error
 	if environment == "dev" {
@@ -56,22 +56,36 @@ func GetApiExtensionClient() *client.GroupCrdClient {
 		panic(err)
 	}
 
+	err = crd.CreateSubscriberCRD(clientset)
+	if err != nil {
+		panic(err)
+	}
+
 	// Wait for the CRD to be created before we use it (only needed if its a new one)
 	time.Sleep(3 * time.Second)
 
 	// Create a new clientset which include our CRD schema
-	crdcs, scheme, err := crd.NewClient(config)
+	gcrdcs, gscheme, err := crd.NewGroupClient(config)
 	if err != nil {
 		panic(err)
 	}
 
 	// Create a CRD client interface
-	crdclient := client.CreateGroupCrdClient(crdcs, scheme, "default")
+	groupcrdclient := client.CreateGroupCrdClient(gcrdcs, gscheme, "default")
 
-	return crdclient
+	// Create a new clientset which include our CRD schema
+	crdcs, scheme, err := crd.NewSubscriberClient(config)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create a CRD client interface
+	subcrdclient := client.CreateSubscriberCrdClient(crdcs, scheme, "default")
+
+	return groupcrdclient, subcrdclient
 }
 
-func CreateCRDInstance(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
+func CreateGroupCRDInstance(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
 	// Create a new Example object and write to k8s
 	example := &crd.Group{
 		ObjectMeta: meta_v1.ObjectMeta{
@@ -90,38 +104,75 @@ func CreateCRDInstance(crdclient *client.GroupCrdClient, groupName string, group
 
 	result, err := crdclient.CreateGroup(example)
 	if err == nil {
-		log.Printf("CREATED: %#v\n", result)
+		log.Printf("Created Group : %#v\n", result)
 	} else if apierrors.IsAlreadyExists(err) {
-		log.Printf("ALREADY EXISTS: %#v\n", result)
+		log.Printf("Group already exists : %#v\n", result)
 	} else {
 		panic(err)
 	}
 	return result
 }
 
-func ListCrdInstances(crdclient *client.GroupCrdClient) {
-	items, err := crdclient.ListGroup(meta_v1.ListOptions{})
+func CreateSubscriberCRDInstance(crdclient *client.SubscriberCrdClient, subscriberName string) *crd.Subscriber {
+	// Create a new Example object and write to k8s
+	example := &crd.Subscriber{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Name: subscriberName,
+			//Labels: map[string]string{"mylabel": "test"},
+		},
+		Spec: crd.SubscriberSpec{
+			Name: subscriberName,
+		},
+		Status: crd.SubscriberStatus{
+			State:   "created",
+			Message: "Done",
+		},
+	}
+
+	result, err := crdclient.CreateSubscriber(example)
+	if err == nil {
+		log.Printf("Created Subscriber : %#v\n", result)
+	} else if apierrors.IsAlreadyExists(err) {
+		log.Printf("Subscriber already exists : %#v\n", result)
+	} else {
+		panic(err)
+	}
+	return result
+}
+
+func ListGroupCrdInstances(crdclient *client.GroupCrdClient) {
+	items, err := crdclient.ListGroups(meta_v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
 	log.Printf("List:\n%s\n", items)
 }
 
-func GetCrdByName(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
+func ListSubscriberCrdInstances(crdclient *client.SubscriberCrdClient) {
+	items, err := crdclient.ListSubscribers(meta_v1.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("List:\n%s\n", items)
+}
+
+
+
+func GetGroupCrdByName(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
 	group, err := crdclient.GetGroup(groupName)
 
 	if err == nil {
 		return group
 	} else if apierrors.IsNotFound(err) {
 		// create group if not exist
-		return CreateCRDInstance(crdclient, groupName, groupType)
+		return CreateGroupCRDInstance(crdclient, groupName, groupType)
 	} else {
 		panic(err)
 	}
 }
 
 func GetAllCustomGroups(crdclient *client.GroupCrdClient) []crd.Group {
-	items, err := crdclient.ListGroup(meta_v1.ListOptions{})
+	items, err := crdclient.ListGroups(meta_v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
@@ -172,7 +223,7 @@ func UpdateCustomGroupCrd(crdclient *client.GroupCrdClient, metric *metrics.Metr
 func UpdateNamespaceGroupCrd(crdclient *client.GroupCrdClient, groupName string, groupType string, pod string,
 	metric *metrics.Metrics) {
 
-	group := GetCrdByName(crdclient, groupName, groupType)
+	group := GetGroupCrdByName(crdclient, groupName, groupType)
 	existingPods := group.Spec.PodsMetrics
 
 	if existingPods == nil {
@@ -208,7 +259,7 @@ func UpdateLabelGroupCrd(crdclient *client.GroupCrdClient, metric *metrics.Metri
 	for key, val := range pod.Labels {
 		groupName := createGroupNameFromLabel(key, val)
 		//fmt.Printf("Label group = %s\n", groupName)
-		group := GetCrdByName(crdclient, groupName, "label")
+		group := GetGroupCrdByName(crdclient, groupName, "label")
 		existingPods := group.Spec.PodsMetrics
 
 		if existingPods == nil {

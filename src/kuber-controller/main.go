@@ -2,7 +2,7 @@ package main
 
 import (
 	"kuber-controller/controller"
-	"kuber-controller/config"
+	//"kuber-controller/config"
 	log "github.com/Sirupsen/logrus"
 	"os"
 )
@@ -22,8 +22,8 @@ func setlogFile() {
 }
 
 func main() {
-	conf := config.Config{Resource: config.Resource{Pod: true}}
-	controller.Start(&conf)
+	//conf := config.Config{Resource: config.Resource{Pod: true}}
+	//controller.Start(&conf)
 	//controller.CreateCRDDefinition()
-	//controller.TestCrdFlow()
+	controller.TestCrdFlow()
 }

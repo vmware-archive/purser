@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
 	"kuber-controller/metrics"
+	"reflect"
 )
 
 const (
@@ -46,10 +47,10 @@ type GroupList struct {
 }
 
 // Create a  Rest client with the new CRD Schema
-var SchemeGroupVersion = schema.GroupVersion{Group: GroupGroup, Version: GroupVersion}
+var GroupSchemeGroupVersion = schema.GroupVersion{Group: GroupGroup, Version: GroupVersion}
 
 func CreateGroupCRD(clientset apiextcs.Interface) error {
-	return CreateCRD(clientset, GroupFullName, GroupGroup, GroupVersion, GroupPlural)
+	return CreateCRD(clientset, GroupFullName, GroupGroup, GroupVersion, GroupPlural, reflect.TypeOf(Group{}).Name())
 }
 
 // DeepCopyInto copies all properties of this object into another object of the
@@ -85,23 +86,25 @@ func (in *GroupList) DeepCopyObject() runtime.Object {
 	return &out
 }
 
-func addKnownTypes(scheme *runtime.Scheme) error {
-	scheme.AddKnownTypes(SchemeGroupVersion,
+func addGroupKnownTypes(scheme *runtime.Scheme) error {
+	scheme.AddKnownTypes(GroupSchemeGroupVersion,
 		&Group{},
 		&GroupList{},
+		&Subscriber{},
+		&SubscriberList{},
 	)
-	meta_v1.AddToGroupVersion(scheme, SchemeGroupVersion)
+	meta_v1.AddToGroupVersion(scheme, GroupSchemeGroupVersion)
 	return nil
 }
 
-func NewClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
+func NewGroupClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
 	scheme := runtime.NewScheme()
-	SchemeBuilder := runtime.NewSchemeBuilder(addKnownTypes)
+	SchemeBuilder := runtime.NewSchemeBuilder(addGroupKnownTypes)
 	if err := SchemeBuilder.AddToScheme(scheme); err != nil {
 		return nil, nil, err
 	}
 	config := *cfg
-	config.GroupVersion = &SchemeGroupVersion
+	config.GroupVersion = &GroupSchemeGroupVersion
 	config.APIPath = "/apis"
 	config.ContentType = runtime.ContentTypeJSON
 	config.NegotiatedSerializer = serializer.DirectCodecFactory{

@@ -31,6 +31,14 @@ func (f *GroupCrdClient) CreateGroup(obj *crd.Group) (*crd.Group, error) {
 	return &result, err
 }
 
+/*func (f *GroupCrdClient) CreateSubscriber(obj *crd.Subscriber) (*crd.Subscriber, error) {
+	var result crd.Subscriber
+	err := f.cl.Post().
+		Namespace(f.ns).Resource(crd.SubscriberPlural).
+		Body(obj).Do().Into(&result)
+	return &result, err
+}*/
+
 func (f *GroupCrdClient) UpdateGroup(obj *crd.Group) (*crd.Group, error) {
 	var result crd.Group
 	err := f.cl.
@@ -57,10 +65,19 @@ func (f *GroupCrdClient) GetGroup(name string) (*crd.Group, error) {
 	return &result, err
 }
 
-func (f *GroupCrdClient) ListGroup(opts meta_v1.ListOptions) (*crd.GroupList, error) {
+func (f *GroupCrdClient) ListGroups(opts meta_v1.ListOptions) (*crd.GroupList, error) {
 	var result crd.GroupList
 	err := f.cl.Get().
 		Namespace(f.ns).Resource(f.plural).
+		VersionedParams(&opts, f.codec).
+		Do().Into(&result)
+	return &result, err
+}
+
+func (f *SubscriberCrdClient) ListSubscribers(opts meta_v1.ListOptions) (*crd.SubscriberList, error) {
+	var result crd.SubscriberList
+	err := f.cl.Get().
+		Namespace(f.ns).Resource(crd.SubscriberPlural).
 		VersionedParams(&opts, f.codec).
 		Do().Into(&result)
 	return &result, err
