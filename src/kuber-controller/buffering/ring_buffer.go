@@ -5,7 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-const BUFFER_SIZE uint32 = 500
+const BUFFER_SIZE uint32 = 5000
 
 type RingBuffer struct {
 	start, end, Size uint32
@@ -105,7 +105,5 @@ func next(cur uint32, size uint32) uint32 {
 
 // For debugging purpose
 func (r *RingBuffer) PrintDetails() {
-	log.Printf("Start Position = %d", r.start)
-	log.Printf("End Position = %d", r.end)
-	log.Printf("Buffer Size = %d", r.Size)
+	log.Printf("Start Position = %d, End Position = %d, Buffer Size = %d", r.start, r.end, r.Size)
 }

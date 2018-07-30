@@ -149,7 +149,7 @@ func ListGroupCrdInstances(crdclient *client.GroupCrdClient) {
 }
 
 func ListSubscriberCrdInstances(crdclient *client.SubscriberCrdClient) {
-	items, err := crdclient.ListSubscribers(meta_v1.ListOptions{})
+	items, err := crdclient.ListSubscriber(meta_v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}

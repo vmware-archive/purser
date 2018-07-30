@@ -74,14 +74,14 @@ func (f *GroupCrdClient) ListGroups(opts meta_v1.ListOptions) (*crd.GroupList, e
 	return &result, err
 }
 
-func (f *SubscriberCrdClient) ListSubscribers(opts meta_v1.ListOptions) (*crd.SubscriberList, error) {
+/*func (f *SubscriberCrdClient) ListSubscribers(opts meta_v1.ListOptions) (*crd.SubscriberList, error) {
 	var result crd.SubscriberList
 	err := f.cl.Get().
 		Namespace(f.ns).Resource(crd.SubscriberPlural).
 		VersionedParams(&opts, f.codec).
 		Do().Into(&result)
 	return &result, err
-}
+}*/
 
 // Create a new List watch for our TPR
 func (f *GroupCrdClient) NewListWatchGroup() *cache.ListWatch {

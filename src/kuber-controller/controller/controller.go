@@ -2,7 +2,9 @@ package controller
 
 import (
 	api_v1 "k8s.io/api/core/v1"
-
+	apps_v1beta1 "k8s.io/api/apps/v1beta1"
+	batch_v1 "k8s.io/api/batch/v1"
+	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -12,7 +14,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	"kuber-controller/client"
 	"kuber-controller/config"
 	"kuber-controller/utils"
 	"os"
@@ -20,17 +21,15 @@ import (
 	"syscall"
 	"time"
 	log "github.com/Sirupsen/logrus"
-	"kuber-controller/buffering"
 	"kuber-controller/uploader"
-	"sync"
 	"fmt"
-	"kuber-controller/metrics"
 )
 
 type Controller struct {
 	clientset kubernetes.Interface
 	queue     workqueue.RateLimitingInterface
 	informer  cache.SharedIndexInformer
+	conf      *config.Config
 }
 
 // Event indicate the informerEvent
@@ -39,14 +38,6 @@ type Event struct {
 	eventType    string
 	namespace    string
 	resourceType string
-}
-
-var serverStartTime time.Time
-var groupcrdclient *client.GroupCrdClient
-var ringBuffer *buffering.RingBuffer
-
-func init() {
-	ringBuffer = &buffering.RingBuffer{Size: buffering.BUFFER_SIZE, Mutex: &sync.Mutex{}}
 }
 
 func TestCrdFlow() {
@@ -65,10 +56,6 @@ func TestCrdFlow() {
 }
 
 func Start(conf *config.Config) {
-	// initialize client for api extension server
-	groupcrdclient, _ = GetApiExtensionClient()
-
-	//go uploader.UploadData(ringBuffer)
 
 	//var kubeClient kubernetes.Interface
 	var kubeClient *kubernetes.Clientset
@@ -95,6 +82,7 @@ func Start(conf *config.Config) {
 		)
 
 		c := newResourceController(kubeClient, informer, "pod")
+		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 
@@ -117,6 +105,99 @@ func Start(conf *config.Config) {
 		)
 
 		c := newResourceController(kubeClient, informer, "node")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Services {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.CoreV1().Services(meta_v1.NamespaceAll).List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.CoreV1().Services(meta_v1.NamespaceAll).Watch(options)
+				},
+			},
+			&api_v1.Service{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "service")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.ReplicaSet {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.ExtensionsV1beta1().ReplicaSets(meta_v1.NamespaceAll).List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.ExtensionsV1beta1().ReplicaSets(meta_v1.NamespaceAll).Watch(options)
+				},
+			},
+			&ext_v1beta1.ReplicaSet{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "replicaset")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Deployment {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.AppsV1beta1().Deployments(meta_v1.NamespaceAll).List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.AppsV1beta1().Deployments(meta_v1.NamespaceAll).Watch(options)
+				},
+			},
+			&apps_v1beta1.Deployment{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "deployment")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Job {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.BatchV1().Jobs(meta_v1.NamespaceAll).List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.BatchV1().Jobs(meta_v1.NamespaceAll).Watch(options)
+				},
+			},
+			&batch_v1.Job{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "job")
+		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 
@@ -144,13 +225,13 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 			}
 		},
 		UpdateFunc: func(old, new interface{}) {
-			newEvent.key, err = cache.MetaNamespaceKeyFunc(old)
+			/*newEvent.key, err = cache.MetaNamespaceKeyFunc(old)
 			newEvent.eventType = "update"
 			newEvent.resourceType = resourceType
 			log.Printf("Processing update to %v: %s", resourceType, newEvent.key)
 			if err == nil {
 				queue.Add(newEvent)
-			}
+			}*/
 		},
 		DeleteFunc: func(obj interface{}) {
 			log.Printf("Delete object: %s\n", obj)
@@ -176,9 +257,6 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 func (c *Controller) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()
-
-	log.Println("Starting kubewatch controller")
-	serverStartTime = time.Now().Local()
 
 	go c.informer.Run(stopCh)
 
@@ -216,11 +294,7 @@ func (c *Controller) processNextItem() bool {
 	defer c.queue.Done(newEvent)
 	err := c.processItem(newEvent.(Event))
 	if err == nil {
-		// No error, reset the ratelimit counters
 		c.queue.Forget(newEvent)
-		/*} else if c.queue.NumRequeues(newEvent) < maxRetries {
-		c.logger.Errorf("Error processing %s (will retry): %v", newEvent.(Event).key, err)
-		c.queue.AddRateLimited(newEvent)*/
 	} else {
 		log.Printf("Error processing %s (giving up): %v", newEvent.(Event).key, err)
 		c.queue.Forget(newEvent)
@@ -229,8 +303,6 @@ func (c *Controller) processNextItem() bool {
 
 	return true
 }
-
-var count int16
 
 func (c *Controller) processItem(newEvent Event) error {
 	obj, _, err := c.informer.GetIndexer().GetByKey(newEvent.key)
@@ -241,23 +313,9 @@ func (c *Controller) processItem(newEvent Event) error {
 	// process events based on its type
 	switch newEvent.eventType {
 	case "create":
-		switch obj.(type) {
-		case *api_v1.Pod:
-			pod := obj.(*api_v1.Pod)
-			payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
-				ResourceType: newEvent.resourceType, Data: &obj}
-			ringBuffer.Put(payload)
-
-			met := metrics.CalculatePodStatsFromContainers(pod)
-			//metrics.PrintPodStats(pod, met)
-			UpdateNamespaceGroupCrd(groupcrdclient, pod.Namespace, "namespace", pod.Name, met)
-			//UpdateLabelGroupCrd(crdclient, met, pod)
-			//UpdateCustomGroupCrd(crdclient, met, pod)
-
-		case *api_v1.Node:
-			count++
-			log.Printf("Event type is node and count =  %d\n", count)
-		}
+		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
+			ResourceType: newEvent.resourceType, Data: &obj}
+		c.conf.RingBuffer.Put(payload)
 		return nil
 	case "update":
 		// Decide on what needs to be propagated.
@@ -265,7 +323,7 @@ func (c *Controller) processItem(newEvent Event) error {
 	case "delete":
 		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
 			ResourceType: newEvent.resourceType, Data: &obj}
-		ringBuffer.Put(payload)
+		c.conf.RingBuffer.Put(payload)
 		return nil
 	}
 	return nil
