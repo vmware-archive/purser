@@ -12,12 +12,18 @@ import (
 
 const READ_SIZE uint32 = 50
 
+type PayloadWrapper struct {
+	Data []*interface{} `json:"data"`
+}
+
 type Payload struct {
-	Key          string
-	EventType    string
-	Namespace    string
-	ResourceType string
-	Data         *interface{}
+	Key          string `json:"key"`
+	EventType    string `json:"eventType"`
+	Namespace    string `json:"namespace"`
+	ResourceType string `json:"resourceType"`
+	//Data         *interface{} `json:"data"`
+	Data string `json:"data"`
+	//Data []byte `json:"data"`
 }
 
 func UploadData(conf *config.Config) {
@@ -59,7 +65,9 @@ func UploadData(conf *config.Config) {
 }
 
 func SendData(payload []*interface{}, subscriber *subscriber) (*http.Response, error) {
-	jsonStr, _ := json.Marshal(payload)
+	payloadWrapper := PayloadWrapper{Data: payload}
+	jsonStr, _ := json.Marshal(payloadWrapper)
+	log.Info(jsonStr)
 	req, err := http.NewRequest("POST", subscriber.url, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return nil, err
@@ -70,10 +78,10 @@ func SendData(payload []*interface{}, subscriber *subscriber) (*http.Response, e
 	return client.Do(req)
 }
 
-func setAuthHeaders(r *http.Request, subscriber *subscriber)  {
+func setAuthHeaders(r *http.Request, subscriber *subscriber) {
 	if subscriber.authType != "" {
 		if subscriber.authType == "access-token" {
-			r.Header.Set("Authorization", "Bearer " + subscriber.authCode)
+			r.Header.Set("Authorization", "Bearer "+subscriber.authCode)
 		}
 	}
 }
@@ -82,8 +90,7 @@ type subscriber struct {
 	url      string
 	authType string
 	authCode string
-	cluster string
-
+	cluster  string
 }
 
 func getSubscriber(conf *config.Config) *subscriber {
@@ -95,7 +102,8 @@ func getSubscriber(conf *config.Config) *subscriber {
 	} else {
 		if list != nil && len(list.Items) > 0 {
 			sub := list.Items[0]
-			subscriber.url = sub.Spec.Url
+			//subscriber.url = sub.Spec.Url
+			subscriber.url = "http://localhost:8080/purser/inventory"
 			subscriber.authType = sub.Spec.AuthType
 			subscriber.authCode = sub.Spec.AuthToken
 			subscriber.cluster = sub.Spec.ClusterName

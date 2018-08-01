@@ -23,6 +23,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"kuber-controller/uploader"
 	"fmt"
+	"encoding/json"
 )
 
 type Controller struct {
@@ -313,16 +314,18 @@ func (c *Controller) processItem(newEvent Event) error {
 	// process events based on its type
 	switch newEvent.eventType {
 	case "create":
+		str, _ := json.Marshal(obj)
 		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
-			ResourceType: newEvent.resourceType, Data: &obj}
+			ResourceType: newEvent.resourceType, Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	case "update":
 		// Decide on what needs to be propagated.
 		return nil
 	case "delete":
+		str, _ := json.Marshal(obj)
 		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
-			ResourceType: newEvent.resourceType, Data: &obj}
+			ResourceType: newEvent.resourceType, Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	}
