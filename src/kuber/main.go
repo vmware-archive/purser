@@ -17,7 +17,7 @@ var ClientSetInstance *kubernetes.Clientset
 var crdclient  *client.Crdclient
 
 func main1()  {
-	//getClusterPods()
+	getClusterSummary()
 }
 
 func main() {
@@ -55,6 +55,10 @@ func main() {
 	} else if (len(inputs) == 2 && inputs[0] == "get") {
 		if inputs[1] == "summary" {
 			getClusterSummary()
+		} else if inputs[1] == "savings" {
+			getSavings()
+		} else {
+			printHelp()
 		}
 	} else {
 		printHelp()
@@ -91,7 +95,6 @@ func init2() {
 
 func init() {
 	var kubeconfig *string
-	//fmt.Println(os.Environ())
 	kubeconfig = flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"))
 	flag.Parse()
 

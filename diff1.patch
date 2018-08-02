@@ -1,0 +1,146 @@
+diff --git a/bin/kuber b/bin/kuber
+index ee0f9ec5..acf64bf0 100755
+Binary files a/bin/kuber and b/bin/kuber differ
+diff --git a/src/kuber/costing.go b/src/kuber/costing.go
+index f251db6a..982fd104 100644
+--- a/src/kuber/costing.go
++++ b/src/kuber/costing.go
+@@ -3,8 +3,57 @@ package main
+ import (
+ 	"fmt"
+ 	"kuber/metrics"
++	"os"
++	"io/ioutil"
++	"encoding/json"
++	"strconv"
++
++
+ )
+ 
++type CostStruct struct {
++	Cost string
++}
++
++type Price struct {
++	Products map[string](map[string]CostStruct)
++}
++
++func GetComputeCost(instanceType string) float64{
++
++	jsonFile, _ := os.Open("/home/manisha/sample.json")
++
++	defer jsonFile.Close()
++
++	byteValue, _ := ioutil.ReadAll(jsonFile)
++
++	var myprice Price
++	json.Unmarshal(byteValue, &myprice)
++	cost:= myprice.Products["us-east-1"]["m5d.12xlarge"].Cost
++	//fmt.Printf(cost)
++	cost1, _ := strconv.ParseFloat(cost, 64)
++	//fmt.Printf("price: %s\n", myprice.Products["us-east-1"]["m5d.12xlarge"].Cost)
++	return cost1
++}
++
++
++func GetStorageCost(instanceType string) float64{
++
++	jsonFile, _ := os.Open("/home/manisha/sample.json")
++
++	defer jsonFile.Close()
++
++	byteValue, _ := ioutil.ReadAll(jsonFile)
++
++	var myprice Price
++	json.Unmarshal(byteValue, &myprice)
++	cost:= myprice.Products["us-east-1"]["m5d.12xlarge"].Cost
++	//fmt.Printf(cost)
++	cost1, _ := strconv.ParseFloat(cost, 64)
++	//fmt.Printf("price: %s\n", myprice.Products["us-east-1"]["m5d.12xlarge"].Cost)
++	return cost1
++}
++
+ func calculateCost(pods []*Pod, nodes map[string]*Node, pvcs map[string]*PersistentVolumeClaim) []*Pod {
+ 	i := 0
+ 	for i <= len(pods)-1 {
+@@ -46,7 +95,7 @@ func getPodsCostForLabel(label string) {
+ func getClusterSummary() {
+ 	pods := GetClusterPods()
+ 	podMetrics := metrics.CalculatePodStatsFromContainers(pods)
+-
++	//podPVClaims := volume.PersistentVolume{}
+ 	fmt.Printf("Cluster Details:\n")
+ 	fmt.Printf("Provisioned Resources:\n")
+ 	fmt.Printf("\tCpu Limit = %s\n", podMetrics.CpuLimit.String())
+@@ -59,6 +108,18 @@ func getClusterSummary() {
+ 	fmt.Printf("Total Capacity:\n")
+ 	fmt.Printf("\tCpu Limit = %s\n", nodeMetrics.CpuLimit.String())
+ 	fmt.Printf("\tMemory Limit = %s\n", nodeMetrics.MemoryLimit.String())
++	var totalCost= 0.0
++	var computeCost = 0.0
++	var storageCost = 0.0
++	for _,node:= range nodes{
++		node:= getNodeDetailsFromNodeDescribe(node.Name)
++		computeCost = computeCost + GetComputeCost(node.instanceType)
++		storageCost = storageCost + GetStorageCost(node.instanceType)
++		totalCost = totalCost + computeCost + storageCost
++	}
++	fmt.Printf("\tCluster Compute cost = %f\n", computeCost)
++	fmt.Printf("\tCluster Storage cost = %f\n", storageCost)
++	fmt.Printf("\tTotal cost of the cluster = %f\n", totalCost)
+ 
+ }
+ 
+diff --git a/src/kuber/metrics/metrics.go b/src/kuber/metrics/metrics.go
+index e26cb328..5e950b60 100644
+--- a/src/kuber/metrics/metrics.go
++++ b/src/kuber/metrics/metrics.go
+@@ -5,6 +5,7 @@ import (
+ 	api_v1 "k8s.io/api/core/v1"
+ 	v1 "k8s.io/api/core/v1"
+ 	"k8s.io/apimachinery/pkg/api/resource"
++
+ )
+ 
+ type Metrics struct {
+@@ -12,6 +13,10 @@ type Metrics struct {
+ 	MemoryLimit   *resource.Quantity
+ 	CpuRequest    *resource.Quantity
+ 	MemoryRequest *resource.Quantity
++    ComputeCost    float64
++	StorageCost    float64
++	TotalCost      float64
++
+ }
+ 
+ func CalculatePodStatsFromContainers(pods []v1.Pod) *Metrics {
+@@ -50,6 +55,9 @@ func CalculateNodeStats(nodes []v1.Node) *Metrics {
+ 	for _, node := range nodes {
+ 		cpuLimit.Add(*node.Status.Capacity.Cpu())
+ 		memoryLimit.Add(*node.Status.Capacity.Memory())
++		key:= node.Name
++		fmt.Printf("\tNode name = %s\n", key)
++
+ 	}
+ 	return &Metrics{
+ 		CpuLimit:      cpuLimit,
+diff --git a/src/kuber/node.go b/src/kuber/node.go
+index 2bbc5821..8dad126f 100644
+--- a/src/kuber/node.go
++++ b/src/kuber/node.go
+@@ -35,6 +35,7 @@ type Node struct {
+ 	allocatedResources *Metric
+ 	podsResources      map[string]*Metric
+ 	cost               *Cost
++	region             string
+ }
+ 
+ func getNodeDetails(nodeName string) Node {
+@@ -44,6 +45,7 @@ func getNodeDetails(nodeName string) Node {
+ 	json := string(bytes)
+ 	node.name = nodeName
+ 	node.instanceType = gjson.Get(json, "metadata.labels.beta\\.kubernetes\\.io/instance-type").Str
++	node.region = gjson.Get(json, "failure-domain.beta.kubernetes.io/region").Str
+ 	return node
+ }
+ 

@@ -221,3 +221,8 @@ func convertToMi(input string) float64 {
 	}
 	return s / divisor
 }
+
+func GetNodeType(node v1.Node) string {
+	labels := node.Labels
+	return labels["beta.kubernetes.io/instance-type"]
+}

@@ -145,7 +145,7 @@ func getAllPodsThroughClient() []*Pod {
 
 func printPodsVerbose(pods []*Pod) {
 	i := 0
-	fmt.Printf("==Pods Cost Details==\n")
+	fmt.Printf("Cost Summary\n")
 	totalCost := 0.0
 	totalCPUCost := 0.0
 	totalMemoryCost := 0.0

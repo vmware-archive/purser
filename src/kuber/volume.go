@@ -5,6 +5,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/api/core/v1"
 )
 
 // PersistentVolume details
@@ -73,4 +74,20 @@ func collectPersistentVolume(volName string) *PersistentVolume {
 		persistentVolume.capacityInGB = (float64)(q.Value()) / (float64)(1024.0*1024.0*1024.0)
 		return &persistentVolume
 	}
+}
+
+func GetClusterVolumes() []v1.PersistentVolume {
+	pvs, err := ClientSetInstance.CoreV1().PersistentVolumes().List(metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	return pvs.Items
+}
+
+func GetClusterPersistentVolumeClaims() []v1.PersistentVolumeClaim {
+	pvcs, err := ClientSetInstance.CoreV1().PersistentVolumeClaims("").List(metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	return pvcs.Items
 }

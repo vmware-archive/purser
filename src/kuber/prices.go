@@ -30,6 +30,11 @@ func totalHoursTillNow() float64 {
 	return 24.0*float64(now.Day()-1) + float64(now.Hour())
 }
 
+func projectToMonth(val float64) float64 {
+	// TODO: enhance this.
+	return (val * 31 * 24) / totalHoursTillNow()
+}
+
 func cpuMemoryRatio(instanceType string) float64 {
 	// TODO: enhance this.
 	return 0.3

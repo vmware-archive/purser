@@ -85,6 +85,14 @@ func init() {
 	computeRefCost["m4.10xlarge"] = 2
 	computeRefCost["m4.16xlarge"] = 3.2
 
+	// new vals
+	computeRefCost["m3.large"] = 0.1
+	computeRefCost["m3.xlarge"] = 0.2
+	computeRefCost["m3.2xlarge"] = 0.4
+	computeRefCost["m3.4xlarge"] = 0.8
+	computeRefCost["m3.10xlarge"] = 2
+	computeRefCost["m3.16xlarge"] = 3.2
+
 	// gpu
 	computeRefCost["p2.xlarge"] = 0.9
 	computeRefCost["p2.8xlarge"] = 7.2
@@ -116,7 +124,7 @@ func getPriceForInstanceType(instanceType string) float64 {
 func getPriceForVolumeType(volumeType string) float64 {
 	cost := storageRefCost[volumeType]
 	if cost == 0.0 {
-		fmt.Printf("Price is not present for volume type - %s, returning default value...\n", volumeType)
+		//fmt.Printf("Price is not present for volume type - %s, returning default value...\n", volumeType)
 		return 0.1
 	}
 	return cost
