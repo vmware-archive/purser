@@ -7,17 +7,20 @@ import (
 
 // Resource contains resource configuration
 type Resource struct {
-	Pod        bool `json:"po"`
-	Node       bool `json:"node"`
-	Services   bool `json:"services"`
-	ReplicaSet bool `json:"replicaset"`
-	Deployment bool `json:"deployment"`
-	Job        bool `json:"job"`
+	Pod                   bool `json:"po"`
+	Node                  bool `json:"node"`
+	PersistentVolume      bool `json:"pv"`
+	PersistentVolumeClaim bool `json:"pvc"`
+	Service               bool `json:"service"`
+	ReplicaSet            bool `json:"replicaset"`
+	StatefulSet           bool `json:"statefulset"`
+	Deployment            bool `json:"deployment"`
+	Job                   bool `json:"job"`
 }
 
 type Config struct {
-	Resource Resource `json:"resource"`
-	RingBuffer *buffering.RingBuffer
-	Groupcrdclient *client.GroupCrdClient
+	Resource         Resource `json:"resource"`
+	RingBuffer       *buffering.RingBuffer
+	Groupcrdclient   *client.GroupCrdClient
 	Subscriberclient *client.SubscriberCrdClient
 }

@@ -13,7 +13,9 @@ import (
 const READ_SIZE uint32 = 50
 
 type PayloadWrapper struct {
-	Data []*interface{} `json:"data"`
+	CspOrgId string         `json:"cspOrgId"`
+	Cluster  string         `json:"cluster"`
+	Data     []*interface{} `json:"data"`
 }
 
 type Payload struct {
@@ -21,9 +23,8 @@ type Payload struct {
 	EventType    string `json:"eventType"`
 	Namespace    string `json:"namespace"`
 	ResourceType string `json:"resourceType"`
-	//Data         *interface{} `json:"data"`
-	Data string `json:"data"`
-	//Data []byte `json:"data"`
+	CloudType    string `json:"cloudType"`
+	Data         string `json:"data"`
 }
 
 func UploadData(conf *config.Config) {
@@ -65,9 +66,9 @@ func UploadData(conf *config.Config) {
 }
 
 func SendData(payload []*interface{}, subscriber *subscriber) (*http.Response, error) {
-	payloadWrapper := PayloadWrapper{Data: payload}
+	payloadWrapper := PayloadWrapper{Data: payload, CspOrgId:subscriber.cspOrgId, Cluster:subscriber.cluster}
 	jsonStr, _ := json.Marshal(payloadWrapper)
-	log.Info(jsonStr)
+	//log.Info(jsonStr)
 	req, err := http.NewRequest("POST", subscriber.url, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return nil, err
@@ -91,6 +92,7 @@ type subscriber struct {
 	authType string
 	authCode string
 	cluster  string
+	cspOrgId string
 }
 
 func getSubscriber(conf *config.Config) *subscriber {
@@ -107,6 +109,7 @@ func getSubscriber(conf *config.Config) *subscriber {
 			subscriber.authType = sub.Spec.AuthType
 			subscriber.authCode = sub.Spec.AuthToken
 			subscriber.cluster = sub.Spec.ClusterName
+			subscriber.cspOrgId = sub.Spec.CspOrgId
 		} else {
 			log.Info("There are no subscribers")
 			return nil

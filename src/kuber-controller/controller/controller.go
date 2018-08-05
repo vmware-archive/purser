@@ -82,7 +82,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "pod")
+		c := newResourceController(kubeClient, informer, "Pod")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -105,7 +105,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "node")
+		c := newResourceController(kubeClient, informer, "Node")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -113,7 +113,53 @@ func Start(conf *config.Config) {
 		go c.Run(stopCh)
 	}
 
-	if conf.Resource.Services {
+	if conf.Resource.PersistentVolume {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.CoreV1().PersistentVolumes().List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.CoreV1().PersistentVolumes().Watch(options)
+				},
+			},
+			&api_v1.PersistentVolume{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "PersistentVolume")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.PersistentVolumeClaim {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.CoreV1().PersistentVolumeClaims(meta_v1.NamespaceAll).List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.CoreV1().PersistentVolumeClaims(meta_v1.NamespaceAll).Watch(options)
+				},
+			},
+			&api_v1.PersistentVolumeClaim{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "PersistentVolumeClaim")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Service {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -128,7 +174,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "service")
+		c := newResourceController(kubeClient, informer, "Service")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -151,7 +197,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "replicaset")
+		c := newResourceController(kubeClient, informer, "ReplicaSet")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -174,7 +220,30 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "deployment")
+		c := newResourceController(kubeClient, informer, "Deployment")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.StatefulSet {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.AppsV1beta1().StatefulSets(meta_v1.NamespaceAll).List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.AppsV1beta1().StatefulSets(meta_v1.NamespaceAll).Watch(options)
+				},
+			},
+			&apps_v1beta1.StatefulSet{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "StatefulSet")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -197,7 +266,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "job")
+		c := newResourceController(kubeClient, informer, "Job")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -316,7 +385,7 @@ func (c *Controller) processItem(newEvent Event) error {
 	case "create":
 		str, _ := json.Marshal(obj)
 		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
-			ResourceType: newEvent.resourceType, Data: string(str)}
+			ResourceType: newEvent.resourceType, CloudType:"aws", Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	case "update":
@@ -325,7 +394,7 @@ func (c *Controller) processItem(newEvent Event) error {
 	case "delete":
 		str, _ := json.Marshal(obj)
 		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
-			ResourceType: newEvent.resourceType, Data: string(str)}
+			ResourceType: newEvent.resourceType, CloudType:"aws", Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	}

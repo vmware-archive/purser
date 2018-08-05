@@ -20,7 +20,7 @@ func init() {
 	setlogFile()
 	conf = &config.Config{}
 	//conf.Resource = config.Resource{Pod: true, Node:true, Services:true, ReplicaSet:true, Deployment:true, Job:true}
-	conf.Resource = config.Resource{Pod: true}
+	conf.Resource = config.Resource{StatefulSet:true}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BUFFER_SIZE, Mutex: &sync.Mutex{}}
 	// initialize client for api extension server
 	conf.Groupcrdclient, conf.Subscriberclient = controller.GetApiExtensionClient()
@@ -32,7 +32,7 @@ func setlogFile() {
 		log.Fatal(err)
 	}
 	log.SetOutput(f)
-	//log.SetOutput(os.Stdout)
+	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
 }
 

@@ -27,6 +27,7 @@ type Subscriber struct {
 type SubscriberSpec struct {
 	Name        string `json:"name"`
 	ClusterName string `json:"cluster"`
+	CspOrgId	string	`json:"cspOrgId"`
 	Url         string `json:"url"`
 	AuthType    string `json:"authType,omitempty"`
 	AuthToken   string `json:"authToken,omitempty"`
