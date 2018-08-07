@@ -205,6 +205,29 @@ func Start(conf *config.Config) {
 		go c.Run(stopCh)
 	}
 
+	if conf.Resource.DaemonSet {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return kubeClient.ExtensionsV1beta1().DaemonSets(meta_v1.NamespaceAll).List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return kubeClient.ExtensionsV1beta1().DaemonSets(meta_v1.NamespaceAll).Watch(options)
+				},
+			},
+			&ext_v1beta1.DaemonSet{},
+			0, //Skip resync
+			cache.Indexers{},
+		)
+
+		c := newResourceController(kubeClient, informer, "DaemonSet")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
 	if conf.Resource.Deployment {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{

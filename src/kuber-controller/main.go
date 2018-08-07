@@ -19,8 +19,9 @@ var subscriberclient *client.SubscriberCrdClient
 func init() {
 	setlogFile()
 	conf = &config.Config{}
-	//conf.Resource = config.Resource{Pod: true, Node:true, Services:true, ReplicaSet:true, Deployment:true, Job:true}
-	conf.Resource = config.Resource{StatefulSet:true}
+	//conf.Resource = config.Resource{Pod: true, Node:true, PersistentVolume:true, PersistentVolumeClaim:true,
+	//ReplicaSet:true, Deployment:true, StatefulSet:true}
+	conf.Resource = config.Resource{Pod:true}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BUFFER_SIZE, Mutex: &sync.Mutex{}}
 	// initialize client for api extension server
 	conf.Groupcrdclient, conf.Subscriberclient = controller.GetApiExtensionClient()

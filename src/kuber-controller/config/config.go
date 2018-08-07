@@ -16,6 +16,7 @@ type Resource struct {
 	StatefulSet           bool `json:"statefulset"`
 	Deployment            bool `json:"deployment"`
 	Job                   bool `json:"job"`
+	DaemonSet             bool `json:"daemonset"`
 }
 
 type Config struct {
