@@ -24,18 +24,14 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"kuber/client"
-	"kuber/controller"
+	"purser-plugin/client"
+	"purser-plugin/controller"
 	"strings"
 )
 
 // ClientSetInstance helps in accessing kubernetes apis through client.
 var ClientSetInstance *kubernetes.Clientset
 var crdclient  *client.Crdclient
-
-func main1()  {
-	getClusterSummary()
-}
 
 func main() {
 	inputs := os.Args[1:]
@@ -132,10 +128,10 @@ func init() {
 
 func printHelp() {
 	fmt.Printf("Try one of the following commands...\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get summary\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get resources namespace <Namespace>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get resources label <key=val>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost label <key=val>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost pod <pod name>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin kuber get cost node <node name>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get summary\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources namespace <Namespace>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources label <key=val>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>\n")
 }

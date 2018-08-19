@@ -23,7 +23,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"bytes"
-	"kuber-controller/config"
+	"purser-controller/config"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

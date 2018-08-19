@@ -25,8 +25,8 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"kuber/client"
-	"kuber/crd"
+	"purser-plugin/client"
+	"purser-plugin/crd"
 	"os"
 )
 

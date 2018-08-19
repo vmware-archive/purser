@@ -18,7 +18,7 @@
 package client
 
 import (
-	"kuber-controller/crd"
+	"purser-controller/crd"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -47,14 +47,6 @@ func (f *GroupCrdClient) CreateGroup(obj *crd.Group) (*crd.Group, error) {
 		Body(obj).Do().Into(&result)
 	return &result, err
 }
-
-/*func (f *GroupCrdClient) CreateSubscriber(obj *crd.Subscriber) (*crd.Subscriber, error) {
-	var result crd.Subscriber
-	err := f.cl.Post().
-		Namespace(f.ns).Resource(crd.SubscriberPlural).
-		Body(obj).Do().Into(&result)
-	return &result, err
-}*/
 
 func (f *GroupCrdClient) UpdateGroup(obj *crd.Group) (*crd.Group, error) {
 	var result crd.Group
@@ -90,15 +82,6 @@ func (f *GroupCrdClient) ListGroups(opts meta_v1.ListOptions) (*crd.GroupList, e
 		Do().Into(&result)
 	return &result, err
 }
-
-/*func (f *SubscriberCrdClient) ListSubscribers(opts meta_v1.ListOptions) (*crd.SubscriberList, error) {
-	var result crd.SubscriberList
-	err := f.cl.Get().
-		Namespace(f.ns).Resource(crd.SubscriberPlural).
-		VersionedParams(&opts, f.codec).
-		Do().Into(&result)
-	return &result, err
-}*/
 
 // Create a new List watch for our TPR
 func (f *GroupCrdClient) NewListWatchGroup() *cache.ListWatch {

@@ -28,8 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
-	//"kuber-controller/metrics"
-	"kuber/metrics"
+	"purser-plugin/metrics"
 )
 
 const (

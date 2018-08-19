@@ -1,5 +1,5 @@
-name: "kuber"
+name: "purser"
 shortDesc: "Cost Insight integration with kubernetes"
 longDesc: >
-  Kuber gives cost insights of kubernetes deployments.
-command: kuber $@
+  Purser gives cost insights of kubernetes deployments.
+command: purser $@

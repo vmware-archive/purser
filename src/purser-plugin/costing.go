@@ -19,7 +19,7 @@ package main
 
 import (
 	"fmt"
-	"kuber/metrics"
+	"purser-plugin/metrics"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/api/core/v1"
 )

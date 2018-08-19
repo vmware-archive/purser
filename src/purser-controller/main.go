@@ -14,18 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package main
 
 import (
-	"kuber-controller/controller"
-	"kuber-controller/config"
+	"purser-controller/controller"
+	"purser-controller/config"
 	log "github.com/Sirupsen/logrus"
 	"os"
-	"kuber-controller/buffering"
+	"purser-controller/buffering"
 	"sync"
-	"kuber-controller/client"
-	"kuber-controller/uploader"
+	"purser-controller/client"
+	"purser-controller/uploader"
 )
 
 var conf *config.Config

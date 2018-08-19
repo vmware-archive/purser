@@ -18,8 +18,8 @@
 package config
 
 import (
-	"kuber-controller/buffering"
-	"kuber-controller/client"
+	"purser-controller/buffering"
+	"purser-controller/client"
 )
 
 // Resource contains resource configuration

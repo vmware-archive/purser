@@ -1,4 +1,4 @@
-# Kuber extension for K8s
+# Purser extension for K8s
 
 Cost visbility for Kubernetes based Cloud Native Applications
 
@@ -10,21 +10,21 @@ high level and usually involves a lot of manual steps or custom scripting.
 Wouldn't it be great if you know the cost of you Kuberentes deployed applications, not matter the cloud of your choice? Don't you wish there was an easy way to
 incorporate your budgeting and cost savings at a level of control that was entirely based on application level components rather than infrastructure? 
 
-## What is Kuber
+## What is Purser
 
-Kuber provides cost visibility of services, microservices and applications deployed with Kubernetes in a cloud neutral manner. It does so at a granular level and
+Purser provides cost visibility of services, microservices and applications deployed with Kubernetes in a cloud neutral manner. It does so at a granular level and
 over time ranges that match with budget planning.
 
-Kuber is an extension to Kubernetes. More specifically, it is a tool interfacing with ``kubectl`` that helps you query for cost based on native Kubernetes artifacts
-as well as your own custom defined services. In addition, Kuber allows for alerting on budget adherence and helps enforce budgets and savings.
+Purser is an extension to Kubernetes. More specifically, it is a tool interfacing with ``kubectl`` that helps you query for cost based on native Kubernetes artifacts
+as well as your own custom defined services. In addition, Purser allows for alerting on budget adherence and helps enforce budgets and savings.
 
-Kuber currently supports Kubernetes deployments on Amazon Web Services. Support for VMware vSphere, Azure, Google Compute Engine are planned.
+Purser currently supports Kubernetes deployments on Amazon Web Services. Support for VMware vSphere, Azure, Google Compute Engine are planned.
 
 
 ## Features
 
 * Query cost associated with Kubernetes native groups
-* Extend Kuber with YAML based declarative custom service, microservice and application definitions
+* Extend Purser with YAML based declarative custom service, microservice and application definitions
 * Capability for control over time range for cost query
 * Capability for cost analysis based on resource Usage or Allocation
 * Visibility into Cost savings oppurtunities
@@ -33,7 +33,7 @@ Kuber currently supports Kubernetes deployments on Amazon Web Services. Support 
 
 ## Getting Started
 
-Instructions to install and start using Kuber plugin.
+Instructions to install and start using Purser plugin.
 
 ### Prerequisites
 
@@ -44,9 +44,9 @@ Instructions to install and start using Kuber plugin.
 
 #### Server side installation
 
-The following two steps installs kuber controller and custom resource definitions for user groups in kubernetes cluster.
+The following two steps installs purser controller and custom resource definitions for user groups in kubernetes cluster.
 
-1. Installing kuber custom controller
+1. Installing purser custom controller
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/custom_controller.yaml
     * kubectl apply -f custom_controller.yaml
 
@@ -54,7 +54,7 @@ The following two steps installs kuber controller and custom resource definition
     * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
     * kubectl create -f crd.yaml
     
-    Note: The above CRD is also created by kuber custom controller, if CRD is already by controller then kubectl displays resource already exist message.
+    Note: The above CRD is also created by purser custom controller, if CRD is already by controller then kubectl displays resource already exist message.
 
 #### Client side installation
 
@@ -70,7 +70,7 @@ The following two steps installs the necessary components on client side.
 
 ### Usage
 
-Once installed, Kuber is ready for use right away. You can query using native Kubernetes grouping artifacts
+Once installed, Purser is ready for use right away. You can query using native Kubernetes grouping artifacts
 
 **Examples:**
 
@@ -78,7 +78,7 @@ Once installed, Kuber is ready for use right away. You can query using native Ku
 1. Get cost of pods having label "app=vrbc-adapter"
 
 
-        $ kubectl kuber get cost label app=vrbc-adapter
+        $ kubectl purser get cost label app=vrbc-adapter
             ===Pods Cost Details===
             Pod Name:                     vrbc-adapter-statefulset-1-1-577-0
             Node:                         ip-172-20-40-248.ec2.internal
@@ -118,7 +118,7 @@ Once installed, Kuber is ready for use right away. You can query using native Ku
 
 2. Get cost of all nodes
 
-        kubectl kuber get cost node all
+        kubectl purser get cost node all
 
 
 Next, define higher level groupings to define your business, logical or application constructs
@@ -168,7 +168,7 @@ Query the cost of Cost Insight infrastructure deployed in "default" namespace
 
 ### Uninstalling
 
-Not convinced? Uninstalling cleans up everything Kuber and leaves your cluster in it's original state: [kuber_uninstall.sh] ()
+Not convinced? Uninstalling cleans up everything Purser and leaves your cluster in it's original state: [kuber_uninstall.sh] ()
 
 ## Enabling historic cost
 
