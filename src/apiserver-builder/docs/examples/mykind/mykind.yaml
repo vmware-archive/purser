@@ -1,7 +1,0 @@
-note: MyKind Example
-sample: |
-  apiVersion: kuber.kuber/v1
-  kind: MyKind
-  metadata:
-    name: mykind-example
-  spec:

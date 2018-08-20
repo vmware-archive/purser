@@ -2,4 +2,4 @@ name: "purser"
 shortDesc: "Cost Insight integration with kubernetes"
 longDesc: >
   Purser gives cost insights of kubernetes deployments.
-command: purser $@
+command: purser_plugin $@
