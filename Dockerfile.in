@@ -1,0 +1,13 @@
+FROM ARG_FROM
+
+MAINTAINER VMware <gurusreekanthc@vmware.com>
+
+ADD bin/ARG_ARCH/ARG_BIN /ARG_BIN
+
+#USER nobody:nobody
+
+#RUN touch log.txt
+
+#RUN chmod 0755 log.txt
+
+ENTRYPOINT ["/ARG_BIN"]
