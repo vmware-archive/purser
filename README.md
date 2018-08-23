@@ -47,11 +47,11 @@ Instructions to install and start using Purser plugin.
 The following two steps installs purser controller and custom resource definitions for user groups in kubernetes cluster.
 
 1. Installing purser custom controller
-    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/custom_controller.yaml
+    * wget https://github.com/vmware/purser/blob/master/custom_controller.yaml
     * kubectl apply -f custom_controller.yaml
 
 2. Installing CRDs(Custom Resource Definitions) for custom groups.
-    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/crd.yaml
+    * wget https://github.com/vmware/purser/blob/master/crd.yaml
     * kubectl create -f crd.yaml
     
     Note: The above CRD is also created by purser custom controller, if CRD is already by controller then kubectl displays resource already exist message.
@@ -61,12 +61,11 @@ The following two steps installs purser controller and custom resource definitio
 The following two steps installs the necessary components on client side.
 
 1. Downloading kubectl plugin yaml file
-    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/plugin.yaml
+    * wget https://github.com/vmware/purser/blob/master/plugin.yaml
     * copy the plugin.yaml file into one of the paths specified in `Plugin loader` section in [link](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/)
 
-2. Downloading kubectl plugin binary
-    * wget https://gitlab.eng.vmware.com/kuber/kuber-plugin/blob/master/bin/kuber
-    * export the path of above binary into PATH variable.
+2. Installing kubectl plugin binary
+    * Follow [CODECOMPILE.md](./docs/CODECOMPILE.md)
 
 ### Usage
 
@@ -165,14 +164,6 @@ Query the cost of Cost Insight infrastructure deployed in "default" namespace
 3. Get the cost of CI group
 
         kubectl get cost group CI
-
-### Uninstalling
-
-Not convinced? Uninstalling cleans up everything Purser and leaves your cluster in it's original state: [kuber_uninstall.sh] ()
-
-## Enabling historic cost
-
-## Utilization based cost
 
 
 
