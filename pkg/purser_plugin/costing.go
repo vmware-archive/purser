@@ -64,12 +64,6 @@ func GetPodsCostForLabel(label string) {
 	printPodsVerbose(pods)
 }
 
-/*func getClusterPods() {
-	pods := GetClusterPods()
-	fmt.Printf("Total number of pods = %d\n", len(pods))
-	//printPodsVerbose(pods)
-}*/
-
 func GetClusterSummary() {
 	pods := GetClusterPods()
 	podMetrics := metrics.CalculatePodStatsFromContainers(pods)
@@ -170,52 +164,6 @@ func GetSavings() {
 	fmt.Printf("   %-25s   %.2f\n", "Unused Capacity(GB):", bytesToGB(storageCapacity - pvcCapacity))
 	fmt.Printf("   %-25s   %.2f$\n", "Month To Date Savings:", mtdSaving)
 	fmt.Printf("   %-25s   %.2f$\n", "Projected Monthly Savings:", projectedSaving)
-
-	/*fmt.Printf("Compute:\n")
-	pods := GetClusterPods()
-	var ps = []*Pod{}
-
-	for _, p := range pods {
-		var temp Pod
-		temp.name = p.GetObjectMeta().GetName()
-		temp.nodeName = p.Spec.NodeName
-		j := 0
-		podVolumes := []*string{}
-		for j < len(p.Spec.Volumes) {
-			vol := p.Spec.Volumes[j]
-			if vol.PersistentVolumeClaim != nil {
-				podVolumes = append(podVolumes, &vol.PersistentVolumeClaim.ClaimName)
-			}
-			j++
-		}
-		temp.pvcs = podVolumes
-		ps = append(ps, &temp)
-	}
-
-	ps = getPodsComputeCost(ps)
-	totalPodCost := 0.0
-	for _, temp := range ps {
-		totalPodCost += temp.cost.cpuCost + temp.cost.memoryCost
-	}
-
-	/*podMetrics := metrics.CalculatePodStatsFromContainers(pods)
-	//fmt.Println(podMetrics)
-
-	var computeCost = 0.0
-	nodes := GetClusterNodes()
-	for _, node := range nodes {
-		instanceType := GetNodeType(node)
-		total, _, _ := getMonthToDateCostForInstanceType(instanceType)
-		computeCost = computeCost + total
-	}
-	nodeMetrics := metrics.CalculateNodeStats(nodes)
-	fmt.Printf("   %-25s   %d\n", "Unused CPU(vCPU):", nodeMetrics.CpuLimit.Value() - podMetrics.CpuRequest.Value())
-	fmt.Printf("   %-25s   %.2f\n", "Unused Memory(GB):", bytesToGB(nodeMetrics.MemoryLimit.Value()) -
-		bytesToGB(podMetrics.MemoryRequest.Value()))
-	mtdComputeSaving := computeCost - totalPodCost
-	projectedComputeSaving := projectToMonth(mtdSaving)
-	fmt.Printf("   %-25s   %.2f$\n", "Month To Date Savings:", mtdComputeSaving)
-	fmt.Printf("   %-25s   %.2f$\n", "Projected Monthly Savings:", projectedComputeSaving)*/
 }
 
 func GetPodCost(podName string) {

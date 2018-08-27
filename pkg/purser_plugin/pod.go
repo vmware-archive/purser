@@ -46,34 +46,6 @@ type Pod struct {
 	pvcs               []*string
 }
 
-func getPodsForLabel(label string) []Pod {
-	pods := []Pod{}
-	command := fmt.Sprintf(getPodsByLabel, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), label)
-	bytes := executeCommand(command)
-	json := string(bytes)
-	items := gjson.Get(json, "items")
-
-	items.ForEach(func(key, value gjson.Result) bool {
-		name := value.Get("metadata.name")
-		nodeName := value.Get("spec.nodeName")
-		pod := Pod{name: name.Str, nodeName: nodeName.Str}
-
-		podVolumes := []*string{}
-		volumes := value.Get("spec.volumes")
-		volumes.ForEach(func(volKey, volume gjson.Result) bool {
-			pvc := volume.Get("persistentVolumeClaim.claimName")
-			if pvc.Exists() {
-				podVolumes = append(podVolumes, &pvc.Str)
-			}
-			return true
-		})
-		pod.pvcs = podVolumes
-		pods = append(pods, pod)
-		return true
-	})
-	return pods
-}
-
 func getPodDetailsFromClient(podName string) *Pod {
 	pod, err := ClientSetInstance.CoreV1().Pods("default").Get(podName, metav1.GetOptions{})
 	if errors.IsNotFound(err) {

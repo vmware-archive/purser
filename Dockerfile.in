@@ -1,5 +1,7 @@
 FROM ARG_FROM
 
+#FROM ubuntu:14.04.1
+
 MAINTAINER VMware <gurusreekanthc@vmware.com>
 
 ADD bin/ARG_ARCH/ARG_BIN /ARG_BIN
@@ -9,5 +11,17 @@ ADD bin/ARG_ARCH/ARG_BIN /ARG_BIN
 #RUN touch log.txt
 
 #RUN chmod 0755 log.txt
+
+#RUN apt-get update
+
+#RUN apt-get install -y ca-certificates
+
+RUN set -ex \
+	&& apk add --no-cache --virtual .build-deps \
+		bash \
+		ca-certificates \
+		gcc \
+		musl-dev \
+		openssl
 
 ENTRYPOINT ["/ARG_BIN"]

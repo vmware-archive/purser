@@ -36,8 +36,6 @@ var subscriberclient *client.SubscriberCrdClient
 func init() {
 	setlogFile()
 	conf = &config.Config{}
-	//conf.Resource = config.Resource{Pod: true, Node:true, PersistentVolume:true, PersistentVolumeClaim:true,
-	//ReplicaSet:true, Deployment:true, StatefulSet:true}
 	conf.Resource = config.Resource{Pod:true, Node:true, PersistentVolume:true, PersistentVolumeClaim:true,ReplicaSet:true,
 	Deployment:true, StatefulSet:true, DaemonSet:true, Job:true, Service:true}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BUFFER_SIZE, Mutex: &sync.Mutex{}}
@@ -58,6 +56,4 @@ func setlogFile() {
 func main() {
 	go uploader.UploadData(conf)
 	controller.Start(conf)
-	//controller.CreateCRDDefinition()
-	// controller.TestCrdFlow()
 }

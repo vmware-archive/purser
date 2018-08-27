@@ -23,7 +23,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tidwall/gjson"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/api/core/v1"
@@ -52,16 +51,6 @@ type Node struct {
 	allocatedResources *Metric
 	podsResources      map[string]*Metric
 	cost               *Cost
-}
-
-func getNodeDetails(nodeName string) Node {
-	node := Node{}
-	command := fmt.Sprintf(getNodeByName, os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), nodeName)
-	bytes := executeCommand(command)
-	json := string(bytes)
-	node.name = nodeName
-	node.instanceType = gjson.Get(json, "metadata.labels.beta\\.kubernetes\\.io/instance-type").Str
-	return node
 }
 
 func getNodeDetailsFromClient(nodeName string) *Node {
