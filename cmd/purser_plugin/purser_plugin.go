@@ -22,16 +22,16 @@ import (
 	"fmt"
 	"os"
 
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	"strings"
+
 	"github.com/vmware/purser/pkg/purser_plugin"
 	"github.com/vmware/purser/pkg/purser_plugin/client"
 	"github.com/vmware/purser/pkg/purser_plugin/controller"
-	"strings"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
-
-var crdclient  *client.Crdclient
+var crdclient *client.Crdclient
 
 func main() {
 	inputs := os.Args[1:]
@@ -46,7 +46,7 @@ func main() {
 		} else {
 			printHelp()
 		}
-	} else if (len(inputs) == 4 && inputs[0] == "get" && inputs[1] == "resources") {
+	} else if len(inputs) == 4 && inputs[0] == "get" && inputs[1] == "resources" {
 		if inputs[2] == "namespace" {
 			group := controller.GetCrdByName(crdclient, inputs[3])
 			if group != nil {
@@ -55,7 +55,7 @@ func main() {
 				fmt.Printf("Group %s is not present\n", inputs[3])
 			}
 		} else if inputs[2] == "label" {
-			if (!strings.Contains(inputs[3], "=")) {
+			if !strings.Contains(inputs[3], "=") {
 				printHelp()
 			}
 			group := controller.GetCrdByName(crdclient, createGroupNameFromLabel(inputs[3]))
@@ -64,12 +64,32 @@ func main() {
 			} else {
 				fmt.Printf("Group %s is not present\n", inputs[3])
 			}
+		} else {
+			printHelp()
 		}
-	} else if (len(inputs) == 2 && inputs[0] == "get") {
+	} else if len(inputs) == 2 && inputs[0] == "get" {
 		if inputs[1] == "summary" {
 			purser_plugin.GetClusterSummary()
 		} else if inputs[1] == "savings" {
 			purser_plugin.GetSavings()
+		} else {
+			printHelp()
+		}
+	} else if len(inputs) == 2 && inputs[0] == "set" {
+		if inputs[1] == "user-costs" {
+			fmt.Printf("Enter CPU cost per cpu per hour: ")
+			var cpuCostPerCPUPerHour string
+			fmt.Scan(&cpuCostPerCPUPerHour)
+
+			fmt.Printf("Enter Memory cost per GB per hour: ")
+			var memCostPerGBPerHour string
+			fmt.Scan(&memCostPerGBPerHour)
+
+			fmt.Printf("Enter Storage cost per GB per hour: ")
+			var storageCostPerGBPerHour string
+			fmt.Scan(&storageCostPerGBPerHour)
+
+			purser_plugin.SaveUserCosts(cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour)
 		} else {
 			printHelp()
 		}
@@ -90,7 +110,7 @@ func createGroupNameFromLabel(input string) string {
 	return groupName
 }
 
-func main2()  {
+func main2() {
 	//controller.ListCrdInstances(crdclient)
 	groupName := "apundlik1"
 	group := controller.GetCrdByName(crdclient, groupName)
