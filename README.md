@@ -7,7 +7,7 @@ Cost visbility for Kubernetes based Cloud Native Applications
 Today, cost visibility in the world of Cloud Native Applications is very limited. It is mostly restricted to cost of cloud infrastructure at a
 high level and usually involves a lot of manual steps or custom scripting.
 
-Wouldn't it be great if you know the cost of you Kuberentes deployed applications, not matter the cloud of your choice? Don't you wish there was an easy way to
+Wouldn't it be great if you know the cost of you Kubernetes deployed applications, not matter the cloud of your choice? Don't you wish there was an easy way to
 incorporate your budgeting and cost savings at a level of control that was entirely based on application level components rather than infrastructure? 
 
 ## What is Purser
