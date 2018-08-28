@@ -28,27 +28,27 @@ import (
 const (
 	namespace                      = "default"
 	userCostsConfigMap             = "purser-user-costs"
-	defaultCPUCostPerCPUPerHour    = float64(0.024)
-	defaultMemCostPerGBPerHour     = float64(0.01)
-	defaultStorageCostPerGBPerHour = float64(0.0033)
+	defaultCPUCostPerCPUPerHour    = 0.024
+	defaultMemCostPerGBPerHour     = 0.01
+	defaultStorageCostPerGBPerHour = 0.00013888888
 )
 
 /*
-SaveUserCosts stores the cpu, memory and storage cost per unit per hour in the cluster as config maps.
+ SaveUserCosts stores the cpu, memory and storage cost per unit per hour in the cluster as config maps.
 */
 func SaveUserCosts(cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour string) bool {
 	cm, err := ClientSetInstance.CoreV1().ConfigMaps(namespace).Get(userCostsConfigMap, metav1.GetOptions{})
 	if err != nil {
 		// no configmap so create new one
-		mp := map[string]string{}
-		mp["cpuCostPerCPUPerHour"] = cpuCostPerCPUPerHour
-		mp["memCostPerGBPerHour"] = memCostPerGBPerHour
-		mp["storageCostPerGBPerHour"] = storageCostPerGBPerHour
+		costMap := map[string]string{}
+		costMap["cpuCostPerCPUPerHour"] = cpuCostPerCPUPerHour
+		costMap["memCostPerGBPerHour"] = memCostPerGBPerHour
+		costMap["storageCostPerGBPerHour"] = storageCostPerGBPerHour
 		cm := &v1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: userCostsConfigMap,
 			},
-			Data: mp,
+			Data: costMap,
 		}
 		_, err2 := ClientSetInstance.CoreV1().ConfigMaps(namespace).Create(cm)
 		if err2 != nil {
@@ -72,7 +72,7 @@ func SaveUserCosts(cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPe
 }
 
 /*
-GetUserCosts gives the cpu, memory and storage cost per unit per hour which are stored in the cluster as config maps.
+ GetUserCosts gives the cpu, memory and storage cost per unit per hour which are stored in the cluster as config maps.
 */
 func GetUserCosts() (float64, float64, float64) {
 	var cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour float64
@@ -83,30 +83,27 @@ func GetUserCosts() (float64, float64, float64) {
 		memCostPerGBPerHour = defaultMemCostPerGBPerHour
 		storageCostPerGBPerHour = defaultStorageCostPerGBPerHour
 	} else {
-		cpuCostPerCPUPerHour = strToFloat64(cm.Data["cpuCostPerCPUPerHour"])
-		if cpuCostPerCPUPerHour < 0.0 {
+		cpuCostPerCPUPerHour, err = strconv.ParseFloat(cm.Data["cpuCostPerCPUPerHour"], 64)
+		if err != nil {
+			fmt.Printf("Error converting cpuCostPerCPUPerHour string %s to float, rolling back to default value\n",
+				cm.Data["cpuCostPerCPUPerHour"])
 			cpuCostPerCPUPerHour = defaultCPUCostPerCPUPerHour
 		}
 
-		memCostPerGBPerHour = strToFloat64(cm.Data["memCostPerGBPerHour"])
-		if memCostPerGBPerHour < 0.0 {
+		memCostPerGBPerHour, err = strconv.ParseFloat(cm.Data["memCostPerGBPerHour"], 64)
+		if err != nil {
+			fmt.Printf("Error converting memCostPerGBPerHour string %s to float, rolling back to default value\n",
+				cm.Data["memCostPerGBPerHour"])
 			memCostPerGBPerHour = defaultMemCostPerGBPerHour
 		}
 
-		storageCostPerGBPerHour = strToFloat64(cm.Data["storageCostPerGBPerHour"])
-		if storageCostPerGBPerHour < 0.0 {
+		storageCostPerGBPerHour, err = strconv.ParseFloat(cm.Data["storageCostPerGBPerHour"], 64)
+		if err != nil {
+			fmt.Printf("Error converting storageCostPerGBPerHour string %s to float, rolling back to default value\n",
+				cm.Data["storageCostPerGBPerHour"])
 			storageCostPerGBPerHour = defaultStorageCostPerGBPerHour
 		}
 	}
 
 	return cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour
-}
-
-func strToFloat64(strNum string) float64 {
-	n, err := strconv.ParseFloat(strNum, 64)
-	if err != nil {
-		fmt.Printf("Error converting string %s to float\n", strNum)
-		return -1.0
-	}
-	return n
 }
