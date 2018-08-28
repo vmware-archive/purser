@@ -78,7 +78,7 @@ repo as the upstream remote repository.
 # (go to directory $GOPATH/src/github.com/vmware)
 cd $GOPATH/github.com/vmware
 # (clone the forked repository)
-go clone https://github.com/<your-username>/purser.git
+git clone https://github.com/<your-username>/purser.git
 # (go to purser directory)
 cd $GOPATH/src/github.com/vmware/purser
 # add upstream repository as the original purser repo)
