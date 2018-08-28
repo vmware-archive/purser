@@ -72,20 +72,26 @@ func main() {
 			purser_plugin.GetClusterSummary()
 		} else if inputs[1] == "savings" {
 			purser_plugin.GetSavings()
+		} else if inputs[1] == "user-costs" {
+			cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour := purser_plugin.GetUserCosts()
+			fmt.Printf("cpu cost per CPU per hour:\t %f$\nmem cost per GB per hour:\t %f$\nstorage cost per GB per hour:\t %f$\n",
+				cpuCostPerCPUPerHour,
+				memCostPerGBPerHour,
+				storageCostPerGBPerHour)
 		} else {
 			printHelp()
 		}
 	} else if len(inputs) == 2 && inputs[0] == "set" {
 		if inputs[1] == "user-costs" {
-			fmt.Printf("Enter CPU cost per cpu per hour: ")
+			fmt.Printf("Enter CPU cost per cpu per hour:\t ")
 			var cpuCostPerCPUPerHour string
 			fmt.Scan(&cpuCostPerCPUPerHour)
 
-			fmt.Printf("Enter Memory cost per GB per hour: ")
+			fmt.Printf("Enter Memory cost per GB per hour:\t ")
 			var memCostPerGBPerHour string
 			fmt.Scan(&memCostPerGBPerHour)
 
-			fmt.Printf("Enter Storage cost per GB per hour: ")
+			fmt.Printf("Enter Storage cost per GB per hour:\t ")
 			var storageCostPerGBPerHour string
 			fmt.Scan(&storageCostPerGBPerHour)
 
@@ -154,4 +160,6 @@ func printHelp() {
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser set user-costs\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get user-costs\n")
 }
