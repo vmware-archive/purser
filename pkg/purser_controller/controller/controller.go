@@ -18,9 +18,20 @@
 package controller
 
 import (
-	api_v1 "k8s.io/api/core/v1"
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/purser_controller/config"
+	"github.com/vmware/purser/pkg/purser_controller/eventprocessor"
+	"github.com/vmware/purser/pkg/purser_controller/utils"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
+	api_v1 "k8s.io/api/core/v1"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,16 +42,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	"github.com/vmware/purser/pkg/purser_controller/config"
-	"github.com/vmware/purser/pkg/purser_controller/utils"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-	log "github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/purser_controller/uploader"
-	"fmt"
-	"encoding/json"
 )
 
 type Controller struct {
@@ -76,7 +77,6 @@ func TestCrdFlow() {
 
 func Start(conf *config.Config) {
 
-	//var kubeClient kubernetes.Interface
 	var kubeClient *kubernetes.Clientset
 	_, err := rest.InClusterConfig()
 	if err != nil {
@@ -96,7 +96,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&api_v1.Pod{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -119,7 +119,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&api_v1.Node{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -142,7 +142,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&api_v1.PersistentVolume{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -165,7 +165,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&api_v1.PersistentVolumeClaim{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -188,7 +188,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&api_v1.Service{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -211,7 +211,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&ext_v1beta1.ReplicaSet{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -234,7 +234,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&ext_v1beta1.DaemonSet{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -257,7 +257,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&apps_v1beta1.Deployment{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -280,7 +280,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&apps_v1beta1.StatefulSet{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -303,7 +303,7 @@ func Start(conf *config.Config) {
 				},
 			},
 			&batch_v1.Job{},
-			0, //Skip resync
+			0,
 			cache.Indexers{},
 		)
 
@@ -345,12 +345,11 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 			}*/
 		},
 		DeleteFunc: func(obj interface{}) {
-			log.Printf("Delete object: %s\n", obj)
+			//log.Printf("Delete object: %s\n", obj)
 			newEvent.key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 			newEvent.eventType = "delete"
 			newEvent.resourceType = resourceType
 			newEvent.data = obj
-			newEvent.namespace = utils.GetObjectMetaData(obj).Namespace
 			log.Printf("Processing delete to %v: %s", resourceType, newEvent.key)
 			if err == nil {
 				queue.Add(newEvent)
@@ -426,7 +425,7 @@ func (c *Controller) processItem(newEvent Event) error {
 	switch newEvent.eventType {
 	case "create":
 		str, _ := json.Marshal(obj)
-		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
+		payload := &eventprocessor.Payload{Key: newEvent.key, EventType: newEvent.eventType,
 			ResourceType: newEvent.resourceType, CloudType: "aws", Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
@@ -435,7 +434,7 @@ func (c *Controller) processItem(newEvent Event) error {
 		return nil
 	case "delete":
 		str, _ := json.Marshal(newEvent.data)
-		payload := &uploader.Payload{Key: newEvent.key, EventType: newEvent.eventType, Namespace: newEvent.namespace,
+		payload := &eventprocessor.Payload{Key: newEvent.key, EventType: newEvent.eventType,
 			ResourceType: newEvent.resourceType, CloudType: "aws", Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
