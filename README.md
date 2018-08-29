@@ -117,6 +117,10 @@ The following two steps installs purser controller and custom resource definitio
 1. Copy the [plugin.yaml](../plugin.yaml) into one of the paths specified under 
    section [Installing kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/)
 
+#### Uninstallation
+
+1. Uninstall the controller in the cluster using `kubectl delete -f custom_controller.yaml`
+
 
 ### Usage
 
