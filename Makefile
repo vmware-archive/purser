@@ -1,3 +1,10 @@
+travis-build: install-plugin install-controller
+
+install-plugin:
+	go install github.com/vmware/purser/cmd/purser_plugin
+
+install-controller: build
+
 # The binary to build (just the basename).
 BIN := purser_controller
 

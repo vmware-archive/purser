@@ -1,4 +1,5 @@
 # Purser extension for K8s
+[![Build Status](https://travis-ci.org/vmware/purser.svg?branch=master)](https://travis-ci.org/vmware/purser)
 
 Cost visbility for Kubernetes based Cloud Native Applications
 
