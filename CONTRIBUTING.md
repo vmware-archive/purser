@@ -67,7 +67,7 @@ Visit https://cla.vmware.com and follow steps presented there.
 Navigate to the [Purser repo on
 GitHub](https://github.com/vmware/purser) and use the 'Fork' button to
 create a forked repository under your GitHub account.  This gives you a copy 
-of the repo for pull requests back to purser in https://github.com/<your-username>/purser
+of the repo for pull requests back to purser in https://github.com/your-github-id/purser
 
 ### Clone and Set Upstream Remote
 
@@ -78,7 +78,7 @@ repo as the upstream remote repository.
 # (go to directory $GOPATH/src/github.com/vmware)
 cd $GOPATH/github.com/vmware
 # (clone the forked repository)
-git clone https://github.com/<your-username>/purser.git
+git clone https://github.com/<your-github-id>/purser.git
 # (go to purser directory)
 cd $GOPATH/src/github.com/vmware/purser
 # add upstream repository as the original purser repo)
@@ -139,7 +139,7 @@ for why this is important.
 
 To contribute your feature, create a pull request by going to the [purser upstream repo on GitHub](https://github.com/vmware/purser) and pressing the 'New pull request' button. 
 
-Select 'compare across forks' and select <your-username>/purser as 'head fork'
+Select 'compare across forks' and select your-github-id/purser as 'head fork'
 and foo-api-fix-22 as the 'compare' branch.  Leave the base fork as 
 vmware/purser and master. 
 
