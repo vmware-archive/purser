@@ -18,20 +18,23 @@
 package controller
 
 import (
+	"flag"
+	"time"
+
+	"encoding/json"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/purser_controller/client"
+	"github.com/vmware/purser/pkg/purser_controller/crd"
+	"github.com/vmware/purser/pkg/purser_controller/eventprocessor"
+	"github.com/vmware/purser/pkg/purser_controller/metrics"
+	api_v1 "k8s.io/api/core/v1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api_v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"github.com/vmware/purser/pkg/purser_controller/client"
-	"github.com/vmware/purser/pkg/purser_controller/crd"
-	"github.com/vmware/purser/pkg/purser_controller/metrics"
-	"time"
-	log "github.com/Sirupsen/logrus"
-	"strings"
-	"flag"
 )
 
 const environment = "dev"
@@ -173,8 +176,6 @@ func ListSubscriberCrdInstances(crdclient *client.SubscriberCrdClient) {
 	log.Printf("List:\n%s\n", items)
 }
 
-
-
 func GetGroupCrdByName(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
 	group, err := crdclient.GetGroup(groupName)
 
@@ -188,116 +189,100 @@ func GetGroupCrdByName(crdclient *client.GroupCrdClient, groupName string, group
 	}
 }
 
-func GetAllCustomGroups(crdclient *client.GroupCrdClient) []crd.Group {
+func GetAllGroups(crdclient *client.GroupCrdClient) []crd.Group {
 	items, err := crdclient.ListGroups(meta_v1.ListOptions{})
 	if err != nil {
-		panic(err)
+		log.Error("Error while fetching groups ", err)
+		return nil
 	}
-	userGroups := []crd.Group{}
-	for _, group := range items.Items {
-		if group.Spec.CustomGroup {
-			userGroups = append(userGroups, group)
-		}
-	}
-	return userGroups
+	return items.Items
 }
 
-func UpdateCustomGroupCrd(crdclient *client.GroupCrdClient, metric *metrics.Metrics, pod *api_v1.Pod) {
-	log.Printf("Started updating User Created Groups for pod {} update.\n", pod.Name)
-	userGroups := GetAllCustomGroups(crdclient)
-	for _, group := range userGroups {
-		for gkey, gval := range group.Spec.Labels {
-			for pkey, pval := range pod.Labels {
-				if gkey == pkey && gval == pval {
-					log.Printf("Updating the user group {} with pod {} details\n", group.Spec.Name, pod.Name)
+func UpdateCustomGroups(crdclient *client.GroupCrdClient, payloads []*interface{}) {
+	groups := GetAllGroups(crdclient)
+	if groups == nil {
+		return
+	}
 
-					existingPods := group.Spec.PodsMetrics
+	for _, event := range payloads {
 
-					if existingPods == nil {
-						existingPods = map[string]*metrics.Metrics{}
+		payload := (*event).(eventprocessor.Payload)
+		if payload.ResourceType != "Pod" {
+			continue
+		}
+		pod := api_v1.Pod{}
+		json.Unmarshal([]byte(payload.Data), &pod)
+
+		log.Info("Started updating User Created Groups for pod {} update.\n", pod.Name)
+
+		for _, group := range groups {
+			if isPodBelongsToGroup(&group, &pod) {
+				log.Info("Updating the user group {} with pod {} details\n", group.Spec.Name, pod.Name)
+
+				podKey := pod.GetObjectMeta().GetNamespace() + ":" + pod.GetObjectMeta().GetName()
+				podDetails := group.Spec.PodsDetails
+
+				if podDetails == nil {
+					podDetails = map[string]*crd.PodDetails{}
+				}
+
+				existingPodDetails := podDetails[podKey]
+				if existingPodDetails != nil {
+					if payload.EventType == "create" {
+						// do nothing.
+					} else if payload.EventType == "delete" {
+						existingPodDetails.EndTime = pod.GetObjectMeta().GetCreationTimestamp()
 					}
-
-					existingPods[pod.Name] = metric
-					group.Spec.PodsMetrics = existingPods
-					group.Spec.AllocatedResources = calculatedAggregatedPodMetric(existingPods)
-
-					//fmt.Println(group)
-					_, err := crdclient.UpdateGroup(&group)
-
-					if err != nil {
-						log.Printf("There is a panic while updating the crd for group = %s\n", group.Name)
-						panic(err)
-					} else {
-						log.Printf("Updating the crd for group = %s is successful\n", group.Name)
+				} else {
+					if payload.EventType == "create" {
+						newPodDetails := crd.PodDetails{Name: pod.Name, StartTime: pod.GetCreationTimestamp()}
+						containers := []*crd.Container{}
+						for _, cont := range pod.Spec.Containers {
+							container := crd.Container{Name: cont.Name}
+							metrics := metrics.Metrics{}
+							if cont.Resources.Requests != nil {
+								metrics.CpuRequest = cont.Resources.Requests.Cpu()
+								metrics.MemoryRequest = cont.Resources.Requests.Memory()
+							}
+							if cont.Resources.Limits != nil {
+								metrics.CpuLimit = cont.Resources.Limits.Cpu()
+								metrics.MemoryLimit = cont.Resources.Limits.Memory()
+							}
+							container.Metrics = &metrics
+							containers = append(containers, &container)
+						}
+						newPodDetails.Containers = containers
+						podDetails[podKey] = &newPodDetails
+					} else if payload.EventType == "delete" {
+						// do nothing.
 					}
 				}
 			}
 		}
-	}
-	log.Printf("Completed updating User Created Groups for pod {} update.\n", pod.Name)
-}
-
-func UpdateNamespaceGroupCrd(crdclient *client.GroupCrdClient, groupName string, groupType string, pod string,
-	metric *metrics.Metrics) {
-
-	group := GetGroupCrdByName(crdclient, groupName, groupType)
-	existingPods := group.Spec.PodsMetrics
-
-	if existingPods == nil {
-		existingPods = map[string]*metrics.Metrics{}
+		log.Info("Completed updating User Created Groups for pod {} update.\n", pod.Name)
 	}
 
-	existingPods[pod] = metric
-	group.Spec.PodsMetrics = existingPods
-	group.Spec.AllocatedResources = calculatedAggregatedPodMetric(existingPods)
-	group.Name = groupName
-
-	//fmt.Println(group)
-	_, err := crdclient.UpdateGroup(group)
-
-	if err != nil {
-		log.Printf("There is a panic while updating the crd for group = %s\n", groupName)
-		panic(err)
-	} else {
-		log.Printf("Updating the crd for group = %s is successful\n", groupName)
-	}
-}
-
-func createGroupNameFromLabel(key string, val string) string {
-	groupName := key + "." + val
-	if strings.Contains(groupName, "/") {
-		groupName = strings.Replace(groupName, "/", "-", -1)
-	}
-	groupName = strings.ToLower(groupName)
-	return groupName
-}
-
-func UpdateLabelGroupCrd(crdclient *client.GroupCrdClient, metric *metrics.Metrics, pod *api_v1.Pod) {
-	for key, val := range pod.Labels {
-		groupName := createGroupNameFromLabel(key, val)
-		//fmt.Printf("Label group = %s\n", groupName)
-		group := GetGroupCrdByName(crdclient, groupName, "label")
-		existingPods := group.Spec.PodsMetrics
-
-		if existingPods == nil {
-			existingPods = map[string]*metrics.Metrics{}
-		}
-
-		existingPods[pod.Name] = metric
-		group.Spec.PodsMetrics = existingPods
-		group.Spec.AllocatedResources = calculatedAggregatedPodMetric(existingPods)
-		group.Name = groupName
-
-		//fmt.Println(group)
-		_, err := crdclient.UpdateGroup(group)
+	// update all the groups
+	for _, group := range groups {
+		_, err := crdclient.UpdateGroup(&group)
 
 		if err != nil {
-			log.Printf("There is a panic while updating the crd for group = %s\n", groupName)
-			panic(err)
+			log.Error("There is an error while updating the crd for group = %s\n", group.Name)
 		} else {
-			log.Printf("Updating the crd for group = %s is successful\n", groupName)
+			log.Info("Updating the crd for group = %s is successful\n", group.Name)
 		}
 	}
+}
+
+func isPodBelongsToGroup(group *crd.Group, pod *api_v1.Pod) bool {
+	for groupLabelKey, groupLabelVal := range group.Spec.Labels {
+		for podLabelKey, podLabelVal := range pod.Labels {
+			if groupLabelKey == podLabelKey && groupLabelVal == podLabelVal {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func calculatedAggregatedPodMetric(met map[string]*metrics.Metrics) *metrics.Metrics {
