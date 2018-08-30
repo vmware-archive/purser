@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-package uploader
+package eventprocessor
 
 import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/purser_controller/config"
@@ -39,65 +38,48 @@ type PayloadWrapper struct {
 type Payload struct {
 	Key          string `json:"key"`
 	EventType    string `json:"eventType"`
-	Namespace    string `json:"namespace"`
 	ResourceType string `json:"resourceType"`
 	CloudType    string `json:"cloudType"`
 	Data         string `json:"data"`
 }
 
-func UploadData(conf *config.Config) {
+func NotifySubscribers(payload []*interface{}, subscribers []*subscriber) {
+	if subscribers == nil {
+		return
+	}
 
-	subscriber := getSubscriber(conf)
-
-	for true {
-		conf.RingBuffer.PrintDetails()
-
-		for true {
-			data, size := conf.RingBuffer.ReadN(READ_SIZE)
-
-			if size == 0 {
-				log.Debug("There is no data to upload.")
-				break
-			}
-
-			resp, err := SendData(data, subscriber)
-			if err != nil {
-				log.Warn("Error while sending data ", err)
-				break
-			}
-
-			if resp != nil && resp.StatusCode == 200 {
-				log.Info("Data is posted successfully")
-				conf.RingBuffer.RemoveN(size)
-				conf.RingBuffer.PrintDetails()
-			} else {
-				if resp != nil {
-					log.Error("Data posting is failed with error ", resp.StatusCode)
-				} else {
-					log.Error("")
-				}
-				break
-			}
-		}
-		time.Sleep(10 * time.Second)
+	for _, subscriber := range subscribers {
+		SendData(payload, subscriber)
 	}
 }
 
-func SendData(payload []*interface{}, subscriber *subscriber) (*http.Response, error) {
-	payloadWrapper := PayloadWrapper{Data: payload, CspOrgId: subscriber.cspOrgId, Cluster: subscriber.cluster}
+func SendData(payload []*interface{}, subscriber *subscriber) {
+	payloadWrapper := PayloadWrapper{Data: payload, CspOrgId: subscriber.orgId, Cluster: subscriber.cluster}
 	jsonStr, _ := json.Marshal(payloadWrapper)
-	//log.Info(jsonStr)
+
 	req, err := http.NewRequest("POST", subscriber.url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		return nil, err
+		log.Error("Error while creating the http request ", err)
+		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 	setAuthHeaders(req, subscriber)
 	client := &http.Client{}
-	return client.Do(req)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Error("Error while sending data to subscriber "+subscriber.url, err)
+	} else if resp != nil {
+		if resp.StatusCode == 200 {
+			log.Info("Data is posted successfully for subscriber " + subscriber.url)
+		} else {
+			log.Info("Data posting failed for subscriber " + subscriber.url + " " + resp.Status)
+		}
+	}
 }
 
 func setAuthHeaders(r *http.Request, subscriber *subscriber) {
+	//TODO: add support for other auth types.
 	if subscriber.authType != "" {
 		if subscriber.authType == "access-token" {
 			r.Header.Set("Authorization", "Bearer "+subscriber.authCode)
@@ -110,29 +92,30 @@ type subscriber struct {
 	authType string
 	authCode string
 	cluster  string
-	cspOrgId string
+	orgId    string
 }
 
-func getSubscriber(conf *config.Config) *subscriber {
-	subscriber := &subscriber{}
+func getSubscribers(conf *config.Config) []*subscriber {
+	subscribers := []*subscriber{}
 	list, err := conf.Subscriberclient.ListSubscriber(meta_v1.ListOptions{})
 	if err != nil {
 		log.Error("Error while fetching subscribers list ", err)
 		return nil
 	} else {
 		if list != nil && len(list.Items) > 0 {
-			sub := list.Items[0]
-			//subscriber.url = sub.Spec.Url
-			subscriber.url = "http://localhost:8080/purser/inventory"
-			subscriber.authType = sub.Spec.AuthType
-			subscriber.authCode = sub.Spec.AuthToken
-			subscriber.cluster = sub.Spec.ClusterName
-			subscriber.cspOrgId = sub.Spec.CspOrgId
+			for _, sub := range list.Items {
+				subscriber := &subscriber{}
+				subscriber.url = sub.Spec.Url
+				subscriber.authType = sub.Spec.AuthType
+				subscriber.authCode = sub.Spec.AuthToken
+				subscriber.cluster = sub.Spec.ClusterName
+				subscriber.orgId = sub.Spec.OrgId
+				subscribers = append(subscribers, subscriber)
+			}
 		} else {
 			log.Info("There are no subscribers")
 			return nil
 		}
 	}
-	log.Info(*subscriber)
-	return subscriber
+	return subscribers
 }
