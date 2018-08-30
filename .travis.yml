@@ -1,0 +1,16 @@
+services:
+  - docker
+
+language: go
+
+os:
+  - linux
+
+go:
+  - "1.10"
+
+script:
+  - make travis-build
+
+notifications:
+  email: false

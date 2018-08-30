@@ -26,7 +26,7 @@ import (
 	"github.com/vmware/purser/pkg/purser_controller/client"
 	"github.com/vmware/purser/pkg/purser_controller/config"
 	"github.com/vmware/purser/pkg/purser_controller/controller"
-	"github.com/vmware/purser/pkg/purser_controller/uploader"
+	"github.com/vmware/purser/pkg/purser_controller/eventprocessor"
 )
 
 var conf *config.Config
@@ -55,6 +55,6 @@ func setlogFile() {
 }
 
 func main() {
-	go uploader.UploadData(conf)
+	go eventprocessor.ProcessEvents(conf)
 	controller.Start(conf)
 }

@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kuber-controller
+  name: purser-controller
   labels:
-    app: kuber
+    app: purser
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kuber
+      app: purser
   template:
     metadata:
       labels:
-        app: kuber
+        app: purser
     spec:
       containers:
-      - name: kuber-controller
-        image: gurusreekanth/kuber-controller-amd64:1.0.0
+      - name: purser-controller
+        image: gurusreekanth/purser_controller-amd64:1.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
