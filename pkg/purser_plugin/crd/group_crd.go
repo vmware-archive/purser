@@ -20,6 +20,7 @@ package crd
 import (
 	"reflect"
 
+	"github.com/vmware/purser/pkg/purser_plugin/metrics"
 	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,7 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
-	"github.com/vmware/purser/pkg/purser_plugin/metrics"
 )
 
 const (

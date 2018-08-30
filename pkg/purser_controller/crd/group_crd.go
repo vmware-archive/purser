@@ -18,14 +18,15 @@
 package crd
 
 import (
+	"reflect"
+
+	"github.com/vmware/purser/pkg/purser_controller/metrics"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
-	"github.com/vmware/purser/pkg/purser_controller/metrics"
-	"reflect"
 )
 
 const (
@@ -39,8 +40,8 @@ const (
 type Group struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
-	Spec   GroupSpec   `json:"spec"`
-	Status GroupStatus `json:"status,omitempty"`
+	Spec               GroupSpec   `json:"spec"`
+	Status             GroupStatus `json:"status,omitempty"`
 }
 
 type GroupSpec struct {
@@ -60,7 +61,7 @@ type GroupStatus struct {
 type GroupList struct {
 	meta_v1.TypeMeta `json:",inline"`
 	meta_v1.ListMeta `json:"metadata"`
-	Items []Group    `json:"items"`
+	Items            []Group `json:"items"`
 }
 
 // Create a  Rest client with the new CRD Schema

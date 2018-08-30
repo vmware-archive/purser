@@ -18,20 +18,21 @@
 package controller
 
 import (
+	"flag"
+	"strings"
+	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/purser_controller/client"
+	"github.com/vmware/purser/pkg/purser_controller/crd"
+	"github.com/vmware/purser/pkg/purser_controller/metrics"
+	api_v1 "k8s.io/api/core/v1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api_v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"github.com/vmware/purser/pkg/purser_controller/client"
-	"github.com/vmware/purser/pkg/purser_controller/crd"
-	"github.com/vmware/purser/pkg/purser_controller/metrics"
-	"time"
-	log "github.com/Sirupsen/logrus"
-	"strings"
-	"flag"
 )
 
 const environment = "dev"
@@ -172,8 +173,6 @@ func ListSubscriberCrdInstances(crdclient *client.SubscriberCrdClient) {
 	}
 	log.Printf("List:\n%s\n", items)
 }
-
-
 
 func GetGroupCrdByName(crdclient *client.GroupCrdClient, groupName string, groupType string) *crd.Group {
 	group, err := crdclient.GetGroup(groupName)

@@ -18,9 +18,20 @@
 package controller
 
 import (
-	api_v1 "k8s.io/api/core/v1"
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/purser_controller/config"
+	"github.com/vmware/purser/pkg/purser_controller/uploader"
+	"github.com/vmware/purser/pkg/purser_controller/utils"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
+	api_v1 "k8s.io/api/core/v1"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,16 +42,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	"github.com/vmware/purser/pkg/purser_controller/config"
-	"github.com/vmware/purser/pkg/purser_controller/utils"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-	log "github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/purser_controller/uploader"
-	"fmt"
-	"encoding/json"
 )
 
 type Controller struct {

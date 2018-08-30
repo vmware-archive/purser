@@ -18,13 +18,14 @@
 package crd
 
 import (
+	"reflect"
+
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
-	"reflect"
 )
 
 const (
@@ -35,16 +36,16 @@ const (
 )
 
 type Subscriber struct {
-	meta_v1.TypeMeta        `json:",inline"`
-	meta_v1.ObjectMeta      `json:"metadata"`
-	Spec   SubscriberSpec   `json:"spec"`
-	Status SubscriberStatus `json:"status,omitempty"`
+	meta_v1.TypeMeta   `json:",inline"`
+	meta_v1.ObjectMeta `json:"metadata"`
+	Spec               SubscriberSpec   `json:"spec"`
+	Status             SubscriberStatus `json:"status,omitempty"`
 }
 
 type SubscriberSpec struct {
 	Name        string `json:"name"`
 	ClusterName string `json:"cluster"`
-	CspOrgId	string	`json:"cspOrgId"`
+	CspOrgId    string `json:"cspOrgId"`
 	Url         string `json:"url"`
 	AuthType    string `json:"authType,omitempty"`
 	AuthToken   string `json:"authToken,omitempty"`
@@ -56,9 +57,9 @@ type SubscriberStatus struct {
 }
 
 type SubscriberList struct {
-	meta_v1.TypeMeta   `json:",inline"`
-	meta_v1.ListMeta   `json:"metadata"`
-	Items []Subscriber `json:"items"`
+	meta_v1.TypeMeta `json:",inline"`
+	meta_v1.ListMeta `json:"metadata"`
+	Items            []Subscriber `json:"items"`
 }
 
 // Create a  Rest client with the new CRD Schema

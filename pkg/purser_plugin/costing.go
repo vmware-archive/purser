@@ -19,9 +19,10 @@ package purser_plugin
 
 import (
 	"fmt"
+
 	"github.com/vmware/purser/pkg/purser_plugin/metrics"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -82,9 +83,8 @@ func GetClusterSummary() {
 	fmt.Printf("   %-25s   %.2f$\n", "Cost:", computeCost)
 	nodeMetrics := metrics.CalculateNodeStats(nodes)
 	fmt.Printf("   Total Capacity:\n")
-	fmt.Printf("      %-25s%d\n","Cpu(vCPU):", nodeMetrics.CpuLimit.Value())
-	fmt.Printf("      %-25s%.2f\n","Memory(GB):", bytesToGB(nodeMetrics.MemoryLimit.Value()))
-
+	fmt.Printf("      %-25s%d\n", "Cpu(vCPU):", nodeMetrics.CpuLimit.Value())
+	fmt.Printf("      %-25s%.2f\n", "Memory(GB):", bytesToGB(nodeMetrics.MemoryLimit.Value()))
 
 	fmt.Printf("   Provisioned Resources:\n")
 	//fmt.Printf("      %-25s%d\n", "Cpu Limit(vCPU):", podMetrics.CpuLimit.Value())
@@ -108,11 +108,10 @@ func GetClusterSummary() {
 	//fmt.Printf("   %-25s   %.2f$\n", "PVC Cost:", pvcCost)
 	fmt.Printf("   %-25s   %.2f\n", "PV Claim Capacity(GB):", bytesToGB(pvcCapacity))
 
-
 	fmt.Printf("Cost:\n")
 	fmt.Printf("   %-25s   %.2f$\n", "Compute cost:", computeCost)
 	fmt.Printf("   %-25s   %.2f$\n", "Storage cost:", storageCost)
-	fmt.Printf("   %-25s   %.2f$\n", "Total cost:", computeCost + storageCost)
+	fmt.Printf("   %-25s   %.2f$\n", "Total cost:", computeCost+storageCost)
 }
 
 func bytesToGB(val int64) float64 {
@@ -121,7 +120,7 @@ func bytesToGB(val int64) float64 {
 
 func getPvCostAndCapacity(pvs []v1.PersistentVolume) (float64, int64) {
 	var storageCost = 0.0
-	var storageCapacity =  resource.Quantity{}
+	var storageCapacity = resource.Quantity{}
 	for _, pv := range pvs {
 		storageClass := pv.Spec.StorageClassName
 		total := getMonthToDateCostForStorageClass(storageClass)
@@ -160,8 +159,8 @@ func GetSavings() {
 	mtdSaving := storageCost - pvcCost
 	projectedSaving := projectToMonth(mtdSaving)
 
-	fmt.Printf("   %-25s   %d\n", "Unused Volumes:", len(pvs) - len(pvcs))
-	fmt.Printf("   %-25s   %.2f\n", "Unused Capacity(GB):", bytesToGB(storageCapacity - pvcCapacity))
+	fmt.Printf("   %-25s   %d\n", "Unused Volumes:", len(pvs)-len(pvcs))
+	fmt.Printf("   %-25s   %.2f\n", "Unused Capacity(GB):", bytesToGB(storageCapacity-pvcCapacity))
 	fmt.Printf("   %-25s   %.2f$\n", "Month To Date Savings:", mtdSaving)
 	fmt.Printf("   %-25s   %.2f$\n", "Projected Monthly Savings:", projectedSaving)
 }
@@ -188,7 +187,7 @@ func getPodsCost(pods []*Pod) []*Pod {
 	return pods
 }
 
-func getPodsComputeCost(pods []*Pod) []*Pod  {
+func getPodsComputeCost(pods []*Pod) []*Pod {
 	nodes := map[string]*Node{}
 	nodes = collectNodes(nodes)
 
@@ -199,7 +198,7 @@ func getPodsComputeCost(pods []*Pod) []*Pod  {
 		totalComputeCost, cpuCost, memoryCost := getMonthToDateCostForInstanceType(node.instanceType)
 
 		podCost := Cost{}
-		podCost.totalCost = pods[i].nodeCostPercentage*totalComputeCost
+		podCost.totalCost = pods[i].nodeCostPercentage * totalComputeCost
 		podCost.cpuCost = pods[i].nodeCostPercentage * cpuCost
 		podCost.memoryCost = pods[i].nodeCostPercentage * memoryCost
 		pods[i].cost = &podCost

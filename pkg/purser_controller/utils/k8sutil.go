@@ -18,6 +18,8 @@
 package utils
 
 import (
+	"os"
+
 	"github.com/Sirupsen/logrus"
 	apps_v1 "k8s.io/api/apps/v1"
 	batch_v1 "k8s.io/api/batch/v1"
@@ -27,7 +29,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
 )
 
 // GetClient returns a k8s clientset to the request from inside of cluster

@@ -18,11 +18,12 @@
 package uploader
 
 import (
-	"time"
-	log "github.com/Sirupsen/logrus"
+	"bytes"
 	"encoding/json"
 	"net/http"
-	"bytes"
+	"time"
+
+	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/purser_controller/config"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -83,7 +84,7 @@ func UploadData(conf *config.Config) {
 }
 
 func SendData(payload []*interface{}, subscriber *subscriber) (*http.Response, error) {
-	payloadWrapper := PayloadWrapper{Data: payload, CspOrgId:subscriber.cspOrgId, Cluster:subscriber.cluster}
+	payloadWrapper := PayloadWrapper{Data: payload, CspOrgId: subscriber.cspOrgId, Cluster: subscriber.cluster}
 	jsonStr, _ := json.Marshal(payloadWrapper)
 	//log.Info(jsonStr)
 	req, err := http.NewRequest("POST", subscriber.url, bytes.NewBuffer(jsonStr))

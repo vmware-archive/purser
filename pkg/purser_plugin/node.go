@@ -23,9 +23,9 @@ import (
 	"strconv"
 	"strings"
 
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/api/core/v1"
 )
 
 // Metric details
@@ -92,7 +92,7 @@ func getAllNodeDetailsFromClient() []*Node {
 	return allNodes
 }
 
-func GetClusterNodes() []v1.Node{
+func GetClusterNodes() []v1.Node {
 	nodes, err := ClientSetInstance.CoreV1().Nodes().List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())

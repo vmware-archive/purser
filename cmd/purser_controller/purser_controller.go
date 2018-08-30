@@ -18,13 +18,14 @@
 package main
 
 import (
-	"github.com/vmware/purser/pkg/purser_controller/controller"
-	"github.com/vmware/purser/pkg/purser_controller/config"
-	log "github.com/Sirupsen/logrus"
 	"os"
-	"github.com/vmware/purser/pkg/purser_controller/buffering"
 	"sync"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/purser_controller/buffering"
 	"github.com/vmware/purser/pkg/purser_controller/client"
+	"github.com/vmware/purser/pkg/purser_controller/config"
+	"github.com/vmware/purser/pkg/purser_controller/controller"
 	"github.com/vmware/purser/pkg/purser_controller/uploader"
 )
 
@@ -36,8 +37,8 @@ var subscriberclient *client.SubscriberCrdClient
 func init() {
 	setlogFile()
 	conf = &config.Config{}
-	conf.Resource = config.Resource{Pod:true, Node:true, PersistentVolume:true, PersistentVolumeClaim:true,ReplicaSet:true,
-	Deployment:true, StatefulSet:true, DaemonSet:true, Job:true, Service:true}
+	conf.Resource = config.Resource{Pod: true, Node: true, PersistentVolume: true, PersistentVolumeClaim: true, ReplicaSet: true,
+		Deployment: true, StatefulSet: true, DaemonSet: true, Job: true, Service: true}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BUFFER_SIZE, Mutex: &sync.Mutex{}}
 	// initialize client for api extension server
 	conf.Groupcrdclient, conf.Subscriberclient = controller.GetApiExtensionClient()

@@ -51,9 +51,9 @@ func (f *SubscriberCrdClient) CreateSubscriber(obj *crd.Subscriber) (*crd.Subscr
 func (f *SubscriberCrdClient) UpdateSubscriber(obj *crd.Subscriber) (*crd.Subscriber, error) {
 	var result crd.Subscriber
 	err := f.cl.
-	//Put().
+		//Put().
 		Put().Name((obj.Name)).
-	//Patch(types.JSONPatchType).Name(obj.Name).
+		//Patch(types.JSONPatchType).Name(obj.Name).
 		Namespace(f.ns).Resource(f.plural).
 		Body(obj).Do().Into(&result)
 	return &result, err

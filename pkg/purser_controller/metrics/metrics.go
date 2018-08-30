@@ -18,9 +18,9 @@
 package metrics
 
 import (
+	log "github.com/Sirupsen/logrus"
 	api_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	log "github.com/Sirupsen/logrus"
 )
 
 type Metrics struct {

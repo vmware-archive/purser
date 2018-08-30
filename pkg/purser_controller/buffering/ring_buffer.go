@@ -19,6 +19,7 @@ package buffering
 
 import (
 	"sync"
+
 	log "github.com/Sirupsen/logrus"
 )
 
