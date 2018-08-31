@@ -25,14 +25,25 @@
 #   unused-packages = true
 
 
-ignored = [
-  "github.com/pkg/errors",
-]
+[[constraint]]
+  revision = "655e4e87cb5a855657ad325d1a615cf870870c9d"
+  name = "k8s.io/api"
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  branch = "master"
+  revision = "926207d3f23130ee823e4e723686691fdcaf1bd8"
 
+[[constraint]]
+  revision = "49fb9c9ee47ede1ead7dc90a697c0652526b072c"
+  name = "k8s.io/apimachinery"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  revision = "82b3a5753636104067ccc0759f33c870d17686dd"
+
+[[override]]
+  name = "github.com/tidwall/gjson"
+  version = "1.1.2"
 
 [prune]
   go-tests = true
