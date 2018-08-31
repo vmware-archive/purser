@@ -21,9 +21,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/vmware/purser/pkg/purser_controller/config"
+
 	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/purser_controller/config"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const READ_SIZE uint32 = 50
@@ -66,7 +67,7 @@ func SendData(payload []*interface{}, subscriber *subscriber) {
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
-	if (err != nil) {
+	if err != nil {
 		log.Error("Error while sending data to subscriber "+subscriber.url, err)
 	} else if resp != nil {
 		if resp.StatusCode == 200 {

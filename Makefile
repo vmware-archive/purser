@@ -156,3 +156,10 @@ container-clean:
 
 bin-clean:
 	rm -rf .go bin
+
+GOFORMAT_FILES := $(shell find  . -name '*.go')
+
+.PHONY: format ## Formats any go file that differs from gofmt's style and removes uneeded imports
+format: 
+	@gofmt -s -l -w ${GOFORMAT_FILES}
+	@goimports -l -w ${GOFORMAT_FILES}
