@@ -45,10 +45,16 @@ BUILD_IMAGE ?= golang:1.8-alpine
 
 DOCKER_MOUNT_MODE=delegated
 
+# Set dep management tool parameters
+VENDOR_DIR := vendor
 DEP_BIN_NAME := dep
 DEP_BIN_DIR := ./tmp/bin
 DEP_BIN := $(DEP_BIN_DIR)/$(DEP_BIN_NAME)
-DEP_VERSION=v0.4.1
+DEP_VERSION := v0.5.0
+
+# Define and get the vakue for UNAME_S variable from shell
+UNAME_S := $(shell uname -s)
+
 
 .PHONY: travis-build
 travis-build: install-plugin install-controller travis-success
@@ -197,12 +203,12 @@ $(DEP_BIN):
 ifeq ($(UNAME_S),Darwin)
 	@curl -L -s https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-darwin-amd64 -o $(DEP_BIN)
 	@cd $(DEP_BIN_DIR) && \
-	echo "1544afdd4d543574ef8eabed343d683f7211202a65380f8b32035d07ce0c45ef  dep" > dep-darwin-amd64.sha256 && \
+	echo "1a7bdb0d6c31ecba8b3fd213a1170adf707657123e89dff234871af9e0498be2  dep" > dep-darwin-amd64.sha256 && \
 	shasum -a 256 --check dep-darwin-amd64.sha256
 else
 	@curl -L -s https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-linux-amd64 -o $(DEP_BIN)
 	@cd $(DEP_BIN_DIR) && \
-	echo "31144e465e52ffbc0035248a10ddea61a09bf28b00784fd3fdd9882c8cbb2315  dep" > dep-linux-amd64.sha256 && \
+	echo "287b08291e14f1fae8ba44374b26a2b12eb941af3497ed0ca649253e21ba2f83  dep" > dep-linux-amd64.sha256 && \
 	sha256sum -c dep-linux-amd64.sha256
 endif
 	@chmod +x $(DEP_BIN)
@@ -225,11 +231,11 @@ tools: ## Installs required go tools
 	
 .PHONY: install
 install: ## Fetches all dependencies using dep
-	dep ensure -v
+	@$(DEP_BIN) ensure -v
 
 .PHONY: update
 update: ## Updates all dependencies defined for dep
-	dep ensure -update -v
+	@$(DEP_BIN) ensure -update -v
 
 .PHONY: check
 check: ## Concurrently runs a whole bunch of static analysis tools

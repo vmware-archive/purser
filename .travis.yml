@@ -11,7 +11,7 @@ go:
 
 script:
   - make tools
-  - curl https://raw.githubusercontent.com/golang/dep/1550da37d8fab9ed2dbc4bd04290e6c8dd3ff04a/install.sh | sh
+  - make deps
   - make install
   - make travis-build
 
