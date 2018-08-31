@@ -20,14 +20,15 @@ package controller
 import (
 	"flag"
 	"fmt"
+	"os"
+
+	"github.com/vmware/purser/pkg/purser_plugin/client"
+	"github.com/vmware/purser/pkg/purser_plugin/crd"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"github.com/vmware/purser/pkg/purser_plugin/client"
-	"github.com/vmware/purser/pkg/purser_plugin/crd"
-	"os"
 )
 
 // return rest config, if path not specified assume in cluster config

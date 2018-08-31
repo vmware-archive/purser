@@ -18,10 +18,11 @@
 package buffering_test
 
 import (
+	"sync"
 	"testing"
+
 	"github.com/vmware/purser/pkg/purser_controller/buffering"
 	"github.com/vmware/purser/test/utils"
-	"sync"
 )
 
 func TestPut(t *testing.T) {
