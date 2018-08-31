@@ -1,13 +1,3 @@
-travis-build: install-plugin install-controller travis-success
-
-install-plugin:
-	go install github.com/vmware/purser/cmd/purser_plugin
-
-install-controller: build container
-
-travis-success:
-	@echo "travis build success"
-
 # The binary to build (just the basename).
 BIN := purser_controller
 
@@ -55,10 +45,30 @@ BUILD_IMAGE ?= golang:1.8-alpine
 
 DOCKER_MOUNT_MODE=delegated
 
+DEP_BIN_NAME := dep
+DEP_BIN_DIR := ./tmp/bin
+DEP_BIN := $(DEP_BIN_DIR)/$(DEP_BIN_NAME)
+DEP_VERSION=v0.4.1
+
+.PHONY: travis-build
+travis-build: install-plugin install-controller travis-success
+
+.PHONY: install-plugin
+install-plugin:
+	go install github.com/vmware/purser/cmd/purser_plugin
+
+.PHONY: install-controller
+install-controller: build container
+
+.PHONY: travis-success
+travis-success:
+	@echo "travis build success"
+
 # If you want to build all binaries, see the 'all-build' rule.
 # If you want to build all containers, see the 'all-container' rule.
 # If you want to build AND push all containers, see the 'all-push' rule.
-all: build
+.PHONY: all
+all: deps build check
 
 build-%:
 	@$(MAKE) --no-print-directory ARCH=$* build
@@ -69,12 +79,16 @@ container-%:
 push-%:
 	@$(MAKE) --no-print-directory ARCH=$* push
 
+.PHONY: all-build
 all-build: $(addprefix build-, $(ALL_ARCH))
 
+.PHONY: all-container
 all-container: $(addprefix container-, $(ALL_ARCH))
 
+.PHONY: all-push
 all-push: $(addprefix push-, $(ALL_ARCH))
 
+.PHONY: build
 build: bin/$(ARCH)/$(BIN)
 
 bin/$(ARCH)/$(BIN): build-dirs
@@ -100,6 +114,7 @@ bin/$(ARCH)/$(BIN): build-dirs
 
 DOTFILE_IMAGE = $(subst :,_,$(subst /,_,$(IMAGE))-$(VERSION))
 
+.PHONY: container
 container: .container-$(DOTFILE_IMAGE) container-name
 .container-$(DOTFILE_IMAGE): bin/$(ARCH)/$(BIN) Dockerfile.in
 	@sed \
@@ -110,9 +125,11 @@ container: .container-$(DOTFILE_IMAGE) container-name
 	@docker build -t $(IMAGE):$(VERSION) -f .dockerfile-$(ARCH) .
 	@docker images -q $(IMAGE):$(VERSION) > $@
 
+.PHONY: container-name
 container-name:
 	@echo "container: $(IMAGE):$(VERSION)"
 
+.PHONY: push
 push: .push-$(DOTFILE_IMAGE) push-name
 .push-$(DOTFILE_IMAGE): .container-$(DOTFILE_IMAGE)
 ifeq ($(findstring gcr.io,$(REGISTRY)),gcr.io)
@@ -122,12 +139,15 @@ else
 endif
 	@docker images -q $(IMAGE):$(VERSION) > $@
 
+.PHONY: push-name
 push-name:
 	@echo "pushed: $(IMAGE):$(VERSION)"
 
+.PHONY: version
 version:
 	@echo $(VERSION)
 
+.PHONY: test
 test: build-dirs
 	@docker run                                                            \
 	    -ti                                                                \
@@ -145,21 +165,72 @@ test: build-dirs
 	        ./build/test.sh                                                \
 	    "
 
+.PHONY: build-dirs
 build-dirs:
 	@mkdir -p bin/$(ARCH)
 	@mkdir -p .go/src/$(PKG) .go/pkg .go/bin .go/std/$(ARCH)
 
+.PHONY: clean
 clean: container-clean bin-clean
 
+.PHONY: container-clean
 container-clean:
 	rm -rf .container-* .dockerfile-* .push-*
 
+.PHONY: bin-clean
 bin-clean:
 	rm -rf .go bin
 
+.PHONY: clean-vendor
+## Removes the ./vendor directory.
+clean-vendor:
+	-rm -rf $(VENDOR_DIR)
+
+.PHONY: deps
+## Download build dependencies.
+deps: $(DEP_BIN) $(VENDOR_DIR)
+
+# install dep in a the tmp/bin dir of the repo
+$(DEP_BIN):
+	@echo "Installing 'dep' $(DEP_VERSION) at '$(DEP_BIN_DIR)'..."
+	mkdir -p $(DEP_BIN_DIR)
+ifeq ($(UNAME_S),Darwin)
+	@curl -L -s https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-darwin-amd64 -o $(DEP_BIN)
+	@cd $(DEP_BIN_DIR) && \
+	echo "1544afdd4d543574ef8eabed343d683f7211202a65380f8b32035d07ce0c45ef  dep" > dep-darwin-amd64.sha256 && \
+	shasum -a 256 --check dep-darwin-amd64.sha256
+else
+	@curl -L -s https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-linux-amd64 -o $(DEP_BIN)
+	@cd $(DEP_BIN_DIR) && \
+	echo "31144e465e52ffbc0035248a10ddea61a09bf28b00784fd3fdd9882c8cbb2315  dep" > dep-linux-amd64.sha256 && \
+	sha256sum -c dep-linux-amd64.sha256
+endif
+	@chmod +x $(DEP_BIN)
+
+$(VENDOR_DIR): Gopkg.toml Gopkg.lock
+	@echo "checking dependencies..."
+	@$(DEP_BIN) ensure -v
+
 GOFORMAT_FILES := $(shell find  . -name '*.go')
 
-.PHONY: format ## Formats any go file that differs from gofmt's style and removes uneeded imports
+.PHONY: format ## Formats any go file that differs from gofmt's style and removes unused imports
 format: 
 	@gofmt -s -l -w ${GOFORMAT_FILES}
 	@goimports -l -w ${GOFORMAT_FILES}
+
+.PHONY: tools
+tools: ## Installs required go tools
+	@go get -u github.com/alecthomas/gometalinter && gometalinter --install
+	@go get -u golang.org/x/tools/cmd/goimports
+	
+.PHONY: install
+install: ## Fetches all dependencies using dep
+	dep ensure -v
+
+.PHONY: update
+update: ## Updates all dependencies defined for dep
+	dep ensure -update -v
+
+.PHONY: check
+check: ## Concurrently runs a whole bunch of static analysis tools
+	gometalinter --enable=misspell --enable=gosimple --enable-gc --vendor --deadline 300s ./...	
