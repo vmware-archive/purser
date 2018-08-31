@@ -20,7 +20,9 @@ package plugin
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/plugin/crd"
 	"github.com/vmware/purser/pkg/plugin/metrics"
+
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
@@ -60,6 +62,7 @@ func GetClusterSummary() {
 	nodeMetrics := metrics.CalculateNodeStats(nodes)
 	fmt.Printf("   Total Capacity:\n")
 	fmt.Printf("      %-25s%d\n", "CPU(vCPU):", nodeMetrics.CPULimit.Value())
+
 	fmt.Printf("      %-25s%.2f\n", "Memory(GB):", bytesToGB(nodeMetrics.MemoryLimit.Value()))
 
 	fmt.Printf("   Provisioned Resources:\n")
@@ -200,4 +203,41 @@ func getPodsCost(pods []*Pod) []*Pod {
 	pvcs = collectPersistentVolumeClaims(pvcs)
 	pods = calculateCost(pods, nodes, pvcs)
 	return pods
+}
+
+// GetGroupCost returns Cost (total, cpu, memory and storage) for a Group
+func GetGroupCost(group *crd.Group) *Cost {
+	cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour := GetUserCosts()
+
+	currentTime := getCurrentTime()
+	monthStartTime := getCurrentMonthStartTime()
+
+	podsDetails := group.Spec.PodsDetails
+	var totalCPUCost, totalMemoryCost, totalStorageCost, totalCumulativeCost float64
+	for podName, podDetails := range podsDetails {
+		startTime := podDetails.StartTime
+		endTime := podDetails.EndTime
+
+		podActiveHours := currentMonthActiveTimeInHours(startTime, endTime, currentTime, monthStartTime)
+
+		podMetrics := group.Spec.PodsMetrics[podName]
+		podCPURequest := resourceQuantityToFloat64(podMetrics.CPURequest)
+		podMemRequest := resourceQuantityToFloat64(podMetrics.MemoryRequest)
+
+		// TODO: find podStorage
+		podStorageClaimed := 0.0
+
+		totalCPUCost += cpuCostPerCPUPerHour * podCPURequest * podActiveHours
+		totalMemoryCost += memCostPerGBPerHour * podMemRequest * podActiveHours
+		totalStorageCost += storageCostPerGBPerHour * podStorageClaimed * podActiveHours
+	}
+
+	totalCumulativeCost = totalCPUCost + totalMemoryCost + totalStorageCost
+
+	return &Cost{
+		totalCost:   totalCumulativeCost,
+		cpuCost:     totalCPUCost,
+		memoryCost:  totalMemoryCost,
+		storageCost: totalStorageCost,
+	}
 }
