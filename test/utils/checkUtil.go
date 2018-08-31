@@ -20,8 +20,8 @@ package utils
 import (
 	"fmt"
 	"path/filepath"
-	"runtime"
 	"reflect"
+	"runtime"
 	"testing"
 )
 

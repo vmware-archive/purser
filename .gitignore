@@ -2,3 +2,4 @@
 .vscode
 .go/
 bin/
+vendor/

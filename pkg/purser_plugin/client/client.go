@@ -18,10 +18,10 @@
 package client
 
 import (
+	"github.com/vmware/purser/pkg/purser_plugin/crd"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
-	"github.com/vmware/purser/pkg/purser_plugin/crd"
 )
 
 // This file implement all the (CRUD) client methods we need to access our CRD object

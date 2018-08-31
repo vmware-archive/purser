@@ -51,9 +51,9 @@ func (f *GroupCrdClient) CreateGroup(obj *crd.Group) (*crd.Group, error) {
 func (f *GroupCrdClient) UpdateGroup(obj *crd.Group) (*crd.Group, error) {
 	var result crd.Group
 	err := f.cl.
-	//Put().
+		//Put().
 		Put().Name((obj.Name)).
-	//Patch(types.JSONPatchType).Name(obj.Name).
+		//Patch(types.JSONPatchType).Name(obj.Name).
 		Namespace(f.ns).Resource(f.plural).
 		Body(obj).Do().Into(&result)
 	return &result, err
