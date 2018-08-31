@@ -81,7 +81,7 @@ cd $GOPATH/github.com/vmware
 git clone https://github.com/<your-github-id>/purser.git
 # (go to purser directory)
 cd $GOPATH/src/github.com/vmware/purser
-# add upstream repository as the original purser repo)
+# (add upstream repository as the original purser repo)
 git remote add upstream https://github.com/vmware/purser.git
 ```
 
@@ -91,7 +91,7 @@ the fork up to date. More on that shortly.
 
 ### Make Changes and Commit
 
-Start a new topic branch from the current HEAD position on master and
+Start a new topic branch(say branch-name: `foo-api-fix-22`) from the current HEAD position on master and
 commit your feature changes into that branch.  
 
 ``` shell
@@ -136,7 +136,7 @@ for why this is important.
 - Depending on your git configuration push --force-with-lease is required to make git update your fork with commits from the upstream repo.
 
 ### Create a Pull Request
-
+Github docs on creating a pull request from a fork: [Pull request from a fork](https://help.github.com/articles/creating-a-pull-request-from-a-fork/)
 To contribute your feature, create a pull request by going to the [purser upstream repo on GitHub](https://github.com/vmware/purser) and pressing the 'New pull request' button. 
 
 Select 'compare across forks' and select your-github-id/purser as 'head fork'
