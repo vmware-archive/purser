@@ -10,6 +10,9 @@ go:
   - "1.10"
 
 script:
+  - make tools
+  - make deps
+  - make install
   - make travis-build
 
 notifications:
