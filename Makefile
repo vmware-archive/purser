@@ -1,5 +1,5 @@
 # The binary to build (just the basename).
-BIN := purser_controller
+BIN := controller
 
 # This repo's root import path (under GOPATH)
 PRO := github.com/vmware/purser

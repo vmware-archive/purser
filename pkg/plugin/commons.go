@@ -35,9 +35,5 @@ func executeCommand(command string) []byte {
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
-	err := cmd.Wait()
-	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
-	}
 	return out.Bytes()
 }

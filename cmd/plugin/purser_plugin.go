@@ -179,6 +179,7 @@ func printHelp() {
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser set user-costs\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get user-costs\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get savings\n")
 }
 
 func logError(err error) {

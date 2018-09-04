@@ -72,6 +72,7 @@ func TestCrdFlow() {
 }
 
 // Start runs the controller goroutine.
+// nolint: gocyclo, interfacer
 func Start(conf *config.Config) {
 
 	var kubeClient *kubernetes.Clientset
@@ -82,21 +83,7 @@ func Start(conf *config.Config) {
 		kubeClient = utils.GetClient()
 	}
 
-	c := getResourceController(conf, kubeClient)
-	invokeResourceController(c, conf)
-
-	sigterm := make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGTERM)
-	signal.Notify(sigterm, syscall.SIGINT)
-	<-sigterm
-}
-
-// nolint: gocyclo, interfacer
-func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset) *Controller {
-	var controller *Controller
-
-	switch {
-	case conf.Resource.Pod:
+	if conf.Resource.Pod {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -110,9 +97,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "Pod")
 
-	case conf.Resource.Node:
+		c := newResourceController(kubeClient, informer, "Pod")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Node {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -126,9 +120,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "Node")
 
-	case conf.Resource.PersistentVolume:
+		c := newResourceController(kubeClient, informer, "Node")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.PersistentVolume {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -142,9 +143,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "PersistentVolume")
 
-	case conf.Resource.PersistentVolumeClaim:
+		c := newResourceController(kubeClient, informer, "PersistentVolume")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.PersistentVolumeClaim {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -158,9 +166,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "PersistentVolumeClaim")
 
-	case conf.Resource.Service:
+		c := newResourceController(kubeClient, informer, "PersistentVolumeClaim")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Service {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -174,9 +189,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "Service")
 
-	case conf.Resource.ReplicaSet:
+		c := newResourceController(kubeClient, informer, "Service")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.ReplicaSet {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -190,9 +212,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "ReplicaSet")
 
-	case conf.Resource.DaemonSet:
+		c := newResourceController(kubeClient, informer, "ReplicaSet")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.DaemonSet {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -206,9 +235,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "DaemonSet")
 
-	case conf.Resource.Deployment:
+		c := newResourceController(kubeClient, informer, "DaemonSet")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Deployment {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -222,9 +258,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "Deployment")
 
-	case conf.Resource.StatefulSet:
+		c := newResourceController(kubeClient, informer, "Deployment")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.StatefulSet {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -238,9 +281,16 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "StatefulSet")
 
-	case conf.Resource.Job:
+		c := newResourceController(kubeClient, informer, "StatefulSet")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Job {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
@@ -254,17 +304,19 @@ func getResourceController(conf *config.Config, kubeClient *kubernetes.Clientset
 			0,
 			cache.Indexers{},
 		)
-		controller = newResourceController(kubeClient, informer, "Job")
+
+		c := newResourceController(kubeClient, informer, "Job")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
 	}
-	return controller
-}
 
-func invokeResourceController(c *Controller, conf *config.Config) {
-	c.conf = conf
-	stopCh := make(chan struct{})
-	defer close(stopCh)
-
-	go c.Run(stopCh)
+	sigterm := make(chan os.Signal, 1)
+	signal.Notify(sigterm, syscall.SIGTERM)
+	signal.Notify(sigterm, syscall.SIGINT)
+	<-sigterm
 }
 
 func newResourceController(client kubernetes.Interface, informer cache.SharedIndexInformer, resourceType string) *Controller {
