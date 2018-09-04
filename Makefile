@@ -4,8 +4,9 @@ BIN := purser_controller
 # This repo's root import path (under GOPATH)
 PRO := github.com/vmware/purser
 DEP := vendor
-PKG := pkg/purser_controller
-CMD := cmd/purser_controller
+BUILD := build
+PKG := pkg/controller
+CMD := cmd/controller
 
 # Where to push the docker image.
 REGISTRY ?= gurusreekanth
@@ -103,6 +104,7 @@ bin/$(ARCH)/$(BIN): build-dirs
 	    -ti                                                                \
 	    -u $$(id -u):$$(id -g)                                             \
 	    -v $$(pwd)/.go:/go:$(DOCKER_MOUNT_MODE)                            \
+		-v $$(pwd)/$(BUILD):/go/src/$(PRO)/$(BUILD):$(DOCKER_MOUNT_MODE)		\
 	    -v $$(pwd)/$(CMD):/go/src/$(PRO)/$(CMD):$(DOCKER_MOUNT_MODE)                     \
 	    -v $$(pwd)/$(PKG):/go/src/$(PRO)/$(PKG):$(DOCKER_MOUNT_MODE)                     \
 	    -v $$(pwd)/$(DEP):/go/src/$(PRO)/$(DEP):$(DOCKER_MOUNT_MODE)                     \
@@ -115,7 +117,7 @@ bin/$(ARCH)/$(BIN): build-dirs
 	        ARCH=$(ARCH)                                                   \
 	        VERSION=$(VERSION)                                             \
 	        PKG=$(PKG)                                                     \
-	        ./$(PRO)/$(CMD)/build/build.sh                                               \
+	        ./$(PRO)/build/build.sh                                               \
 	    "
 
 DOTFILE_IMAGE = $(subst :,_,$(subst /,_,$(IMAGE))-$(VERSION))
