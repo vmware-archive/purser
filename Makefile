@@ -62,7 +62,7 @@ travis-build: install-plugin install-controller travis-success
 
 .PHONY: install-plugin
 install-plugin:
-	go install github.com/vmware/purser/cmd/purser_plugin
+	go install github.com/vmware/purser/cmd/plugin
 
 .PHONY: install-controller
 install-controller: build container
@@ -117,7 +117,7 @@ bin/$(ARCH)/$(BIN): build-dirs
 	        ARCH=$(ARCH)                                                   \
 	        VERSION=$(VERSION)                                             \
 	        PKG=$(PKG)                                                     \
-	        ./$(PRO)/build/build.sh                                               \
+	        ./$(PRO)/$(BUILD)/build.sh                                               \
 	    "
 
 DOTFILE_IMAGE = $(subst :,_,$(subst /,_,$(IMAGE))-$(VERSION))
