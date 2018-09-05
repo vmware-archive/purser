@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: purser-controller
-        image: gurusreekanth/purser_controller-amd64:1.0.0
+        image: gurusreekanth/controller-amd64:1.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
