@@ -70,11 +70,26 @@ type Group struct {
 	Spec               GroupSpec   `json:"spec"`
 	Status             GroupStatus `json:"status,omitempty"`
 }
+
 type GroupSpec struct {
 	Name               string                      `json:"name"`
-	Type               string                      `json:"type"`
+	Type               string                      `json:"type,omitempty"`
+	Labels             map[string]string           `json:"labels,omitempty"`
 	AllocatedResources *metrics.Metrics            `json:"metrics,omitempty"`
 	PodsMetrics        map[string]*metrics.Metrics `json:"pods,omitempty"`
+	PodsDetails        map[string]*PodDetails      `json:podDetails,omitempty`
+}
+
+type PodDetails struct {
+	Name       string
+	StartTime  meta_v1.Time
+	EndTime    meta_v1.Time
+	Containers []*Container
+}
+
+type Container struct {
+	Name    string
+	Metrics *metrics.Metrics
 }
 
 type GroupStatus struct {

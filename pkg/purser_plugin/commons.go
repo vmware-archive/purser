@@ -19,10 +19,15 @@ package purser_plugin
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
+
+	"k8s.io/apimachinery/pkg/api/resource"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func executeCommand(command string) []byte {
@@ -35,4 +40,28 @@ func executeCommand(command string) []byte {
 		log.Fatal(err)
 	}
 	return out.Bytes()
+}
+
+func currentMonthActiveTimeInHours(startTime, endTime meta_v1.Time) float64 {
+	now := time.Now()
+	monthStart := meta_v1.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+	if startTime.Time.Before(monthStart.Time) {
+		startTime = monthStart
+	}
+
+	if endTime.IsZero() {
+		endTime = meta_v1.Now()
+	}
+
+	duration := endTime.Time.Sub(startTime.Time)
+	durationInHours := duration.Hours()
+	return durationInHours
+}
+
+func resourceQuantityToFloat64(quantity *resource.Quantity) float64 {
+	val, isSuccess := quantity.AsInt64()
+	if !isSuccess {
+		fmt.Println("Unable to convert resource quantity into int64")
+	}
+	return float64(val)
 }
