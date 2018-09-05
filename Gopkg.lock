@@ -170,7 +170,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
+<<<<<<< 58c3e6cea73bfc218aa07fa34c9a308d2045fa42
   revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
+=======
+  revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
+>>>>>>> Calculate compute cost of Group
 
 [[projects]]
   branch = "master"
@@ -188,14 +192,22 @@
 
 [[projects]]
   branch = "master"
+<<<<<<< 58c3e6cea73bfc218aa07fa34c9a308d2045fa42
   digest = "1:7f4a61b989d94774dc61016b660cf8347f59eb0bed91a10b2f23fc72a38d45d4"
+=======
+  digest = "1:629034aef6b53eb8ea737e6d82cb5402907e2757fbab5ddf5e74c08b4c6473af"
+>>>>>>> Calculate compute cost of Group
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
+<<<<<<< 58c3e6cea73bfc218aa07fa34c9a308d2045fa42
   revision = "ebe1bf3edb3325c393447059974de898d5133eb8"
+=======
+  revision = "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a"
+>>>>>>> Calculate compute cost of Group
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
