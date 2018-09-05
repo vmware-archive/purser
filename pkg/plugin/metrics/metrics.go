@@ -33,6 +33,16 @@ type Metrics struct {
 	MemoryRequest *resource.Quantity
 }
 
+// GroupMetrics Details
+// Here Active resource is the resource quantity active in the current month
+type GroupMetrics struct {
+	ActiveCPULimit       float64
+	ActiveMemoryLimit    float64
+	ActiveCPURequest     float64
+	ActiveMemoryRequest  float64
+	ActiveStorageClaimed float64
+}
+
 // CalculatePodStatsFromContainers returns pods stats from containers.
 func CalculatePodStatsFromContainers(pods []v1.Pod) *Metrics {
 	cpuLimit := &resource.Quantity{}

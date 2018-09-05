@@ -205,15 +205,16 @@ func getPodsCost(pods []*Pod) []*Pod {
 	return pods
 }
 
-// GetGroupCost returns Cost (total, cpu, memory and storage) for a Group
-func GetGroupCost(group *crd.Group) *Cost {
+// GetGroupDetails returns aggregated metrics (cpu, memory, storage) and cost (total, cpu, memory and storage) of a Group
+func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
+	// TODO: include storage in group details
 	cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour := GetUserCosts()
 
 	currentTime := getCurrentTime()
 	monthStartTime := getCurrentMonthStartTime()
 
 	podsDetails := group.Spec.PodsDetails
-	var totalCPUCost, totalMemoryCost, totalStorageCost, totalCumulativeCost float64
+	var totalCPURequest, totalCPULimit, totalMemoryRequest, totalMemoryLimit, totalStorageClaimed float64
 	for podName, podDetails := range podsDetails {
 		startTime := podDetails.StartTime
 		endTime := podDetails.EndTime
@@ -221,24 +222,42 @@ func GetGroupCost(group *crd.Group) *Cost {
 		podActiveHours := currentMonthActiveTimeInHours(startTime, endTime, currentTime, monthStartTime)
 
 		podMetrics := group.Spec.PodsMetrics[podName]
+
 		podCPURequest := resourceQuantityToFloat64(podMetrics.CPURequest)
 		podMemRequest := resourceQuantityToFloat64(podMetrics.MemoryRequest)
+		podCPULimit := resourceQuantityToFloat64(podMetrics.CPULimit)
+		podMemLimit := resourceQuantityToFloat64(podMetrics.MemoryLimit)
+
+		totalCPURequest += podCPURequest * podActiveHours
+		totalMemoryRequest += podMemRequest * podActiveHours
+		totalCPULimit += podCPULimit * podActiveHours
+		totalMemoryLimit += podMemLimit * podActiveHours
 
 		// TODO: find podStorage
 		podStorageClaimed := 0.0
-
-		totalCPUCost += cpuCostPerCPUPerHour * podCPURequest * podActiveHours
-		totalMemoryCost += memCostPerGBPerHour * podMemRequest * podActiveHours
-		totalStorageCost += storageCostPerGBPerHour * podStorageClaimed * podActiveHours
-
+		totalStorageClaimed += podStorageClaimed * podActiveHours
 	}
 
-	totalCumulativeCost = totalCPUCost + totalMemoryCost + totalStorageCost
+	totalCPUCost := cpuCostPerCPUPerHour * totalCPURequest
+	totalMemoryCost := memCostPerGBPerHour * totalMemoryRequest
+	totalStorageCost := storageCostPerGBPerHour * totalStorageClaimed
 
-	return &Cost{
+	totalCumulativeCost := totalCPUCost + totalMemoryCost + totalStorageCost
+
+	groupMetrics := &metrics.GroupMetrics{
+		ActiveCPULimit:       totalCPULimit,
+		ActiveMemoryLimit:    totalMemoryLimit,
+		ActiveCPURequest:     totalCPURequest,
+		ActiveMemoryRequest:  totalMemoryRequest,
+		ActiveStorageClaimed: totalStorageClaimed,
+	}
+
+	cost := &Cost{
 		totalCost:   totalCumulativeCost,
 		cpuCost:     totalCPUCost,
 		memoryCost:  totalMemoryCost,
 		storageCost: totalStorageCost,
 	}
+
+	return groupMetrics, cost
 }
