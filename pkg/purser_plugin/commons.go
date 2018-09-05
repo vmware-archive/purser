@@ -42,15 +42,31 @@ func executeCommand(command string) []byte {
 	return out.Bytes()
 }
 
-func currentMonthActiveTimeInHours(startTime, endTime meta_v1.Time) float64 {
+// getCurrentTime returns the current time now as meta_v1.Time object
+func getCurrentTime() meta_v1.Time {
+	return meta_v1.Now()
+}
+
+// getMonthStartAsTime returns the start of this month as meta_v1.Time object
+func getMonthStartAsTime() meta_v1.Time {
 	now := time.Now()
 	monthStart := meta_v1.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+	return monthStart
+}
+
+/*
+currentMonthActiveTimeInHours calculates the active time (endTime - startTime) in the current month.
+1. It checks whether the startTime is before month start, and if it is so then the startTime is set to month start
+2. If endTime is not set(isZero) then endTime is taken as current time.
+These two conditions ensure that we calculate the active time within in the current month only.
+*/
+func currentMonthActiveTimeInHours(startTime, endTime, monthStart, currentTime meta_v1.Time) float64 {
 	if startTime.Time.Before(monthStart.Time) {
 		startTime = monthStart
 	}
 
 	if endTime.IsZero() {
-		endTime = meta_v1.Now()
+		endTime = currentTime
 	}
 
 	duration := endTime.Time.Sub(startTime.Time)

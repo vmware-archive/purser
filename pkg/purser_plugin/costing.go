@@ -227,25 +227,28 @@ func GetAllNodesCost() {
 // GetGroupCost returns Cost (total, cpu, memory and storage) for a Group
 func GetGroupCost(group *crd.Group) Cost {
 	cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour := GetUserCosts()
-	cost := Cost{}
 
+	currentTime := getCurrentTime()
+	monthStartTime := getMonthStartAsTime()
+
+	cost := Cost{}
 	podsDetails := group.Spec.PodsDetails
 	for podName, podDetails := range podsDetails {
 		startTime := podDetails.StartTime
 		endTime := podDetails.EndTime
 
-		podTime := currentMonthActiveTimeInHours(startTime, endTime)
+		podActiveHours := currentMonthActiveTimeInHours(startTime, endTime, currentTime, monthStartTime)
 
 		podMetrics := group.Spec.PodsMetrics[podName]
-		podCPU := resourceQuantityToFloat64(podMetrics.CpuRequest)
-		podMem := resourceQuantityToFloat64(podMetrics.MemoryRequest)
+		podCPURequest := resourceQuantityToFloat64(podMetrics.CpuRequest)
+		podMemRequest := resourceQuantityToFloat64(podMetrics.MemoryRequest)
 
 		// TODO: find podStorage
-		podStorage := 0.0
+		podStorageClaimed := 0.0
 
-		cost.cpuCost += cpuCostPerCPUPerHour * podCPU * podTime
-		cost.memoryCost += memCostPerGBPerHour * podMem * podTime
-		cost.storageCost += storageCostPerGBPerHour * podStorage * podTime
+		cost.cpuCost += cpuCostPerCPUPerHour * podCPURequest * podActiveHours
+		cost.memoryCost += memCostPerGBPerHour * podMemRequest * podActiveHours
+		cost.storageCost += storageCostPerGBPerHour * podStorageClaimed * podActiveHours
 	}
 
 	cost.totalCost = cost.cpuCost + cost.memoryCost + cost.storageCost
