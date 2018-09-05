@@ -230,6 +230,7 @@ func GetGroupCost(group *crd.Group) *Cost {
 		totalCPUCost += cpuCostPerCPUPerHour * podCPURequest * podActiveHours
 		totalMemoryCost += memCostPerGBPerHour * podMemRequest * podActiveHours
 		totalStorageCost += storageCostPerGBPerHour * podStorageClaimed * podActiveHours
+
 	}
 
 	totalCumulativeCost = totalCPUCost + totalMemoryCost + totalStorageCost
