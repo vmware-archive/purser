@@ -268,7 +268,7 @@ func updatePodDetails(group crd.Group, pod api_v1.Pod, payload eventprocessor.Pa
 			newPodDetails := crd.PodDetails{Name: pod.Name, StartTime: pod.GetCreationTimestamp()}
 			containers := []*crd.Container{}
 			for _, cont := range pod.Spec.Containers {
-				container := getPodMetrics(cont)
+				container := getContainerWithMetrics(cont)
 				containers = append(containers, container)
 			}
 			newPodDetails.Containers = containers
@@ -279,7 +279,7 @@ func updatePodDetails(group crd.Group, pod api_v1.Pod, payload eventprocessor.Pa
 	}
 }
 
-func getPodMetrics(cont api_v1.Container) *crd.Container {
+func getContainerWithMetrics(cont api_v1.Container) *crd.Container {
 	container := crd.Container{Name: cont.Name}
 	metrics := metrics.Metrics{}
 	if cont.Resources.Requests != nil {

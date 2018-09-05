@@ -104,7 +104,7 @@ bin/$(ARCH)/$(BIN): build-dirs
 	    -ti                                                                \
 	    -u $$(id -u):$$(id -g)                                             \
 	    -v $$(pwd)/.go:/go:$(DOCKER_MOUNT_MODE)                            \
-		-v $$(pwd)/$(BUILD):/go/src/$(PRO)/$(BUILD):$(DOCKER_MOUNT_MODE)		\
+        -v $$(pwd)/$(BUILD):/go/src/$(PRO)/$(BUILD):$(DOCKER_MOUNT_MODE)   \
 	    -v $$(pwd)/$(CMD):/go/src/$(PRO)/$(CMD):$(DOCKER_MOUNT_MODE)                     \
 	    -v $$(pwd)/$(PKG):/go/src/$(PRO)/$(PKG):$(DOCKER_MOUNT_MODE)                     \
 	    -v $$(pwd)/$(DEP):/go/src/$(PRO)/$(DEP):$(DOCKER_MOUNT_MODE)                     \

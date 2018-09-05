@@ -333,6 +333,16 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 				queue.Add(newEvent)
 			}
 		},
+		// TODO: Fixme
+		UpdateFunc: func(old, new interface{}) {
+			/*newEvent.key, err = cache.MetaNamespaceKeyFunc(old)
+			newEvent.eventType = "update"
+			newEvent.resourceType = resourceType
+			log.Printf("Processing update to %v: %s", resourceType, newEvent.key)
+			if err == nil {
+				queue.Add(newEvent)
+			}*/
+		},
 		DeleteFunc: func(obj interface{}) {
 			newEvent.key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 			newEvent.eventType = Delete
@@ -419,6 +429,9 @@ func (c *Controller) processItem(newEvent Event) error {
 		payload := &eventprocessor.Payload{Key: newEvent.key, EventType: newEvent.eventType,
 			ResourceType: newEvent.resourceType, CloudType: "aws", Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
+		return nil
+	case Update:
+		// TODO: Decide on what needs to be propagated.
 		return nil
 	case Delete:
 		str, err := json.Marshal(newEvent.data)
