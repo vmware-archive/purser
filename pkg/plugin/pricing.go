@@ -33,6 +33,14 @@ const (
 	defaultStorageCostPerGBPerHour = 0.00013888888
 )
 
+// Price information.
+// NOTE: All fields are Per unit resource per hour
+type Price struct {
+	CPU     float64
+	Memory  float64
+	Storage float64
+}
+
 // SaveUserCosts stores the cpu, memory and storage cost per unit per hour in the cluster as config maps.
 func SaveUserCosts(cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour string) bool {
 	cm, err := ClientSetInstance.CoreV1().ConfigMaps(namespace).Get(userCostsConfigMap, metav1.GetOptions{})
@@ -70,7 +78,7 @@ func SaveUserCosts(cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPe
 }
 
 // GetUserCosts gives the cpu, memory and storage cost per unit per hour which are stored in the cluster as config maps.
-func GetUserCosts() (float64, float64, float64) {
+func GetUserCosts() *Price {
 	var cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour float64
 	cm, err := ClientSetInstance.CoreV1().ConfigMaps(namespace).Get(userCostsConfigMap, metav1.GetOptions{})
 	if err != nil {
@@ -101,5 +109,9 @@ func GetUserCosts() (float64, float64, float64) {
 		}
 	}
 
-	return cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour
+	return &Price{
+		CPU:     cpuCostPerCPUPerHour,
+		Memory:  memCostPerGBPerHour,
+		Storage: storageCostPerGBPerHour,
+	}
 }

@@ -21,27 +21,21 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/purser/pkg/plugin/metrics"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
-// Cost details
-type Cost struct {
-	totalCost   float64
-	cpuCost     float64
-	memoryCost  float64
-	storageCost float64
-}
-
 // Pod Information
 type Pod struct {
-	name               string
-	nodeName           string
-	nodeCostPercentage float64
-	cost               *Cost
-	pvcs               []*string
+	name       string
+	nodeName   string
+	cost       *Cost
+	pvcs       []*string
+	podMetrics *metrics.Metrics
+	startTime  metav1.Time
 }
 
 // GetClusterPods returns the list of pods in cluster.
@@ -99,25 +93,31 @@ func createPodObjects(pods *v1.PodList) []*Pod {
 	ps := []*Pod{}
 
 	for i := 0; i < len(pods.Items); i++ {
-		pod := pods.Items[i]
-
-		podVolumes := []*string{}
-		for j := 0; j < len(pod.Spec.Volumes); j++ {
-			vol := pod.Spec.Volumes[j]
-			if vol.PersistentVolumeClaim != nil {
-				podVolumes = append(podVolumes, &vol.PersistentVolumeClaim.ClaimName)
-			}
-		}
-
-		p := Pod{
-			name:     pod.GetObjectMeta().GetName(),
-			nodeName: pod.Spec.NodeName,
-			pvcs:     podVolumes,
-		}
-
+		p := createPodObject(&pods.Items[i])
 		ps = append(ps, &p)
 	}
 	return ps
+}
+
+func createPodObject(pod *v1.Pod) Pod {
+	return Pod{
+		name:       pod.GetObjectMeta().GetName(),
+		nodeName:   pod.Spec.NodeName,
+		pvcs:       getPodVolumes(pod),
+		podMetrics: metrics.CalculatePodStatsFromContainers([]v1.Pod{*pod}),
+		startTime:  *pod.Status.StartTime,
+	}
+}
+
+func getPodVolumes(pod *v1.Pod) []*string {
+	podVolumes := []*string{}
+	for j := 0; j < len(pod.Spec.Volumes); j++ {
+		vol := pod.Spec.Volumes[j]
+		if vol.PersistentVolumeClaim != nil {
+			podVolumes = append(podVolumes, &vol.PersistentVolumeClaim.ClaimName)
+		}
+	}
+	return podVolumes
 }
 
 func printPodsVerbose(pods []*Pod) {
@@ -130,7 +130,6 @@ func printPodsVerbose(pods []*Pod) {
 	for i := 0; i <= len(pods)-1; i++ {
 		fmt.Printf("%-30s%s\n", "Pod Name:", pods[i].name)
 		fmt.Printf("%-30s%s\n", "Node:", pods[i].nodeName)
-		fmt.Printf("%-30s%.2f\n", "Pod Compute Cost Percentage:", pods[i].nodeCostPercentage*100.0)
 		fmt.Printf("%-30s\n", "Persistent Volume Claims:")
 
 		for j := 0; j <= len(pods[i].pvcs)-1; j++ {

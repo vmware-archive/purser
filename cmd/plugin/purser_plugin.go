@@ -93,11 +93,11 @@ func getStats(inputs []string) {
 	} else if inputs[1] == "savings" {
 		plugin.GetSavings()
 	} else if inputs[1] == "user-costs" {
-		cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour := plugin.GetUserCosts()
+		price := plugin.GetUserCosts()
 		fmt.Printf("cpu cost per CPU per hour:\t %f$\nmem cost per GB per hour:\t %f$\nstorage cost per GB per hour:\t %f$\n",
-			cpuCostPerCPUPerHour,
-			memCostPerGBPerHour,
-			storageCostPerGBPerHour)
+			price.CPU,
+			price.Memory,
+			price.Storage)
 	} else {
 		printHelp()
 	}
