@@ -32,196 +32,72 @@ Purser currently supports Kubernetes deployments on Amazon Web Services. Support
 * Set budget limits on Kubernetes native or custom defined groups
 * Capability to enforce budget for Kubernetes native or custom defined groups
 
-## Getting Started
+## Use Case
 
-Instructions to install and start using Purser plugin.
+```
+kubectl --kubeconfig=<absolute path to config> plugin purser get summary
+kubectl --kubeconfig=<absolute path to config> plugin purser get savings
+kubectl --kubeconfig=<absolute path to config> plugin purser get resources namespace <Namespace>
+kubectl --kubeconfig=<absolute path to config> plugin purser get resources label <key=val>
+kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>
+kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>
+kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>
+kubectl --kubeconfig=<absolute path to config> plugin purser set user-costs
+kubectl --kubeconfig=<absolute path to config> plugin purser get user-costs
+```
 
-### Installation
+For detailed usage with examples see [here](./docs/Usage.md)
 
-#### Prerequisites
+## Installation
 
-* Kubernetes version 1.8 or greater
+### Prerequisites
+
+* Kubernetes version 1.9 or greater
 * ``kubectl`` installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-#### Installation through binaries
+### Installation Methods
 
-*Note: Installation through binaries is in progress. Follow next section Installation through source code*
-##### Server side installation
+- [Binary (Preffered method)](#Binary-Installation)
+- [Manual Installation](./docs/ManualInstallation.md)
+- [Source Code](./docs/SourceCodeInstallation.md)
 
-The following two steps installs purser controller and custom resource definitions for user groups in kubernetes cluster.
+### Binary Installation
 
-1. Installing purser custom controller
-    * wget https://github.com/vmware/purser/blob/master/custom_controller.yaml
-    * kubectl apply -f custom_controller.yaml
-
-2. Installing CRDs(Custom Resource Definitions) for custom groups.
-    * wget https://github.com/vmware/purser/blob/master/crd.yaml
-    * kubectl create -f crd.yaml
-    
-    Note: The above CRD is also created by purser custom controller, if CRD is already by controller then kubectl displays resource already exist message.
-
-##### Client side installation
-
-The following two steps installs the necessary components on client side.
-
-1. Downloading kubectl plugin yaml file
-    * wget https://github.com/vmware/purser/blob/master/plugin.yaml
-    * copy the plugin.yaml file into one of the paths specified in `Plugin loader` section in [link](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/)
-
-2. Installing kubectl plugin binary
-    * Follow [CODECOMPILE.md](./docs/CODECOMPILE.md)
-
-#### Installation through source code
-
-1. Install dependencies 
-    * Install [Go](https://golang.org/dl/)
-        - Version atleast 1.7
-        - Setup GOPATH environment variable by following [https://github.com/golang/go/wiki/SettingGOPATH](https://github.com/golang/go/wiki/SettingGOPATH)
-    * Install [Docker](https://www.docker.com/get-started)
-
-1. Get Purser source code
-    * `go get github.com/vmware/purser`
-
-1. Change directory to project root
-    * `cd $GOPATH/src/github.com/vmware/purser`
-
-##### Server side installation
-
-The following two steps installs purser controller and custom resource definitions for user groups in kubernetes cluster.
-
-1. In [Makefile](./Makefile) update `REGISTRY` field to your docker username.
-
-1. Build purser_controller binary using `make build`
-
-1. Create container(docker image) using `make container`
-
-1. Authenticate your docker credentials using `docker login`
-
-1. Push your docker image to docker hub using `make push`
-
-1. In kubernetes cluster download custom_controller.yaml from [here](https://github.com/vmware/purser/blob/master/custom_controller.yaml) or
-
-    `wget https://github.com/vmware/purser/blob/master/custom_controller.yaml`
-
-1. In `custom_controller.yaml` update image name to your docker image name that you pushed
-
-1. Install the controller in the cluster using `kubectl create -f custom_controller.yaml`
-
-##### Client side installation
-
-1. Run the following command to create a purser plugin binary in 
-   `GOPATH/bin` directory
-
-    `go install github.com/vmware/purser/cmd/purser_plugin`
-
-1. Copy the [plugin.yaml](../plugin.yaml) into one of the paths specified under 
-   section [Installing kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/)
-
-#### Uninstallation
-
-1. Uninstall the controller in the cluster using `kubectl delete -f custom_controller.yaml`
-
-
-### Usage
-
-Once installed, Purser is ready for use right away. You can query using native Kubernetes grouping artifacts
-
-**Examples:**
-
-
-1. Get cost of pods having label "app=vrbc-adapter"
-
-
-        $ kubectl purser get cost label app=vrbc-adapter
-            ===Pods Cost Details===
-            Pod Name:                     vrbc-adapter-statefulset-1-1-577-0
-            Node:                         ip-172-20-40-248.ec2.internal
-            Pod Compute Cost Percentage:  7.03
-            Persistent Volume Claims:     
-                vrbc-adapter-volume-1-1-577-vrbc-adapter-statefulset-1-1-577-0
-            Cost:                         
-            Total Cost:          108.092667$
-            Compute Cost:        69.426000$
-            Storage Cost:        38.666667$
-
-            Pod Name:                     vrbc-adapter-statefulset-1-1-577-1
-            Node:                         ip-172-20-41-91.ec2.internal
-            Pod Compute Cost Percentage:  6.96
-            Persistent Volume Claims:     
-                vrbc-adapter-volume-1-1-577-vrbc-adapter-statefulset-1-1-577-1
-            Cost:                         
-                Total Cost:          107.412371$
-                Compute Cost:        68.745704$
-                Storage Cost:        38.666667$
-
-            Pod Name:                     vrbc-adapter-statefulset-1-1-577-2
-            Node:                         ip-172-20-52-245.ec2.internal
-            Pod Compute Cost Percentage:  5.86
-            Persistent Volume Claims:     
-                vrbc-adapter-volume-1-1-577-vrbc-adapter-statefulset-1-1-577-2
-            Cost:                         
-                Total Cost:          96.496567$
-                Compute Cost:        57.829900$
-                Storage Cost:        38.666667$
-                
-            Total Cost Summary:           
-                Total Cost:          312.001604$
-                Compute Cost:        196.001604$
-                Storage Cost:        116.000000$
-
-
-2. Get cost of all nodes
-
-        kubectl purser get cost node all
-
-
-Next, define higher level groupings to define your business, logical or application constructs
-
-### Defining custom groups
-Group .yaml format
+#### Linux and macOS:
 
 ```
-Kind: Group
-Metadata:
-    name: <name of the group>
-Spec:
-    labels:
-        <label1>
-        ....
-        <labelN>
-    namespace:
-        <namespace1,...namespaceN>
+wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.1/purser-install.sh && sh purser-install.sh
 ```
-**Example:**
 
-Query the cost of Cost Insight infrastructure deployed in "default" namespace
+Enter your cluster's configuration path when prompted. We need the plugin binary to be in your PATH environment variable, so once the download of the binary is finished the script tries to move it to `/usr/local/bin`. This may need your sudo permission.
 
-1. The following is the ci.yaml definition which groups a few native Kubernetes labels into a business/application construct
+#### Windows:
 
-    ```
-    Kind: Group
-    Metadata:
-        name: CI
-    Spec:
-        labels:
-            app=vrbc-transformer
-            app=vrbc-adapter
-            app=vrbc-showback
-            app=vrbc-ui
-            app=ci-lambda
-        namespace:
-            default
-    ```
-2. Create the construct defined above
+Windows users, follow the steps under [Manual Installation](./docs/ManualInstallation.md) section
 
-        kubectl create -f ci.yaml
+### Manual Installation
 
-3. Get the cost of CI group
+Refer [Manual Installation docs](./docs/ManualInstallation.md)
 
-        kubectl get cost group CI
+### Source Code
 
+For detailed installation throught source code, refer [this](./docs/SourceCodeInstallation.md)
 
+## Uninstallation
 
+**For Linux and Mac Users:**
 
+```
+wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.1/purser-uninstall.sh && sh purser-uninstall.sh
+```
 
+**For Others:**
 
+```
+kubectl --kubeconfig=<absolute path to config> delete -f custom_controller.yaml
+kubectl --kubeconfig=<absolute path to config> delete -f crd.yaml
+```
+
+## Contributors
+
+For developers who would like to contribute to our project refer [How to contribute](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md)
