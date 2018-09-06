@@ -25,8 +25,17 @@ import (
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
+
+// Cost details
+type Cost struct {
+	totalCost   float64
+	cpuCost     float64
+	memoryCost  float64
+	storageCost float64
+}
 
 // ClientSetInstance helps in accessing kubernetes apis through client.
 var ClientSetInstance *kubernetes.Clientset
@@ -52,13 +61,7 @@ func GetClusterSummary() {
 	fmt.Println("Compute:")
 	nodes := GetClusterNodes()
 	fmt.Printf("   %-25s   %d\n", "Node count:", len(nodes))
-	var computeCost = 0.0
-	for _, node := range nodes {
-		instanceType := GetNodeType(node)
-		total, _, _ := getMonthToDateCostForInstanceType(instanceType)
-		computeCost = computeCost + total
-	}
-	fmt.Printf("   %-25s   %.2f$\n", "Cost:", computeCost)
+
 	nodeMetrics := metrics.CalculateNodeStats(nodes)
 	fmt.Printf("   Total Capacity:\n")
 	fmt.Printf("      %-25s%d\n", "CPU(vCPU):", nodeMetrics.CPULimit.Value())
@@ -68,6 +71,14 @@ func GetClusterSummary() {
 	fmt.Printf("   Provisioned Resources:\n")
 	fmt.Printf("      %-25s%d\n", "CPU Request(vCPU):", podMetrics.CPURequest.Value())
 	fmt.Printf("      %-25s%.2f\n", "Memory Request(GB):", bytesToGB(podMetrics.MemoryRequest.Value()))
+
+	price := GetUserCosts()
+	hoursInMonthTillNow := totalHoursTillNow()
+
+	cpuCost := float64(nodeMetrics.CPULimit.Value()) * hoursInMonthTillNow * price.CPU
+	memCost := bytesToGB(nodeMetrics.MemoryLimit.Value()) * hoursInMonthTillNow * price.Memory
+	computeCost := cpuCost + memCost
+	fmt.Printf("   %-25s   %.2f$\n", "Cost:", computeCost)
 
 	fmt.Printf("Storage:\n")
 
@@ -118,97 +129,94 @@ func GetPodCost(podName string) {
 
 // GetAllNodesCost returns the cumulative cost of all the nodes.
 func GetAllNodesCost() {
-	nodes := getAllNodeDetailsFromClient()
+	nodes := GetClusterNodes()
 
+	price := GetUserCosts()
+	hoursInMonthTillNow := totalHoursTillNow()
+
+	fmt.Println("Node name\tNode cpu-cost\tNode mem-cost\tNode total-cost")
 	for i := 0; i < len(nodes); i++ {
-		totalComputeCost, cpuCost, memoryCost := getMonthToDateCostForInstanceType(nodes[i].instanceType)
-		nodeCost := Cost{
-			totalCost:  totalComputeCost,
-			cpuCost:    cpuCost,
-			memoryCost: memoryCost,
-		}
-		nodes[i].cost = &nodeCost
+		node := nodes[i]
+		nodeMetrics := metrics.CalculateNodeStats([]v1.Node{node})
+
+		cpuCost := float64(nodeMetrics.CPULimit.Value()) * hoursInMonthTillNow * price.CPU
+		memoryCost := bytesToGB(nodeMetrics.MemoryLimit.Value()) * hoursInMonthTillNow * price.Memory
+		totalComputeCost := cpuCost + memoryCost
+
+		fmt.Printf("%s\t%f\t%f\t%f\n", node.Name, cpuCost, memoryCost, totalComputeCost)
 	}
-	printNodeDetails(nodes)
 }
 
-func calculateCost(pods []*Pod, nodes map[string]*Node, pvcs map[string]*PersistentVolumeClaim) []*Pod {
+func calculateCost(pods []*Pod, pvcs map[string]*PersistentVolumeClaim) []*Pod {
+	price := GetUserCosts()
 	for i := 0; i <= len(pods)-1; i++ {
-		node := nodes[pods[i].nodeName]
-		pods[i].nodeCostPercentage = node.getPodResourcePercentage(pods[i].name)
-		totalComputeCost, cpuCost, memoryCost := getMonthToDateCostForInstanceType(node.instanceType)
-		totalStorageCost := 0.0
-		for _, pvc := range pods[i].pvcs {
-			if pvcs[*pvc] != nil {
-				storagePrice := getMonthToDateCostForStorageClass(*pvcs[*pvc].storageClass)
-				totalStorageCost = totalStorageCost + storagePrice*pvcs[*pvc].capacityAllotedInGB
-			} else {
-				fmt.Printf("Persistent volume claim is not present for %s\n", *pvc)
-			}
-		}
-		podCost := Cost{
-			totalCost:   pods[i].nodeCostPercentage*totalComputeCost + totalStorageCost,
-			cpuCost:     pods[i].nodeCostPercentage * cpuCost,
-			memoryCost:  pods[i].nodeCostPercentage * memoryCost,
-			storageCost: totalStorageCost,
-		}
-		pods[i].cost = &podCost
+		pod := pods[i]
+		pods[i].cost = calculateCostOfPod(*pod, pvcs, price)
 	}
 	return pods
 }
 
-func bytesToGB(val int64) float64 {
-	return float64(val) / (1024.0 * 1024.0 * 1024.0)
+func calculateCostOfPod(pod Pod, pvcs map[string]*PersistentVolumeClaim, price *Price) *Cost {
+	podDurationInHours := currentMonthActiveTimeInHours(pod.startTime, metav1.Now())
+
+	podCPUCost := float64(pod.podMetrics.CPURequest.Value()) * podDurationInHours * (price.CPU)
+	podMemoryCost := bytesToGB(pod.podMetrics.MemoryRequest.Value()) * podDurationInHours * (price.Memory)
+
+	podStorageCost := 0.0
+	for _, pvc := range pod.pvcs {
+		if pvcs[*pvc] != nil {
+			podStorageCost += pvcs[*pvc].capacityAllotedInGB * podDurationInHours * (price.Storage)
+		} else {
+			fmt.Printf("Persistent volume claim is not present for %s\n", *pvc)
+		}
+	}
+	podTotalCost := podCPUCost + podMemoryCost + podStorageCost
+	return &Cost{
+		totalCost:   podTotalCost,
+		cpuCost:     podCPUCost,
+		memoryCost:  podMemoryCost,
+		storageCost: podStorageCost,
+	}
 }
 
 func getPvCostAndCapacity(pvs []v1.PersistentVolume) (float64, int64) {
-	var storageCost = 0.0
+	price := GetUserCosts()
+	hoursInMonthTillNow := totalHoursTillNow()
 	var storageCapacity = resource.Quantity{}
 	for _, pv := range pvs {
-		storageClass := pv.Spec.StorageClassName
-		total := getMonthToDateCostForStorageClass(storageClass)
-		var cur = resource.Quantity{}
-		cur.Add(pv.Spec.Capacity["storage"])
-		storageCost += total * bytesToGB(cur.Value())
 		storageCapacity.Add(pv.Spec.Capacity["storage"])
 	}
+	storageCost := bytesToGB(storageCapacity.Value()) * hoursInMonthTillNow * price.Storage
 	return storageCost, storageCapacity.Value()
 }
 
 func getPvcCostAndCapacity(pvcs []v1.PersistentVolumeClaim) (float64, int64) {
+	price := GetUserCosts()
+	hoursInMonthTillNow := totalHoursTillNow()
 	var pvcCapacity = resource.Quantity{}
-	var pvcCost = 0.0
 	for _, pvc := range pvcs {
 		pvcCapacity.Add(pvc.Spec.Resources.Requests["storage"])
-
-		storageClass := pvc.Spec.StorageClassName
-		total := getMonthToDateCostForStorageClass(*storageClass)
-		var cur = resource.Quantity{}
-		cur.Add(pvc.Spec.Resources.Requests["storage"])
-		pvcCost += total * bytesToGB(cur.Value())
 	}
+	pvcCost := bytesToGB(pvcCapacity.Value()) * hoursInMonthTillNow * price.Storage
 	return pvcCost, pvcCapacity.Value()
 }
 
 func getPodsCost(pods []*Pod) []*Pod {
-	nodes := map[string]*Node{}
 	pvcs := map[string]*PersistentVolumeClaim{}
 	for _, pod := range pods {
-		nodes[pod.nodeName] = nil
 		for _, pvc := range pod.pvcs {
 			pvcs[*pvc] = nil
 		}
 	}
-	nodes = collectNodes(nodes)
 	pvcs = collectPersistentVolumeClaims(pvcs)
-	pods = calculateCost(pods, nodes, pvcs)
+	pods = calculateCost(pods, pvcs)
 	return pods
 }
 
 // GetGroupDetails returns aggregated metrics (cpu, memory, storage) and cost (total, cpu, memory and storage) of a Group
 func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
 	// TODO: include storage in group details
-	cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour := GetUserCosts()
+	price := GetUserCosts()
 
 	currentTime := getCurrentTime()
 	monthStartTime := getCurrentMonthStartTime()
@@ -219,14 +227,14 @@ func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
 		startTime := podDetails.StartTime
 		endTime := podDetails.EndTime
 
-		podActiveHours := currentMonthActiveTimeInHours(startTime, endTime, currentTime, monthStartTime)
+		podActiveHours := currentMonthActiveTimeInHoursMulti(startTime, endTime, currentTime, monthStartTime)
 
 		podMetrics := group.Spec.PodsMetrics[podName]
 
-		podCPURequest := resourceQuantityToFloat64(podMetrics.CPURequest)
-		podMemRequest := resourceQuantityToFloat64(podMetrics.MemoryRequest)
-		podCPULimit := resourceQuantityToFloat64(podMetrics.CPULimit)
-		podMemLimit := resourceQuantityToFloat64(podMetrics.MemoryLimit)
+		podCPURequest := float64(podMetrics.CPURequest.Value())
+		podMemRequest := bytesToGB(podMetrics.MemoryRequest.Value())
+		podCPULimit := float64(podMetrics.CPULimit.Value())
+		podMemLimit := bytesToGB(podMetrics.MemoryLimit.Value())
 
 		totalCPURequest += podCPURequest * podActiveHours
 		totalMemoryRequest += podMemRequest * podActiveHours
@@ -238,9 +246,9 @@ func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
 		totalStorageClaimed += podStorageClaimed * podActiveHours
 	}
 
-	totalCPUCost := cpuCostPerCPUPerHour * totalCPURequest
-	totalMemoryCost := memCostPerGBPerHour * totalMemoryRequest
-	totalStorageCost := storageCostPerGBPerHour * totalStorageClaimed
+	totalCPUCost := price.CPU * totalCPURequest
+	totalMemoryCost := price.Memory * totalMemoryRequest
+	totalStorageCost := price.Storage * totalStorageClaimed
 
 	totalCumulativeCost := totalCPUCost + totalMemoryCost + totalStorageCost
 

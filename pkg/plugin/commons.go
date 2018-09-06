@@ -19,15 +19,13 @@ package plugin
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/resource"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // nolint
@@ -44,14 +42,14 @@ func executeCommand(command string) []byte {
 }
 
 // getCurrentTime returns the current time as k8s apimachinery Time object
-func getCurrentTime() meta_v1.Time {
-	return meta_v1.Now()
+func getCurrentTime() metav1.Time {
+	return metav1.Now()
 }
 
 // getCurrentMonthStartTime returns month start time as k8s apimachinery Time object
-func getCurrentMonthStartTime() meta_v1.Time {
+func getCurrentMonthStartTime() metav1.Time {
 	now := time.Now()
-	monthStart := meta_v1.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+	monthStart := metav1.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
 	return monthStart
 }
 
@@ -61,7 +59,18 @@ currentMonthActiveTimeInHours returns active time (endTime - startTime) in the c
 2. If endTime is not set(isZero) then it is set as current time
 These two conditions ensures that the active time we compute is within the current month.
 */
-func currentMonthActiveTimeInHours(startTime, endTime, currentTime, monthStart meta_v1.Time) float64 {
+func currentMonthActiveTimeInHours(startTime, endTime metav1.Time) float64 {
+	currentTime := getCurrentTime()
+	monthStart := getCurrentMonthStartTime()
+	return currentMonthActiveTimeInHoursMulti(startTime, endTime, currentTime, monthStart)
+}
+
+/*
+currentMonthActiveTimeInHoursMulti is same as currentMonthActiveTimeInHours but it needs extra inputs:
+currentTime and monthStart.
+Use this method(currentMonthActiveTimeInHoursMulti) if you want to caclculate active time multiple times (ex: inside a loop).
+*/
+func currentMonthActiveTimeInHoursMulti(startTime, endTime, currentTime, monthStart metav1.Time) float64 {
 	if startTime.Time.Before(monthStart.Time) {
 		startTime = monthStart
 	}
@@ -75,10 +84,18 @@ func currentMonthActiveTimeInHours(startTime, endTime, currentTime, monthStart m
 	return durationInHours
 }
 
-func resourceQuantityToFloat64(quantity *resource.Quantity) float64 {
-	val, isSuccess := quantity.AsInt64()
-	if !isSuccess {
-		fmt.Println("Unable to convert resource quantity into int64")
-	}
-	return float64(val)
+// totalHoursTillNow return number of hours from month start to current time.
+func totalHoursTillNow() float64 {
+	monthStart := getCurrentMonthStartTime()
+	currentTime := getCurrentTime()
+	return currentMonthActiveTimeInHours(monthStart, currentTime)
+}
+
+func projectToMonth(val float64) float64 {
+	// TODO: enhance this.
+	return (val * 31 * 24) / totalHoursTillNow()
+}
+
+func bytesToGB(val int64) float64 {
+	return float64(val) / (1024.0 * 1024.0 * 1024.0)
 }
