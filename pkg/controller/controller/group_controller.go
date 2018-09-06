@@ -25,7 +25,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/client"
 	"github.com/vmware/purser/pkg/controller/crd"
-	"github.com/vmware/purser/pkg/controller/eventprocessor"
+
 	"github.com/vmware/purser/pkg/controller/metrics"
 	api_v1 "k8s.io/api/core/v1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -35,7 +35,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const environment = "dev"
+const environment = "prod"
 
 // GetClientConfig returns rest config, if path not specified assume in cluster config
 func GetClientConfig(kubeconfig string) (*rest.Config, error) {
@@ -193,7 +193,7 @@ func GetGroupCrdByName(crdclient *client.GroupCrdClient, groupName string, group
 }
 
 // GetAllGroups returns the collection of all groups.
-func GetAllGroups(crdclient *client.GroupCrdClient) []crd.Group {
+func GetAllGroups(crdclient *client.GroupCrdClient) []*crd.Group {
 	items, err := crdclient.ListGroups(meta_v1.ListOptions{})
 	if err != nil {
 		log.Error("Error while fetching groups ", err)
@@ -203,52 +203,48 @@ func GetAllGroups(crdclient *client.GroupCrdClient) []crd.Group {
 }
 
 // UpdateCustomGroups modifies custom group deifinitions.
-func UpdateCustomGroups(crdclient *client.GroupCrdClient, payloads []*interface{}) {
-	groups := GetAllGroups(crdclient)
-	if groups == nil {
-		return
-	}
+func UpdateCustomGroups(payloads []*interface{}, groups []*crd.Group, crdclient *client.GroupCrdClient) {
 
 	processPayload(groups, payloads)
 
 	// update all the groups
 	for _, group := range groups {
-		_, err := crdclient.UpdateGroup(&group)
+		_, err := crdclient.UpdateGroup(group)
 
 		if err != nil {
-			log.Errorf("There is an error while updating the crd for group = %s\n", group.Name)
+			log.Errorf("There is an error while updating the crd for group = "+group.Name, err)
 		} else {
-			log.Infof("Updating the crd for group = %s is successful\n", group.Name)
+			log.Debug("Updating the crd for group = " + group.Name + " is successful")
 		}
 	}
 }
 
-func processPayload(groups []crd.Group, payloads []*interface{}) {
+func processPayload(groups []*crd.Group, payloads []*interface{}) {
 	for _, event := range payloads {
-		payload := (*event).(eventprocessor.Payload)
+		payload := (*event).(*Payload)
 		if payload.ResourceType != "Pod" {
 			continue
 		}
 		pod := api_v1.Pod{}
 		err := json.Unmarshal([]byte(payload.Data), &pod)
 		if err != nil {
-			log.Errorf("Error unmarshalling payload %s", payload.Data)
+			log.Errorf("Error unmarshalling payload " + payload.Data)
 		}
 
-		log.Info("Started updating User Created Groups for pod {} update.\n", pod.Name)
+		log.Info("Started updating User Created Groups for pod "+pod.Name+" update.", pod.Name)
 
 		for _, group := range groups {
-			if isPodBelongsToGroup(&group, &pod) {
-				log.Info("Updating the user group {} with pod {} details\n", group.Spec.Name, pod.Name)
-				updatePodDetails(group, pod, payload)
+			if isPodBelongsToGroup(group, &pod) {
+				log.Info("Updating the user group " + group.Spec.Name + " with pod " + pod.Name + " details")
+				updatePodDetails(group, pod, *payload)
 			}
 		}
-		log.Info("Completed updating User Created Groups for pod {} update.\n", pod.Name)
+		log.Debug("Completed updating User Created Groups for pod " + pod.Name + " update.")
 	}
 }
 
 // nolint
-func updatePodDetails(group crd.Group, pod api_v1.Pod, payload eventprocessor.Payload) {
+func updatePodDetails(group *crd.Group, pod api_v1.Pod, payload Payload) {
 	podKey := pod.GetObjectMeta().GetNamespace() + ":" + pod.GetObjectMeta().GetName()
 	podDetails := group.Spec.PodsDetails
 
@@ -277,6 +273,7 @@ func updatePodDetails(group crd.Group, pod api_v1.Pod, payload eventprocessor.Pa
 			// do nothing.
 		}
 	}
+	group.Spec.PodsDetails = podDetails
 }
 
 func getContainerWithMetrics(cont api_v1.Container) *crd.Container {

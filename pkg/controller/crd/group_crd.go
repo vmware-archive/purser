@@ -82,7 +82,7 @@ type GroupStatus struct {
 type GroupList struct {
 	meta_v1.TypeMeta `json:",inline"`
 	meta_v1.ListMeta `json:"metadata"`
-	Items            []Group `json:"items"`
+	Items            []*Group `json:"items"`
 }
 
 // GroupSchemeGroupVersion creates a Rest client with the new CRD Schema
@@ -116,9 +116,9 @@ func (in *GroupList) DeepCopyObject() runtime.Object {
 	out.ListMeta = in.ListMeta
 
 	if in.Items != nil {
-		out.Items = make([]Group, len(in.Items))
+		out.Items = make([]*Group, len(in.Items))
 		for i := range in.Items {
-			in.Items[i].DeepCopyInto(&out.Items[i])
+			in.Items[i].DeepCopyInto(out.Items[i])
 		}
 	}
 	return &out

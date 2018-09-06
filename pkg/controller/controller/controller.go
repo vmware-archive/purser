@@ -27,7 +27,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/config"
-	"github.com/vmware/purser/pkg/controller/eventprocessor"
 	"github.com/vmware/purser/pkg/controller/utils"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
@@ -362,7 +361,6 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 	}
 }
 
-// Run starts the kubewatch controller
 func (c *Controller) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()
@@ -374,7 +372,7 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 		return
 	}
 
-	log.Println("Kubewatch controller synced and ready")
+	log.Println("Purser controller synced and ready")
 	wait.Until(c.runWorker, time.Second, stopCh)
 }
 
@@ -426,8 +424,8 @@ func (c *Controller) processItem(newEvent Event) error {
 		if err != nil {
 			log.Errorf("Error marshalling object %s", obj)
 		}
-		payload := &eventprocessor.Payload{Key: newEvent.key, EventType: newEvent.eventType,
-			ResourceType: newEvent.resourceType, CloudType: "aws", Data: string(str)}
+		payload := &Payload{Key: newEvent.key, EventType: newEvent.eventType, ResourceType: newEvent.resourceType,
+			CloudType: "aws", Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	case Update:
@@ -438,8 +436,8 @@ func (c *Controller) processItem(newEvent Event) error {
 		if err != nil {
 			log.Errorf("Error marshalling object %s", newEvent.data)
 		}
-		payload := &eventprocessor.Payload{Key: newEvent.key, EventType: newEvent.eventType,
-			ResourceType: newEvent.resourceType, CloudType: "aws", Data: string(str)}
+		payload := &Payload{Key: newEvent.key, EventType: newEvent.eventType, ResourceType: newEvent.resourceType,
+			CloudType: "aws", Data: string(str)}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	}
