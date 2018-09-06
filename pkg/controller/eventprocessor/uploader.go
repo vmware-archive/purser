@@ -24,27 +24,12 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/config"
+	"github.com/vmware/purser/pkg/controller/controller"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ReadSize defines the default payload read size
 const ReadSize uint32 = 50
-
-// PayloadWrapper holds additional information about payload
-type PayloadWrapper struct {
-	CspOrgID string         `json:"cspOrgId"`
-	Cluster  string         `json:"cluster"`
-	Data     []*interface{} `json:"data"`
-}
-
-// Payload holds payload information
-type Payload struct {
-	Key          string `json:"key"`
-	EventType    string `json:"eventType"`
-	ResourceType string `json:"resourceType"`
-	CloudType    string `json:"cloudType"`
-	Data         string `json:"data"`
-}
 
 // NotifySubscribers notifies subscribers of the process event.
 func NotifySubscribers(payload []*interface{}, subscribers []*subscriber) {
@@ -58,7 +43,7 @@ func NotifySubscribers(payload []*interface{}, subscribers []*subscriber) {
 }
 
 func sendData(payload []*interface{}, subscriber *subscriber) {
-	payloadWrapper := PayloadWrapper{Data: payload, CspOrgID: subscriber.orgID, Cluster: subscriber.cluster}
+	payloadWrapper := controller.PayloadWrapper{Data: payload, OrgID: subscriber.orgID, Cluster: subscriber.cluster}
 	jsonStr, err := json.Marshal(payloadWrapper)
 	if err != nil {
 		log.Error("Error while unmarshalling payload ", err)
@@ -122,7 +107,7 @@ func getSubscribers(conf *config.Config) []*subscriber {
 			subscribers = append(subscribers, subscriber)
 		}
 	} else {
-		log.Info("There are no subscribers")
+		log.Debug("There are no subscribers")
 		return nil
 	}
 	return subscribers
