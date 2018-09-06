@@ -17,9 +17,18 @@
 
 package controller
 
-// These are the event types supported for controllers
-const (
-	Create = "create"
-	Delete = "delete"
-	Update = "update"
-)
+// PayloadWrapper holds additional information about payload
+type PayloadWrapper struct {
+	OrgID   string         `json:"orgId"`
+	Cluster string         `json:"cluster"`
+	Data    []*interface{} `json:"data"`
+}
+
+// Payload holds payload information
+type Payload struct {
+	Key          string `json:"key"`
+	EventType    string `json:"eventType"`
+	ResourceType string `json:"resourceType"`
+	CloudType    string `json:"cloudType"`
+	Data         string `json:"data"`
+}

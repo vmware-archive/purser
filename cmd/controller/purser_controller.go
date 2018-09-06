@@ -46,7 +46,6 @@ func setlogFile() {
 		log.Fatal(err)
 	}
 	log.SetOutput(f)
-	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
 }
 
