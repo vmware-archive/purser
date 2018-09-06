@@ -20,7 +20,9 @@ package plugin
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/plugin/crd"
 	"github.com/vmware/purser/pkg/plugin/metrics"
+
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
@@ -60,6 +62,7 @@ func GetClusterSummary() {
 	nodeMetrics := metrics.CalculateNodeStats(nodes)
 	fmt.Printf("   Total Capacity:\n")
 	fmt.Printf("      %-25s%d\n", "CPU(vCPU):", nodeMetrics.CPULimit.Value())
+
 	fmt.Printf("      %-25s%.2f\n", "Memory(GB):", bytesToGB(nodeMetrics.MemoryLimit.Value()))
 
 	fmt.Printf("   Provisioned Resources:\n")
@@ -200,4 +203,61 @@ func getPodsCost(pods []*Pod) []*Pod {
 	pvcs = collectPersistentVolumeClaims(pvcs)
 	pods = calculateCost(pods, nodes, pvcs)
 	return pods
+}
+
+// GetGroupDetails returns aggregated metrics (cpu, memory, storage) and cost (total, cpu, memory and storage) of a Group
+func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
+	// TODO: include storage in group details
+	cpuCostPerCPUPerHour, memCostPerGBPerHour, storageCostPerGBPerHour := GetUserCosts()
+
+	currentTime := getCurrentTime()
+	monthStartTime := getCurrentMonthStartTime()
+
+	podsDetails := group.Spec.PodsDetails
+	var totalCPURequest, totalCPULimit, totalMemoryRequest, totalMemoryLimit, totalStorageClaimed float64
+	for podName, podDetails := range podsDetails {
+		startTime := podDetails.StartTime
+		endTime := podDetails.EndTime
+
+		podActiveHours := currentMonthActiveTimeInHours(startTime, endTime, currentTime, monthStartTime)
+
+		podMetrics := group.Spec.PodsMetrics[podName]
+
+		podCPURequest := resourceQuantityToFloat64(podMetrics.CPURequest)
+		podMemRequest := resourceQuantityToFloat64(podMetrics.MemoryRequest)
+		podCPULimit := resourceQuantityToFloat64(podMetrics.CPULimit)
+		podMemLimit := resourceQuantityToFloat64(podMetrics.MemoryLimit)
+
+		totalCPURequest += podCPURequest * podActiveHours
+		totalMemoryRequest += podMemRequest * podActiveHours
+		totalCPULimit += podCPULimit * podActiveHours
+		totalMemoryLimit += podMemLimit * podActiveHours
+
+		// TODO: find podStorage
+		podStorageClaimed := 0.0
+		totalStorageClaimed += podStorageClaimed * podActiveHours
+	}
+
+	totalCPUCost := cpuCostPerCPUPerHour * totalCPURequest
+	totalMemoryCost := memCostPerGBPerHour * totalMemoryRequest
+	totalStorageCost := storageCostPerGBPerHour * totalStorageClaimed
+
+	totalCumulativeCost := totalCPUCost + totalMemoryCost + totalStorageCost
+
+	groupMetrics := &metrics.GroupMetrics{
+		ActiveCPULimit:       totalCPULimit,
+		ActiveMemoryLimit:    totalMemoryLimit,
+		ActiveCPURequest:     totalCPURequest,
+		ActiveMemoryRequest:  totalMemoryRequest,
+		ActiveStorageClaimed: totalStorageClaimed,
+	}
+
+	cost := &Cost{
+		totalCost:   totalCumulativeCost,
+		cpuCost:     totalCPUCost,
+		memoryCost:  totalMemoryCost,
+		storageCost: totalStorageCost,
+	}
+
+	return groupMetrics, cost
 }

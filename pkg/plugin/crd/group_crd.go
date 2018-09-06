@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	"github.com/vmware/purser/pkg/plugin/metrics"
+
 	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -78,9 +79,25 @@ type Group struct {
 // GroupSpec definition
 type GroupSpec struct {
 	Name               string                      `json:"name"`
-	Type               string                      `json:"type"`
+	Type               string                      `json:"type,omitempty"`
+	Labels             map[string]string           `json:"labels,omitempty"`
 	AllocatedResources *metrics.Metrics            `json:"metrics,omitempty"`
 	PodsMetrics        map[string]*metrics.Metrics `json:"pods,omitempty"`
+	PodsDetails        map[string]*PodDetails      `json:"podDetails,omitempty"`
+}
+
+// PodDetails definition
+type PodDetails struct {
+	Name       string
+	StartTime  meta_v1.Time
+	EndTime    meta_v1.Time
+	Containers []*Container
+}
+
+// Container definition
+type Container struct {
+	Name    string
+	Metrics *metrics.Metrics
 }
 
 // GroupStatus details
