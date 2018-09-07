@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/vmware/purser/pkg/plugin"
 	"github.com/vmware/purser/pkg/plugin/client"
 	"github.com/vmware/purser/pkg/plugin/crd"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -92,10 +93,22 @@ func GetCrdByName(crdclient *client.Crdclient, groupName string) *crd.Group {
 
 // PrintGroup displays the group information.
 func PrintGroup(group *crd.Group) {
+	groupMetrics, cost := plugin.GetGroupDetails(group)
 	fmt.Printf("%-25s%s\n", "Group Name:", group.Name)
 	fmt.Printf("%-25s\n", "Resources:")
-	fmt.Printf("             %-25s%s\n", "CPU Limit:", group.Spec.AllocatedResources.CPULimit)
-	fmt.Printf("             %-25s%s\n", "Memory Limit:", group.Spec.AllocatedResources.MemoryLimit)
-	fmt.Printf("             %-25s%s\n", "CPU Request:", group.Spec.AllocatedResources.CPURequest)
-	fmt.Printf("             %-25s%s\n", "Memory Request:", group.Spec.AllocatedResources.MemoryRequest)
+	fmt.Printf("             %-25s%s\n", "CPU Limit(vCPU):", group.Spec.AllocatedResources.CPULimit)
+	fmt.Printf("             %-25s%s\n", "Memory Limit(GB):", group.Spec.AllocatedResources.MemoryLimit)
+	fmt.Printf("             %-25s%s\n", "CPU Request(vCPU):", group.Spec.AllocatedResources.CPURequest)
+	fmt.Printf("             %-25s%s\n", "Memory Request(GB):", group.Spec.AllocatedResources.MemoryRequest)
+
+	fmt.Printf("%-25s\n", "Month to Date Active Resource Details:")
+	fmt.Printf("             %-25s%f\n", "CPU Request(vCPU-hours):", groupMetrics.ActiveCPURequest)
+	fmt.Printf("             %-25s%f\n", "Memory Request(GB-hours):", groupMetrics.ActiveMemoryRequest)
+	fmt.Printf("             %-25s%f\n", "Storage Claimed(GB-hours):", groupMetrics.ActiveStorageClaimed)
+
+	fmt.Printf("%-25s\n", "Month to Date Cost Details:")
+	fmt.Printf("             %-25s%f\n", "CPU Cost($):", cost.CPUCost)
+	fmt.Printf("             %-25s%f\n", "Memory Cost($):", cost.MemoryCost)
+	fmt.Printf("             %-25s%f\n", "Storage Cost($):", cost.StorageCost)
+	fmt.Printf("             %-25s%f\n", "Total Cost($):", cost.TotalCost)
 }
