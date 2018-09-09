@@ -24,7 +24,7 @@ cd $HOME/opt/purser-env
 # === Purser Controller ===
 
 # Get Cluster config file location
-read -p "Enter your cluster's configuration. (Leave blank for default $HOME/.kube/config): " readConfig
+read -p "Enter your cluster's configuration path. ($HOME/.kube/config): " readConfig
 if [ -z readConfig ]
 then
     kubeConfig="$HOME/.kube/config"

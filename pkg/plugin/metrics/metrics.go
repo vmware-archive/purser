@@ -36,11 +36,11 @@ type Metrics struct {
 // GroupMetrics Details
 // Here Active resource is the resource quantity active in the current month
 type GroupMetrics struct {
-	ActiveCPULimit       float64
-	ActiveMemoryLimit    float64
-	ActiveCPURequest     float64
-	ActiveMemoryRequest  float64
-	ActiveStorageClaimed float64
+	CPULimit       float64
+	MemoryLimit    float64
+	CPURequest     float64
+	MemoryRequest  float64
+	StorageClaimed float64
 }
 
 // CalculatePodStatsFromContainers returns pods stats from containers.

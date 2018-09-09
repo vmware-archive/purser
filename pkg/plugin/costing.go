@@ -232,7 +232,7 @@ func getPodsCost(pods []*Pod) []*Pod {
 }
 
 // GetGroupDetails returns aggregated metrics (cpu, memory, storage) and cost (total, cpu, memory and storage) of a Group
-func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
+func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *metrics.GroupMetrics, *Cost) {
 	// TODO: include storage in group details
 	price := GetUserCosts()
 
@@ -241,18 +241,28 @@ func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
 
 	podsDetails := group.Spec.PodsDetails
 	var totalCPURequest, totalCPULimit, totalMemoryRequest, totalMemoryLimit, totalStorageClaimed float64
-	for podName, podDetails := range podsDetails {
+	// [PIT] Point In Time metrics for the group
+	var pitCPURequest, pitCPULimit, pitMemoryRequest, pitMemoryLimit, pitStorageClaimed float64
+	for _, podDetails := range podsDetails {
 		startTime := podDetails.StartTime
 		endTime := podDetails.EndTime
 
 		podActiveHours := currentMonthActiveTimeInHoursMulti(startTime, endTime, currentTime, monthStartTime)
 
-		podMetrics := group.Spec.PodsMetrics[podName]
+		podMetrics := CalculatePodMetricsFromPodDetails(podDetails)
 
 		podCPURequest := float64(podMetrics.CPURequest.Value())
 		podMemRequest := bytesToGB(podMetrics.MemoryRequest.Value())
 		podCPULimit := float64(podMetrics.CPULimit.Value())
 		podMemLimit := bytesToGB(podMetrics.MemoryLimit.Value())
+
+		// Pod is alive
+		if endTime.IsZero() {
+			pitCPULimit += podCPULimit
+			pitCPURequest += podCPURequest
+			pitMemoryLimit += podMemLimit
+			pitMemoryRequest += podMemRequest
+		}
 
 		totalCPURequest += podCPURequest * podActiveHours
 		totalMemoryRequest += podMemRequest * podActiveHours
@@ -270,12 +280,20 @@ func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
 
 	totalCumulativeCost := totalCPUCost + totalMemoryCost + totalStorageCost
 
-	groupMetrics := &metrics.GroupMetrics{
-		ActiveCPULimit:       totalCPULimit,
-		ActiveMemoryLimit:    totalMemoryLimit,
-		ActiveCPURequest:     totalCPURequest,
-		ActiveMemoryRequest:  totalMemoryRequest,
-		ActiveStorageClaimed: totalStorageClaimed,
+	mtdGroupMetrics := &metrics.GroupMetrics{
+		CPULimit:       totalCPULimit,
+		MemoryLimit:    totalMemoryLimit,
+		CPURequest:     totalCPURequest,
+		MemoryRequest:  totalMemoryRequest,
+		StorageClaimed: totalStorageClaimed,
+	}
+
+	pitGroupMetrics := &metrics.GroupMetrics{
+		CPULimit:       pitCPULimit,
+		MemoryLimit:    pitMemoryLimit,
+		CPURequest:     pitCPURequest,
+		MemoryRequest:  pitMemoryRequest,
+		StorageClaimed: pitStorageClaimed,
 	}
 
 	cost := &Cost{
@@ -285,5 +303,31 @@ func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *Cost) {
 		StorageCost: totalStorageCost,
 	}
 
-	return groupMetrics, cost
+	return pitGroupMetrics, mtdGroupMetrics, cost
+}
+
+// CalculatePodMetricsFromPodDetails returns PodMetrics given its details(container metrics)
+func CalculatePodMetricsFromPodDetails(podDetails *crd.PodDetails) *metrics.Metrics {
+	CPURequest := resource.Quantity{}
+	MemoryRequest := resource.Quantity{}
+	CPULimit := resource.Quantity{}
+	MemoryLimit := resource.Quantity{}
+	for _, container := range podDetails.Containers {
+		addResourceAToResourceB(container.Metrics.CPURequest, &CPURequest)
+		addResourceAToResourceB(container.Metrics.MemoryRequest, &MemoryRequest)
+		addResourceAToResourceB(container.Metrics.MemoryLimit, &MemoryLimit)
+		addResourceAToResourceB(container.Metrics.CPULimit, &CPULimit)
+	}
+	return &metrics.Metrics{
+		CPULimit:      &CPULimit,
+		MemoryLimit:   &MemoryLimit,
+		CPURequest:    &CPURequest,
+		MemoryRequest: &MemoryRequest,
+	}
+}
+
+func addResourceAToResourceB(resA, resB *resource.Quantity) {
+	if resA != nil {
+		resB.Add(*resA)
+	}
 }
