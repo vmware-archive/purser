@@ -137,15 +137,15 @@ func printPodsVerbose(pods []*Pod) {
 
 		}
 		fmt.Printf("%-30s\n", "Cost:")
-		fmt.Printf("    %-21s%f$\n", "Total Cost:", pods[i].cost.totalCost)
-		fmt.Printf("    %-21s%f$\n", "Compute Cost:", pods[i].cost.cpuCost+pods[i].cost.memoryCost)
-		fmt.Printf("    %-21s%f$\n", "Storage Cost:", pods[i].cost.storageCost)
+		fmt.Printf("    %-21s%f$\n", "Total Cost:", pods[i].cost.TotalCost)
+		fmt.Printf("    %-21s%f$\n", "Compute Cost:", pods[i].cost.CPUCost+pods[i].cost.MemoryCost)
+		fmt.Printf("    %-21s%f$\n", "Storage Cost:", pods[i].cost.StorageCost)
 		fmt.Printf("\n")
 
-		totalCost += pods[i].cost.totalCost
-		totalCPUCost += pods[i].cost.cpuCost
-		totalMemoryCost += pods[i].cost.memoryCost
-		totalStorageCost += pods[i].cost.storageCost
+		totalCost += pods[i].cost.TotalCost
+		totalCPUCost += pods[i].cost.CPUCost
+		totalMemoryCost += pods[i].cost.MemoryCost
+		totalStorageCost += pods[i].cost.StorageCost
 	}
 
 	fmt.Printf("%-30s\n", "Total Cost Summary:")
