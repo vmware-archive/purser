@@ -34,16 +34,19 @@ Purser currently supports Kubernetes deployments on Amazon Web Services. Support
 
 ## Use Case
 
+*Note:* Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at [default location].(https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)
+
 ```
-kubectl --kubeconfig=<absolute path to config> plugin purser get summary
-kubectl --kubeconfig=<absolute path to config> plugin purser get savings
-kubectl --kubeconfig=<absolute path to config> plugin purser get resources namespace <Namespace>
-kubectl --kubeconfig=<absolute path to config> plugin purser get resources label <key=val>
-kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>
-kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>
-kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>
-kubectl --kubeconfig=<absolute path to config> plugin purser set user-costs
-kubectl --kubeconfig=<absolute path to config> plugin purser get user-costs
+kubectl plugin purser get summary
+kubectl plugin purser get savings
+kubectl plugin purser get resources namespace <Namespace>
+kubectl plugin purser get resources label <key=val>
+kubectl plugin purser get resources group <group-name>
+kubectl plugin purser get cost label <key=val>
+kubectl plugin purser get cost pod <pod name>
+kubectl plugin purser get cost node <node name>
+kubectl plugin purser set user-costs
+kubectl plugin purser get user-costs
 ```
 
 For detailed usage with examples see [here](./docs/Usage.md)
@@ -57,16 +60,16 @@ For detailed usage with examples see [here](./docs/Usage.md)
 
 ### Installation Methods
 
-- [Binary (Preffered method)](#Binary-Installation)
-- [Manual Installation](./docs/ManualInstallation.md)
-- [Source Code](./docs/SourceCodeInstallation.md)
+* [Binary (Preffered method)](#Binary-Installation)
+* [Manual Installation](./docs/ManualInstallation.md)
+* [Source Code](./docs/SourceCodeInstallation.md)
 
 ### Binary Installation
 
 #### Linux and macOS:
 
 ```
-wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.1/purser-install.sh && sh purser-install.sh
+wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-install.sh && sh purser-install.sh
 ```
 
 Enter your cluster's configuration path when prompted. We need the plugin binary to be in your PATH environment variable, so once the download of the binary is finished the script tries to move it to `/usr/local/bin`. This may need your sudo permission.
@@ -88,14 +91,15 @@ For detailed installation throught source code, refer [this](./docs/SourceCodeIn
 **For Linux and Mac Users:**
 
 ```
-wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.1/purser-uninstall.sh && sh purser-uninstall.sh
+wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-uninstall.sh && sh purser-uninstall.sh
 ```
 
 **For Others:**
 
+*Note:* Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at [default location].(https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)
 ```
-kubectl --kubeconfig=<absolute path to config> delete -f custom_controller.yaml
-kubectl --kubeconfig=<absolute path to config> delete -f crd.yaml
+kubectl delete -f custom_controller.yaml
+kubectl delete -f crd.yaml
 ```
 
 ## Contributors

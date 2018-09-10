@@ -89,14 +89,37 @@ The last git command prepares your clone to pull changes from the
 upstream repo and push them into the fork, which enables you to keep
 the fork up to date. More on that shortly.
 
+### Download dependencies
+
+Run the following commands to download dependencies.
+
+``` shell
+make tools
+make deps
+make install
+```
+
 ### Make Changes and Commit
 
 Start a new topic branch(say branch-name: `foo-api-fix-22`) from the current HEAD position on master and
-commit your feature changes into that branch.  
+commit your feature changes into that branch.
 
 ``` shell
 git checkout -b foo-api-fix-22 master
 # (Make feature changes)
+```
+
+Ensure that you run the following commands to ensure new dependencies are recorded and to fix formatting of the code.
+
+``` shell
+make update
+make format
+make check
+```
+
+If there is an error while running `make check`, fix them and re run the above commands.
+
+``` shell
 git commit -a --signoff
 git push origin foo-api-fix-22
 ```

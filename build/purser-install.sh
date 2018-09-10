@@ -15,7 +15,7 @@
 
 
 # Realease Version
-releaseVersion=v0.1-alpha.1
+releaseVersion=v0.1-alpha.2
 
 # purser directory
 mkdir -p $HOME/opt/purser-env
@@ -79,11 +79,9 @@ wget -q --show-progress -O plugin.yaml $pluginYamlUrl
 # Downloading purser plugin binary based on os type
 if [ $machine = Linux ]
 then
-    # echo "Downloading from https://github.com/vmware/purser/releases/download/v0.1-alpha.1/purser_plugin_linux_amd64"
     pluginUrl=https://github.com/vmware/purser/releases/download/$releaseVersion/purser_plugin_linux_amd64
 elif [ $machine = Mac ]
 then
-    # echo "Downloading from https://github.com/vmware/purser/releases/download/v0.1-alpha.1/purser_plugin_darwin_amd64"
     pluginUrl=https://github.com/vmware/purser/releases/download/$releaseVersion/purser_plugin_darwin_amd64
 else
     echo "No match found for your os: $machine"
