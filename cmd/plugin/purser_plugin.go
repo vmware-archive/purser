@@ -61,6 +61,8 @@ func performAction(inputs []string) {
 		getStats(inputs)
 	case Set:
 		setStats(inputs)
+	default:
+		printHelp()
 	}
 }
 
@@ -181,6 +183,7 @@ func printHelp() {
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get summary\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources namespace <Namespace>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources label <key=val>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources group <group-name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>\n")

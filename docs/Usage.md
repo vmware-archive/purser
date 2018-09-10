@@ -3,18 +3,18 @@
 Once installed, Purser is ready for use right away. You can query using native Kubernetes grouping artifacts.
 
 Following are the commands that purser supports.
-Skip using `--kubeconfig=<absolute path to config>` if the cluster configuration is in [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable).
+Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at [default location].(https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable).
 
 ```
-kubectl --kubeconfig=<absolute path to config> plugin purser get summary
-kubectl --kubeconfig=<absolute path to config> plugin purser get savings
-kubectl --kubeconfig=<absolute path to config> plugin purser get resources namespace <Namespace>
-kubectl --kubeconfig=<absolute path to config> plugin purser get resources label <key=val>
-kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>
-kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>
-kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>
-kubectl --kubeconfig=<absolute path to config> plugin purser set user-costs
-kubectl --kubeconfig=<absolute path to config> plugin purser get user-costs
+kubectl plugin purser get summary
+kubectl plugin purser get savings
+kubectl plugin purser get resources namespace <Namespace>
+kubectl plugin purser get resources label <key=val>
+kubectl plugin purser get cost label <key=val>
+kubectl plugin purser get cost pod <pod name>
+kubectl plugin purser get cost node <node name>
+kubectl plugin purser set user-costs
+kubectl plugin purser get user-costs
 ```
 
 **Examples:**
@@ -68,10 +68,10 @@ Next, define higher level groupings to define your business, logical or applicat
 Group .yaml format
 
 ```
-Kind: Group
-Metadata:
+kind: Group
+metadata:
     name: <name of the group>
-Spec:
+spec:
     labels:
         <label1>
         ....
@@ -85,19 +85,16 @@ Query the cost of Cost Insight infrastructure deployed in "default" namespace
 
 1. The following is the ci.yaml definition which groups a few native Kubernetes labels into a business/application construct
 
-    ```
-    Kind: Group
-    Metadata:
-        name: CI
-    Spec:
-        labels:
-            app=vrbc-transformer
-            app=vrbc-adapter
-            app=vrbc-showback
-            app=vrbc-ui
-            app=ci-lambda
-        namespace:
-            default
+```
+apiVersion: vmware.kuber/v1
+kind: Group
+metadata:
+  name: ci-group
+spec:
+  name: ci-group
+  labels:
+    app: vrbc-transformer
+    app: vrbc-adapterdefault
     ```
 2. Create the construct defined above
 
