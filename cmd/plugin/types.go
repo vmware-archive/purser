@@ -29,6 +29,7 @@ const (
 	Pod       = "pod"
 	Node      = "node"
 	Namespace = "namespace"
+	Group     = "group"
 )
 
 // These are utilisation metrics

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/vmware/purser/pkg/plugin"
 	"github.com/vmware/purser/pkg/plugin/client"
 	"github.com/vmware/purser/pkg/plugin/crd"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -92,10 +93,26 @@ func GetCrdByName(crdclient *client.Crdclient, groupName string) *crd.Group {
 
 // PrintGroup displays the group information.
 func PrintGroup(group *crd.Group) {
-	fmt.Printf("%-25s%s\n", "Group Name:", group.Name)
-	fmt.Printf("%-25s\n", "Resources:")
-	fmt.Printf("             %-25s%s\n", "CPU Limit:", group.Spec.AllocatedResources.CPULimit)
-	fmt.Printf("             %-25s%s\n", "Memory Limit:", group.Spec.AllocatedResources.MemoryLimit)
-	fmt.Printf("             %-25s%s\n", "CPU Request:", group.Spec.AllocatedResources.CPURequest)
-	fmt.Printf("             %-25s%s\n", "Memory Request:", group.Spec.AllocatedResources.MemoryRequest)
+	pitGroupMetrics, mtdGroupMetrics, cost := plugin.GetGroupDetails(group)
+
+	fmt.Printf("%-30s%s\n", "Group Name:", group.Name)
+	fmt.Println()
+	fmt.Println("Point in Time Resource Stats:")
+	fmt.Printf("             %-30s%f\n", "CPU Limit(vCPU):", pitGroupMetrics.CPULimit)
+	fmt.Printf("             %-30s%f\n", "Memory Limit(GB):", pitGroupMetrics.MemoryLimit)
+	fmt.Printf("             %-30s%f\n", "CPU Request(vCPU):", pitGroupMetrics.CPURequest)
+	fmt.Printf("             %-30s%f\n", "Memory Request(GB):", pitGroupMetrics.MemoryRequest)
+
+	fmt.Println()
+	fmt.Printf("%-30s\n", "Month to Date Active Resource Stats:")
+	fmt.Printf("             %-30s%f\n", "CPU Request(vCPU-hours):", mtdGroupMetrics.CPURequest)
+	fmt.Printf("             %-30s%f\n", "Memory Request(GB-hours):", mtdGroupMetrics.MemoryRequest)
+	fmt.Printf("             %-30s%f\n", "Storage Claimed(GB-hours):", mtdGroupMetrics.StorageClaimed)
+
+	fmt.Println()
+	fmt.Printf("%-30s\n", "Month to Date Cost Stats:")
+	fmt.Printf("             %-30s%f\n", "CPU Cost($):", cost.CPUCost)
+	fmt.Printf("             %-30s%f\n", "Memory Cost($):", cost.MemoryCost)
+	fmt.Printf("             %-30s%f\n", "Storage Cost($):", cost.StorageCost)
+	fmt.Printf("             %-30s%f\n", "Total Cost($):", cost.TotalCost)
 }

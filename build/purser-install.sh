@@ -24,16 +24,22 @@ cd $HOME/opt/purser-env
 # === Purser Controller ===
 
 # Get Cluster config file location
-read -p "Taking $HOME/.kube/config as your cluster's configuration (yes/no): " isDefaultConfig
-if [ "$isDefaultConfig" != "yes" ]
+read -p "Enter your cluster's configuration path. ($HOME/.kube/config): " readConfig
+if [ -z readConfig ]
 then
-    read -p "Enter location of your cluster's configuration: " kubeConfig
-else
     kubeConfig="$HOME/.kube/config"
+else
+    kubeConfig=$readConfig
 fi
 
+echo ""
+
+echo "====================================================="
+echo "Starting installation for Purser controller"
+echo "====================================================="
+
 # Download purser controller yaml
-echo "Downloading purser controller yaml"
+echo "Downloading files for controller..."
 controllerUrl=https://github.com/vmware/purser/releases/download/$releaseVersion/custom_controller.yaml
 wget -q --show-progress -O custom_controller.yaml $controllerUrl
 
@@ -45,26 +51,16 @@ wget -q -O crd.yaml $crdUrl
 echo "Installing purser controller"
 kubectl --kubeconfig=$kubeConfig create -f custom_controller.yaml
 
+echo "Purser controller installation completed"
 echo ""
+
+echo "====================================================="
+echo "Starting installation for Purser plugin"
+echo "====================================================="
 
 # === Purser Plugin ===
 
-# Download purser plugin yaml
-echo "Downloading purser plugin yaml"
-pluginYamlUrl=https://github.com/vmware/purser/releases/download/$releaseVersion/plugin.yaml
-wget -q --show-progress -O plugin.yaml $pluginYamlUrl
-
-# Move th plugin yaml to one of the location specified in 
-# https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
-if [ ! -d $HOME/.kube/plugins ]
-then
-    mkdir $HOME/.kube/plugins
-fi
-echo "Moving plugin.yaml to $HOME/.kube/plugins/"
-mv plugin.yaml $HOME/.kube/plugins/
-
 # Detecting os type
-echo "Detecting your os"
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     machine=Linux;;
@@ -73,10 +69,14 @@ case "${unameOut}" in
     MINGW*)     machine=MinGw;;
     *)          machine="UNKNOWN:${unameOut}"
 esac
-echo ${machine}
+echo "Detecting your Operating System: ${machine}"
+
+echo "Downloading files for plugin..."
+# Download purser plugin yaml
+pluginYamlUrl=https://github.com/vmware/purser/releases/download/$releaseVersion/plugin.yaml
+wget -q --show-progress -O plugin.yaml $pluginYamlUrl
 
 # Downloading purser plugin binary based on os type
-echo "Downloading purser plugin binary"
 if [ $machine = Linux ]
 then
     # echo "Downloading from https://github.com/vmware/purser/releases/download/v0.1-alpha.1/purser_plugin_linux_amd64"
@@ -92,6 +92,15 @@ else
 fi
 wget -q --show-progress -O purser_plugin $pluginUrl
 
+# Move th plugin yaml to one of the location specified in 
+# https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
+if [ ! -d $HOME/.kube/plugins ]
+then
+    mkdir $HOME/.kube/plugins
+fi
+echo "Moving plugin.yaml to $HOME/.kube/plugins/"
+mv plugin.yaml $HOME/.kube/plugins/
+
 # Change execution permissions for the binary
 chmod +x purser_plugin
 
@@ -99,4 +108,8 @@ chmod +x purser_plugin
 echo "Moving the binary to /usr/local/bin"
 sudo mv purser_plugin /usr/local/bin
 
-echo "Installation Completed"
+echo "Purser plugin installation Completed"
+
+echo ""
+
+echo "Purser Installation Completed"

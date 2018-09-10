@@ -121,6 +121,13 @@ func fetchResource(inputs []string) {
 		} else {
 			fmt.Printf("Group %s is not present\n", inputs[3])
 		}
+	} else if inputs[2] == Group {
+		group := controller.GetCrdByName(crdclient, inputs[3])
+		if group != nil {
+			controller.PrintGroup(group)
+		} else {
+			fmt.Printf("No group with name: %s\n", inputs[3])
+		}
 	} else {
 		printHelp()
 	}
