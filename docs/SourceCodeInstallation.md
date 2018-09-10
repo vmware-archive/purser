@@ -42,6 +42,7 @@ The following two steps installs purser controller and custom resource definitio
 1. In [`custom_controller.yaml`](./custom_controller.yaml) update image name to your docker image name that you pushed
 
 1. Install the controller in the cluster using `kubectl create -f custom_controller.yaml`
+    * Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at default location.
 
 ## Client side installation
 
