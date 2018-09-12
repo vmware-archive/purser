@@ -39,8 +39,8 @@ Engine are planned.
 Currenty the below list of commands are supported for the Purser plugin. 
 
 ``` bash
-# Query cluster visibilty in terms of savings and summary for the application. 
-kubectl plugin purser get [summary| savings]
+# Query cluster visibility in terms of savings and summary for the application. 
+kubectl plugin purser get [summary|savings]
 
 # Query resources filtered by associated namespace, labels and groups.
 kubectl plugin purser get resources namespace <Namespace>
@@ -53,12 +53,12 @@ kubectl plugin purser get cost pod <pod name>
 kubectl plugin purser get cost node <node name>
 
 # Configure user-costs for the choice of deployment.
-kubectl plugin purser [set| get] user-costs
+kubectl plugin purser [set|get] user-costs
 ```
 
-For detailed usage with examples see [here](./docs/Usage.md).
-
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>`, if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)_.
+
+For detailed usage with examples see [here](./docs/Usage.md).
 
 ## Installation
 
