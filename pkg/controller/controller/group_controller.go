@@ -255,9 +255,14 @@ func updatePodDetails(group *crd.Group, pod api_v1.Pod, payload Payload) {
 	existingPodDetails := podDetails[podKey]
 	if existingPodDetails != nil {
 		if payload.EventType == Create {
-			// do nothing.
+			// TODO:
+			// This case means we have lost a Delete event for this pod. So we need to update
+			// the pod details with the new one
 		} else if payload.EventType == Delete {
-			existingPodDetails.EndTime = pod.GetObjectMeta().GetCreationTimestamp()
+			// Here we are not using pod.GetObjectMeta().GetDeletionTimestamp() because
+			// by the time controller gets to this part of the code the object(pod) might have been
+			// removed from etcd.
+			existingPodDetails.EndTime = *pod.GetDeletionTimestamp()
 		}
 	} else {
 		if payload.EventType == Create {
@@ -270,7 +275,10 @@ func updatePodDetails(group *crd.Group, pod api_v1.Pod, payload Payload) {
 			newPodDetails.Containers = containers
 			podDetails[podKey] = &newPodDetails
 		} else if payload.EventType == Delete {
-			// do nothing.
+			// TODO:
+			// This case means we have lost a Create event for this pod.
+			// If we can retrieve pod details(metrics and creation time) then we can
+			// include that in podDetails
 		}
 	}
 	group.Spec.PodsDetails = podDetails
