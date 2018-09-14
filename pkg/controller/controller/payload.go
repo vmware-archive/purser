@@ -17,6 +17,10 @@
 
 package controller
 
+import (
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
 // PayloadWrapper holds additional information about payload
 type PayloadWrapper struct {
 	OrgID   string         `json:"orgId"`
@@ -31,4 +35,5 @@ type Payload struct {
 	ResourceType string `json:"resourceType"`
 	CloudType    string `json:"cloudType"`
 	Data         string `json:"data"`
+	CaptureTime  meta_v1.Time
 }

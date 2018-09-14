@@ -57,6 +57,7 @@ type Event struct {
 	eventType    string
 	resourceType string
 	data         interface{}
+	captureTime  meta_v1.Time
 }
 
 // TestCrdFlow executes the CRD flow.
@@ -327,6 +328,7 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 			newEvent.key, err = cache.MetaNamespaceKeyFunc(obj)
 			newEvent.eventType = Create
 			newEvent.resourceType = resourceType
+			newEvent.captureTime = meta_v1.Now()
 			log.Printf("Processing add to %v: %s", resourceType, newEvent.key)
 			if err == nil {
 				queue.Add(newEvent)
@@ -347,6 +349,7 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 			newEvent.eventType = Delete
 			newEvent.resourceType = resourceType
 			newEvent.data = obj
+			newEvent.captureTime = meta_v1.Now()
 			log.Printf("Processing delete to %v: %s", resourceType, newEvent.key)
 			if err == nil {
 				queue.Add(newEvent)
@@ -425,7 +428,7 @@ func (c *Controller) processItem(newEvent Event) error {
 			log.Errorf("Error marshalling object %s", obj)
 		}
 		payload := &Payload{Key: newEvent.key, EventType: newEvent.eventType, ResourceType: newEvent.resourceType,
-			CloudType: "aws", Data: string(str)}
+			CloudType: "aws", Data: string(str), CaptureTime: newEvent.captureTime}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	case Update:
@@ -437,7 +440,7 @@ func (c *Controller) processItem(newEvent Event) error {
 			log.Errorf("Error marshalling object %s", newEvent.data)
 		}
 		payload := &Payload{Key: newEvent.key, EventType: newEvent.eventType, ResourceType: newEvent.resourceType,
-			CloudType: "aws", Data: string(str)}
+			CloudType: "aws", Data: string(str), CaptureTime: newEvent.captureTime}
 		c.conf.RingBuffer.Put(payload)
 		return nil
 	}
