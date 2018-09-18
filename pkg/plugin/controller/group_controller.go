@@ -102,6 +102,7 @@ func PrintGroup(group *crd.Group) {
 	fmt.Printf("             %-30s%.2f\n", "Memory Limit(GB):", pitGroupMetrics.MemoryLimit)
 	fmt.Printf("             %-30s%.2f\n", "CPU Request(vCPU):", pitGroupMetrics.CPURequest)
 	fmt.Printf("             %-30s%.2f\n", "Memory Request(GB):", pitGroupMetrics.MemoryRequest)
+	fmt.Printf("             %-30s%.2f\n", "Storage Claimed(GB):", pitGroupMetrics.StorageClaimed)
 
 	fmt.Println()
 	fmt.Printf("%-30s\n", "Month to Date Active Resource Stats:")
