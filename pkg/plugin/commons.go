@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -98,4 +99,10 @@ func projectToMonth(val float64) float64 {
 
 func bytesToGB(val int64) float64 {
 	return float64(val) / (1024.0 * 1024.0 * 1024.0)
+}
+
+func addResourceAToResourceB(resA, resB *resource.Quantity) {
+	if resA != nil {
+		resB.Add(*resA)
+	}
 }
