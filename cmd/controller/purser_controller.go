@@ -38,6 +38,7 @@ func init() {
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BufferSize, Mutex: &sync.Mutex{}}
 	// initialize client for api extension server
 	conf.Groupcrdclient, conf.Subscriberclient = controller.GetAPIExtensionClient()
+	conf.Kubeclient = controller.GetKubeclient()
 }
 
 func setlogFile() {

@@ -25,7 +25,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/client"
 	"github.com/vmware/purser/pkg/controller/crd"
-
 	"github.com/vmware/purser/pkg/controller/metrics"
 	api_v1 "k8s.io/api/core/v1"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -263,6 +262,12 @@ func updatePodDetails(group *crd.Group, pod api_v1.Pod, payload Payload) {
 			// by the time controller gets to this part of the code the object(pod) might have been
 			// removed from etcd.
 			existingPodDetails.EndTime = *pod.GetDeletionTimestamp()
+			pvcHandlePodDeletion(existingPodDetails)
+		} else if payload.EventType == Update {
+			// TODO: handle all pod updates
+
+			// handle pod pvc updates
+			*existingPodDetails = updatePodVolumeClaims(pod, *existingPodDetails, payload.CaptureTime)
 		}
 	} else {
 		if payload.EventType == Create {
@@ -273,11 +278,17 @@ func updatePodDetails(group *crd.Group, pod api_v1.Pod, payload Payload) {
 				containers = append(containers, container)
 			}
 			newPodDetails.Containers = containers
+			newPodDetails = updatePodVolumeClaims(pod, newPodDetails, pod.GetCreationTimestamp())
 			podDetails[podKey] = &newPodDetails
 		} else if payload.EventType == Delete {
 			// TODO:
 			// This case means we have lost a Create event for this pod.
 			// If we can retrieve pod details(metrics and creation time) then we can
+			// include that in podDetails
+		} else if payload.EventType == Update {
+			// TODO:
+			// This case means we have lost a Create event for this pod.
+			// We can retrieve pod details(metrics and creation time) then we can
 			// include that in podDetails
 		}
 	}
