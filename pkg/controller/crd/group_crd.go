@@ -60,16 +60,34 @@ type GroupSpec struct {
 
 // PodDetails information
 type PodDetails struct {
-	Name       string
-	StartTime  meta_v1.Time
-	EndTime    meta_v1.Time
-	Containers []*Container
+	Name            string
+	StartTime       meta_v1.Time
+	EndTime         meta_v1.Time
+	Containers      []*Container
+	PodVolumeClaims map[string]*PersistentVolumeClaim
 }
 
 // Container information
 type Container struct {
 	Name    string
 	Metrics *metrics.Metrics
+}
+
+// PersistentVolumeClaim information
+// A PVC can bound and unbound to a pod many times, so maintaining
+// BoundTimes and UnboundTimes as lists.
+// A PVC can be upgraded or downgraded, so maintaining capacityAllocated as a list
+// Whenever a PVC capacity changes will update UnboundTime for old capacity, and
+// append new capacity to capacityAllocated with bound time appended to BoundTimes
+// The i-th capacity alloacted corresponds to the i-th bound time and to i-th unbound time.
+// Similarly for RequestSizeInGB
+type PersistentVolumeClaim struct {
+	Name                string
+	VolumeName          string
+	RequestSizeInGB     []float64
+	CapacityAllotedInGB []float64
+	BoundTimes          []meta_v1.Time
+	UnboundTimes        []meta_v1.Time
 }
 
 // GroupStatus information

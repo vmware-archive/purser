@@ -78,8 +78,8 @@ func collectPersistentVolumeClaim(claimName string) *PersistentVolumeClaim {
 			name:                pvc.GetObjectMeta().GetName(),
 			volumeName:          pvc.Spec.VolumeName,
 			storageClass:        pvc.Spec.StorageClassName,
-			requestSizeInGB:     (float64)(request.Value()) / (float64)(1024.0*1024.0*1024.0),
-			capacityAllotedInGB: (float64)(capacity.Value()) / (float64)(1024.0*1024.0*1024.0),
+			requestSizeInGB:     bytesToGB(request.Value()),
+			capacityAllotedInGB: bytesToGB(capacity.Value()),
 		}
 	}
 }
