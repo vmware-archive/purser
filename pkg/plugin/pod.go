@@ -58,18 +58,10 @@ func getPodDetailsFromClient(podName string) *Pod {
 	} else if err != nil {
 		panic(err.Error())
 	} else {
-		podVolumes := []*string{}
-		for j := 0; j < len(pod.Spec.Volumes); j++ {
-			vol := pod.Spec.Volumes[j]
-			if vol.PersistentVolumeClaim != nil {
-				podVolumes = append(podVolumes, &vol.PersistentVolumeClaim.ClaimName)
-			}
-		}
-
 		return &Pod{
 			name:     pod.GetObjectMeta().GetName(),
 			nodeName: pod.Spec.NodeName,
-			pvcs:     podVolumes,
+			pvcs:     getPodVolumes(pod),
 		}
 	}
 }

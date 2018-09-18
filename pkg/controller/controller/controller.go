@@ -43,6 +43,9 @@ import (
 	"k8s.io/client-go/util/workqueue"
 )
 
+// Kubeclient is kubernetes Clientset
+var Kubeclient *kubernetes.Clientset
+
 // Controller holds Kubernetes controller components
 type Controller struct {
 	clientset kubernetes.Interface
@@ -71,10 +74,8 @@ func TestCrdFlow() {
 	<-sigterm
 }
 
-// Start runs the controller goroutine.
-// nolint: gocyclo, interfacer
-func Start(conf *config.Config) {
-
+// GetKubeclient returns kubernetes clientset
+func GetKubeclient() *kubernetes.Clientset {
 	var kubeClient *kubernetes.Clientset
 	_, err := rest.InClusterConfig()
 	if err != nil {
@@ -82,15 +83,22 @@ func Start(conf *config.Config) {
 	} else {
 		kubeClient = utils.GetClient()
 	}
+	return kubeClient
+}
+
+// Start runs the controller goroutine.
+// nolint: gocyclo, interfacer
+func Start(conf *config.Config) {
+	Kubeclient = conf.Kubeclient
 
 	if conf.Resource.Pod {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.CoreV1().Pods(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.CoreV1().Pods(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.CoreV1().Pods(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.CoreV1().Pods(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&api_v1.Pod{},
@@ -98,7 +106,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "Pod")
+		c := newResourceController(Kubeclient, informer, "Pod")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -110,10 +118,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.CoreV1().Nodes().List(options)
+					return Kubeclient.CoreV1().Nodes().List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.CoreV1().Nodes().Watch(options)
+					return Kubeclient.CoreV1().Nodes().Watch(options)
 				},
 			},
 			&api_v1.Node{},
@@ -121,7 +129,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "Node")
+		c := newResourceController(Kubeclient, informer, "Node")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -133,10 +141,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.CoreV1().PersistentVolumes().List(options)
+					return Kubeclient.CoreV1().PersistentVolumes().List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.CoreV1().PersistentVolumes().Watch(options)
+					return Kubeclient.CoreV1().PersistentVolumes().Watch(options)
 				},
 			},
 			&api_v1.PersistentVolume{},
@@ -144,7 +152,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "PersistentVolume")
+		c := newResourceController(Kubeclient, informer, "PersistentVolume")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -156,10 +164,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.CoreV1().PersistentVolumeClaims(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.CoreV1().PersistentVolumeClaims(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.CoreV1().PersistentVolumeClaims(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.CoreV1().PersistentVolumeClaims(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&api_v1.PersistentVolumeClaim{},
@@ -167,7 +175,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "PersistentVolumeClaim")
+		c := newResourceController(Kubeclient, informer, "PersistentVolumeClaim")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -179,10 +187,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.CoreV1().Services(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.CoreV1().Services(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.CoreV1().Services(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.CoreV1().Services(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&api_v1.Service{},
@@ -190,7 +198,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "Service")
+		c := newResourceController(Kubeclient, informer, "Service")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -202,10 +210,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.ExtensionsV1beta1().ReplicaSets(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.ExtensionsV1beta1().ReplicaSets(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.ExtensionsV1beta1().ReplicaSets(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.ExtensionsV1beta1().ReplicaSets(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&ext_v1beta1.ReplicaSet{},
@@ -213,7 +221,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "ReplicaSet")
+		c := newResourceController(Kubeclient, informer, "ReplicaSet")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -225,10 +233,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.ExtensionsV1beta1().DaemonSets(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.ExtensionsV1beta1().DaemonSets(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.ExtensionsV1beta1().DaemonSets(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.ExtensionsV1beta1().DaemonSets(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&ext_v1beta1.DaemonSet{},
@@ -236,7 +244,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "DaemonSet")
+		c := newResourceController(Kubeclient, informer, "DaemonSet")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -248,10 +256,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.AppsV1beta1().Deployments(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.AppsV1beta1().Deployments(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.AppsV1beta1().Deployments(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.AppsV1beta1().Deployments(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&apps_v1beta1.Deployment{},
@@ -259,7 +267,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "Deployment")
+		c := newResourceController(Kubeclient, informer, "Deployment")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -271,10 +279,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.AppsV1beta1().StatefulSets(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.AppsV1beta1().StatefulSets(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.AppsV1beta1().StatefulSets(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.AppsV1beta1().StatefulSets(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&apps_v1beta1.StatefulSet{},
@@ -282,7 +290,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "StatefulSet")
+		c := newResourceController(Kubeclient, informer, "StatefulSet")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -294,10 +302,10 @@ func Start(conf *config.Config) {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
 				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
-					return kubeClient.BatchV1().Jobs(meta_v1.NamespaceAll).List(options)
+					return Kubeclient.BatchV1().Jobs(meta_v1.NamespaceAll).List(options)
 				},
 				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
-					return kubeClient.BatchV1().Jobs(meta_v1.NamespaceAll).Watch(options)
+					return Kubeclient.BatchV1().Jobs(meta_v1.NamespaceAll).Watch(options)
 				},
 			},
 			&batch_v1.Job{},
@@ -305,7 +313,7 @@ func Start(conf *config.Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(kubeClient, informer, "Job")
+		c := newResourceController(Kubeclient, informer, "Job")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
@@ -364,6 +372,7 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 	}
 }
 
+// Run
 func (c *Controller) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()

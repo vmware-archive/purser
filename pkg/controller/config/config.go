@@ -20,6 +20,7 @@ package config
 import (
 	"github.com/vmware/purser/pkg/controller/buffering"
 	"github.com/vmware/purser/pkg/controller/client"
+	"k8s.io/client-go/kubernetes"
 )
 
 // Resource contains resource configuration
@@ -42,4 +43,5 @@ type Config struct {
 	RingBuffer       *buffering.RingBuffer
 	Groupcrdclient   *client.GroupCrdClient
 	Subscriberclient *client.SubscriberCrdClient
+	Kubeclient       *kubernetes.Clientset
 }
