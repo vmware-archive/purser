@@ -43,14 +43,12 @@ Currenty the below list of commands are supported for the Purser plugin.
 kubectl plugin purser get [summary|savings]
 
 # Query resources filtered by associated namespace, labels and groups.
-kubectl plugin purser get resources namespace <Namespace>
-kubectl plugin purser get resources label <key=val>
 kubectl plugin purser get resources group <group-name>
 
 # Query cost filtered by associated labels, pods and node.
 kubectl plugin purser get cost label <key=val>
 kubectl plugin purser get cost pod <pod name>
-kubectl plugin purser get cost node <node name>
+kubectl plugin purser get cost node all
 
 # Configure user-costs for the choice of deployment.
 kubectl plugin purser [set|get] user-costs
