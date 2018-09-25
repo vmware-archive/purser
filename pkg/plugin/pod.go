@@ -59,9 +59,11 @@ func getPodDetailsFromClient(podName string) *Pod {
 		panic(err.Error())
 	} else {
 		return &Pod{
-			name:     pod.GetObjectMeta().GetName(),
-			nodeName: pod.Spec.NodeName,
-			pvcs:     getPodVolumes(pod),
+			name:       pod.GetObjectMeta().GetName(),
+			nodeName:   pod.Spec.NodeName,
+			pvcs:       getPodVolumes(pod),
+			podMetrics: metrics.CalculatePodStatsFromContainers([]v1.Pod{*pod}),
+			startTime:  *pod.Status.StartTime,
 		}
 	}
 }

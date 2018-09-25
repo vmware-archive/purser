@@ -181,12 +181,10 @@ func init() {
 func printHelp() {
 	fmt.Printf("Try one of the following commands...\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get summary\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources namespace <Namespace>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources label <key=val>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources group <group-name>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost node <node name>\n")
+	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost node all\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser set user-costs\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get user-costs\n")
 	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get savings\n")

@@ -8,11 +8,9 @@ Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration 
 ```
 kubectl plugin purser get summary
 kubectl plugin purser get savings
-kubectl plugin purser get resources namespace <Namespace>
-kubectl plugin purser get resources label <key=val>
 kubectl plugin purser get cost label <key=val>
 kubectl plugin purser get cost pod <pod name>
-kubectl plugin purser get cost node <node name>
+kubectl plugin purser get cost node all
 kubectl plugin purser set user-costs
 kubectl plugin purser get user-costs
 ```
