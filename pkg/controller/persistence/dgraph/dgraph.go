@@ -55,7 +55,7 @@ func CreateSchema() error {
 func GetUId(dg *dgo.Dgraph, id string, nodeType string) (string, error) {
 
 	query := `query Me($id:string, $nodeType:string) {
-		me(func: eq(xid, $id)) @filter(has(` + nodeType + `)) {
+		getUid(func: eq(xid, $id)) @filter(has(` + nodeType + `)) {
 			uid
 		}
 	}`
@@ -71,7 +71,7 @@ func GetUId(dg *dgo.Dgraph, id string, nodeType string) (string, error) {
 	}
 
 	type Root struct {
-		Me []ID `json:"me"`
+		IDs []ID `json:"getUid"`
 	}
 
 	var r Root
@@ -80,11 +80,11 @@ func GetUId(dg *dgo.Dgraph, id string, nodeType string) (string, error) {
 		return "", err
 	}
 
-	if len(r.Me) == 0 {
+	if len(r.IDs) == 0 {
 		return "", fmt.Errorf("id %s is not in dgraph", id)
 	}
 
-	return r.Me[0].UID, nil
+	return r.IDs[0].UID, nil
 }
 
 func MutateNode(dg *dgo.Dgraph, n []byte) error {

@@ -31,6 +31,9 @@ func ProcessEvents(conf *config.Config) {
 				break
 			}
 
+			// Persist in dgraph
+			//PersistPayloads(data)
+
 			// Post data to subscribers.
 			NotifySubscribers(data, subscribers)
 
