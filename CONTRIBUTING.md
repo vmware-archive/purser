@@ -17,6 +17,7 @@ know the fix or a workaround include that too.
 - Install [git](https://git-scm.com/downloads)
 - Install [Go](https://golang.org/dl/) version at least 1.7
 - Set GOPATH environment variable. [https://github.com/golang/go/wiki/SettingGOPATH](https://github.com/golang/go/wiki/SettingGOPATH)
+- Add GOPATH/bin in system PATH variable
 
 ## Code Contribution Flow
 
@@ -76,7 +77,7 @@ repo as the upstream remote repository.
 
 ``` shell
 # (go to directory $GOPATH/src/github.com/vmware)
-cd $GOPATH/github.com/vmware
+cd $GOPATH/src/github.com/vmware
 # (clone the forked repository)
 git clone https://github.com/<your-github-id>/purser.git
 # (go to purser directory)
