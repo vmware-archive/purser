@@ -23,7 +23,7 @@ import (
 )
 
 // Helper implementation for testing dgraph persistence.
-func main() {
+func main1() {
 	fmt.Println("Hello World")
 	dgraph.Open("127.0.0.1:9080")
 	err := dgraph.CreateSchema()

@@ -43,7 +43,7 @@ type Pod struct {
 	StartTime  time.Time    `json:"startTime,omitempty"`
 	EndTime    time.Time    `json:"endTime,omitempty"`
 	Containers []*Container `json:"containers,omitempty"`
-	Interacts  []*Pod       `json:interacts,omitempty`
+	Interacts  []*Pod       `json:"interacts,omitempty"`
 }
 
 type Container struct {
@@ -132,6 +132,7 @@ func PersistPodsInteractionGraph(sourcePod string, destinationPods []string) err
 	}
 	if uid == "" {
 		log.Println("Source Pod " + sourcePod + " is not persisted yet.")
+		return nil
 	}
 
 	pods := []*Pod{}

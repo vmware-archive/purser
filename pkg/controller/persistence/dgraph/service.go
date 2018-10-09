@@ -66,6 +66,7 @@ func PersistServicesInteractionGraph(sourceService string, destinationServices [
 	}
 	if uid == "" {
 		log.Println("Source Service " + sourceService + " is not persisted yet.")
+		return nil
 	}
 
 	services := []*Service{}
