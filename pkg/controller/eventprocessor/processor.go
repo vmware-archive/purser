@@ -3,9 +3,13 @@ package eventprocessor
 import (
 	"time"
 
+	"encoding/json"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/config"
 	"github.com/vmware/purser/pkg/controller/controller"
+	"github.com/vmware/purser/pkg/controller/persistence/dgraph"
+	api_v1 "k8s.io/api/core/v1"
 )
 
 // ProcessEvents processes the event and notifies the subscribers.
@@ -20,11 +24,6 @@ func ProcessEvents(conf *config.Config) {
 			subscribers := getSubscribers(conf)
 			groups := controller.GetAllGroups(conf.Groupcrdclient)
 
-			if len(subscribers) == 0 && len(groups) == 0 {
-				// Avoid processing events if there are no groups and subscribers.
-				break
-			}
-
 			data, size := conf.RingBuffer.ReadN(ReadSize)
 
 			if size == 0 {
@@ -32,15 +31,48 @@ func ProcessEvents(conf *config.Config) {
 				break
 			}
 
+			// Persist in dgraph
+			//PersistPayloads(data)
+
 			// Post data to subscribers.
 			NotifySubscribers(data, subscribers)
 
 			// Update user created groups.
 			controller.UpdateCustomGroups(data, groups, conf.Groupcrdclient)
 
+			// Persist in dgraph
+			PersistPayloads(data)
+
 			conf.RingBuffer.RemoveN(size)
 			conf.RingBuffer.PrintDetails()
 		}
 		time.Sleep(10 * time.Second)
+	}
+}
+
+func PersistPayloads(payloads []*interface{}) {
+	for _, event := range payloads {
+		payload := (*event).(*controller.Payload)
+		if payload.ResourceType == "Pod" {
+			pod := api_v1.Pod{}
+			err := json.Unmarshal([]byte(payload.Data), &pod)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			err = dgraph.PersistPod(pod)
+			if err != nil {
+				log.Errorf("Error while persisting pod ", err)
+			}
+		} else if payload.ResourceType == "Service" {
+			service := api_v1.Service{}
+			err := json.Unmarshal([]byte(payload.Data), &service)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			err = dgraph.PersistService(service)
+			if err != nil {
+				log.Errorf("Error while persisting service ", err)
+			}
+		}
 	}
 }
