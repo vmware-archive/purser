@@ -40,9 +40,6 @@ func ProcessEvents(conf *config.Config) {
 			// Update user created groups.
 			controller.UpdateCustomGroups(data, groups, conf.Groupcrdclient)
 
-			// Persist in dgraph
-			PersistPayloads(data)
-
 			conf.RingBuffer.RemoveN(size)
 			conf.RingBuffer.PrintDetails()
 		}
