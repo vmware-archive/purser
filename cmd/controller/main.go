@@ -19,14 +19,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/vmware/purser/pkg/controller/persistence/dgraph"
+
+	"github.com/vmware/purser/pkg/persistence/dgraph"
 )
 
 // Helper implementation for testing dgraph persistence.
 func main1() {
 	fmt.Println("Hello World")
-	dgraph.Open("127.0.0.1:9080")
-	err := dgraph.CreateSchema()
+	err := dgraph.Open("127.0.0.1:9080")
+	if err != nil {
+		fmt.Println("Error while opening connection to Dgraph ", err)
+	}
+
+	err = dgraph.CreateSchema()
 	if err != nil {
 		fmt.Println("Error while creating schema ", err)
 	}
