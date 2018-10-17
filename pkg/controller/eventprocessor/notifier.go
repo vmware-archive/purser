@@ -38,8 +38,7 @@ type subscriber struct {
 	orgID    string
 }
 
-// NotifySubscribers notifies subscribers of the process event.
-func NotifySubscribers(payload []*interface{}, subscribers []*subscriber) {
+func notifySubscribers(payload []*interface{}, subscribers []*subscriber) {
 	if subscribers == nil {
 		return
 	}

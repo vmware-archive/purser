@@ -30,8 +30,7 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// UpdateCustomGroups modifies custom group deifinitions.
-func UpdateCustomGroups(payloads []*interface{}, groups []*groups_v1.Group, crdclient *groups_client_v1.GroupClient) {
+func updateCustomGroups(payloads []*interface{}, groups []*groups_v1.Group, crdclient *groups_client_v1.GroupClient) {
 
 	processPayload(groups, payloads)
 

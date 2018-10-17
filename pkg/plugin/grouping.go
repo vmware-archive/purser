@@ -119,12 +119,6 @@ func getPodComputeMetrics(podDetails *groups_v1.PodDetails) *metrics.Metrics {
 	}
 }
 
-func addResourceAToResourceB(resA, resB *resource.Quantity) {
-	if resA != nil {
-		resB.Add(*resA)
-	}
-}
-
 func getPodStorageMetrics(podDetails *groups_v1.PodDetails) (float64, float64) {
 	var podStorageAllocatedInGBHours, podActiveStorageAllocated float64
 	currentTime := getCurrentTime()

@@ -18,6 +18,7 @@
 package v1
 
 import (
+	"log"
 	"reflect"
 	"time"
 
@@ -32,8 +33,27 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-// CreateSubscriberCRD creates subscriber CRD.
-func CreateSubscriberCRD(clientset apiextcs.Interface) error {
+// NewSubscriberClient returns an instance of the Subscriber Client
+func NewSubscriberClient(clientset apiextcs.Interface, config *rest.Config) *SubscriberClient {
+	err := createSubscriberCRD(clientset)
+	if err != nil {
+		log.Fatalf("failed to create CRD subscriber %v", err)
+	}
+
+	// Wait for the CRD to be created before we use it (only needed if its a new one)
+	time.Sleep(3 * time.Second)
+
+	// Create a new clientset which include our CRD schema
+	crdcs, scheme, err := newClient(config)
+	if err != nil {
+		log.Fatalf("failed to add CRD subscriber schema to clientset %v", err)
+	}
+
+	// Create a CRD client interface
+	return NewSubscriber(crdcs, scheme, "default")
+}
+
+func createSubscriberCRD(clientset apiextcs.Interface) error {
 	crd := &apiextv1beta1.CustomResourceDefinition{
 		ObjectMeta: meta_v1.ObjectMeta{Name: subscriber_v1.SubscriberFullName},
 		Spec: apiextv1beta1.CustomResourceDefinitionSpec{
@@ -55,28 +75,7 @@ func CreateSubscriberCRD(clientset apiextcs.Interface) error {
 	return err
 }
 
-// NewSubscriberClient returns an instance of the Subscriber Client
-func NewSubscriberClient(clientset apiextcs.Interface, config *rest.Config) *SubscriberClient {
-	err := CreateSubscriberCRD(clientset)
-	if err != nil {
-		panic(err)
-	}
-
-	// Wait for the CRD to be created before we use it (only needed if its a new one)
-	time.Sleep(3 * time.Second)
-
-	// Create a new clientset which include our CRD schema
-	crdcs, scheme, err := NewClient(config)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create a CRD client interface
-	return NewSubscriber(crdcs, scheme, "default")
-}
-
-// NewClient returns a new instance of REST client.
-func NewClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
+func newClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
 	config := *cfg
 	scheme, err := setConfigDefaults(&config)
 	if err != nil {

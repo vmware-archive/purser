@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2018 VMware Inc. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package v1
 
 import (
@@ -12,11 +29,8 @@ var (
 	AddToScheme   = SchemeBuilder.AddToScheme
 )
 
-// GroupName is the group name use in this package
-const GroupName = "kuber.input"
-
 // SubscriberGroupVersion is group version used to register these objects
-var SubscriberGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1"}
+var SubscriberGroupVersion = schema.GroupVersion{Group: SubscriberGroup, Version: SubscriberVersion}
 
 // Kind takes an unqualified kind and returns a Group qualified GroupKind
 func Kind(kind string) schema.GroupKind {
@@ -35,6 +49,5 @@ func AddKnownTypes(scheme *runtime.Scheme) error {
 		&SubscriberList{},
 	)
 	meta_v1.AddToGroupVersion(scheme, SubscriberGroupVersion)
-
 	return nil
 }

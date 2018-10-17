@@ -40,12 +40,12 @@ func init() {
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
-		log.Printf("failed to fetch kubeconfig %v", err)
+		log.Fatalf("failed to fetch kubeconfig %v", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Printf("failed to connect to the cluster %v", clientset)
+		log.Fatalf("failed to connect to the cluster %v", err)
 	}
 	plugin.ProvideClientSetInstance(clientset)
 

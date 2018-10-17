@@ -18,6 +18,7 @@
 package v1
 
 import (
+	"log"
 	"reflect"
 	"time"
 
@@ -32,8 +33,27 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-// CreateGroupCRD creates the CRD resource, ignore error if it already exists
-func CreateGroupCRD(clientset apiextcs.Interface) error {
+// NewGroupClient returns an instance of the Group Client
+func NewGroupClient(clientset apiextcs.Interface, config *rest.Config) *GroupClient {
+	err := createGroupCRD(clientset)
+	if err != nil {
+		log.Fatalf("failed to create CRD group %v", err)
+	}
+
+	// Wait for the CRD to be created before we use it (only needed if its a new one)
+	time.Sleep(3 * time.Second)
+
+	// Create a new clientset which include our CRD schema
+	gcrdcs, gscheme, err := newClient(config)
+	if err != nil {
+		log.Fatalf("failed to add CRD group schema to clientset %v", err)
+	}
+
+	// Create a CRD client interface
+	return NewGroup(gcrdcs, gscheme, "default")
+}
+
+func createGroupCRD(clientset apiextcs.Interface) error {
 	crd := &apiextv1beta1.CustomResourceDefinition{
 		ObjectMeta: meta_v1.ObjectMeta{Name: groups_v1.FullCRDName},
 		Spec: apiextv1beta1.CustomResourceDefinitionSpec{
@@ -53,33 +73,9 @@ func CreateGroupCRD(clientset apiextcs.Interface) error {
 		return nil
 	}
 	return err
-
-	// Note the original apiextensions example adds logic to wait for creation and exception handling
 }
 
-// NewGroupClient ...
-func NewGroupClient(clientset apiextcs.Interface, config *rest.Config) *GroupClient {
-	// note: if the CRD exist our CreateGroupCRD function is set to exit without an error
-	err := CreateGroupCRD(clientset)
-	if err != nil {
-		panic(err)
-	}
-
-	// Wait for the CRD to be created before we use it (only needed if its a new one)
-	time.Sleep(3 * time.Second)
-
-	// Create a new clientset which include our CRD schema
-	gcrdcs, gscheme, err := NewClient(config)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create a CRD client interface
-	return NewGroup(gcrdcs, gscheme, "default")
-}
-
-// NewClient returns a new instance of REST client.
-func NewClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
+func newClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) {
 	config := *cfg
 	scheme, err := setConfigDefaults(&config)
 	if err != nil {
@@ -97,7 +93,7 @@ func setConfigDefaults(config *rest.Config) (*runtime.Scheme, error) {
 	scheme := runtime.NewScheme()
 	SchemeBuilder := runtime.NewSchemeBuilder(groups_v1.AddKnownTypes)
 	if err := SchemeBuilder.AddToScheme(scheme); err != nil {
-		return nil, nil
+		return nil, err
 	}
 	config.GroupVersion = &groups_v1.SchemeGroupVersion
 	config.APIPath = "/apis"

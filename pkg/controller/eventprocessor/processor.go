@@ -34,10 +34,10 @@ func ProcessEvents(conf *controller.Config) {
 			//PersistPayloads(data)
 
 			// Post data to subscribers.
-			NotifySubscribers(data, subscribers)
+			notifySubscribers(data, subscribers)
 
 			// Update user created groups.
-			UpdateCustomGroups(data, groups, conf.Groupcrdclient)
+			updateCustomGroups(data, groups, conf.Groupcrdclient)
 
 			conf.RingBuffer.RemoveN(size)
 			conf.RingBuffer.PrintDetails()
