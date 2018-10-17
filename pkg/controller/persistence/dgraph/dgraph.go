@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -84,7 +85,7 @@ func CreateSchema() error {
 }
 
 // GetUID returns the UID of the node in the Dgraph
-func GetUID(dg *dgo.Dgraph, id string, nodeType string) (string, error) {
+func GetUID(dg *dgo.Dgraph, id string, nodeType string) string {
 
 	query := `query Me($id:string, $nodeType:string) {
 		getUid(func: eq(xid, $id)) @filter(has(` + nodeType + `)) {
@@ -99,24 +100,10 @@ func GetUID(dg *dgo.Dgraph, id string, nodeType string) (string, error) {
 
 	resp, err := dg.NewReadOnlyTxn().QueryWithVars(ctx, query, variables)
 	if err != nil {
-		return "", err
+		log.Printf("failed to fetch UID from Dgraph %v", err)
+		return ""
 	}
-
-	type Root struct {
-		IDs []ID `json:"getUid"`
-	}
-
-	var r Root
-	err = json.Unmarshal(resp.Json, &r)
-	if err != nil {
-		return "", err
-	}
-
-	if len(r.IDs) == 0 {
-		return "", fmt.Errorf("id %s is not in dgraph", id)
-	}
-
-	return r.IDs[0].UID, nil
+	return unmarshalDgraphResponse(resp, id)
 }
 
 // MutateNode mutates a Dgraph transaction
@@ -128,4 +115,24 @@ func MutateNode(dg *dgo.Dgraph, n []byte) (*api.Assigned, error) {
 	mu.SetJson = n
 	ctx := context.Background()
 	return dg.NewTxn().Mutate(ctx, mu)
+}
+
+func unmarshalDgraphResponse(resp *api.Response, id string) string {
+	type Root struct {
+		IDs []ID `json:"getUid"`
+	}
+
+	var r Root
+	err := json.Unmarshal(resp.Json, &r)
+	if err != nil {
+		log.Printf("failed to marshal Dgraph response %v", err)
+		return ""
+	}
+
+	if len(r.IDs) == 0 {
+		log.Printf("id %s is not in dgraph", id)
+		return ""
+	}
+
+	return r.IDs[0].UID
 }

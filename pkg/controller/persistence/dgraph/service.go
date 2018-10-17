@@ -44,10 +44,7 @@ type Service struct {
 // PersistService create a new node in the Dgraph or if it exists updates the original node
 func PersistService(service api_v1.Service) error {
 	xid := service.Namespace + ":" + service.Name
-	uid, err := GetUID(Client, xid, IsService)
-	if err != nil {
-		return err
-	}
+	uid := GetUID(Client, xid, IsService)
 
 	if uid == "" {
 		newService := Service{
@@ -67,10 +64,7 @@ func PersistService(service api_v1.Service) error {
 
 // PersistServicesInteractionGraph stores the service interaction data in the Dgraph
 func PersistServicesInteractionGraph(sourceService string, destinationServices []string) error {
-	uid, err := GetUID(Client, sourceService, IsService)
-	if err != nil {
-		return err
-	}
+	uid := GetUID(Client, sourceService, IsService)
 	if uid == "" {
 		log.Println("Source Service " + sourceService + " is not persisted yet.")
 		return nil
@@ -78,11 +72,7 @@ func PersistServicesInteractionGraph(sourceService string, destinationServices [
 
 	services := []*Service{}
 	for _, destinationService := range destinationServices {
-		uid, err = GetUID(Client, destinationService, IsService)
-		if err != nil {
-			return err
-		}
-
+		uid = GetUID(Client, destinationService, IsService)
 		if uid == "" {
 			continue
 		}
