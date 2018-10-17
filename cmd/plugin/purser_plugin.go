@@ -22,17 +22,17 @@ import (
 	"fmt"
 	"log"
 	"os"
-
 	"strings"
 
 	"github.com/vmware/purser/pkg/client"
 	groups_client_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
 	"github.com/vmware/purser/pkg/plugin"
+
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-var crdclient *groups_client_v1.GroupClient
+var groupClient *groups_client_v1.GroupClient
 
 func init() {
 	kubeconfig := flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), "path to Kubernetes config file")
@@ -40,23 +40,21 @@ func init() {
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
-		panic(err.Error())
+		log.Printf("failed to fetch kubeconfig %v", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		log.Printf("failed to connect to the cluster %v", clientset)
 	}
 	plugin.ProvideClientSetInstance(clientset)
 
-	// Crd client
 	client, clusterConfig := client.GetAPIExtensionClient()
-	crdclient = groups_client_v1.NewGroupClient(client, clusterConfig)
+	groupClient = groups_client_v1.NewGroupClient(client, clusterConfig)
 }
 
 func main() {
-	inputs := os.Args[1:]
-	inputs = inputs[1:]
+	inputs := os.Args[2:] // index 1 is empty
 	if len(inputs) == 4 && inputs[0] == Get {
 		computeMetricInsight(inputs)
 	} else if len(inputs) == 2 {
@@ -76,57 +74,57 @@ func computeMetricInsight(inputs []string) {
 }
 
 func computeCost(inputs []string) {
-	if inputs[2] == Label {
+	switch inputs[2] {
+	case Label:
 		plugin.GetPodsCostForLabel(inputs[3])
-	} else if inputs[2] == Pod {
+	case Pod:
 		plugin.GetPodCost(inputs[3])
-	} else if inputs[2] == Node {
+	case Node:
 		plugin.GetAllNodesCost()
-	} else {
+	default:
 		printHelp()
 	}
 }
 
 func fetchResource(inputs []string) {
-	if inputs[2] == Namespace {
-		group := plugin.GetGroupByName(crdclient, inputs[3])
+	switch inputs[2] {
+	case Namespace:
+		group := plugin.GetGroupByName(groupClient, inputs[3])
 		if group != nil {
 			plugin.PrintGroup(group)
 		} else {
 			fmt.Printf("Group %s is not present\n", inputs[3])
 		}
-	} else if inputs[2] == Label {
+	case Label:
 		if !strings.Contains(inputs[3], "=") {
 			printHelp()
 		}
-		group := plugin.GetGroupByName(crdclient, createGroupNameFromLabel(inputs[3]))
+		group := plugin.GetGroupByName(groupClient, createGroupNameFromLabel(inputs[3]))
 		if group != nil {
 			plugin.PrintGroup(group)
 		} else {
 			fmt.Printf("Group %s is not present\n", inputs[3])
 		}
-	} else if inputs[2] == Group {
-		group := plugin.GetGroupByName(crdclient, inputs[3])
+	case Group:
+		group := plugin.GetGroupByName(groupClient, inputs[3])
 		if group != nil {
 			plugin.PrintGroup(group)
 		} else {
 			fmt.Printf("No group with name: %s\n", inputs[3])
 		}
-	} else {
+	default:
 		printHelp()
 	}
 }
 
 func createGroupNameFromLabel(input string) string {
 	inp := strings.Split(input, "=")
-	key := inp[0]
-	val := inp[1]
+	key, val := inp[0], inp[1]
 	groupName := key + "." + val
 	if strings.Contains(groupName, "/") {
 		groupName = strings.Replace(groupName, "/", "-", -1)
 	}
-	groupName = strings.ToLower(groupName)
-	return groupName
+	return strings.ToLower(groupName)
 }
 
 func computeStats(inputs []string) {
@@ -134,29 +132,30 @@ func computeStats(inputs []string) {
 	case Get:
 		getStats(inputs)
 	case Set:
-		setStats(inputs)
+		inputUserCosts(inputs)
 	default:
 		printHelp()
 	}
 }
 
 func getStats(inputs []string) {
-	if inputs[1] == "summary" {
+	switch inputs[1] {
+	case "summary":
 		plugin.GetClusterSummary()
-	} else if inputs[1] == "savings" {
+	case "savings":
 		plugin.GetSavings()
-	} else if inputs[1] == "user-costs" {
+	case "user-costs":
 		price := plugin.GetUserCosts()
 		fmt.Printf("cpu cost per CPU per hour:\t %f$\nmem cost per GB per hour:\t %f$\nstorage cost per GB per hour:\t %f$\n",
 			price.CPU,
 			price.Memory,
 			price.Storage)
-	} else {
+	default:
 		printHelp()
 	}
 }
 
-func setStats(inputs []string) {
+func inputUserCosts(inputs []string) {
 	if inputs[1] == "user-costs" {
 		fmt.Printf("Enter CPU cost per cpu per hour:\t ")
 		var cpuCostPerCPUPerHour string
@@ -180,19 +179,21 @@ func setStats(inputs []string) {
 }
 
 func printHelp() {
-	fmt.Printf("Try one of the following commands...\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get summary\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get resources group <group-name>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost label <key=val>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost pod <pod name>\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get cost node all\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser set user-costs\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get user-costs\n")
-	fmt.Printf("kubectl --kubeconfig=<absolute path to config> plugin purser get savings\n")
+	pluginExt := "kubectl --kubeconfig=<absolute path to config> plugin purser "
+
+	fmt.Println("Try one of the following commands...")
+	fmt.Println(pluginExt + "get summary")
+	fmt.Println(pluginExt + "get resources group <group-name>")
+	fmt.Println(pluginExt + "get cost label <key=val>")
+	fmt.Println(pluginExt + "get cost pod <pod name>")
+	fmt.Println(pluginExt + "get cost node all")
+	fmt.Println(pluginExt + "set user-costs")
+	fmt.Println(pluginExt + "get user-costs")
+	fmt.Println(pluginExt + "get savings")
 }
 
 func logError(err error) {
 	if err != nil {
-		log.Printf("%+v", err)
+		log.Printf("failed to read user input %+v", err)
 	}
 }
