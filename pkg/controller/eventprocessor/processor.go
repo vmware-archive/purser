@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/vmware/purser/pkg/controller"
-	"github.com/vmware/purser/pkg/persistence/dgraph"
+	"github.com/vmware/purser/pkg/controller/persistence/dgraph"
 
 	log "github.com/Sirupsen/logrus"
 	api_v1 "k8s.io/api/core/v1"

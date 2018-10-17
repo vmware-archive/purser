@@ -20,7 +20,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/vmware/purser/pkg/persistence/dgraph"
+	"github.com/vmware/purser/pkg/controller/persistence/dgraph"
 )
 
 // Helper implementation for testing dgraph persistence.
