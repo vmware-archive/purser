@@ -23,26 +23,32 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/config"
-	"github.com/vmware/purser/pkg/controller/controller"
+	"github.com/vmware/purser/pkg/controller"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ReadSize defines the default payload read size
 const ReadSize uint32 = 50
 
-// NotifySubscribers notifies subscribers of the process event.
-func NotifySubscribers(payload []*interface{}, subscribers []*subscriber) {
+type subscriber struct {
+	url      string
+	authType string
+	authCode string
+	cluster  string
+	orgID    string
+}
+
+func notifySubscribers(payload []*interface{}, subscribers []*subscriber) {
 	if subscribers == nil {
 		return
 	}
 
 	for _, subscriber := range subscribers {
-		sendData(payload, subscriber)
+		subscriber.sendData(payload)
 	}
 }
 
-func sendData(payload []*interface{}, subscriber *subscriber) {
+func (subscriber *subscriber) sendData(payload []*interface{}) {
 	payloadWrapper := controller.PayloadWrapper{Data: payload, OrgID: subscriber.orgID, Cluster: subscriber.cluster}
 	jsonStr, err := json.Marshal(payloadWrapper)
 	if err != nil {
@@ -55,7 +61,7 @@ func sendData(payload []*interface{}, subscriber *subscriber) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	setAuthHeaders(req, subscriber)
+	subscriber.setAuthHeaders(req)
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
@@ -70,7 +76,7 @@ func sendData(payload []*interface{}, subscriber *subscriber) {
 	}
 }
 
-func setAuthHeaders(r *http.Request, subscriber *subscriber) {
+func (subscriber *subscriber) setAuthHeaders(r *http.Request) {
 	//TODO: add support for other auth types.
 	if subscriber.authType != "" {
 		if subscriber.authType == "access-token" {
@@ -79,15 +85,7 @@ func setAuthHeaders(r *http.Request, subscriber *subscriber) {
 	}
 }
 
-type subscriber struct {
-	url      string
-	authType string
-	authCode string
-	cluster  string
-	orgID    string
-}
-
-func getSubscribers(conf *config.Config) []*subscriber {
+func getSubscribers(conf *controller.Config) []*subscriber {
 	subscribers := []*subscriber{}
 	list, err := conf.Subscriberclient.ListSubscriber(meta_v1.ListOptions{})
 	if err != nil {

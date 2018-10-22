@@ -15,12 +15,20 @@
  * limitations under the License.
  */
 
-package config
+package controller
 
 import (
+	groups_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
+	subscriber_v1 "github.com/vmware/purser/pkg/client/clientset/typed/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller/buffering"
-	"github.com/vmware/purser/pkg/controller/client"
 	"k8s.io/client-go/kubernetes"
+)
+
+// These are the event types supported for controllers
+const (
+	Create = "create"
+	Delete = "delete"
+	Update = "update"
 )
 
 // Resource contains resource configuration
@@ -41,7 +49,7 @@ type Resource struct {
 type Config struct {
 	Resource         Resource `json:"resource"`
 	RingBuffer       *buffering.RingBuffer
-	Groupcrdclient   *client.GroupCrdClient
-	Subscriberclient *client.SubscriberCrdClient
+	Groupcrdclient   *groups_v1.GroupClient
+	Subscriberclient *subscriber_v1.SubscriberClient
 	Kubeclient       *kubernetes.Clientset
 }

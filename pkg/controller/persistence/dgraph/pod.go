@@ -19,23 +19,27 @@ package dgraph
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
-	api_v1 "k8s.io/api/core/v1"
 	"github.com/dgraph-io/dgo/protos/api"
-	"log"
+
+	api_v1 "k8s.io/api/core/v1"
 )
 
+// Dgraph Model Constants
 const (
 	IsPod       = "isPod"
 	IsContainer = "isContainer"
 )
 
+// ID maps the external ID used in Dgraph to the UID
 type ID struct {
 	Xid string `json:"xid,omitempty"`
 	UID string `json:"uid,omitempty"`
 }
 
+// Pod defines the Pod structure for Dgraph
 type Pod struct {
 	ID
 	IsPod      bool         `json:"isPod,omitempty"`
@@ -46,6 +50,7 @@ type Pod struct {
 	Interacts  []*Pod       `json:"interacts,omitempty"`
 }
 
+// Container defines the Container structure for Dgraph
 type Container struct {
 	ID
 	IsContainer bool      `json:"isContainer,omitempty"`
@@ -55,6 +60,7 @@ type Container struct {
 	Pod         Pod       `json:"pod,omitempty"`
 }
 
+// CreatePod creates a new node for the pod in the Dgraph
 func CreatePod(pod api_v1.Pod, xid string) (*api.Assigned, error) {
 	newPod := Pod{
 		Name:  pod.Name,
@@ -68,9 +74,10 @@ func CreatePod(pod api_v1.Pod, xid string) (*api.Assigned, error) {
 	return MutateNode(Client, bytes)
 }
 
+// PersistPod updates the pod details and create it a new node if not exists.
 func PersistPod(pod api_v1.Pod) error {
 	xid := pod.Namespace + ":" + pod.Name
-	uid, _ := GetUId(Client, xid, IsPod)
+	uid := GetUID(Client, xid, IsPod)
 
 	var newPod Pod
 	if uid == "" {
@@ -97,13 +104,14 @@ func PersistPod(pod api_v1.Pod) error {
 	return err
 }
 
-func GetContainers(pod api_v1.Pod, podUid string) []*Container {
+// GetContainers fetchs the list of containers in given pod
+func GetContainers(pod api_v1.Pod, podUID string) []*Container {
 	podXid := pod.Namespace + ":" + pod.Name
 
 	containers := []*Container{}
 	for _, c := range pod.Spec.Containers {
 		containerXid := podXid + ":" + c.Name
-		uid, _ := GetUId(Client, containerXid, IsContainer)
+		uid := GetUID(Client, containerXid, IsContainer)
 
 		var container *Container
 		if uid == "" {
@@ -111,12 +119,12 @@ func GetContainers(pod api_v1.Pod, podUid string) []*Container {
 				ID:          ID{Xid: containerXid, UID: uid},
 				Name:        c.Name,
 				IsContainer: true,
-				Pod:         Pod{ID: ID{Xid: podXid, UID: podUid}},
+				Pod:         Pod{ID: ID{Xid: podXid, UID: podUID}},
 			}
 		} else {
 			container = &Container{
 				ID:  ID{Xid: containerXid, UID: uid},
-				Pod: Pod{ID: ID{Xid: podXid, UID: podUid}},
+				Pod: Pod{ID: ID{Xid: podXid, UID: podUID}},
 			}
 		}
 
@@ -125,11 +133,9 @@ func GetContainers(pod api_v1.Pod, podUid string) []*Container {
 	return containers
 }
 
+// PersistPodsInteractionGraph store the pod interactions in Dgraph
 func PersistPodsInteractionGraph(sourcePod string, destinationPods []string) error {
-	uid, err := GetUId(Client, sourcePod, IsPod)
-	if err != nil {
-		return err
-	}
+	uid := GetUID(Client, sourcePod, IsPod)
 	if uid == "" {
 		log.Println("Source Pod " + sourcePod + " is not persisted yet.")
 		return nil
@@ -137,11 +143,7 @@ func PersistPodsInteractionGraph(sourcePod string, destinationPods []string) err
 
 	pods := []*Pod{}
 	for _, destinationPod := range destinationPods {
-		uid, err := GetUId(Client, destinationPod, IsPod)
-		if err != nil {
-			return err
-		}
-
+		uid = GetUID(Client, destinationPod, IsPod)
 		if uid == "" {
 			continue
 		}
@@ -152,8 +154,8 @@ func PersistPodsInteractionGraph(sourcePod string, destinationPods []string) err
 		pods = append(pods, pod)
 	}
 	source := Pod{
-		ID: ID{UID: uid},
-		Interacts:	pods,
+		ID:        ID{UID: uid},
+		Interacts: pods,
 	}
 
 	bytes, err := json.Marshal(source)

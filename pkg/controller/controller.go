@@ -26,8 +26,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/config"
 	"github.com/vmware/purser/pkg/controller/utils"
+
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
 	api_v1 "k8s.io/api/core/v1"
@@ -51,7 +51,7 @@ type Controller struct {
 	clientset kubernetes.Interface
 	queue     workqueue.RateLimitingInterface
 	informer  cache.SharedIndexInformer
-	conf      *config.Config
+	conf      *Config
 }
 
 // Event indicate the informerEvent
@@ -61,17 +61,6 @@ type Event struct {
 	resourceType string
 	data         interface{}
 	captureTime  meta_v1.Time
-}
-
-// TestCrdFlow executes the CRD flow.
-func TestCrdFlow() {
-	_, subcrdclient := GetAPIExtensionClient()
-	ListSubscriberCrdInstances(subcrdclient)
-
-	sigterm := make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGTERM)
-	signal.Notify(sigterm, syscall.SIGINT)
-	<-sigterm
 }
 
 // GetKubeclient returns kubernetes clientset
@@ -88,7 +77,7 @@ func GetKubeclient() *kubernetes.Clientset {
 
 // Start runs the controller goroutine.
 // nolint: gocyclo, interfacer
-func Start(conf *config.Config) {
+func Start(conf *Config) {
 	Kubeclient = conf.Kubeclient
 
 	if conf.Resource.Pod {
@@ -372,7 +361,7 @@ func newResourceController(client kubernetes.Interface, informer cache.SharedInd
 	}
 }
 
-// Run
+// Run initiates the controller
 func (c *Controller) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()

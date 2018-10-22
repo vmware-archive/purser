@@ -22,23 +22,33 @@ import (
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/client"
+	group_client "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
+	subscriber_client "github.com/vmware/purser/pkg/client/clientset/typed/subscriber/v1"
+	"github.com/vmware/purser/pkg/controller"
 	"github.com/vmware/purser/pkg/controller/buffering"
-	"github.com/vmware/purser/pkg/controller/config"
-	"github.com/vmware/purser/pkg/controller/controller"
 	"github.com/vmware/purser/pkg/controller/eventprocessor"
 )
 
-var conf *config.Config
+var conf *controller.Config
 
 func init() {
 	setlogFile()
-	conf = &config.Config{}
-	conf.Resource = config.Resource{Pod: true, Node: true, PersistentVolume: true, PersistentVolumeClaim: true, ReplicaSet: true,
+	conf = &controller.Config{}
+	conf.Resource = controller.Resource{Pod: true, Node: true, PersistentVolume: true, PersistentVolumeClaim: true, ReplicaSet: true,
 		Deployment: true, StatefulSet: true, DaemonSet: true, Job: true, Service: true}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BufferSize, Mutex: &sync.Mutex{}}
+
 	// initialize client for api extension server
-	conf.Groupcrdclient, conf.Subscriberclient = controller.GetAPIExtensionClient()
+	clientset, clusterConfig := client.GetAPIExtensionClient()
+	conf.Groupcrdclient = group_client.NewGroupClient(clientset, clusterConfig)
+	conf.Subscriberclient = subscriber_client.NewSubscriberClient(clientset, clusterConfig)
 	conf.Kubeclient = controller.GetKubeclient()
+}
+
+func main() {
+	go eventprocessor.ProcessEvents(conf)
+	controller.Start(conf)
 }
 
 func setlogFile() {
@@ -48,9 +58,4 @@ func setlogFile() {
 	}
 	log.SetOutput(f)
 	log.SetLevel(log.InfoLevel)
-}
-
-func main() {
-	go eventprocessor.ProcessEvents(conf)
-	controller.Start(conf)
 }
