@@ -5,7 +5,7 @@ BIN := controller
 PRO := github.com/vmware/purser
 DEP := vendor
 BUILD := build
-PKG := pkg/controller
+PKG := pkg
 CMD := cmd/controller
 
 # Where to push the docker image.

@@ -19,14 +19,15 @@ package controller
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/crd"
+	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
+
 	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// activePodVolumeClaims: current active(bounded) podVolumeClaims for the pod.
+// UpdatePodVolumeClaims activePodVolumeClaims: current active(bounded) podVolumeClaims for the pod.
 // old podVolumeClaims: Claims(map) for the pod before this update.
 // compares old podVolumeClaims and activePodVolumeClaims. This function hadles 3 cases.
 // Case Unbound pvc:
@@ -35,12 +36,12 @@ import (
 //		Not present in old podVolumeClaims. Present in activePodVolumeClaims.
 // Case Bound an unbounded pvc:
 //		Present as 'unbounded' in old podVolumClaimss. Present in activePodVolumeClaims.
-func updatePodVolumeClaims(pod api_v1.Pod, podDetails crd.PodDetails, eventTime meta_v1.Time) crd.PodDetails {
+func UpdatePodVolumeClaims(pod api_v1.Pod, podDetails groups_v1.PodDetails, eventTime meta_v1.Time) groups_v1.PodDetails {
 	activePodVolumeClaims := getactivePodVolumeClaims(pod)
 
 	podVolumeClaims := podDetails.PodVolumeClaims
 	if podVolumeClaims == nil {
-		podVolumeClaims = map[string]*crd.PersistentVolumeClaim{}
+		podVolumeClaims = map[string]*groups_v1.PersistentVolumeClaim{}
 	}
 
 	for claimName := range podVolumeClaims {
@@ -77,9 +78,9 @@ func updatePodVolumeClaims(pod api_v1.Pod, podDetails crd.PodDetails, eventTime 
 	return podDetails
 }
 
-func getactivePodVolumeClaims(pod api_v1.Pod) map[string]*crd.PersistentVolumeClaim {
+func getactivePodVolumeClaims(pod api_v1.Pod) map[string]*groups_v1.PersistentVolumeClaim {
 	namespace := pod.GetNamespace()
-	podVolumeClaims := map[string]*crd.PersistentVolumeClaim{}
+	podVolumeClaims := map[string]*groups_v1.PersistentVolumeClaim{}
 	for j := 0; j < len(pod.Spec.Volumes); j++ {
 		vol := pod.Spec.Volumes[j]
 		if vol.PersistentVolumeClaim != nil {
@@ -91,7 +92,7 @@ func getactivePodVolumeClaims(pod api_v1.Pod) map[string]*crd.PersistentVolumeCl
 	return podVolumeClaims
 }
 
-func collectPersistentVolumeClaim(claimName, namespace string) *crd.PersistentVolumeClaim {
+func collectPersistentVolumeClaim(claimName, namespace string) *groups_v1.PersistentVolumeClaim {
 	pvc, err := Kubeclient.CoreV1().PersistentVolumeClaims(namespace).Get(claimName, meta_v1.GetOptions{})
 	if isPVCError(err, claimName) {
 		return nil
@@ -100,7 +101,7 @@ func collectPersistentVolumeClaim(claimName, namespace string) *crd.PersistentVo
 	request := pvc.Spec.Resources.Requests["storage"].DeepCopy()
 	capacity := pvc.Status.Capacity["storage"].DeepCopy()
 
-	return &crd.PersistentVolumeClaim{
+	return &groups_v1.PersistentVolumeClaim{
 		Name:                pvc.GetObjectMeta().GetName(),
 		VolumeName:          pvc.Spec.VolumeName,
 		RequestSizeInGB:     []float64{utils.BytesToGB(request.Value())},
@@ -110,9 +111,9 @@ func collectPersistentVolumeClaim(claimName, namespace string) *crd.PersistentVo
 	}
 }
 
-// action to be taken when pod is deleted.
+// PvcHandlePodDeletion action to be taken when pod is deleted.
 // Unbound all bounded pvcs.
-func pvcHandlePodDeletion(podDetails *crd.PodDetails) {
+func PvcHandlePodDeletion(podDetails *groups_v1.PodDetails) {
 	pvMap := podDetails.PodVolumeClaims
 	for claimName := range pvMap {
 		if checkBounded(pvMap[claimName]) {
@@ -124,7 +125,7 @@ func pvcHandlePodDeletion(podDetails *crd.PodDetails) {
 }
 
 // If length of bound times is 1 more than unbound times it means that the pvc is still bound to pod.
-func checkBounded(pvc *crd.PersistentVolumeClaim) bool {
+func checkBounded(pvc *groups_v1.PersistentVolumeClaim) bool {
 	return len(pvc.BoundTimes)-len(pvc.UnboundTimes) == 1
 }
 

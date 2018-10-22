@@ -18,14 +18,32 @@
 package plugin
 
 import (
-	"github.com/vmware/purser/pkg/plugin/crd"
+	"fmt"
+
+	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
+	groups_client_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
 	"github.com/vmware/purser/pkg/plugin/metrics"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// GetGroupByName return group CRD by name.
+func GetGroupByName(crdclient *groups_client_v1.GroupClient, groupName string) *groups_v1.Group {
+	group, err := crdclient.GetGroup(groupName)
+
+	if err == nil {
+		return group
+	} else if apierrors.IsNotFound(err) {
+		return nil
+	} else {
+		panic(err)
+	}
+}
+
 // GetGroupDetails returns aggregated metrics (cpu, memory, storage) and cost (total, cpu, memory and storage) of a Group
-func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *metrics.GroupMetrics, *Cost) {
+func GetGroupDetails(group *groups_v1.Group) (*metrics.GroupMetrics, *metrics.GroupMetrics, *Cost) {
 	// TODO: include storage in group details
 	price := GetUserCosts()
 
@@ -100,7 +118,7 @@ func GetGroupDetails(group *crd.Group) (*metrics.GroupMetrics, *metrics.GroupMet
 }
 
 // getPodComputeMetrics returns PodMetrics given its details(container metrics)
-func getPodComputeMetrics(podDetails *crd.PodDetails) *metrics.Metrics {
+func getPodComputeMetrics(podDetails *groups_v1.PodDetails) *metrics.Metrics {
 	CPURequest := resource.Quantity{}
 	MemoryRequest := resource.Quantity{}
 	CPULimit := resource.Quantity{}
@@ -119,7 +137,7 @@ func getPodComputeMetrics(podDetails *crd.PodDetails) *metrics.Metrics {
 	}
 }
 
-func getPodStorageMetrics(podDetails *crd.PodDetails) (float64, float64) {
+func getPodStorageMetrics(podDetails *groups_v1.PodDetails) (float64, float64) {
 	var podStorageAllocatedInGBHours, podActiveStorageAllocated float64
 	currentTime := getCurrentTime()
 	monthStart := getCurrentMonthStartTime()
@@ -142,11 +160,38 @@ func getPodStorageMetrics(podDetails *crd.PodDetails) (float64, float64) {
 	return podStorageAllocatedInGBHours, podActiveStorageAllocated
 }
 
-func getUnboundTime(pvc *crd.PersistentVolumeClaim, i int) metav1.Time {
+func getUnboundTime(pvc *groups_v1.PersistentVolumeClaim, i int) metav1.Time {
 	var unboundTime metav1.Time
 	if i < len(pvc.UnboundTimes) {
 		return pvc.UnboundTimes[i]
 	}
 	// unboundTime is nil if pvc is still bounded (i.e, length of BoundTimes - length of UnboundTime is 1.)
 	return unboundTime
+}
+
+// PrintGroup displays the group information.
+func PrintGroup(group *groups_v1.Group) {
+	pitGroupMetrics, mtdGroupMetrics, cost := GetGroupDetails(group)
+
+	fmt.Printf("%-30s             %s\n", "Group Name:", group.Name)
+	fmt.Println()
+	fmt.Println("Point in Time Resource Stats:")
+	fmt.Printf("             %-30s%.2f\n", "CPU Limit(vCPU):", pitGroupMetrics.CPULimit)
+	fmt.Printf("             %-30s%.2f\n", "Memory Limit(GB):", pitGroupMetrics.MemoryLimit)
+	fmt.Printf("             %-30s%.2f\n", "CPU Request(vCPU):", pitGroupMetrics.CPURequest)
+	fmt.Printf("             %-30s%.2f\n", "Memory Request(GB):", pitGroupMetrics.MemoryRequest)
+	fmt.Printf("             %-30s%.2f\n", "Storage Claimed(GB):", pitGroupMetrics.StorageClaimed)
+
+	fmt.Println()
+	fmt.Printf("%-30s\n", "Month to Date Active Resource Stats:")
+	fmt.Printf("             %-30s%.2f\n", "CPU Request(vCPU-hours):", mtdGroupMetrics.CPURequest)
+	fmt.Printf("             %-30s%.2f\n", "Memory Request(GB-hours):", mtdGroupMetrics.MemoryRequest)
+	fmt.Printf("             %-30s%.2f\n", "Storage Claimed(GB-hours):", mtdGroupMetrics.StorageClaimed)
+
+	fmt.Println()
+	fmt.Printf("%-30s\n", "Month to Date Cost Stats:")
+	fmt.Printf("             %-30s%.2f\n", "CPU Cost($):", cost.CPUCost)
+	fmt.Printf("             %-30s%.2f\n", "Memory Cost($):", cost.MemoryCost)
+	fmt.Printf("             %-30s%.2f\n", "Storage Cost($):", cost.StorageCost)
+	fmt.Printf("             %-30s%.2f\n", "Total Cost($):", cost.TotalCost)
 }

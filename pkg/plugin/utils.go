@@ -18,28 +18,16 @@
 package plugin
 
 import (
-	"bytes"
-	"log"
-	"os"
-	"os/exec"
-	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// nolint
-func executeCommand(command string) []byte {
-	slice := strings.Fields(command)
-	cmd := exec.Command(slice[0], slice[1:]...)
-	cmd.Env = os.Environ()
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
+func addResourceAToResourceB(resA, resB *resource.Quantity) {
+	if resA != nil {
+		resB.Add(*resA)
 	}
-	return out.Bytes()
 }
 
 // getCurrentTime returns the current time as k8s apimachinery Time object
@@ -99,10 +87,4 @@ func projectToMonth(val float64) float64 {
 
 func bytesToGB(val int64) float64 {
 	return float64(val) / (1024.0 * 1024.0 * 1024.0)
-}
-
-func addResourceAToResourceB(resA, resB *resource.Quantity) {
-	if resA != nil {
-		resB.Add(*resA)
-	}
 }

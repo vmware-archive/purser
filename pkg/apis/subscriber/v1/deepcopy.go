@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package crd
+package v1
 
 import "k8s.io/apimachinery/pkg/runtime"
 
 // DeepCopyInto copies all properties of this object into another object of the
 // same type that is provided as a pointer.
-func (in *Group) DeepCopyInto(out *Group) {
+func (in *Subscriber) DeepCopyInto(out *Subscriber) {
 	out.TypeMeta = in.TypeMeta
 	out.ObjectMeta = in.ObjectMeta
 	out.Spec = in.Spec
@@ -29,20 +29,20 @@ func (in *Group) DeepCopyInto(out *Group) {
 }
 
 // DeepCopyObject returns a generically typed copy of an object
-func (in *Group) DeepCopyObject() runtime.Object {
-	out := Group{}
+func (in *Subscriber) DeepCopyObject() runtime.Object {
+	out := Subscriber{}
 	in.DeepCopyInto(&out)
 	return &out
 }
 
 // DeepCopyObject returns a generically typed copy of an object
-func (in *GroupList) DeepCopyObject() runtime.Object {
-	out := GroupList{
-		TypeMeta: in.TypeMeta,
-		ListMeta: in.ListMeta,
-	}
+func (in *SubscriberList) DeepCopyObject() runtime.Object {
+	out := SubscriberList{}
+	out.TypeMeta = in.TypeMeta
+	out.ListMeta = in.ListMeta
+
 	if in.Items != nil {
-		out.Items = make([]Group, len(in.Items))
+		out.Items = make([]Subscriber, len(in.Items))
 		for i := range in.Items {
 			in.Items[i].DeepCopyInto(&out.Items[i])
 		}
