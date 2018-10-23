@@ -19,9 +19,11 @@ package dgraph
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
 )
 
@@ -52,27 +54,24 @@ func PersistService(service api_v1.Service) error {
 			IsService: true,
 			ID:        ID{Xid: xid},
 		}
-		bytes, err := json.Marshal(newService)
-		if err != nil {
-			return err
-		}
-		_, err = MutateNode(Client, bytes)
+		bytes := utils.JsonMarshal(newService)
+		_, err := MutateNode(Client, bytes)
 		return err
 	}
 	return nil
 }
 
 // PersistServicesInteractionGraph stores the service interaction data in the Dgraph
-func PersistServicesInteractionGraph(sourceService string, destinationServices []string) error {
-	uid := GetUID(Client, sourceService, IsService)
+func PersistServicesInteractionGraph(sourceServiceXID string, destinationServicesXIDs []string) error {
+	uid := GetUID(Client, sourceServiceXID, IsService)
 	if uid == "" {
-		log.Println("Source Service " + sourceService + " is not persisted yet.")
-		return nil
+		log.Println("Source Service " + sourceServiceXID + " is not persisted yet.")
+		return fmt.Errorf("source service: %s is not persisted yet", sourceServiceXID)
 	}
 
 	services := []*Service{}
-	for _, destinationService := range destinationServices {
-		uid = GetUID(Client, destinationService, IsService)
+	for _, destinationServiceXID := range destinationServicesXIDs {
+		uid = GetUID(Client, destinationServiceXID, IsService)
 		if uid == "" {
 			continue
 		}
@@ -93,5 +92,84 @@ func PersistServicesInteractionGraph(sourceService string, destinationServices [
 	}
 	_, err = MutateNode(Client, bytes)
 	return err
+}
 
+// PersistPodsInServices saves pods in Services object in the dgraph
+func PersistPodsInServices(svcToPod map[string][]string) error {
+	for svcXID, podXIDs := range svcToPod {
+		svcUID := GetUID(Client, svcXID, IsService)
+		if svcUID == "" {
+			continue
+		}
+
+		svcPods := []*Pod{}
+		for _, podXID := range podXIDs {
+			podUID := GetUID(Client, podXID, IsPod)
+			if podUID == "" {
+				log.Debugf("Pod uid is empty for pod xid: %s", podXID)
+				continue
+			}
+			pod := &Pod{
+				ID: ID{UID: podUID},
+			}
+			svcPods = append(svcPods, pod)
+		}
+
+		updatedService := Service{
+			ID:  ID{UID: svcUID},
+			Pod: svcPods,
+		}
+		bytes := utils.JsonMarshal(updatedService)
+		_, err := MutateNode(Client, bytes)
+		if err != nil {
+			log.Error(err)
+		}
+	}
+	return nil
+}
+
+// FetchAllServices returns all pods in the dgraph
+func FetchAllServices() ([]Service, error) {
+	const q = `query {
+		services(func: has(isService)) {
+			name
+			interacts @facets {
+				name
+			}
+			pod {
+				name
+			}
+		}
+	}`
+
+	type root struct {
+		Services []Service `json:"services"`
+	}
+	newRoot := root{}
+	err := executeQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	return newRoot.Services, nil
+}
+
+// FetchServiceList ...
+func FetchServiceList() ([]Service, error) {
+	const q = `query {
+		serviceList(func: has(isService)) {
+			name
+		}
+	}`
+
+	type root struct {
+		ServiceList []Service `json:"serviceList"`
+	}
+	newRoot := root{}
+	err := executeQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	return newRoot.ServiceList, nil
 }

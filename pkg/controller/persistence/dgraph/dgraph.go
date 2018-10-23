@@ -77,6 +77,7 @@ func CreateSchema() error {
 		isService: bool .
 		isPod: bool .
 		isContainer: bool .
+		isProc: bool .
 	`
 	ctx := context.Background()
 	err := Client.Alter(ctx, op)
@@ -85,6 +86,7 @@ func CreateSchema() error {
 }
 
 // GetUID returns the UID of the node in the Dgraph
+// returns empty string if error has occured
 func GetUID(dg *dgo.Dgraph, id string, nodeType string) string {
 
 	query := `query Me($id:string, $nodeType:string) {
@@ -117,6 +119,7 @@ func MutateNode(dg *dgo.Dgraph, n []byte) (*api.Assigned, error) {
 	return dg.NewTxn().Mutate(ctx, mu)
 }
 
+// unmarshalDgraphResponse returns empty string if error has occured
 func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	type Root struct {
 		IDs []ID `json:"getUid"`
@@ -135,4 +138,21 @@ func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	}
 
 	return r.IDs[0].UID
+}
+
+func executeQuery(query string, root interface{}) error {
+	ctx := context.Background()
+
+	resp, err := Client.NewTxn().Query(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(resp.Json, root)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
 }
