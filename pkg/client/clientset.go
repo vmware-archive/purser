@@ -34,17 +34,26 @@ func GetAPIExtensionClient() (*apiextcs.Clientset, *rest.Config) {
 	var config *rest.Config
 	var err error
 
-	usr, _ := user.Current()
 	if environment == "dev" {
+		var usr *user.User
+		usr, err = user.Current()
+		if err != nil {
+			log.Fatalf("failed to fetch path to config file %v", err)
+			panic(err)
+		}
 		kubeconf := flag.String("kubeconf", usr.HomeDir+"/.kube/config", "path to Kubernetes config file")
 		flag.Parse()
 		config, err = getClientConfig(*kubeconf)
+		if err != nil {
+			log.Fatalf("failed to fetch kubeconfig %v", err)
+			panic(err)
+		}
 	} else {
 		config, err = getClientConfig("")
-	}
-
-	if err != nil {
-		log.Fatalf("failed to fetch kubeconfig %v", err)
+		if err != nil {
+			log.Fatalf("failed to fetch kubeconfig %v", err)
+			panic(err)
+		}
 	}
 
 	// create clientset and create our CRD, this only need to run once

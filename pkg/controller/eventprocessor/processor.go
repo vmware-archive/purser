@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/vmware/purser/pkg/controller"
-	"github.com/vmware/purser/pkg/controller/persistence/dgraph"
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	log "github.com/Sirupsen/logrus"
 	api_v1 "k8s.io/api/core/v1"
@@ -56,7 +56,7 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error un marshalling payload " + payload.Data)
 			}
-			err = dgraph.PersistPod(pod)
+			err = models.StorePod(pod)
 			if err != nil {
 				log.Errorf("Error while persisting pod %v", err)
 			}
@@ -66,7 +66,7 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error un marshalling payload " + payload.Data)
 			}
-			err = dgraph.PersistService(service)
+			err = models.StoreService(service)
 			if err != nil {
 				log.Errorf("Error while persisting service %v", err)
 			}

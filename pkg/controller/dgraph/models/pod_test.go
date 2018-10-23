@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
-package main
+package models
 
 import (
 	"fmt"
+	"testing"
 
-	"github.com/vmware/purser/pkg/controller/persistence/dgraph"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
-// Helper implementation for testing dgraph persistence.
-func main1() {
+// TestStorePodsInteraction ...
+func TestStorePodsInteraction(t *testing.T) {
 	fmt.Println("Hello World")
 	err := dgraph.Open("127.0.0.1:9080")
 	if err != nil {
@@ -36,16 +37,11 @@ func main1() {
 		fmt.Println("Error while creating schema ", err)
 	}
 
-	/*uid, err := GetUId(Client, "default:Pod2", "isPod")
-	if err != nil {
-		fmt.Println("Error while fetching uid ", err)
-	}
-	fmt.Println("Uid is " + uid)*/
-
 	sourcePod := "weave:weave-scope-app-6d6b76b846-z92wk"
 	destinationPods := []string{"fiaasco:ccs-billing-deployment-1-1-92-75dc8749f4-gld6q", "weave:weave-scope-agent-lbfpj"}
+	interactionCounts := []float64{2.0}
 
-	err = dgraph.PersistPodsInteractionGraph(sourcePod, destinationPods)
+	err = StorePodsInteraction(sourcePod, destinationPods, interactionCounts)
 	if err != nil {
 		fmt.Println("Error while building interation graph ", err)
 	}
