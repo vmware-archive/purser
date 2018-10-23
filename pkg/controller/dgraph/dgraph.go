@@ -25,6 +25,7 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
+	"github.com/robfig/cron"
 	"google.golang.org/grpc"
 )
 
@@ -50,6 +51,7 @@ func init() {
 	if err != nil {
 		fmt.Println("Error while creating schema ", err)
 	}
+	startCronGoRoutines()
 }
 
 // Open creates and establishes a new Dgraph connection
@@ -80,6 +82,8 @@ func CreateSchema() error {
 	op.Schema = `
 		name: string @index(term) .
 		xid:  string @index(term) .
+		startTime: dateTime @index(hour) .
+		endTime: dateTime @index(hour) .
 		isService: bool .
 		isPod: bool .
 		isContainer: bool .
@@ -135,11 +139,25 @@ func ExecuteQuery(query string, root interface{}) error {
 func MutateNode(n []byte) (*api.Assigned, error) {
 	mu := &api.Mutation{
 		CommitNow: true,
+		SetJson:   n,
 	}
 
-	mu.SetJson = n
 	ctx := context.Background()
 	return client.NewTxn().Mutate(ctx, mu)
+}
+
+// DeleteNodes batch deletes given nodes
+func DeleteNodes(n []byte) error {
+	ctx := context.Background()
+	mu := &api.Mutation{
+		CommitNow:  true,
+		DeleteJson: n,
+	}
+	_, err := client.NewTxn().Mutate(ctx, mu)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return err
 }
 
 // unmarshalDgraphResponse returns empty string if error has occurred
@@ -161,4 +179,13 @@ func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	}
 
 	return r.IDs[0].UID
+}
+
+func startCronGoRoutines() {
+	c := cron.New()
+	err := c.AddFunc("@daily", RemoveResourcesInactiveInCurrentMonth)
+	if err != nil {
+		log.Println(err)
+	}
+	c.Start()
 }
