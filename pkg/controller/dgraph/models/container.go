@@ -54,9 +54,9 @@ func newContainer(containerXid, containerName string) (*api.Assigned, error) {
 	return dgraph.MutateNode(bytes)
 }
 
-// StoreAndRetreiveContainers fetchs the list of containers in given pod
+// StoreAndRetrieveContainers fetchs the list of containers in given pod
 // Create a new container in dgraph if container is not in it.
-func StoreAndRetreiveContainers(pod api_v1.Pod, podUID string) []*Container {
+func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string) []*Container {
 	podXid := pod.Namespace + ":" + pod.Name
 
 	containers := []*Container{}

@@ -128,8 +128,8 @@ func StorePodServiceEdges(svcToPod map[string][]string) {
 	}
 }
 
-// RetreiveAllServices returns all pods in the dgraph
-func RetreiveAllServices() ([]Service, error) {
+// RetrieveAllServices returns all pods in the dgraph
+func RetrieveAllServices() ([]Service, error) {
 	const q = `query {
 		services(func: has(isService)) {
 			name
@@ -154,8 +154,8 @@ func RetreiveAllServices() ([]Service, error) {
 	return newRoot.Services, nil
 }
 
-// RetreiveServiceList ...
-func RetreiveServiceList() ([]Service, error) {
+// RetrieveServiceList ...
+func RetrieveServiceList() ([]Service, error) {
 	const q = `query {
 		serviceList(func: has(isService)) {
 			name

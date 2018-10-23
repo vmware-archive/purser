@@ -75,7 +75,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 
 	pod = Pod{
 		ID:         dgraph.ID{Xid: xid, UID: uid},
-		Containers: StoreAndRetreiveContainers(k8sPod, uid),
+		Containers: StoreAndRetrieveContainers(k8sPod, uid),
 	}
 	bytes, err := json.Marshal(pod)
 	if err != nil {
@@ -117,8 +117,8 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 	return err
 }
 
-// RetreiveAllPods returns all pods in the dgraph
-func RetreiveAllPods() ([]Pod, error) {
+// RetrieveAllPods returns all pods in the dgraph
+func RetrieveAllPods() ([]Pod, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
 			name
