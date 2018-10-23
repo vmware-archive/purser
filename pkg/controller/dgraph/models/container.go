@@ -78,7 +78,6 @@ func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string, isDeleted bool) [
 		if isDeleted {
 			container = &Container{
 				ID:      dgraph.ID{UID: containerUID, Xid: containerXid},
-				Pod:     Pod{ID: dgraph.ID{UID: podUID, Xid: podXid}},
 				EndTime: pod.GetDeletionTimestamp().Time,
 			}
 		} else {
@@ -95,6 +94,12 @@ func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string, isDeleted bool) [
 		}
 
 		containers = append(containers, container)
+	}
+	if isDeleted {
+		err := deleteProcessesInTerminatedContainers(containers)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 	return containers
 }

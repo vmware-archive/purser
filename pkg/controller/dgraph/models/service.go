@@ -49,8 +49,6 @@ func StoreService(service api_v1.Service) error {
 	xid := service.Namespace + ":" + service.Name
 	uid := dgraph.GetUID(xid, IsService)
 
-	svcDeletionTimestamp := service.GetDeletionTimestamp()
-	isDeleted := !svcDeletionTimestamp.IsZero()
 	if uid == "" {
 		newService := Service{
 			Name:      service.Name,
@@ -65,6 +63,9 @@ func StoreService(service api_v1.Service) error {
 		}
 		uid = assigned.Uids["blank-0"]
 	}
+
+	svcDeletionTimestamp := service.GetDeletionTimestamp()
+	isDeleted := !svcDeletionTimestamp.IsZero()
 	if isDeleted {
 		updatedService := Service{
 			ID:      dgraph.ID{Xid: xid, UID: uid},

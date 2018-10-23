@@ -78,9 +78,8 @@ func StorePod(k8sPod api_v1.Pod) error {
 	isDeleted := !podDeletedTimestamp.IsZero()
 	if isDeleted {
 		pod = Pod{
-			ID:         dgraph.ID{Xid: xid, UID: uid},
-			Containers: StoreAndRetrieveContainers(k8sPod, uid, isDeleted),
-			EndTime:    podDeletedTimestamp.Time,
+			ID:      dgraph.ID{Xid: xid, UID: uid},
+			EndTime: podDeletedTimestamp.Time,
 		}
 	} else {
 		pod = Pod{
