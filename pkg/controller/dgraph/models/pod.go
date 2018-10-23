@@ -50,9 +50,10 @@ type Pod struct {
 // newPod creates a new node for the pod in the Dgraph
 func newPod(k8sPod api_v1.Pod, xid string) (*api.Assigned, error) {
 	pod := Pod{
-		Name:  k8sPod.Name,
-		IsPod: true,
-		ID:    dgraph.ID{Xid: xid},
+		Name:      k8sPod.Name,
+		IsPod:     true,
+		ID:        dgraph.ID{Xid: xid},
+		StartTime: k8sPod.GetCreationTimestamp().Time,
 	}
 	bytes := utils.JSONMarshal(pod)
 	return dgraph.MutateNode(bytes)
@@ -73,10 +74,21 @@ func StorePod(k8sPod api_v1.Pod) error {
 		uid = assigned.Uids["blank-0"]
 	}
 
-	pod = Pod{
-		ID:         dgraph.ID{Xid: xid, UID: uid},
-		Containers: StoreAndRetrieveContainers(k8sPod, uid),
+	podDeletedTimestamp := k8sPod.GetDeletionTimestamp()
+	isDeleted := !podDeletedTimestamp.IsZero()
+	if isDeleted {
+		pod = Pod{
+			ID:         dgraph.ID{Xid: xid, UID: uid},
+			Containers: StoreAndRetrieveContainers(k8sPod, uid, isDeleted),
+			EndTime:    podDeletedTimestamp.Time,
+		}
+	} else {
+		pod = Pod{
+			ID:         dgraph.ID{Xid: xid, UID: uid},
+			Containers: StoreAndRetrieveContainers(k8sPod, uid, isDeleted),
+		}
 	}
+
 	bytes, err := json.Marshal(pod)
 	if err != nil {
 		return err
@@ -102,13 +114,13 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 		}
 
 		pod := &Pod{
-			ID:    dgraph.ID{UID: dstUID},
+			ID:    dgraph.ID{UID: dstUID, Xid: destinationPodXID},
 			Count: counts[index],
 		}
 		pods = append(pods, pod)
 	}
 	source := Pod{
-		ID:        dgraph.ID{UID: uid},
+		ID:        dgraph.ID{UID: uid, Xid: sourcePodXID},
 		Interacts: pods,
 	}
 

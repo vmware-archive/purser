@@ -40,12 +40,12 @@ type Proc struct {
 	Container Container `json:"container,omitempty"`
 }
 
-func newProc(procXID, procName, containerUID string) (*api.Assigned, error) {
+func newProc(procXID, procName, containerUID, containerXID string) (*api.Assigned, error) {
 	newProc := Proc{
 		ID:        dgraph.ID{Xid: procXID},
 		IsProc:    true,
 		Name:      procName,
-		Container: Container{ID: dgraph.ID{UID: containerUID}},
+		Container: Container{ID: dgraph.ID{UID: containerUID, Xid: containerXID}},
 	}
 	bytes := utils.JSONMarshal(newProc)
 	return dgraph.MutateNode(bytes)
@@ -60,7 +60,7 @@ func StoreProcess(procXID, procName string, podsXIDs []string, containerXID stri
 
 	procUID := dgraph.GetUID(procXID, IsProc)
 	if procUID == "" {
-		assigned, err := newProc(procXID, procName, containerUID)
+		assigned, err := newProc(procXID, procName, containerUID, containerXID)
 		if err != nil {
 			logrus.Errorf("Unable to create proc: %s", procXID)
 			return err
@@ -72,12 +72,12 @@ func StoreProcess(procXID, procName string, podsXIDs []string, containerXID stri
 	for _, podXID := range podsXIDs {
 		podUID := dgraph.GetUID(podXID, IsPod)
 		if podUID != "" {
-			pods = append(pods, &Pod{ID: dgraph.ID{UID: podUID}})
+			pods = append(pods, &Pod{ID: dgraph.ID{UID: podUID, Xid: podXID}})
 		}
 	}
 
 	updatedProc := Proc{
-		ID:        dgraph.ID{UID: procUID},
+		ID:        dgraph.ID{UID: procUID, Xid: procXID},
 		Interacts: pods,
 	}
 	bytes := utils.JSONMarshal(updatedProc)

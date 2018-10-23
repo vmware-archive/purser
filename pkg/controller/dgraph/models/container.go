@@ -44,11 +44,12 @@ type Container struct {
 	Procs       []*Proc   `json:"procs,omitempty"`
 }
 
-func newContainer(containerXid, containerName string) (*api.Assigned, error) {
+func newContainer(containerXid, containerName string, creationTimestamp time.Time) (*api.Assigned, error) {
 	container := &Container{
 		ID:          dgraph.ID{Xid: containerXid},
 		Name:        containerName,
 		IsContainer: true,
+		StartTime:   creationTimestamp,
 	}
 	bytes := utils.JSONMarshal(container)
 	return dgraph.MutateNode(bytes)
@@ -56,7 +57,7 @@ func newContainer(containerXid, containerName string) (*api.Assigned, error) {
 
 // StoreAndRetrieveContainers fetchs the list of containers in given pod
 // Create a new container in dgraph if container is not in it.
-func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string) []*Container {
+func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string, isDeleted bool) []*Container {
 	podXid := pod.Namespace + ":" + pod.Name
 
 	containers := []*Container{}
@@ -66,16 +67,25 @@ func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string) []*Container {
 
 		var container *Container
 		if containerUID == "" {
-			assigned, err := newContainer(containerXid, c.Name)
+			assigned, err := newContainer(containerXid, c.Name, pod.GetCreationTimestamp().Time)
 			containerUID = assigned.Uids["blank-0"]
 			if err != nil {
 				log.Errorf("Unable to create container: %s", containerXid)
 				continue
 			}
 		}
-		container = &Container{
-			ID:  dgraph.ID{UID: containerUID},
-			Pod: Pod{ID: dgraph.ID{UID: podUID}},
+
+		if isDeleted {
+			container = &Container{
+				ID:      dgraph.ID{UID: containerUID, Xid: containerXid},
+				Pod:     Pod{ID: dgraph.ID{UID: podUID, Xid: podXid}},
+				EndTime: pod.GetDeletionTimestamp().Time,
+			}
+		} else {
+			container = &Container{
+				ID:  dgraph.ID{UID: containerUID, Xid: containerXid},
+				Pod: Pod{ID: dgraph.ID{UID: podUID, Xid: podXid}},
+			}
 		}
 		bytes := utils.JSONMarshal(container)
 		_, err := dgraph.MutateNode(bytes)
@@ -100,11 +110,11 @@ func StoreContainerProcessEdge(containerXID string, procsXIDs []string) error {
 	for _, procXID := range procsXIDs {
 		procUID := dgraph.GetUID(procXID, IsProc)
 		if procUID != "" {
-			procs = append(procs, &Proc{ID: dgraph.ID{UID: procUID}})
+			procs = append(procs, &Proc{ID: dgraph.ID{UID: procUID, Xid: procXID}})
 		}
 	}
 	container := Container{
-		ID:    dgraph.ID{UID: containerUID},
+		ID:    dgraph.ID{UID: containerUID, Xid: containerXID},
 		Procs: procs,
 	}
 	bytes := utils.JSONMarshal(container)

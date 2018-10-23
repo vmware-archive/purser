@@ -49,13 +49,28 @@ func StoreService(service api_v1.Service) error {
 	xid := service.Namespace + ":" + service.Name
 	uid := dgraph.GetUID(xid, IsService)
 
+	svcDeletionTimestamp := service.GetDeletionTimestamp()
+	isDeleted := !svcDeletionTimestamp.IsZero()
 	if uid == "" {
 		newService := Service{
 			Name:      service.Name,
 			IsService: true,
 			ID:        dgraph.ID{Xid: xid},
+			StartTime: service.GetCreationTimestamp().Time,
 		}
 		bytes := utils.JSONMarshal(newService)
+		assigned, err := dgraph.MutateNode(bytes)
+		if err != nil {
+			return err
+		}
+		uid = assigned.Uids["blank-0"]
+	}
+	if isDeleted {
+		updatedService := Service{
+			ID:      dgraph.ID{Xid: xid, UID: uid},
+			EndTime: svcDeletionTimestamp.Time,
+		}
+		bytes := utils.JSONMarshal(updatedService)
 		_, err := dgraph.MutateNode(bytes)
 		return err
 	}
@@ -72,18 +87,18 @@ func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs [
 
 	services := []*Service{}
 	for _, destinationServiceXID := range destinationServicesXIDs {
-		uid = dgraph.GetUID(destinationServiceXID, IsService)
-		if uid == "" {
+		destinationServiceUID := dgraph.GetUID(destinationServiceXID, IsService)
+		if destinationServiceUID == "" {
 			continue
 		}
 
 		service := &Service{
-			ID: dgraph.ID{UID: uid},
+			ID: dgraph.ID{UID: destinationServiceUID, Xid: destinationServiceXID},
 		}
 		services = append(services, service)
 	}
 	source := Service{
-		ID:        dgraph.ID{UID: uid},
+		ID:        dgraph.ID{UID: uid, Xid: sourceServiceXID},
 		Interacts: services,
 	}
 
@@ -111,13 +126,13 @@ func StorePodServiceEdges(svcToPod map[string][]string) {
 				continue
 			}
 			pod := &Pod{
-				ID: dgraph.ID{UID: podUID},
+				ID: dgraph.ID{UID: podUID, Xid: podXID},
 			}
 			svcPods = append(svcPods, pod)
 		}
 
 		updatedService := Service{
-			ID:  dgraph.ID{UID: svcUID},
+			ID:  dgraph.ID{UID: svcUID, Xid: svcXID},
 			Pod: svcPods,
 		}
 		bytes := utils.JSONMarshal(updatedService)
