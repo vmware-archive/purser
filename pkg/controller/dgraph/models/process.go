@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package dgraph
+package models
 
 import (
 	"fmt"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/dgraph-io/dgo/protos/api"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
 )
 
@@ -32,34 +33,34 @@ const (
 
 // Proc schema in dgraph
 type Proc struct {
-	ID
+	dgraph.ID
 	IsProc    bool      `json:"isProc,omitemtpy"`
 	Name      string    `json:"name,omitempty"`
 	Interacts []*Pod    `json:"interacts,omitempty"`
 	Container Container `json:"container,omitempty"`
 }
 
-func createProc(procXID, procName, containerUID string) (*api.Assigned, error) {
+func newProc(procXID, procName, containerUID string) (*api.Assigned, error) {
 	newProc := Proc{
-		ID:        ID{Xid: procXID},
+		ID:        dgraph.ID{Xid: procXID},
 		IsProc:    true,
 		Name:      procName,
-		Container: Container{ID: ID{UID: containerUID}},
+		Container: Container{ID: dgraph.ID{UID: containerUID}},
 	}
-	bytes := utils.JsonMarshal(newProc)
-	return MutateNode(Client, bytes)
+	bytes := utils.JSONMarshal(newProc)
+	return dgraph.MutateNode(bytes)
 }
 
-// PersistProc ...
-func PersistProc(procXID, procName string, podsXIDs []string, containerXID string) error {
-	containerUID := GetUID(Client, containerXID, IsContainer)
+// StoreProcess ...
+func StoreProcess(procXID, procName string, podsXIDs []string, containerXID string) error {
+	containerUID := dgraph.GetUID(containerXID, IsContainer)
 	if containerUID == "" {
 		return fmt.Errorf("Container not persisted yet")
 	}
 
-	procUID := GetUID(Client, procXID, IsProc)
+	procUID := dgraph.GetUID(procXID, IsProc)
 	if procUID == "" {
-		assigned, err := createProc(procXID, procName, containerUID)
+		assigned, err := newProc(procXID, procName, containerUID)
 		if err != nil {
 			logrus.Errorf("Unable to create proc: %s", procXID)
 			return err
@@ -69,17 +70,17 @@ func PersistProc(procXID, procName string, podsXIDs []string, containerXID strin
 
 	pods := []*Pod{}
 	for _, podXID := range podsXIDs {
-		podUID := GetUID(Client, podXID, IsPod)
+		podUID := dgraph.GetUID(podXID, IsPod)
 		if podUID != "" {
-			pods = append(pods, &Pod{ID: ID{UID: podUID}})
+			pods = append(pods, &Pod{ID: dgraph.ID{UID: podUID}})
 		}
 	}
 
 	updatedProc := Proc{
-		ID:        ID{UID: procUID},
+		ID:        dgraph.ID{UID: procUID},
 		Interacts: pods,
 	}
-	bytes := utils.JsonMarshal(updatedProc)
-	_, err := MutateNode(Client, bytes)
+	bytes := utils.JSONMarshal(updatedProc)
+	_, err := dgraph.MutateNode(bytes)
 	return err
 }

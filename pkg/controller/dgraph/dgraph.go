@@ -30,9 +30,15 @@ import (
 
 // Dgraph variables
 var (
-	Client     *dgo.Dgraph
-	Connection *grpc.ClientConn
+	client     *dgo.Dgraph
+	connection *grpc.ClientConn
 )
+
+// ID maps the external ID used in Dgraph to the UID
+type ID struct {
+	Xid string `json:"xid,omitempty"`
+	UID string `json:"uid,omitempty"`
+}
 
 func init() {
 	err := Open("127.0.0.1:9080")
@@ -53,16 +59,16 @@ func Open(url string) error {
 		return err
 	}
 
-	Connection = conn
-	dc := api.NewDgraphClient(Connection)
-	Client = dgo.NewDgraphClient(dc)
+	connection = conn
+	dc := api.NewDgraphClient(connection)
+	client = dgo.NewDgraphClient(dc)
 
 	return nil
 }
 
 // Close terminates the Dgraph connection
 func Close() {
-	err := Connection.Close()
+	err := connection.Close()
 	if err != nil {
 		fmt.Println("Error closing connection to Dgraph ", err)
 	}
@@ -80,15 +86,14 @@ func CreateSchema() error {
 		isProc: bool .
 	`
 	ctx := context.Background()
-	err := Client.Alter(ctx, op)
+	err := client.Alter(ctx, op)
 
 	return err
 }
 
 // GetUID returns the UID of the node in the Dgraph
-// returns empty string if error has occured
-func GetUID(dg *dgo.Dgraph, id string, nodeType string) string {
-
+// returns empty string if error has occurred
+func GetUID(id string, nodeType string) string {
 	query := `query Me($id:string, $nodeType:string) {
 		getUid(func: eq(xid, $id)) @filter(has(` + nodeType + `)) {
 			uid
@@ -100,7 +105,7 @@ func GetUID(dg *dgo.Dgraph, id string, nodeType string) string {
 	variables["$nodeType"] = nodeType
 	variables["$id"] = id
 
-	resp, err := dg.NewReadOnlyTxn().QueryWithVars(ctx, query, variables)
+	resp, err := client.NewReadOnlyTxn().QueryWithVars(ctx, query, variables)
 	if err != nil {
 		log.Printf("failed to fetch UID from Dgraph %v", err)
 		return ""
@@ -108,18 +113,36 @@ func GetUID(dg *dgo.Dgraph, id string, nodeType string) string {
 	return unmarshalDgraphResponse(resp, id)
 }
 
+// ExecuteQuery given a query and it fetches and writes result into interface
+func ExecuteQuery(query string, root interface{}) error {
+	ctx := context.Background()
+
+	resp, err := client.NewTxn().Query(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(resp.Json, root)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
+}
+
 // MutateNode mutates a Dgraph transaction
-func MutateNode(dg *dgo.Dgraph, n []byte) (*api.Assigned, error) {
+func MutateNode(n []byte) (*api.Assigned, error) {
 	mu := &api.Mutation{
 		CommitNow: true,
 	}
 
 	mu.SetJson = n
 	ctx := context.Background()
-	return dg.NewTxn().Mutate(ctx, mu)
+	return client.NewTxn().Mutate(ctx, mu)
 }
 
-// unmarshalDgraphResponse returns empty string if error has occured
+// unmarshalDgraphResponse returns empty string if error has occurred
 func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	type Root struct {
 		IDs []ID `json:"getUid"`
@@ -138,21 +161,4 @@ func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	}
 
 	return r.IDs[0].UID
-}
-
-func executeQuery(query string, root interface{}) error {
-	ctx := context.Background()
-
-	resp, err := Client.NewTxn().Query(ctx, query)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(resp.Json, root)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	return nil
 }

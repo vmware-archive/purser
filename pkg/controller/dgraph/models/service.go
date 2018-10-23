@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dgraph
+package models
 
 import (
 	"encoding/json"
@@ -23,6 +23,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
 )
@@ -34,7 +35,7 @@ const (
 
 // Service model structure in Dgraph
 type Service struct {
-	ID
+	dgraph.ID
 	IsService bool       `json:"isService,omitempty"`
 	Name      string     `json:"name,omitempty"`
 	StartTime time.Time  `json:"startTime,omitempty"`
@@ -43,27 +44,27 @@ type Service struct {
 	Interacts []*Service `json:"interacts,omitempty"`
 }
 
-// PersistService create a new node in the Dgraph or if it exists updates the original node
-func PersistService(service api_v1.Service) error {
+// StoreService create a new node in the Dgraph  if it is not present.
+func StoreService(service api_v1.Service) error {
 	xid := service.Namespace + ":" + service.Name
-	uid := GetUID(Client, xid, IsService)
+	uid := dgraph.GetUID(xid, IsService)
 
 	if uid == "" {
 		newService := Service{
 			Name:      service.Name,
 			IsService: true,
-			ID:        ID{Xid: xid},
+			ID:        dgraph.ID{Xid: xid},
 		}
-		bytes := utils.JsonMarshal(newService)
-		_, err := MutateNode(Client, bytes)
+		bytes := utils.JSONMarshal(newService)
+		_, err := dgraph.MutateNode(bytes)
 		return err
 	}
 	return nil
 }
 
-// PersistServicesInteractionGraph stores the service interaction data in the Dgraph
-func PersistServicesInteractionGraph(sourceServiceXID string, destinationServicesXIDs []string) error {
-	uid := GetUID(Client, sourceServiceXID, IsService)
+// StoreServicesInteraction stores the service interaction data in the Dgraph
+func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs []string) error {
+	uid := dgraph.GetUID(sourceServiceXID, IsService)
 	if uid == "" {
 		log.Println("Source Service " + sourceServiceXID + " is not persisted yet.")
 		return fmt.Errorf("source service: %s is not persisted yet", sourceServiceXID)
@@ -71,18 +72,18 @@ func PersistServicesInteractionGraph(sourceServiceXID string, destinationService
 
 	services := []*Service{}
 	for _, destinationServiceXID := range destinationServicesXIDs {
-		uid = GetUID(Client, destinationServiceXID, IsService)
+		uid = dgraph.GetUID(destinationServiceXID, IsService)
 		if uid == "" {
 			continue
 		}
 
 		service := &Service{
-			ID: ID{UID: uid},
+			ID: dgraph.ID{UID: uid},
 		}
 		services = append(services, service)
 	}
 	source := Service{
-		ID:        ID{UID: uid},
+		ID:        dgraph.ID{UID: uid},
 		Interacts: services,
 	}
 
@@ -90,46 +91,45 @@ func PersistServicesInteractionGraph(sourceServiceXID string, destinationService
 	if err != nil {
 		return err
 	}
-	_, err = MutateNode(Client, bytes)
+	_, err = dgraph.MutateNode(bytes)
 	return err
 }
 
-// PersistPodsInServices saves pods in Services object in the dgraph
-func PersistPodsInServices(svcToPod map[string][]string) error {
+// StorePodServiceEdges saves pods in Services object in the dgraph
+func StorePodServiceEdges(svcToPod map[string][]string) {
 	for svcXID, podXIDs := range svcToPod {
-		svcUID := GetUID(Client, svcXID, IsService)
+		svcUID := dgraph.GetUID(svcXID, IsService)
 		if svcUID == "" {
 			continue
 		}
 
 		svcPods := []*Pod{}
 		for _, podXID := range podXIDs {
-			podUID := GetUID(Client, podXID, IsPod)
+			podUID := dgraph.GetUID(podXID, IsPod)
 			if podUID == "" {
 				log.Debugf("Pod uid is empty for pod xid: %s", podXID)
 				continue
 			}
 			pod := &Pod{
-				ID: ID{UID: podUID},
+				ID: dgraph.ID{UID: podUID},
 			}
 			svcPods = append(svcPods, pod)
 		}
 
 		updatedService := Service{
-			ID:  ID{UID: svcUID},
+			ID:  dgraph.ID{UID: svcUID},
 			Pod: svcPods,
 		}
-		bytes := utils.JsonMarshal(updatedService)
-		_, err := MutateNode(Client, bytes)
+		bytes := utils.JSONMarshal(updatedService)
+		_, err := dgraph.MutateNode(bytes)
 		if err != nil {
 			log.Error(err)
 		}
 	}
-	return nil
 }
 
-// FetchAllServices returns all pods in the dgraph
-func FetchAllServices() ([]Service, error) {
+// RetreiveAllServices returns all pods in the dgraph
+func RetreiveAllServices() ([]Service, error) {
 	const q = `query {
 		services(func: has(isService)) {
 			name
@@ -146,7 +146,7 @@ func FetchAllServices() ([]Service, error) {
 		Services []Service `json:"services"`
 	}
 	newRoot := root{}
-	err := executeQuery(q, &newRoot)
+	err := dgraph.ExecuteQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -154,8 +154,8 @@ func FetchAllServices() ([]Service, error) {
 	return newRoot.Services, nil
 }
 
-// FetchServiceList ...
-func FetchServiceList() ([]Service, error) {
+// RetreiveServiceList ...
+func RetreiveServiceList() ([]Service, error) {
 	const q = `query {
 		serviceList(func: has(isService)) {
 			name
@@ -166,7 +166,7 @@ func FetchServiceList() ([]Service, error) {
 		ServiceList []Service `json:"serviceList"`
 	}
 	newRoot := root{}
-	err := executeQuery(q, &newRoot)
+	err := dgraph.ExecuteQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}

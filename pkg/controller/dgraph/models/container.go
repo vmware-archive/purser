@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dgraph
+package models
 
 import (
 	"fmt"
@@ -23,6 +23,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/dgraph-io/dgo/protos/api"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
 )
@@ -34,7 +35,7 @@ const (
 
 // Container schema in dgraph
 type Container struct {
-	ID
+	dgraph.ID
 	IsContainer bool      `json:"isContainer,omitempty"`
 	Name        string    `json:"name,omitempty"`
 	StartTime   time.Time `json:"startTime,omitempty"`
@@ -43,28 +44,29 @@ type Container struct {
 	Procs       []*Proc   `json:"procs,omitempty"`
 }
 
-func createContainer(containerXid, containerName string) (*api.Assigned, error) {
+func newContainer(containerXid, containerName string) (*api.Assigned, error) {
 	container := &Container{
-		ID:          ID{Xid: containerXid},
+		ID:          dgraph.ID{Xid: containerXid},
 		Name:        containerName,
 		IsContainer: true,
 	}
-	bytes := utils.JsonMarshal(container)
-	return MutateNode(Client, bytes)
+	bytes := utils.JSONMarshal(container)
+	return dgraph.MutateNode(bytes)
 }
 
-// GetContainers fetchs the list of containers in given pod
-func GetContainers(pod api_v1.Pod, podUID string) []*Container {
+// StoreAndRetreiveContainers fetchs the list of containers in given pod
+// Create a new container in dgraph if container is not in it.
+func StoreAndRetreiveContainers(pod api_v1.Pod, podUID string) []*Container {
 	podXid := pod.Namespace + ":" + pod.Name
 
 	containers := []*Container{}
 	for _, c := range pod.Spec.Containers {
 		containerXid := podXid + ":" + c.Name
-		containerUID := GetUID(Client, containerXid, IsContainer)
+		containerUID := dgraph.GetUID(containerXid, IsContainer)
 
 		var container *Container
 		if containerUID == "" {
-			assigned, err := createContainer(containerXid, c.Name)
+			assigned, err := newContainer(containerXid, c.Name)
 			containerUID = assigned.Uids["blank-0"]
 			if err != nil {
 				log.Errorf("Unable to create container: %s", containerXid)
@@ -72,36 +74,40 @@ func GetContainers(pod api_v1.Pod, podUID string) []*Container {
 			}
 		}
 		container = &Container{
-			ID:  ID{UID: containerUID},
-			Pod: Pod{ID: ID{UID: podUID}},
+			ID:  dgraph.ID{UID: containerUID},
+			Pod: Pod{ID: dgraph.ID{UID: podUID}},
 		}
-		bytes := utils.JsonMarshal(container)
-		MutateNode(Client, bytes)
+		bytes := utils.JSONMarshal(container)
+		_, err := dgraph.MutateNode(bytes)
+		if err != nil {
+			log.Errorf("Unable to save container: %s", containerXid)
+			continue
+		}
 
 		containers = append(containers, container)
 	}
 	return containers
 }
 
-// CreateEdgeFromContainerToProcs ...
-func CreateEdgeFromContainerToProcs(containerXID string, procsXIDs []string) error {
-	containerUID := GetUID(Client, containerXID, IsContainer)
+// StoreContainerProcessEdge ...
+func StoreContainerProcessEdge(containerXID string, procsXIDs []string) error {
+	containerUID := dgraph.GetUID(containerXID, IsContainer)
 	if containerUID == "" {
 		return fmt.Errorf("Container: %s not persisted in dgraph", containerXID)
 	}
 
 	procs := []*Proc{}
 	for _, procXID := range procsXIDs {
-		procUID := GetUID(Client, procXID, IsProc)
+		procUID := dgraph.GetUID(procXID, IsProc)
 		if procUID != "" {
-			procs = append(procs, &Proc{ID: ID{UID: procUID}})
+			procs = append(procs, &Proc{ID: dgraph.ID{UID: procUID}})
 		}
 	}
 	container := Container{
-		ID:    ID{UID: containerUID},
+		ID:    dgraph.ID{UID: containerUID},
 		Procs: procs,
 	}
-	bytes := utils.JsonMarshal(container)
-	_, err := MutateNode(Client, bytes)
+	bytes := utils.JSONMarshal(container)
+	_, err := dgraph.MutateNode(bytes)
 	return err
 }

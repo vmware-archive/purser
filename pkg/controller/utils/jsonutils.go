@@ -23,12 +23,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// JsonMarshal marshal object and returns in byte. If there is an error then it return nil.
-func JsonMarshal(obj interface{}) []byte {
+// JSONMarshal marshal object and returns in byte. If there is an error then it return nil.
+func JSONMarshal(obj interface{}) []byte {
 	bytes, err := json.Marshal(obj)
 	if err != nil {
 		log.Error(err)
-		return nil
 	}
 	return bytes
 }

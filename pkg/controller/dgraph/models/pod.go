@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package dgraph
+package models
 
 import (
 	"encoding/json"
@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/dgo/protos/api"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
 
 	api_v1 "k8s.io/api/core/v1"
@@ -34,15 +35,9 @@ const (
 	IsPod = "isPod"
 )
 
-// ID maps the external ID used in Dgraph to the UID
-type ID struct {
-	Xid string `json:"xid,omitempty"`
-	UID string `json:"uid,omitempty"`
-}
-
 // Pod schema in dgraph
 type Pod struct {
-	ID
+	dgraph.ID
 	IsPod      bool         `json:"isPod,omitempty"`
 	Name       string       `json:"name,omitempty"`
 	StartTime  time.Time    `json:"startTime,omitempty"`
@@ -52,47 +47,47 @@ type Pod struct {
 	Count      float64      `json:"interacts|count,omitempty"`
 }
 
-// createPod creates a new node for the pod in the Dgraph
-func createPod(pod api_v1.Pod, xid string) (*api.Assigned, error) {
-	newPod := Pod{
-		Name:  pod.Name,
+// newPod creates a new node for the pod in the Dgraph
+func newPod(k8sPod api_v1.Pod, xid string) (*api.Assigned, error) {
+	pod := Pod{
+		Name:  k8sPod.Name,
 		IsPod: true,
-		ID:    ID{Xid: xid},
+		ID:    dgraph.ID{Xid: xid},
 	}
-	bytes := utils.JsonMarshal(newPod)
-	return MutateNode(Client, bytes)
+	bytes := utils.JSONMarshal(pod)
+	return dgraph.MutateNode(bytes)
 }
 
-// PersistPod updates the pod details and create it a new node if not exists.
+// StorePod updates the pod details and create it a new node if not exists.
 // It also populates Containers of a pod.
-func PersistPod(pod api_v1.Pod) error {
-	xid := pod.Namespace + ":" + pod.Name
-	uid := GetUID(Client, xid, IsPod)
+func StorePod(k8sPod api_v1.Pod) error {
+	xid := k8sPod.Namespace + ":" + k8sPod.Name
+	uid := dgraph.GetUID(xid, IsPod)
 
-	var newPod Pod
+	var pod Pod
 	if uid == "" {
-		assigned, err := createPod(pod, xid)
+		assigned, err := newPod(k8sPod, xid)
 		if err != nil {
 			return err
 		}
 		uid = assigned.Uids["blank-0"]
 	}
 
-	newPod = Pod{
-		ID:         ID{Xid: xid, UID: uid},
-		Containers: GetContainers(pod, uid),
+	pod = Pod{
+		ID:         dgraph.ID{Xid: xid, UID: uid},
+		Containers: StoreAndRetreiveContainers(k8sPod, uid),
 	}
-	bytes, err := json.Marshal(newPod)
+	bytes, err := json.Marshal(pod)
 	if err != nil {
 		return err
 	}
-	_, err = MutateNode(Client, bytes)
+	_, err = dgraph.MutateNode(bytes)
 	return err
 }
 
-// PersistPodsInteractionGraph store the pod interactions in Dgraph
-func PersistPodsInteractionGraph(sourcePodXID string, destinationPodsXIDs []string, counts []float64) error {
-	uid := GetUID(Client, sourcePodXID, IsPod)
+// StorePodsInteraction store the pod interactions in Dgraph
+func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, counts []float64) error {
+	uid := dgraph.GetUID(sourcePodXID, IsPod)
 	if uid == "" {
 		log.Println("Source Pod " + sourcePodXID + " is not persisted yet.")
 		return fmt.Errorf("source pod: %s is not persisted yet", sourcePodXID)
@@ -100,30 +95,30 @@ func PersistPodsInteractionGraph(sourcePodXID string, destinationPodsXIDs []stri
 
 	pods := []*Pod{}
 	for index, destinationPodXID := range destinationPodsXIDs {
-		dstUID := GetUID(Client, destinationPodXID, IsPod)
+		dstUID := dgraph.GetUID(destinationPodXID, IsPod)
 		if dstUID == "" {
 			log.Printf("Destination pod: %s is not persistet yet", destinationPodXID)
 			continue
 		}
 
 		pod := &Pod{
-			ID:    ID{UID: dstUID},
+			ID:    dgraph.ID{UID: dstUID},
 			Count: counts[index],
 		}
 		pods = append(pods, pod)
 	}
 	source := Pod{
-		ID:        ID{UID: uid},
+		ID:        dgraph.ID{UID: uid},
 		Interacts: pods,
 	}
 
-	bytes := utils.JsonMarshal(source)
-	_, err := MutateNode(Client, bytes)
+	bytes := utils.JSONMarshal(source)
+	_, err := dgraph.MutateNode(bytes)
 	return err
 }
 
-// FetchAllPods returns all pods in the dgraph
-func FetchAllPods() ([]Pod, error) {
+// RetreiveAllPods returns all pods in the dgraph
+func RetreiveAllPods() ([]Pod, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
 			name
@@ -137,7 +132,7 @@ func FetchAllPods() ([]Pod, error) {
 		Pods []Pod `json:"pods"`
 	}
 	newRoot := root{}
-	err := executeQuery(q, &newRoot)
+	err := dgraph.ExecuteQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}
