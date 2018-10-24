@@ -19,8 +19,9 @@ package client
 
 import (
 	"flag"
-	"log"
 	"os/user"
+
+	log "github.com/Sirupsen/logrus"
 
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/rest"

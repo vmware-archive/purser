@@ -21,11 +21,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
+	"github.com/robfig/cron"
+	"github.com/vmware/purser/pkg/controller/utils"
 	"google.golang.org/grpc"
+)
+
+// mutation types
+const (
+	CREATE = "create"
+	UPDATE = "update"
+	DELETE = "delete"
 )
 
 // Dgraph variables
@@ -50,6 +60,7 @@ func init() {
 	if err != nil {
 		fmt.Println("Error while creating schema ", err)
 	}
+	startCronGoRoutines()
 }
 
 // Open creates and establishes a new Dgraph connection
@@ -80,6 +91,8 @@ func CreateSchema() error {
 	op.Schema = `
 		name: string @index(term) .
 		xid:  string @index(term) .
+		startTime: dateTime @index(hour) .
+		endTime: dateTime @index(hour) .
 		isService: bool .
 		isPod: bool .
 		isContainer: bool .
@@ -132,12 +145,22 @@ func ExecuteQuery(query string, root interface{}) error {
 }
 
 // MutateNode mutates a Dgraph transaction
-func MutateNode(n []byte) (*api.Assigned, error) {
+func MutateNode(data interface{}, mutateType string) (*api.Assigned, error) {
+	bytes := utils.JSONMarshal(data)
+	if bytes == nil {
+		return nil, fmt.Errorf("Unable to marshal data: %v", data)
+	}
+
 	mu := &api.Mutation{
 		CommitNow: true,
 	}
+	switch mutateType {
+	case DELETE:
+		mu.DeleteJson = bytes
+	default:
+		mu.SetJson = bytes
+	}
 
-	mu.SetJson = n
 	ctx := context.Background()
 	return client.NewTxn().Mutate(ctx, mu)
 }
@@ -161,4 +184,13 @@ func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	}
 
 	return r.IDs[0].UID
+}
+
+func startCronGoRoutines() {
+	c := cron.New()
+	err := c.AddFunc("@daily", RemoveResourcesInactiveInCurrentMonth)
+	if err != nil {
+		log.Println(err)
+	}
+	c.Start()
 }
