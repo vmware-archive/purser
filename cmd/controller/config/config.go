@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"sync"
 
 	"github.com/vmware/purser/pkg/client"
@@ -8,13 +9,16 @@ import (
 	subscriber_client "github.com/vmware/purser/pkg/client/clientset/typed/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller"
 	"github.com/vmware/purser/pkg/controller/buffering"
-	"github.com/vmware/purser/pkg/controller/utils"
+	"github.com/vmware/purser/pkg/utils"
 )
 
 // Setup initialzes the controller configuration
 func Setup(conf *controller.Config) {
-	// initialize client for api extension server
-	conf.Kubeclient = utils.GetKubeclient("")
+	kubeconfig := flag.String("kubeconfig", "", "path to the kubeconfig file")
+	flag.Parse()
+
+	*conf = controller.Config{}
+	conf.Kubeclient = utils.GetKubeclient(*kubeconfig)
 	conf.Resource = controller.Resource{
 		Pod:                   true,
 		Node:                  true,
@@ -28,7 +32,7 @@ func Setup(conf *controller.Config) {
 		Service:               true,
 	}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BufferSize, Mutex: &sync.Mutex{}}
-	clientset, clusterConfig := client.GetAPIExtensionClient()
+	clientset, clusterConfig := client.GetAPIExtensionClient(*kubeconfig)
 	conf.Groupcrdclient = group_client.NewGroupClient(clientset, clusterConfig)
 	conf.Subscriberclient = subscriber_client.NewSubscriberClient(clientset, clusterConfig)
 }

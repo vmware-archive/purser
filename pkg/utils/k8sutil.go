@@ -24,12 +24,12 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// GetKubeclient returns a k8s clientset from the kubeconfig, if nil fallsback to
+// GetKubeclient returns a k8s clientset from the kubeconfig, if nil fallback to
 // client from inCluster config.
 func GetKubeclient(kubeconfigPath string) *kubernetes.Clientset {
 	config, err := GetKubeconfig(kubeconfigPath)
 	if err != nil {
-		logrus.Fatalf("failed to get kubernetes config: %v", err)
+		logrus.Fatalf("failed to geeeet kubernetes config: %v", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
@@ -39,7 +39,7 @@ func GetKubeclient(kubeconfigPath string) *kubernetes.Clientset {
 	return clientset
 }
 
-// GetKubeconfig builds config from the kubeconfig path, if not set the fallsback to
+// GetKubeconfig builds config from the kubeconfig path, if nil fallback to
 // inCluster config.
 func GetKubeconfig(kubeconfigPath string) (*rest.Config, error) {
 	return clientcmd.BuildConfigFromFlags("", kubeconfigPath)

@@ -20,18 +20,20 @@ package main
 import (
 	"github.com/vmware/purser/cmd/controller/config"
 	"github.com/vmware/purser/pkg/controller"
+	"github.com/vmware/purser/pkg/controller/discovery/processor"
 	"github.com/vmware/purser/pkg/controller/eventprocessor"
-	"github.com/vmware/purser/pkg/controller/utils"
+	"github.com/vmware/purser/pkg/utils"
 )
 
-var conf *controller.Config
+var conf controller.Config
 
 func init() {
 	utils.InitializeLogger()
-	config.Setup(conf)
+	config.Setup(&conf)
 }
 
 func main() {
-	go eventprocessor.ProcessEvents(conf)
-	controller.Start(conf)
+	go eventprocessor.ProcessEvents(&conf)
+	processor.ProcessPodInteractions(&conf)
+	controller.Start(&conf)
 }

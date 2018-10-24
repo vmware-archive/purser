@@ -18,50 +18,26 @@
 package client
 
 import (
-	"flag"
-	"os/user"
-
 	log "github.com/Sirupsen/logrus"
+
 	"github.com/vmware/purser/pkg/utils"
 
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/rest"
 )
 
-const environment = "prod"
-
 // GetAPIExtensionClient returns a client for the cluster and it's config.
-func GetAPIExtensionClient() (*apiextcs.Clientset, *rest.Config) {
-	var config *rest.Config
-	var err error
-
-	if environment == "dev" {
-		kubeconfig := flag.String("kubeconf", getUsrHomeDir()+"/.kube/config", "path to the kubeconfig file")
-		flag.Parse()
-		config, err = utils.GetKubeconfig(*kubeconfig)
-		if err != nil {
-			log.Fatalf("failed to fetch kubeconfig %v", err)
-		}
-	} else {
-		config, err = utils.GetKubeconfig("")
-		if err != nil {
-			log.Fatalf("failed to fetch kubeconfig %v", err)
-		}
+func GetAPIExtensionClient(kubeconfigPath string) (*apiextcs.Clientset, *rest.Config) {
+	config, err := utils.GetKubeconfig(kubeconfigPath)
+	if err != nil {
+		log.Fatalf("failed to fetch kubeconfig %v", err)
 	}
 
 	// create clientset and create our CRD, this only need to run once
-	clientset, err := apiextcs.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("failed to connect to the cluster %v", err)
+	clientset, clientErr := apiextcs.NewForConfig(config)
+	if clientErr != nil {
+		log.Fatalf("failed to connect to the cluster %v", clientErr)
 	}
 
 	return clientset, config
-}
-
-func getUsrHomeDir() string {
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatalf("failed to fetch path to config file %v", err)
-	}
-	return usr.HomeDir
 }

@@ -27,8 +27,8 @@ import (
 
 	"github.com/vmware/purser/pkg/client"
 	groups_client_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
-	"github.com/vmware/purser/pkg/controller/utils"
 	"github.com/vmware/purser/pkg/plugin"
+	"github.com/vmware/purser/pkg/utils"
 )
 
 var groupClient *groups_client_v1.GroupClient
@@ -39,7 +39,7 @@ func init() {
 
 	plugin.ProvideClientSetInstance(utils.GetKubeclient(*kubeconfig))
 
-	client, clusterConfig := client.GetAPIExtensionClient()
+	client, clusterConfig := client.GetAPIExtensionClient(*kubeconfig)
 	groupClient = groups_client_v1.NewGroupClient(client, clusterConfig)
 }
 
