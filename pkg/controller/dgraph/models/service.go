@@ -18,13 +18,12 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/vmware/purser/pkg/controller/dgraph"
-	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
 )
 
@@ -44,20 +43,23 @@ type Service struct {
 	Interacts []*Service `json:"interacts,omitempty"`
 }
 
+func newService(svc api_v1.Service) (*api.Assigned, error) {
+	newService := Service{
+		Name:      svc.Name,
+		IsService: true,
+		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
+		StartTime: svc.GetCreationTimestamp().Time,
+	}
+	return dgraph.MutateNode(newService, dgraph.CREATE)
+}
+
 // StoreService create a new node in the Dgraph  if it is not present.
 func StoreService(service api_v1.Service) error {
 	xid := service.Namespace + ":" + service.Name
 	uid := dgraph.GetUID(xid, IsService)
 
 	if uid == "" {
-		newService := Service{
-			Name:      service.Name,
-			IsService: true,
-			ID:        dgraph.ID{Xid: xid},
-			StartTime: service.GetCreationTimestamp().Time,
-		}
-		bytes := utils.JSONMarshal(newService)
-		assigned, err := dgraph.MutateNode(bytes)
+		assigned, err := newService(service)
 		if err != nil {
 			return err
 		}
@@ -65,14 +67,12 @@ func StoreService(service api_v1.Service) error {
 	}
 
 	svcDeletionTimestamp := service.GetDeletionTimestamp()
-	isDeleted := !svcDeletionTimestamp.IsZero()
-	if isDeleted {
+	if !svcDeletionTimestamp.IsZero() {
 		updatedService := Service{
 			ID:      dgraph.ID{Xid: xid, UID: uid},
 			EndTime: svcDeletionTimestamp.Time,
 		}
-		bytes := utils.JSONMarshal(updatedService)
-		_, err := dgraph.MutateNode(bytes)
+		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		return err
 	}
 	return nil
@@ -86,58 +86,29 @@ func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs [
 		return fmt.Errorf("source service: %s is not persisted yet", sourceServiceXID)
 	}
 
-	services := []*Service{}
-	for _, destinationServiceXID := range destinationServicesXIDs {
-		destinationServiceUID := dgraph.GetUID(destinationServiceXID, IsService)
-		if destinationServiceUID == "" {
-			continue
-		}
-
-		service := &Service{
-			ID: dgraph.ID{UID: destinationServiceUID, Xid: destinationServiceXID},
-		}
-		services = append(services, service)
-	}
+	services := retrieveServicesFromServicesXIDs(destinationServicesXIDs)
 	source := Service{
 		ID:        dgraph.ID{UID: uid, Xid: sourceServiceXID},
 		Interacts: services,
 	}
-
-	bytes, err := json.Marshal(source)
-	if err != nil {
-		return err
-	}
-	_, err = dgraph.MutateNode(bytes)
+	_, err := dgraph.MutateNode(source, dgraph.UPDATE)
 	return err
 }
 
 // StorePodServiceEdges saves pods in Services object in the dgraph
 func StorePodServiceEdges(svcToPod map[string][]string) {
-	for svcXID, podXIDs := range svcToPod {
+	for svcXID, podsXIDs := range svcToPod {
 		svcUID := dgraph.GetUID(svcXID, IsService)
 		if svcUID == "" {
 			continue
 		}
 
-		svcPods := []*Pod{}
-		for _, podXID := range podXIDs {
-			podUID := dgraph.GetUID(podXID, IsPod)
-			if podUID == "" {
-				log.Debugf("Pod uid is empty for pod xid: %s", podXID)
-				continue
-			}
-			pod := &Pod{
-				ID: dgraph.ID{UID: podUID, Xid: podXID},
-			}
-			svcPods = append(svcPods, pod)
-		}
-
+		svcPods := retrievePodsFromPodsXIDs(podsXIDs)
 		updatedService := Service{
 			ID:  dgraph.ID{UID: svcUID, Xid: svcXID},
 			Pod: svcPods,
 		}
-		bytes := utils.JSONMarshal(updatedService)
-		_, err := dgraph.MutateNode(bytes)
+		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		if err != nil {
 			log.Error(err)
 		}
@@ -188,4 +159,20 @@ func RetrieveServiceList() ([]Service, error) {
 	}
 
 	return newRoot.ServiceList, nil
+}
+
+func retrieveServicesFromServicesXIDs(svcsXIDs []string) []*Service {
+	services := []*Service{}
+	for _, svcXID := range svcsXIDs {
+		svcUID := dgraph.GetUID(svcXID, IsService)
+		if svcUID == "" {
+			continue
+		}
+
+		service := &Service{
+			ID: dgraph.ID{UID: svcUID, Xid: svcXID},
+		}
+		services = append(services, service)
+	}
+	return services
 }

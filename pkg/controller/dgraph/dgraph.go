@@ -21,12 +21,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/robfig/cron"
+	"github.com/vmware/purser/pkg/controller/utils"
 	"google.golang.org/grpc"
+)
+
+// mutation types
+const (
+	CREATE = "create"
+	UPDATE = "update"
+	DELETE = "delete"
 )
 
 // Dgraph variables
@@ -136,28 +145,24 @@ func ExecuteQuery(query string, root interface{}) error {
 }
 
 // MutateNode mutates a Dgraph transaction
-func MutateNode(n []byte) (*api.Assigned, error) {
+func MutateNode(data interface{}, mutateType string) (*api.Assigned, error) {
+	bytes := utils.JSONMarshal(data)
+	if bytes == nil {
+		return nil, fmt.Errorf("Unable to marshal data: %v", data)
+	}
+
 	mu := &api.Mutation{
 		CommitNow: true,
-		SetJson:   n,
+	}
+	switch mutateType {
+	case DELETE:
+		mu.DeleteJson = bytes
+	default:
+		mu.SetJson = bytes
 	}
 
 	ctx := context.Background()
 	return client.NewTxn().Mutate(ctx, mu)
-}
-
-// DeleteNodes batch deletes given nodes
-func DeleteNodes(n []byte) error {
-	ctx := context.Background()
-	mu := &api.Mutation{
-		CommitNow:  true,
-		DeleteJson: n,
-	}
-	_, err := client.NewTxn().Mutate(ctx, mu)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return err
 }
 
 // unmarshalDgraphResponse returns empty string if error has occurred

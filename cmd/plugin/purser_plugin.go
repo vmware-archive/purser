@@ -20,9 +20,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/vmware/purser/pkg/client"
 	groups_client_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"

@@ -24,7 +24,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/vmware/purser/pkg/controller/dgraph"
-	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
 )
 
@@ -44,61 +43,25 @@ type Container struct {
 	Procs       []*Proc   `json:"procs,omitempty"`
 }
 
-func newContainer(containerXid, containerName string, creationTimestamp time.Time) (*api.Assigned, error) {
+func newContainer(containerXid, containerName, podUID string, pod api_v1.Pod) (*api.Assigned, error) {
 	container := &Container{
 		ID:          dgraph.ID{Xid: containerXid},
 		Name:        containerName,
 		IsContainer: true,
-		StartTime:   creationTimestamp,
+		StartTime:   pod.GetCreationTimestamp().Time,
+		Pod:         Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
 	}
-	bytes := utils.JSONMarshal(container)
-	return dgraph.MutateNode(bytes)
+	return dgraph.MutateNode(container, dgraph.CREATE)
 }
 
 // StoreAndRetrieveContainers fetchs the list of containers in given pod
 // Create a new container in dgraph if container is not in it.
-func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string, isDeleted bool) []*Container {
-	podXid := pod.Namespace + ":" + pod.Name
-
+func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string) []*Container {
 	containers := []*Container{}
 	for _, c := range pod.Spec.Containers {
-		containerXid := podXid + ":" + c.Name
-		containerUID := dgraph.GetUID(containerXid, IsContainer)
-
-		var container *Container
-		if containerUID == "" {
-			assigned, err := newContainer(containerXid, c.Name, pod.GetCreationTimestamp().Time)
-			containerUID = assigned.Uids["blank-0"]
-			if err != nil {
-				log.Errorf("Unable to create container: %s", containerXid)
-				continue
-			}
-		}
-
-		if isDeleted {
-			container = &Container{
-				ID:      dgraph.ID{UID: containerUID, Xid: containerXid},
-				EndTime: pod.GetDeletionTimestamp().Time,
-			}
-		} else {
-			container = &Container{
-				ID:  dgraph.ID{UID: containerUID, Xid: containerXid},
-				Pod: Pod{ID: dgraph.ID{UID: podUID, Xid: podXid}},
-			}
-		}
-		bytes := utils.JSONMarshal(container)
-		_, err := dgraph.MutateNode(bytes)
-		if err != nil {
-			log.Errorf("Unable to save container: %s", containerXid)
-			continue
-		}
-
-		containers = append(containers, container)
-	}
-	if isDeleted {
-		err := deleteProcessesInTerminatedContainers(containers)
-		if err != nil {
-			log.Error(err)
+		container, err := storeContainerIfNotExist(c, pod, podUID)
+		if err == nil {
+			containers = append(containers, container)
 		}
 	}
 	return containers
@@ -111,18 +74,43 @@ func StoreContainerProcessEdge(containerXID string, procsXIDs []string) error {
 		return fmt.Errorf("Container: %s not persisted in dgraph", containerXID)
 	}
 
-	procs := []*Proc{}
-	for _, procXID := range procsXIDs {
-		procUID := dgraph.GetUID(procXID, IsProc)
-		if procUID != "" {
-			procs = append(procs, &Proc{ID: dgraph.ID{UID: procUID, Xid: procXID}})
-		}
-	}
+	procs := retrieveProcessesFromProcessesXIDs(procsXIDs)
 	container := Container{
 		ID:    dgraph.ID{UID: containerUID, Xid: containerXID},
 		Procs: procs,
 	}
-	bytes := utils.JSONMarshal(container)
-	_, err := dgraph.MutateNode(bytes)
+	_, err := dgraph.MutateNode(container, dgraph.UPDATE)
 	return err
+}
+
+func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID string) (*Container, error) {
+	podXid := pod.Namespace + ":" + pod.Name
+	containerXid := podXid + ":" + c.Name
+	containerUID := dgraph.GetUID(containerXid, IsContainer)
+
+	var container *Container
+	if containerUID == "" {
+		assigned, err := newContainer(containerXid, c.Name, podUID, pod)
+		if err != nil {
+			log.Errorf("Unable to create container: %s", containerXid)
+			return container, err
+		}
+		containerUID = assigned.Uids["blank-0"]
+	}
+
+	container = &Container{
+		ID: dgraph.ID{UID: containerUID, Xid: containerXid},
+	}
+	return container, nil
+}
+
+func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time) {
+	for _, container := range containers {
+		container.EndTime = endTime
+	}
+	_, err := dgraph.MutateNode(containers, dgraph.UPDATE)
+	if err != nil {
+		log.Error(err)
+	}
+	deleteProcessesInTerminatedContainers(containers)
 }

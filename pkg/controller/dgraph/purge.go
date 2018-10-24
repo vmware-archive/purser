@@ -18,11 +18,9 @@
 package dgraph
 
 import (
-	"fmt"
-	"log"
 	"time"
 
-	"github.com/vmware/purser/pkg/controller/utils"
+	log "github.com/Sirupsen/logrus"
 )
 
 type resource struct {
@@ -48,11 +46,8 @@ func removeOldDeletedResources() error {
 		return nil
 	}
 
-	toDelete := utils.JSONMarshal(uids)
-	if toDelete == nil {
-		return fmt.Errorf("Unable to marshal toDelete uids")
-	}
-	return DeleteNodes(toDelete)
+	_, err = MutateNode(uids, DELETE)
+	return err
 }
 
 func retrieveResourcesWithEndTimeBeforeCurrentMonthStart() ([]resource, error) {
