@@ -18,14 +18,13 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/vmware/purser/pkg/controller/dgraph"
-	"github.com/vmware/purser/pkg/controller/utils"
 
 	api_v1 "k8s.io/api/core/v1"
 )
@@ -48,14 +47,14 @@ type Pod struct {
 }
 
 // newPod creates a new node for the pod in the Dgraph
-func newPod(k8sPod api_v1.Pod, xid string) (*api.Assigned, error) {
+func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	pod := Pod{
-		Name:  k8sPod.Name,
-		IsPod: true,
-		ID:    dgraph.ID{Xid: xid},
+		Name:      k8sPod.Name,
+		IsPod:     true,
+		ID:        dgraph.ID{Xid: k8sPod.Namespace + ":" + k8sPod.Name},
+		StartTime: k8sPod.GetCreationTimestamp().Time,
 	}
-	bytes := utils.JSONMarshal(pod)
-	return dgraph.MutateNode(bytes)
+	return dgraph.MutateNode(pod, dgraph.CREATE)
 }
 
 // StorePod updates the pod details and create it a new node if not exists.
@@ -66,22 +65,28 @@ func StorePod(k8sPod api_v1.Pod) error {
 
 	var pod Pod
 	if uid == "" {
-		assigned, err := newPod(k8sPod, xid)
+		assigned, err := newPod(k8sPod)
 		if err != nil {
 			return err
 		}
 		uid = assigned.Uids["blank-0"]
 	}
 
-	pod = Pod{
-		ID:         dgraph.ID{Xid: xid, UID: uid},
-		Containers: StoreAndRetrieveContainers(k8sPod, uid),
+	podDeletedTimestamp := k8sPod.GetDeletionTimestamp()
+	if !podDeletedTimestamp.IsZero() {
+		pod = Pod{
+			ID:      dgraph.ID{Xid: xid, UID: uid},
+			EndTime: podDeletedTimestamp.Time,
+		}
+		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
+	} else {
+		pod = Pod{
+			ID:         dgraph.ID{Xid: xid, UID: uid},
+			Containers: StoreAndRetrieveContainers(k8sPod, uid),
+		}
 	}
-	bytes, err := json.Marshal(pod)
-	if err != nil {
-		return err
-	}
-	_, err = dgraph.MutateNode(bytes)
+
+	_, err := dgraph.MutateNode(pod, dgraph.UPDATE)
 	return err
 }
 
@@ -93,27 +98,12 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 		return fmt.Errorf("source pod: %s is not persisted yet", sourcePodXID)
 	}
 
-	pods := []*Pod{}
-	for index, destinationPodXID := range destinationPodsXIDs {
-		dstUID := dgraph.GetUID(destinationPodXID, IsPod)
-		if dstUID == "" {
-			log.Printf("Destination pod: %s is not persistet yet", destinationPodXID)
-			continue
-		}
-
-		pod := &Pod{
-			ID:    dgraph.ID{UID: dstUID},
-			Count: counts[index],
-		}
-		pods = append(pods, pod)
-	}
+	pods := retrievePodsWithCountAsEdgeWeightFromPodsXIDs(destinationPodsXIDs, counts)
 	source := Pod{
-		ID:        dgraph.ID{UID: uid},
+		ID:        dgraph.ID{UID: uid, Xid: sourcePodXID},
 		Interacts: pods,
 	}
-
-	bytes := utils.JSONMarshal(source)
-	_, err := dgraph.MutateNode(bytes)
+	_, err := dgraph.MutateNode(source, dgraph.UPDATE)
 	return err
 }
 
@@ -137,4 +127,38 @@ func RetrieveAllPods() ([]Pod, error) {
 		return nil, err
 	}
 	return newRoot.Pods, nil
+}
+
+func retrievePodsFromPodsXIDs(podsXIDs []string) []*Pod {
+	pods := []*Pod{}
+	for _, podXID := range podsXIDs {
+		podUID := dgraph.GetUID(podXID, IsPod)
+		if podUID == "" {
+			log.Debugf("Pod uid is empty for pod xid: %s", podXID)
+			continue
+		}
+		pod := &Pod{
+			ID: dgraph.ID{UID: podUID, Xid: podXID},
+		}
+		pods = append(pods, pod)
+	}
+	return pods
+}
+
+func retrievePodsWithCountAsEdgeWeightFromPodsXIDs(podsXIDs []string, counts []float64) []*Pod {
+	pods := []*Pod{}
+	for index, podXID := range podsXIDs {
+		podUID := dgraph.GetUID(podXID, IsPod)
+		if podUID == "" {
+			log.Printf("Destination pod: %s is not persistet yet", podXID)
+			continue
+		}
+
+		pod := &Pod{
+			ID:    dgraph.ID{UID: podUID, Xid: podXID},
+			Count: counts[index],
+		}
+		pods = append(pods, pod)
+	}
+	return pods
 }

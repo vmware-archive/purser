@@ -185,6 +185,14 @@
   version = "v0.8.0"
 
 [[projects]]
+  digest = "1:ed615c5430ecabbb0fb7629a182da65ecee6523900ac1ac932520860878ffcad"
+  name = "github.com/robfig/cron"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b41be1df696709bb6395fe435af20370037c0b4c"
+  version = "v1.1"
+
+[[projects]]
   digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
   name = "github.com/spf13/pflag"
   packages = ["."]
@@ -487,6 +495,7 @@
     "github.com/Sirupsen/logrus",
     "github.com/dgraph-io/dgo",
     "github.com/dgraph-io/dgo/protos/api",
+    "github.com/robfig/cron",
     "google.golang.org/grpc",
     "k8s.io/api/apps/v1beta1",
     "k8s.io/api/batch/v1",

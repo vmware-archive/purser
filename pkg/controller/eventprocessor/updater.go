@@ -86,9 +86,6 @@ func updatePodDetails(group *groups_v1.Group, pod api_v1.Pod, payload controller
 			// This case means we have lost a Delete event for this pod. So we need to update
 			// the pod details with the new one
 		} else if payload.EventType == controller.Delete {
-			// Here we are not using pod.GetObjectMeta().GetDeletionTimestamp() because
-			// by the time controller gets to this part of the code the object(pod) might have been
-			// removed from etcd.
 			existingPodDetails.EndTime = *pod.GetDeletionTimestamp()
 			controller.PvcHandlePodDeletion(existingPodDetails)
 		}

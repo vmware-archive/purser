@@ -19,11 +19,12 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/vmware/purser/pkg/controller/dgraph"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // Dgraph Model Constants
@@ -38,21 +39,24 @@ type Proc struct {
 	Name      string    `json:"name,omitempty"`
 	Interacts []*Pod    `json:"interacts,omitempty"`
 	Container Container `json:"container,omitempty"`
+	StartTime time.Time `json:"startTime,omitempty"`
+	EndTime   time.Time `json:"endTime,omitempty"`
 }
 
-func newProc(procXID, procName, containerUID string) (*api.Assigned, error) {
+func newProc(procXID, procName, containerUID, containerXID string, creationTimeStamp time.Time) (*api.Assigned, error) {
 	newProc := Proc{
 		ID:        dgraph.ID{Xid: procXID},
 		IsProc:    true,
 		Name:      procName,
-		Container: Container{ID: dgraph.ID{UID: containerUID}},
+		Container: Container{ID: dgraph.ID{UID: containerUID, Xid: containerXID}},
+		StartTime: creationTimeStamp,
 	}
-	bytes := utils.JSONMarshal(newProc)
-	return dgraph.MutateNode(bytes)
+	return dgraph.MutateNode(newProc, dgraph.CREATE)
 }
 
 // StoreProcess ...
-func StoreProcess(procXID, procName string, podsXIDs []string, containerXID string) error {
+func StoreProcess(procName, containerXID string, podsXIDs []string, creationTimeStamp time.Time) error {
+	procXID := containerXID + ":" + procName
 	containerUID := dgraph.GetUID(containerXID, IsContainer)
 	if containerUID == "" {
 		return fmt.Errorf("Container not persisted yet")
@@ -60,7 +64,7 @@ func StoreProcess(procXID, procName string, podsXIDs []string, containerXID stri
 
 	procUID := dgraph.GetUID(procXID, IsProc)
 	if procUID == "" {
-		assigned, err := newProc(procXID, procName, containerUID)
+		assigned, err := newProc(procXID, procName, containerUID, containerXID, creationTimeStamp)
 		if err != nil {
 			logrus.Errorf("Unable to create proc: %s", procXID)
 			return err
@@ -68,19 +72,39 @@ func StoreProcess(procXID, procName string, podsXIDs []string, containerXID stri
 		procUID = assigned.Uids["blank-0"]
 	}
 
-	pods := []*Pod{}
-	for _, podXID := range podsXIDs {
-		podUID := dgraph.GetUID(podXID, IsPod)
-		if podUID != "" {
-			pods = append(pods, &Pod{ID: dgraph.ID{UID: podUID}})
-		}
-	}
-
+	pods := retrievePodsFromPodsXIDs(podsXIDs)
 	updatedProc := Proc{
-		ID:        dgraph.ID{UID: procUID},
+		ID:        dgraph.ID{UID: procUID, Xid: procXID},
 		Interacts: pods,
 	}
-	bytes := utils.JSONMarshal(updatedProc)
-	_, err := dgraph.MutateNode(bytes)
+	_, err := dgraph.MutateNode(updatedProc, dgraph.UPDATE)
 	return err
+}
+
+func deleteProcessesInTerminatedContainers(containers []*Container) {
+	procs := []Proc{}
+	for _, container := range containers {
+		for _, proc := range container.Procs {
+			updatedProc := Proc{
+				ID:      dgraph.ID{UID: proc.ID.UID, Xid: proc.ID.Xid},
+				EndTime: container.EndTime,
+			}
+			procs = append(procs, updatedProc)
+		}
+	}
+	_, err := dgraph.MutateNode(procs, dgraph.UPDATE)
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+func retrieveProcessesFromProcessesXIDs(procsXIDs []string) []*Proc {
+	procs := []*Proc{}
+	for _, procXID := range procsXIDs {
+		procUID := dgraph.GetUID(procXID, IsProc)
+		if procUID != "" {
+			procs = append(procs, &Proc{ID: dgraph.ID{UID: procUID, Xid: procXID}})
+		}
+	}
+	return procs
 }
