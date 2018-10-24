@@ -26,20 +26,28 @@
 
 
 [[constraint]]
-  revision = "655e4e87cb5a855657ad325d1a615cf870870c9d"
   name = "k8s.io/api"
+  version = "kubernetes-1.9.0"
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  revision = "926207d3f23130ee823e4e723686691fdcaf1bd8"
+  version = "kubernetes-1.9.0"
 
 [[constraint]]
-  revision = "49fb9c9ee47ede1ead7dc90a697c0652526b072c"
   name = "k8s.io/apimachinery"
+  version = "kubernetes-1.9.0"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  revision = "82b3a5753636104067ccc0759f33c870d17686dd"
+  version = "6.0.0"
+
+[[constraint]]
+  name = "google.golang.org/grpc"
+  version = "1.15.0"
+
+[[constraint]]
+  name = "github.com/dgraph-io/dgo"
+  branch = "master"
 
 [[override]]
   name = "github.com/tidwall/gjson"
@@ -49,10 +57,3 @@
   go-tests = true
   unused-packages = true
 
-[[constraint]]
-  name = "google.golang.org/grpc"
-  version = "1.15.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/dgraph-io/dgo"
