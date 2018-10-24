@@ -22,10 +22,10 @@ import (
 	"os/user"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/utils"
 
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 const environment = "prod"
@@ -36,24 +36,16 @@ func GetAPIExtensionClient() (*apiextcs.Clientset, *rest.Config) {
 	var err error
 
 	if environment == "dev" {
-		var usr *user.User
-		usr, err = user.Current()
-		if err != nil {
-			log.Fatalf("failed to fetch path to config file %v", err)
-			panic(err)
-		}
-		kubeconf := flag.String("kubeconf", usr.HomeDir+"/.kube/config", "path to Kubernetes config file")
+		kubeconfig := flag.String("kubeconf", getUsrHomeDir()+"/.kube/config", "path to the kubeconfig file")
 		flag.Parse()
-		config, err = getClientConfig(*kubeconf)
+		config, err = utils.GetKubeconfig(*kubeconfig)
 		if err != nil {
 			log.Fatalf("failed to fetch kubeconfig %v", err)
-			panic(err)
 		}
 	} else {
-		config, err = getClientConfig("")
+		config, err = utils.GetKubeconfig("")
 		if err != nil {
 			log.Fatalf("failed to fetch kubeconfig %v", err)
-			panic(err)
 		}
 	}
 
@@ -62,13 +54,14 @@ func GetAPIExtensionClient() (*apiextcs.Clientset, *rest.Config) {
 	if err != nil {
 		log.Fatalf("failed to connect to the cluster %v", err)
 	}
+
 	return clientset, config
 }
 
-func getClientConfig(kubeconfig string) (*rest.Config, error) {
-	if kubeconfig != "" {
-		return clientcmd.BuildConfigFromFlags("", kubeconfig)
+func getUsrHomeDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatalf("failed to fetch path to config file %v", err)
 	}
-	log.Println("Using In cluster config.")
-	return rest.InClusterConfig()
+	return usr.HomeDir
 }

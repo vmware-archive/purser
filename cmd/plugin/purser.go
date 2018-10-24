@@ -27,10 +27,8 @@ import (
 
 	"github.com/vmware/purser/pkg/client"
 	groups_client_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
+	"github.com/vmware/purser/pkg/controller/utils"
 	"github.com/vmware/purser/pkg/plugin"
-
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var groupClient *groups_client_v1.GroupClient
@@ -39,16 +37,7 @@ func init() {
 	kubeconfig := flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), "path to Kubernetes config file")
 	flag.Parse()
 
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		log.Fatalf("failed to fetch kubeconfig %v", err)
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatalf("failed to connect to the cluster %v", err)
-	}
-	plugin.ProvideClientSetInstance(clientset)
+	plugin.ProvideClientSetInstance(utils.GetKubeclient(*kubeconfig))
 
 	client, clusterConfig := client.GetAPIExtensionClient()
 	groupClient = groups_client_v1.NewGroupClient(client, clusterConfig)
