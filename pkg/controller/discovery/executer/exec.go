@@ -24,21 +24,18 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/utils"
+	"github.com/vmware/purser/pkg/controller"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/remotecommand"
 )
 
-const debug = false
-
 // ExecToPodThroughAPI uninterractively exec to the pod with the command specified.
-func ExecToPodThroughAPI(client *kubernetes.Clientset, command, containerName, podName string, stdin io.Reader) (string, string, error) {
+func ExecToPodThroughAPI(conf controller.Config, command, containerName, podName string, stdin io.Reader) (string, string, error) {
 	// Prepare the API URL used to execute another process within the Pod. In this case,
 	// we'll run a remote shell.
-	req := client.CoreV1().RESTClient().Post().
+	req := conf.Kubeclient.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(podName).
 		SubResource("exec")
@@ -58,15 +55,9 @@ func ExecToPodThroughAPI(client *kubernetes.Clientset, command, containerName, p
 		TTY:       false,
 	}, parameterCodec)
 
-	if debug {
-		log.Debug("Request URL:", req.URL().String())
-	}
+	log.Debug("Request URL:", req.URL().String())
 
-	config, err := utils.GetKubeconfig("")
-	if err != nil {
-		return "", "", fmt.Errorf("failed to fetch kubeconfig file %v", err)
-	}
-	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
+	exec, err := remotecommand.NewSPDYExecutor(conf.KubeConfig, "POST", req.URL())
 	if err != nil {
 		return "", "", fmt.Errorf("error while creating Executor: %v", err)
 	}

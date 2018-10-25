@@ -26,12 +26,7 @@ import (
 
 // GetKubeclient returns a k8s clientset from the kubeconfig, if nil fallback to
 // client from inCluster config.
-func GetKubeclient(kubeconfigPath string) *kubernetes.Clientset {
-	config, err := GetKubeconfig(kubeconfigPath)
-	if err != nil {
-		logrus.Fatalf("failed to geeeet kubernetes config: %v", err)
-	}
-
+func GetKubeclient(config *rest.Config) *kubernetes.Clientset {
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		logrus.Fatalf("failed to create kubernetes clientset: %v", err)

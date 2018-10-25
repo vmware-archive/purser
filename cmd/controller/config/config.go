@@ -21,6 +21,8 @@ import (
 	"flag"
 	"sync"
 
+	log "github.com/Sirupsen/logrus"
+
 	"github.com/vmware/purser/pkg/client"
 	group_client "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
 	subscriber_client "github.com/vmware/purser/pkg/client/clientset/typed/subscriber/v1"
@@ -29,13 +31,20 @@ import (
 	"github.com/vmware/purser/pkg/utils"
 )
 
+// InClusterConfigPath should be empty to get client and config for InCluster environment.
+const InClusterConfigPath = ""
+
 // Setup initialzes the controller configuration
 func Setup(conf *controller.Config) {
-	kubeconfig := flag.String("kubeconfig", "", "path to the kubeconfig file")
+	kubeconfig := flag.String("kubeconfig", InClusterConfigPath, "path to the kubeconfig file")
 	flag.Parse()
-
+	var err error
 	*conf = controller.Config{}
-	conf.Kubeclient = utils.GetKubeclient(*kubeconfig)
+	conf.KubeConfig, err = utils.GetKubeconfig(*kubeconfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	conf.Kubeclient = utils.GetKubeclient(conf.KubeConfig)
 	conf.Resource = controller.Resource{
 		Pod:                   true,
 		Node:                  true,
