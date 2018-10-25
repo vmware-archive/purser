@@ -33,18 +33,18 @@ var (
 
 // PopulatePodToServiceTable populates the pod<->service map
 func PopulatePodToServiceTable(svc corev1.Service, pods *corev1.PodList) {
-	svcToPodTable := make(map[string][]string)
+	var podsXIDsInService []string
 	serviceKey := svc.Namespace + KeySpliter + svc.Name
 
 	serviceMu.Lock()
 	for _, pod := range pods.Items {
 		podKey := pod.Namespace + KeySpliter + pod.Name
 		podToSvcTable[podKey] = append(podToSvcTable[podKey], serviceKey)
-		svcToPodTable[serviceKey] = append(svcToPodTable[serviceKey], podKey)
+		podsXIDsInService = append(podsXIDsInService, podKey)
 	}
 	serviceMu.Unlock()
 
-	err := models.StorePodServiceEdges(svcToPodTable)
+	err := models.StorePodServiceEdges(serviceKey, podsXIDsInService)
 	if err != nil {
 		log.Errorf("failed to store pod services edges: %s\n", err)
 	}
