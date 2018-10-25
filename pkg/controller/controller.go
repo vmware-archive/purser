@@ -26,7 +26,6 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/utils"
 
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
@@ -38,7 +37,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
@@ -61,18 +59,6 @@ type Event struct {
 	resourceType string
 	data         interface{}
 	captureTime  meta_v1.Time
-}
-
-// GetKubeclient returns kubernetes clientset
-func GetKubeclient() *kubernetes.Clientset {
-	var kubeClient *kubernetes.Clientset
-	_, err := rest.InClusterConfig()
-	if err != nil {
-		kubeClient = utils.GetClientOutOfCluster()
-	} else {
-		kubeClient = utils.GetClient()
-	}
-	return kubeClient
 }
 
 // Start runs the controller goroutine.
