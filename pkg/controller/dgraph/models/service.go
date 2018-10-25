@@ -141,6 +141,35 @@ func RetrieveAllServices() ([]Service, error) {
 	return newRoot.Services, nil
 }
 
+// RetrieveAllServicesWithDstPods returns all pods in the dgraph
+func RetrieveAllServicesWithDstPods() ([]Service, error) {
+	const q = `query {
+		services(func: has(isService)) {
+			name
+			interacts @facets {
+				name
+			}
+			pod {
+				name
+				interacts @facets {
+					name
+				}
+			}
+		}
+	}`
+
+	type root struct {
+		Services []Service `json:"services"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	return newRoot.Services, nil
+}
+
 // RetrieveServiceList ...
 func RetrieveServiceList() ([]Service, error) {
 	const q = `query {
