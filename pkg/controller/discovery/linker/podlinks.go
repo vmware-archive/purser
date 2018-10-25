@@ -43,12 +43,16 @@ type Process struct {
 	ID, Name string
 }
 
+const (
+	// KeySpliter splits the key into resource namespace and name used for processing Xids
+	KeySpliter = ":"
+)
+
 // PopulatePodIPTable populates the podIP<->podName map
 func PopulatePodIPTable(pods *corev1.PodList) {
 	for _, pod := range pods.Items {
-		podName := pod.GetName()
 		podIP := pod.Status.PodIP
-		podIPTable[podIP] = pod.Namespace + ":" + podName
+		podIPTable[podIP] = pod.Namespace + KeySpliter + pod.Name
 	}
 }
 
@@ -71,7 +75,7 @@ func GenerateAndStorePodInteractions() {
 // PopulateMappingTables updates PodToPodTable
 func PopulateMappingTables(tcpDump []string, pod corev1.Pod, containerName string, podInteractions map[string](map[string]float64)) {
 	for _, address := range tcpDump {
-		address := strings.Split(address, ":")
+		address := strings.Split(address, KeySpliter)
 		srcIP, dstIP := address[0], address[2]
 		srcName, dstName := podIPTable[srcIP], podIPTable[dstIP]
 		updatePodInteractions(srcName, dstName, podInteractions)
