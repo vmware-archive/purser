@@ -41,9 +41,9 @@ func processPodDetails(client *kubernetes.Clientset, pods *corev1.PodList) {
 				defer wg.Done()
 
 				containers := pod.Spec.Containers
-				processContainerDetails(client, pod, containers)
+				podInteractions := processContainerDetails(client, pod, containers)
+				linker.UpdatePodToPodTable(podInteractions)
 				log.Debugf("Finished processing Pod (%d/%d)", index+1, podsCount)
-
 			}(pod, index)
 		}
 	}

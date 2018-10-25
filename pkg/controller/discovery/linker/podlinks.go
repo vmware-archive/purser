@@ -2,6 +2,7 @@ package linker
 
 import (
 	"strings"
+	"sync"
 
 	log "github.com/Sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -14,6 +15,10 @@ import (
 var (
 	podIPTable    = make(map[string]string)
 	podToPodTable = make(map[string](map[string]float64))
+)
+
+var (
+	mu sync.Mutex
 )
 
 // Process holds the details for the executing processes inside the container
@@ -47,25 +52,44 @@ func GenerateAndStorePodInteractions() {
 }
 
 // PopulateMappingTables updates PodToPodTable
-func PopulateMappingTables(tcpDump []string, pod corev1.Pod, containerName string) {
+func PopulateMappingTables(tcpDump []string, pod corev1.Pod, containerName string, podInteractions map[string](map[string]float64)) {
 	for _, address := range tcpDump {
 		address := strings.Split(address, ":")
 		srcIP, dstIP := address[0], address[2]
 		srcName, dstName := podIPTable[srcIP], podIPTable[dstIP]
-		updatePodToPodTable(srcName, dstName)
+		updatePodInteractions(srcName, dstName, podInteractions)
 	}
 }
 
-func updatePodToPodTable(srcName, dstName string) {
+func updatePodInteractions(srcName, dstName string, podInteractions map[string](map[string]float64)) {
 	if dstName != "" && srcName != "" {
-		if _, ok := podToPodTable[srcName]; !ok {
-			podToPodTable[srcName] = make(map[string]float64)
+		if _, ok := podInteractions[srcName]; !ok {
+			podInteractions[srcName] = make(map[string]float64)
 		}
 
-		if _, isPresent := podToPodTable[srcName][dstName]; !isPresent {
-			podToPodTable[srcName][dstName] = 1
+		if _, isPresent := podInteractions[srcName][dstName]; !isPresent {
+			podInteractions[srcName][dstName] = 1
 		} else {
-			podToPodTable[srcName][dstName]++
+			podInteractions[srcName][dstName]++
 		}
 	}
+}
+
+// UpdatePodToPodTable ...
+func UpdatePodToPodTable(podInteractions map[string](map[string]float64)) {
+	mu.Lock()
+	for srcPod, interaction := range podInteractions {
+		if _, ok := podToPodTable[srcPod]; !ok {
+			podToPodTable[srcPod] = interaction
+		} else {
+			for dstPod, count := range interaction {
+				if _, isPresent := podToPodTable[srcPod][dstPod]; !isPresent {
+					podToPodTable[srcPod][dstPod] = count
+				} else {
+					podToPodTable[srcPod][dstPod] += count
+				}
+			}
+		}
+	}
+	mu.Unlock()
 }

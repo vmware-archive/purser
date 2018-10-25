@@ -16,14 +16,17 @@ import (
 
 const debug = false
 
-func processContainerDetails(client *kubernetes.Clientset, pod corev1.Pod, containers []corev1.Container) {
+func processContainerDetails(client *kubernetes.Clientset, pod corev1.Pod,
+	containers []corev1.Container) map[string](map[string]float64) {
+	podInteractions := make(map[string](map[string]float64))
 	for _, container := range containers {
 		pidList, cmdList := getPIDList(client, container.Name, pod.Name)
 		for index, pid := range pidList {
 			process := linker.Process{ID: pid, Name: cmdList[index]}
-			getProcessDump(client, pod, container.Name, process)
+			getProcessDump(client, pod, container.Name, process, podInteractions)
 		}
 	}
+	return podInteractions
 }
 
 func getPIDList(client *kubernetes.Clientset, containerName, podName string) ([]string, []string) {
@@ -47,7 +50,8 @@ func getPIDList(client *kubernetes.Clientset, containerName, podName string) ([]
 	return pidList[1:], cmdList[1:]
 }
 
-func getProcessDump(client *kubernetes.Clientset, pod corev1.Pod, containerName string, process linker.Process) {
+func getProcessDump(client *kubernetes.Clientset, pod corev1.Pod, containerName string,
+	process linker.Process, podInteractions map[string](map[string]float64)) {
 	//get tcp information from /proc/pid/net/tcp for each process
 	if process.ID != "" {
 		tcpCommand := "cat /proc/" + process.ID + "/net/tcp"
@@ -55,7 +59,7 @@ func getProcessDump(client *kubernetes.Clientset, pod corev1.Pod, containerName 
 		if err != nil {
 			//to clean dump only to have required fields
 			tcpDump := utils.PurgeTCPData(tcpOutput)
-			linker.PopulateMappingTables(tcpDump, pod, containerName)
+			linker.PopulateMappingTables(tcpDump, pod, containerName, podInteractions)
 		}
 
 		tcp6Command := "cat /proc/" + process.ID + "/net/tcp6"
@@ -63,7 +67,7 @@ func getProcessDump(client *kubernetes.Clientset, pod corev1.Pod, containerName 
 		if err != nil {
 			//to clean dump only to have required fields
 			tcp6Dump := utils.PurgeTCP6Data(tcp6Output)
-			linker.PopulateMappingTables(tcp6Dump, pod, containerName)
+			linker.PopulateMappingTables(tcp6Dump, pod, containerName, podInteractions)
 		}
 	}
 }
