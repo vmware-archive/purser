@@ -96,23 +96,18 @@ func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs [
 }
 
 // StorePodServiceEdges saves pods in Services object in the dgraph
-func StorePodServiceEdges(svcToPod map[string][]string) {
-	for svcXID, podsXIDs := range svcToPod {
-		svcUID := dgraph.GetUID(svcXID, IsService)
-		if svcUID == "" {
-			continue
-		}
-
-		svcPods := retrievePodsFromPodsXIDs(podsXIDs)
+func StorePodServiceEdges(svcXID string, podsXIDsInService []string) error {
+	svcUID := dgraph.GetUID(svcXID, IsService)
+	if svcUID != "" {
+		svcPods := retrievePodsFromPodsXIDs(podsXIDsInService)
 		updatedService := Service{
 			ID:  dgraph.ID{UID: svcUID, Xid: svcXID},
 			Pod: svcPods,
 		}
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
-		if err != nil {
-			log.Error(err)
-		}
+		return err
 	}
+	return nil
 }
 
 // RetrieveAllServices returns all pods in the dgraph
@@ -125,6 +120,32 @@ func RetrieveAllServices() ([]Service, error) {
 			}
 			pod {
 				name
+			}
+		}
+	}`
+
+	type root struct {
+		Services []Service `json:"services"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	return newRoot.Services, nil
+}
+
+// RetrieveAllServicesWithDstPods returns all pods in the dgraph
+func RetrieveAllServicesWithDstPods() ([]Service, error) {
+	const q = `query {
+		services(func: has(isService)) {
+			name
+			pod {
+				name
+				interacts @facets {
+					name
+				}
 			}
 		}
 	}`
