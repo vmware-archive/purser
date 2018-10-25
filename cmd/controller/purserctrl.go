@@ -15,29 +15,25 @@
  * limitations under the License.
  */
 
-package client
+package main
 
 import (
-	log "github.com/Sirupsen/logrus"
-
+	"github.com/vmware/purser/cmd/controller/config"
+	"github.com/vmware/purser/pkg/controller"
+	"github.com/vmware/purser/pkg/controller/discovery/processor"
+	"github.com/vmware/purser/pkg/controller/eventprocessor"
 	"github.com/vmware/purser/pkg/utils"
-
-	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/rest"
 )
 
-// GetAPIExtensionClient returns a client for the cluster and it's config.
-func GetAPIExtensionClient(kubeconfigPath string) (*apiextcs.Clientset, *rest.Config) {
-	config, err := utils.GetKubeconfig(kubeconfigPath)
-	if err != nil {
-		log.Fatalf("failed to fetch kubeconfig %v", err)
-	}
+var conf controller.Config
 
-	// create clientset and create our CRD, this only need to run once
-	clientset, clientErr := apiextcs.NewForConfig(config)
-	if clientErr != nil {
-		log.Fatalf("failed to connect to the cluster %v", clientErr)
-	}
+func init() {
+	utils.InitializeLogger()
+	config.Setup(&conf)
+}
 
-	return clientset, config
+func main() {
+	go eventprocessor.ProcessEvents(&conf)
+	processor.ProcessPodInteractions(&conf)
+	controller.Start(&conf)
 }

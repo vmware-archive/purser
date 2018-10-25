@@ -18,48 +18,29 @@
 package utils
 
 import (
-	"os"
-
 	"github.com/Sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// GetClient returns a k8s clientset to the request from inside of cluster
-func GetClient() *kubernetes.Clientset {
-	config, err := rest.InClusterConfig()
+// GetKubeclient returns a k8s clientset from the kubeconfig, if nil fallback to
+// client from inCluster config.
+func GetKubeclient(kubeconfigPath string) *kubernetes.Clientset {
+	config, err := GetKubeconfig(kubeconfigPath)
 	if err != nil {
-		logrus.Fatalf("Can not get kubernetes config: %v", err)
+		logrus.Fatalf("failed to geeeet kubernetes config: %v", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		logrus.Fatalf("Can not create kubernetes client: %v", err)
+		logrus.Fatalf("failed to create kubernetes clientset: %v", err)
 	}
-
 	return clientset
 }
 
-func buildOutOfClusterConfig() (*rest.Config, error) {
-	kubeconfigPath := os.Getenv("KUBECONFIG")
-	if kubeconfigPath == "" {
-		kubeconfigPath = os.Getenv("HOME") + "/.kube/config"
-	}
+// GetKubeconfig builds config from the kubeconfig path, if nil fallback to
+// inCluster config.
+func GetKubeconfig(kubeconfigPath string) (*rest.Config, error) {
 	return clientcmd.BuildConfigFromFlags("", kubeconfigPath)
-}
-
-// GetClientOutOfCluster returns a k8s clientset to the request from outside of cluster
-func GetClientOutOfCluster() *kubernetes.Clientset {
-	config, err := buildOutOfClusterConfig()
-	if err != nil {
-		logrus.Fatalf("Can not get kubernetes config: %v", err)
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		logrus.Fatalf("Can not create kubernetes config: %v", err)
-	}
-
-	return clientset
 }

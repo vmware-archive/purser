@@ -15,7 +15,7 @@ import (
 
 // TestCrdFlow executes the CRD flow.
 func TestCrdFlow(t *testing.T) {
-	clientset, clusterConfig := client.GetAPIExtensionClient()
+	clientset, clusterConfig := client.GetAPIExtensionClient("")
 	subcrdclient := subscriber_v1.NewSubscriberClient(clientset, clusterConfig)
 	ListSubscriberCrdInstances(subcrdclient)
 
