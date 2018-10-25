@@ -26,7 +26,6 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
-	"github.com/robfig/cron"
 	"github.com/vmware/purser/pkg/controller/utils"
 	"google.golang.org/grpc"
 )
@@ -60,7 +59,6 @@ func init() {
 	if err != nil {
 		fmt.Println("Error while creating schema ", err)
 	}
-	startCronGoRoutines()
 }
 
 // Open creates and establishes a new Dgraph connection
@@ -184,13 +182,4 @@ func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	}
 
 	return r.IDs[0].UID
-}
-
-func startCronGoRoutines() {
-	c := cron.New()
-	err := c.AddFunc("@daily", RemoveResourcesInactiveInCurrentMonth)
-	if err != nil {
-		log.Println(err)
-	}
-	c.Start()
 }

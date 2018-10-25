@@ -37,7 +37,11 @@ func init() {
 	kubeconfig := flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), "path to Kubernetes config file")
 	flag.Parse()
 
-	plugin.ProvideClientSetInstance(utils.GetKubeclient(*kubeconfig))
+	config, err := utils.GetKubeconfig(*kubeconfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	plugin.ProvideClientSetInstance(utils.GetKubeclient(config))
 
 	client, clusterConfig := client.GetAPIExtensionClient(*kubeconfig)
 	groupClient = groups_client_v1.NewGroupClient(client, clusterConfig)

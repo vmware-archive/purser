@@ -22,6 +22,7 @@ import (
 	subscriber_v1 "github.com/vmware/purser/pkg/client/clientset/typed/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller/buffering"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 // These are the event types supported for controllers
@@ -47,6 +48,7 @@ type Resource struct {
 
 // Config contains config objects
 type Config struct {
+	KubeConfig       *rest.Config
 	Resource         Resource `json:"resource"`
 	RingBuffer       *buffering.RingBuffer
 	Groupcrdclient   *groups_v1.GroupClient
