@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2018 VMware Inc. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package linker
 
 import (
@@ -20,14 +37,18 @@ func PopulatePodToServiceTable(svc corev1.Service, pods *corev1.PodList) {
 		podToSvcTable[podKey] = append(podToSvcTable[podKey], serviceKey)
 		svcToPodTable[serviceKey] = append(svcToPodTable[serviceKey], podKey)
 	}
-	models.StorePodServiceEdges(svcToPodTable)
+
+	err := models.StorePodServiceEdges(svcToPodTable)
+	if err != nil {
+		log.Errorf("failed to store pod services edges: %s\n", err)
+	}
 }
 
 // GenerateAndStoreSvcInteractions parses through pod interactions and generates a source to // destination service interaction.
 func GenerateAndStoreSvcInteractions() {
 	services, err := models.RetrieveAllServicesWithDstPods()
 	if err != nil {
-		log.Errorf("Unable to fetch services: %s\n", err)
+		log.Errorf("failed to fetch services: %s\n", err)
 	}
 
 	for _, service := range services {
@@ -35,7 +56,7 @@ func GenerateAndStoreSvcInteractions() {
 		destinationServices := getServicesXIDsFromPods(destinationPods)
 		err = models.StoreServicesInteraction(service.Xid, destinationServices)
 		if err != nil {
-			log.Error(err)
+			log.Errorf("failed to store services interactions: %s\n", err)
 		}
 	}
 }

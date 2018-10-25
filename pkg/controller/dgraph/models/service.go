@@ -96,7 +96,7 @@ func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs [
 }
 
 // StorePodServiceEdges saves pods in Services object in the dgraph
-func StorePodServiceEdges(svcToPod map[string][]string) {
+func StorePodServiceEdges(svcToPod map[string][]string) error {
 	for svcXID, podsXIDs := range svcToPod {
 		svcUID := dgraph.GetUID(svcXID, IsService)
 		if svcUID == "" {
@@ -109,10 +109,9 @@ func StorePodServiceEdges(svcToPod map[string][]string) {
 			Pod: svcPods,
 		}
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
-		if err != nil {
-			log.Error(err)
-		}
+		return err
 	}
+	return nil
 }
 
 // RetrieveAllServices returns all pods in the dgraph
