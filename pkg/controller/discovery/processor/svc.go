@@ -18,7 +18,6 @@
 package processor
 
 import (
-	"fmt"
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
@@ -71,5 +70,4 @@ func processServiceDetails(client *kubernetes.Clientset, services *corev1.Servic
 		}
 	}
 	svcwg.Wait()
-	fmt.Println("")
 }

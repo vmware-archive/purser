@@ -18,7 +18,6 @@
 package processor
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/vmware/purser/pkg/controller"
@@ -64,5 +63,4 @@ func processPodDetails(conf controller.Config, pods *corev1.PodList) {
 		}
 	}
 	wg.Wait()
-	fmt.Println("")
 }
