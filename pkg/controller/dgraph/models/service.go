@@ -145,9 +145,6 @@ func RetrieveAllServicesWithDstPods() ([]Service, error) {
 	const q = `query {
 		services(func: has(isService)) {
 			name
-			interacts @facets {
-				name
-			}
 			pod {
 				name
 				interacts @facets {
