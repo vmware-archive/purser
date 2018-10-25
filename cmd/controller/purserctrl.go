@@ -18,8 +18,12 @@
 package main
 
 import (
+	log "github.com/Sirupsen/logrus"
+
+	"github.com/robfig/cron"
 	"github.com/vmware/purser/cmd/controller/config"
 	"github.com/vmware/purser/pkg/controller"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/discovery/processor"
 	"github.com/vmware/purser/pkg/controller/eventprocessor"
 	"github.com/vmware/purser/pkg/utils"
@@ -34,6 +38,23 @@ func init() {
 
 func main() {
 	go eventprocessor.ProcessEvents(&conf)
-	processor.ProcessPodInteractions(&conf)
 	controller.Start(&conf)
+	startCronJobs()
+}
+
+func startCronJobs() {
+	c := cron.New()
+	err := c.AddFunc("@every 0h30m", runDiscovery)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = c.AddFunc("@daily", dgraph.RemoveResourcesInactiveInCurrentMonth)
+	if err != nil {
+		log.Error(err)
+	}
+	c.Start()
+}
+
+func runDiscovery() {
+	processor.ProcessPodInteractions(conf)
 }
