@@ -18,6 +18,8 @@
 package linker
 
 import (
+	"sync"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
@@ -26,17 +28,21 @@ import (
 
 var (
 	podToSvcTable = make(map[string][]string)
-	svcToPodTable = make(map[string][]string)
+	serviceMu     sync.Mutex
 )
 
 // PopulatePodToServiceTable populates the pod<->service map
 func PopulatePodToServiceTable(svc corev1.Service, pods *corev1.PodList) {
+	svcToPodTable := make(map[string][]string)
 	serviceKey := svc.Namespace + KeySpliter + svc.Name
+
+	serviceMu.Lock()
 	for _, pod := range pods.Items {
 		podKey := pod.Namespace + KeySpliter + pod.Name
 		podToSvcTable[podKey] = append(podToSvcTable[podKey], serviceKey)
 		svcToPodTable[serviceKey] = append(svcToPodTable[serviceKey], podKey)
 	}
+	serviceMu.Unlock()
 
 	err := models.StorePodServiceEdges(svcToPodTable)
 	if err != nil {
