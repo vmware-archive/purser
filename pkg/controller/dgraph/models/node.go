@@ -53,7 +53,8 @@ func createNodeObject(node api_v1.Node) Node {
 	return newNode
 }
 
-func CreateOrGetNodeById(xid string) (string, error) {
+// CreateOrGetNodeByID create and returns the node if not present, otherwise simply returns node.
+func CreateOrGetNodeByID(xid string) (string, error) {
 	uid := dgraph.GetUID(xid, IsNode)
 	if uid != "" {
 		return uid, nil

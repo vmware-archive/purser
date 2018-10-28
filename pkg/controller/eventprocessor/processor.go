@@ -64,6 +64,7 @@ func ProcessEvents(conf *controller.Config) {
 }
 
 // PersistPayloads store payload info in dgraph
+// nolint: gocyclo
 func PersistPayloads(payloads []*interface{}) {
 	for _, event := range payloads {
 		payload := (*event).(*controller.Payload)
