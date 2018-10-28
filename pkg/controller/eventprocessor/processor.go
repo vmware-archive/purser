@@ -87,6 +87,16 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error while persisting service %v", err)
 			}
+		} else if payload.ResourceType == "Node" {
+			node := api_v1.Node{}
+			err := json.Unmarshal([]byte(payload.Data), &node)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreNode(node)
+			if err != nil {
+				log.Errorf("Error while persisting node %v", err)
+			}
 		}
 	}
 }
