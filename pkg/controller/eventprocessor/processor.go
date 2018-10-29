@@ -98,6 +98,16 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error while persisting node %v", err)
 			}
+		} else if payload.ResourceType == "Namespace" {
+			ns := api_v1.Namespace{}
+			err := json.Unmarshal([]byte(payload.Data), &ns)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreNamespace(ns)
+			if err != nil {
+				log.Errorf("Error while persisting namespace %v", err)
+			}
 		}
 	}
 }
