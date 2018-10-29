@@ -64,6 +64,7 @@ func ProcessEvents(conf *controller.Config) {
 }
 
 // PersistPayloads store payload info in dgraph
+// nolint: gocyclo
 func PersistPayloads(payloads []*interface{}) {
 	for _, event := range payloads {
 		payload := (*event).(*controller.Payload)
@@ -86,6 +87,16 @@ func PersistPayloads(payloads []*interface{}) {
 			err = models.StoreService(service)
 			if err != nil {
 				log.Errorf("Error while persisting service %v", err)
+			}
+		} else if payload.ResourceType == "Node" {
+			node := api_v1.Node{}
+			err := json.Unmarshal([]byte(payload.Data), &node)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreNode(node)
+			if err != nil {
+				log.Errorf("Error while persisting node %v", err)
 			}
 		}
 	}
