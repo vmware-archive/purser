@@ -24,6 +24,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
+	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
 )
 
@@ -35,19 +36,23 @@ const (
 // Node schema in dgraph
 type Node struct {
 	dgraph.ID
-	IsNode    bool      `json:"isNode,omitempty"`
-	Name      string    `json:"name,omitempty"`
-	StartTime time.Time `json:"startTime,omitempty"`
-	EndTime   time.Time `json:"endTime,omitempty"`
-	Pods      []*Pod    `json:"pods,omitempty"`
+	IsNode         bool      `json:"isNode,omitempty"`
+	Name           string    `json:"name,omitempty"`
+	StartTime      time.Time `json:"startTime,omitempty"`
+	EndTime        time.Time `json:"endTime,omitempty"`
+	Pods           []*Pod    `json:"pods,omitempty"`
+	CPUCapity      float64   `json:"cpuCapacity,omitempty"`
+	MemoryCapacity float64   `json:"memoryCapacity,omitempty"`
 }
 
 func createNodeObject(node api_v1.Node) Node {
 	newNode := Node{
-		Name:      node.Name,
-		IsNode:    true,
-		ID:        dgraph.ID{Xid: node.Name},
-		StartTime: node.GetCreationTimestamp().Time,
+		Name:           node.Name,
+		IsNode:         true,
+		ID:             dgraph.ID{Xid: node.Name},
+		StartTime:      node.GetCreationTimestamp().Time,
+		CPUCapity:      utils.ResourceToFloat64(node.Status.Capacity.Cpu()),
+		MemoryCapacity: utils.ResourceToFloat64(node.Status.Capacity.Memory()),
 	}
 	nodeDeletionTimestamp := node.GetDeletionTimestamp()
 	if !nodeDeletionTimestamp.IsZero() {
