@@ -296,6 +296,29 @@ func Start(conf *Config) {
 		go c.Run(stopCh)
 	}
 
+	if conf.Resource.Namespace {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return Kubeclient.CoreV1().Namespaces().List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return Kubeclient.CoreV1().Namespaces().Watch(options)
+				},
+			},
+			&api_v1.Namespace{},
+			0,
+			cache.Indexers{},
+		)
+
+		c := newResourceController(Kubeclient, informer, "Namespace")
+		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
 	sigterm := make(chan os.Signal, 1)
 	signal.Notify(sigterm, syscall.SIGTERM)
 	signal.Notify(sigterm, syscall.SIGINT)

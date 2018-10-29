@@ -44,7 +44,7 @@ type Container struct {
 	Namespace   *Namespace `json:"namespace,omitempty"`
 }
 
-func newContainer(containerXid, containerName, podUID string, pod api_v1.Pod) (*api.Assigned, error) {
+func newContainer(containerXid, containerName, podUID, namespaceUID string, pod api_v1.Pod) (*api.Assigned, error) {
 	container := &Container{
 		ID:          dgraph.ID{Xid: containerXid},
 		Name:        containerName,
@@ -52,8 +52,7 @@ func newContainer(containerXid, containerName, podUID string, pod api_v1.Pod) (*
 		StartTime:   pod.GetCreationTimestamp().Time,
 		Pod:         Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
 	}
-	namespaceUID, err := createOrGetNamespaceByID(pod.Namespace)
-	if err == nil {
+	if namespaceUID != "" {
 		container.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: pod.Namespace}}
 	}
 	return dgraph.MutateNode(container, dgraph.CREATE)
@@ -61,10 +60,10 @@ func newContainer(containerXid, containerName, podUID string, pod api_v1.Pod) (*
 
 // StoreAndRetrieveContainers fetchs the list of containers in given pod
 // Create a new container in dgraph if container is not in it.
-func StoreAndRetrieveContainers(pod api_v1.Pod, podUID string) []*Container {
+func StoreAndRetrieveContainers(pod api_v1.Pod, podUID, namespaceUID string) []*Container {
 	containers := []*Container{}
 	for _, c := range pod.Spec.Containers {
-		container, err := storeContainerIfNotExist(c, pod, podUID)
+		container, err := storeContainerIfNotExist(c, pod, podUID, namespaceUID)
 		if err == nil {
 			containers = append(containers, container)
 		}
@@ -88,14 +87,14 @@ func StoreContainerProcessEdge(containerXID string, procsXIDs []string) error {
 	return err
 }
 
-func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID string) (*Container, error) {
+func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID, namespaceUID string) (*Container, error) {
 	podXid := pod.Namespace + ":" + pod.Name
 	containerXid := podXid + ":" + c.Name
 	containerUID := dgraph.GetUID(containerXid, IsContainer)
 
 	var container *Container
 	if containerUID == "" {
-		assigned, err := newContainer(containerXid, c.Name, podUID, pod)
+		assigned, err := newContainer(containerXid, c.Name, podUID, namespaceUID, pod)
 		if err != nil {
 			log.Errorf("Unable to create container: %s", containerXid)
 			return container, err

@@ -56,6 +56,7 @@ func Setup(conf *controller.Config) {
 		DaemonSet:             true,
 		Job:                   true,
 		Service:               true,
+		Namespace:             true,
 	}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BufferSize, Mutex: &sync.Mutex{}}
 	clientset, clusterConfig := client.GetAPIExtensionClient(*kubeconfig)

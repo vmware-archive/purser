@@ -44,6 +44,7 @@ type Resource struct {
 	Deployment            bool `json:"deployment"`
 	Job                   bool `json:"job"`
 	DaemonSet             bool `json:"daemonset"`
+	Namespace             bool `json:"namespace"`
 }
 
 // Config contains config objects

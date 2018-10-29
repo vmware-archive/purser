@@ -60,8 +60,8 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	if err == nil {
 		pod.Node = &Node{ID: dgraph.ID{UID: nodeUID, Xid: k8sPod.Spec.NodeName}}
 	}
-	namespaceUID, err := createOrGetNamespaceByID(k8sPod.Namespace)
-	if err == nil {
+	namespaceUID := createOrGetNamespaceByID(k8sPod.Namespace)
+	if namespaceUID != "" {
 		pod.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: k8sPod.Namespace}}
 	}
 	return dgraph.MutateNode(pod, dgraph.CREATE)
@@ -91,9 +91,10 @@ func StorePod(k8sPod api_v1.Pod) error {
 		}
 		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
 	} else {
+		namespaceUID := createOrGetNamespaceByID(k8sPod.Namespace)
 		pod = Pod{
 			ID:         dgraph.ID{Xid: xid, UID: uid},
-			Containers: StoreAndRetrieveContainers(k8sPod, uid),
+			Containers: StoreAndRetrieveContainers(k8sPod, uid, namespaceUID),
 		}
 	}
 

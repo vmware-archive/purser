@@ -51,8 +51,8 @@ func newService(svc api_v1.Service) (*api.Assigned, error) {
 		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
 		StartTime: svc.GetCreationTimestamp().Time,
 	}
-	namespaceUID, err := createOrGetNamespaceByID(svc.Namespace)
-	if err == nil {
+	namespaceUID := createOrGetNamespaceByID(svc.Namespace)
+	if namespaceUID != "" {
 		newService.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: svc.Namespace}}
 	}
 	return dgraph.MutateNode(newService, dgraph.CREATE)

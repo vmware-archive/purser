@@ -18,7 +18,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -56,14 +55,15 @@ func newNamespace(namespace api_v1.Namespace) Namespace {
 	return ns
 }
 
-func createOrGetNamespaceByID(xid string) (string, error) {
+func createOrGetNamespaceByID(xid string) string {
 	if xid == "" {
-		return "", fmt.Errorf("Namespace is empty")
+		log.Error("Namespace is empty")
+		return ""
 	}
 	uid := dgraph.GetUID(xid, IsNamespace)
 
 	if uid != "" {
-		return uid, nil
+		return uid
 	}
 
 	ns := Namespace{
@@ -73,10 +73,11 @@ func createOrGetNamespaceByID(xid string) (string, error) {
 	}
 	assigned, err := dgraph.MutateNode(ns, dgraph.CREATE)
 	if err != nil {
-		return "", err
+		log.Error(err)
+		return ""
 	}
 	log.Infof("Namespace with xid: (%s) persisted", xid)
-	return assigned.Uids["blank-0"], nil
+	return assigned.Uids["blank-0"]
 }
 
 // StoreNamespace create a new namespace in the Dgraph  if it is not present.
