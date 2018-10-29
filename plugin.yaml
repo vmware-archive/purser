@@ -3,3 +3,8 @@ shortDesc: "Cost Insight integration with kubernetes"
 longDesc: >
   Purser gives cost insights of kubernetes deployments.
 command: purser_plugin $@
+flags:
+  - name: info
+    desc: Show more details about the plugin.
+  - name: version
+    desc: Show plugin version
