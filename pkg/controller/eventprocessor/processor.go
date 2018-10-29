@@ -26,6 +26,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	api_v1 "k8s.io/api/core/v1"
+	apps_v1beta1 "k8s.io/api/apps/v1beta1"
+	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
 )
 
 // ProcessEvents processes the event and notifies the subscribers.
@@ -97,6 +99,36 @@ func PersistPayloads(payloads []*interface{}) {
 			_, err = models.StoreNode(node)
 			if err != nil {
 				log.Errorf("Error while persisting node %v", err)
+			}
+		} else if payload.ResourceType == "Namespace" {
+			ns := api_v1.Namespace{}
+			err := json.Unmarshal([]byte(payload.Data), &ns)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreNamespace(ns)
+			if err != nil {
+				log.Errorf("Error while persisting namespace %v", err)
+			}
+		} else if payload.ResourceType == "ReplicaSet" {
+			replicaset := ext_v1beta1.ReplicaSet{}
+			err := json.Unmarshal([]byte(payload.Data), &replicaset)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreReplicaset(replicaset)
+			if err != nil {
+				log.Errorf("Error while persisting replicaset %v", err)
+			}
+		} else if payload.ResourceType == "StatefulSet" {
+			statefulset := apps_v1beta1.StatefulSet{}
+			err := json.Unmarshal([]byte(payload.Data), &statefulset)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreStatefulset(statefulset)
+			if err != nil {
+				log.Errorf("Error while persisting statefulset %v", err)
 			}
 		} else if payload.ResourceType == "Namespace" {
 			ns := api_v1.Namespace{}
