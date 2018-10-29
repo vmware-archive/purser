@@ -48,7 +48,7 @@ func ProcessEvents(conf *controller.Config) {
 			}
 
 			// Persist in dgraph
-			//PersistPayloads(data)
+			PersistPayloads(data)
 
 			// Post data to subscribers.
 			notifySubscribers(data, subscribers)

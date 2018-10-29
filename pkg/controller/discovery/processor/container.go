@@ -35,7 +35,7 @@ func processContainerDetails(conf controller.Config, pod corev1.Pod,
 	containers []corev1.Container) map[string](map[string]float64) {
 	podInteractions := make(map[string](map[string]float64))
 	for _, container := range containers {
-		pidList, cmdList := getPIDList(conf, container.Name, pod.Name)
+		pidList, cmdList := getPIDList(conf, pod, container.Name)
 		for index, pid := range pidList {
 			process := linker.Process{ID: pid, Name: cmdList[index]}
 			getProcessDump(conf, pod, container.Name, process, podInteractions)
@@ -44,16 +44,16 @@ func processContainerDetails(conf controller.Config, pod corev1.Pod,
 	return podInteractions
 }
 
-func getPIDList(conf controller.Config, containerName, podName string) ([]string, []string) {
+func getPIDList(conf controller.Config, pod corev1.Pod, containerName string) ([]string, []string) {
 	command := "ps -A -o pid,cmd"
-	output, err := executeCommandInPod(conf, command, containerName, podName)
+	output, err := executeCommandInPod(conf, pod, command, containerName)
 	if err != nil {
 		return nil, nil
 	}
 
 	pidCMDList := strings.Split(output, "\n")
-	var pidList, cmdList []string
 
+	var pidList, cmdList []string
 	for _, pidCMD := range pidCMDList {
 		if pidCMD != "" {
 			pidCMDClean := strings.Split((strings.TrimSpace(pidCMD)), " ")
@@ -70,16 +70,16 @@ func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string
 	//get tcp information from /proc/pid/net/tcp for each process
 	if process.ID != "" {
 		tcpCommand := "cat /proc/" + process.ID + "/net/tcp"
-		tcpOutput, err := executeCommandInPod(conf, tcpCommand, containerName, pod.Name)
-		if err != nil {
+		tcpOutput, err := executeCommandInPod(conf, pod, tcpCommand, containerName)
+		if err == nil {
 			//to clean dump only to have required fields
 			tcpDump := utils.PurgeTCPData(tcpOutput)
 			linker.PopulateMappingTables(tcpDump, pod, containerName, podInteractions)
 		}
 
 		tcp6Command := "cat /proc/" + process.ID + "/net/tcp6"
-		tcp6Output, err := executeCommandInPod(conf, tcp6Command, containerName, pod.Name)
-		if err != nil {
+		tcp6Output, err := executeCommandInPod(conf, pod, tcp6Command, containerName)
+		if err == nil {
 			//to clean dump only to have required fields
 			tcp6Dump := utils.PurgeTCP6Data(tcp6Output)
 			linker.PopulateMappingTables(tcp6Dump, pod, containerName, podInteractions)
@@ -87,11 +87,11 @@ func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string
 	}
 }
 
-func executeCommandInPod(conf controller.Config, command, containerName, podName string) (string, error) {
-	output, stderr, err := executer.ExecToPodThroughAPI(conf, command, containerName, podName, nil)
+func executeCommandInPod(conf controller.Config, pod corev1.Pod, command, containerName string) (string, error) {
+	output, stderr, err := executer.ExecToPodThroughAPI(conf, pod, command, containerName, nil)
 
 	if err != nil {
-		log.Debugf("Failed `exec`ing to the container %q, command %q Error: %+v", podName, command, err)
+		log.Debugf("Failed `exec`ing to the container %q, command %q Error: %+v", pod.Name, command, err)
 	}
 
 	if len(stderr) > 0 {
