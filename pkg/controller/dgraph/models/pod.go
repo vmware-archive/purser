@@ -37,15 +37,27 @@ const (
 // Pod schema in dgraph
 type Pod struct {
 	dgraph.ID
-	IsPod      bool         `json:"isPod,omitempty"`
-	Name       string       `json:"name,omitempty"`
-	StartTime  time.Time    `json:"startTime,omitempty"`
-	EndTime    time.Time    `json:"endTime,omitempty"`
-	Containers []*Container `json:"containers,omitempty"`
-	Interacts  []*Pod       `json:"interacts,omitempty"`
-	Count      float64      `json:"interacts|count,omitempty"`
-	Node       *Node        `json:"podNode,omitempty"`
-	Namespace  *Namespace   `json:"namespace,omitempty"`
+	IsPod         bool         `json:"isPod,omitempty"`
+	Name          string       `json:"name,omitempty"`
+	StartTime     time.Time    `json:"startTime,omitempty"`
+	EndTime       time.Time    `json:"endTime,omitempty"`
+	Containers    []*Container `json:"containers,omitempty"`
+	Interacts     []*Pod       `json:"interacts,omitempty"`
+	Count         float64      `json:"interacts|count,omitempty"`
+	Node          *Node        `json:"podNode,omitempty"`
+	Namespace     *Namespace   `json:"namespace,omitempty"`
+	CPURequest    float64      `json:"cpuRequest,omitempty"`
+	CPULimit      float64      `json:"cpuLimit,omitempty"`
+	MemoryRequest float64      `json:"memoryRequest,omitempty"`
+	MemoryLimit   float64      `json:"memoryLimit,omitempty"`
+}
+
+// Metrics ...
+type Metrics struct {
+	CPURequest    float64
+	CPULimit      float64
+	MemoryRequest float64
+	MemoryLimit   float64
 }
 
 // newPod creates a new node for the pod in the Dgraph
@@ -92,9 +104,14 @@ func StorePod(k8sPod api_v1.Pod) error {
 		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
 	} else {
 		namespaceUID := createOrGetNamespaceByID(k8sPod.Namespace)
+		containers, metrics := StoreAndRetrieveContainersAndMetrics(k8sPod, uid, namespaceUID)
 		pod = Pod{
-			ID:         dgraph.ID{Xid: xid, UID: uid},
-			Containers: StoreAndRetrieveContainers(k8sPod, uid, namespaceUID),
+			ID:            dgraph.ID{Xid: xid, UID: uid},
+			Containers:    containers,
+			CPURequest:    metrics.CPURequest,
+			CPULimit:      metrics.CPULimit,
+			MemoryRequest: metrics.MemoryRequest,
+			MemoryLimit:   metrics.MemoryLimit,
 		}
 	}
 

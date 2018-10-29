@@ -17,7 +17,28 @@
 
 package utils
 
+import (
+	log "github.com/Sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/api/resource"
+)
+
 // BytesToGB converts from bytes(int64) to GB(float64)
 func BytesToGB(val int64) float64 {
 	return float64(val) / (1024.0 * 1024.0 * 1024.0)
+}
+
+// ResourceToFloat64 ...
+func ResourceToFloat64(quantity *resource.Quantity) float64 {
+	val, isSuccess := quantity.AsInt64()
+	if !isSuccess {
+		log.Error("Unable to convert resource to int")
+	}
+	return float64(val) // 0 if not isSuccess
+}
+
+// AddResourceAToResourceB ...
+func AddResourceAToResourceB(resA, resB *resource.Quantity) {
+	if resA != nil {
+		resB.Add(*resA)
+	}
 }
