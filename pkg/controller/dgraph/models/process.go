@@ -35,12 +35,13 @@ const (
 // Proc schema in dgraph
 type Proc struct {
 	dgraph.ID
-	IsProc    bool      `json:"isProc,omitemtpy"`
-	Name      string    `json:"name,omitempty"`
-	Interacts []*Pod    `json:"interacts,omitempty"`
-	Container Container `json:"container,omitempty"`
-	StartTime time.Time `json:"startTime,omitempty"`
-	EndTime   time.Time `json:"endTime,omitempty"`
+	IsProc    bool       `json:"isProc,omitemtpy"`
+	Name      string     `json:"name,omitempty"`
+	Interacts []*Pod     `json:"interacts,omitempty"`
+	Container Container  `json:"container,omitempty"`
+	StartTime time.Time  `json:"startTime,omitempty"`
+	EndTime   time.Time  `json:"endTime,omitempty"`
+	Namespace *Namespace `json:"namespace,omitempty"`
 }
 
 func newProc(procXID, procName, containerUID, containerXID string, creationTimeStamp time.Time) (*api.Assigned, error) {
@@ -69,6 +70,7 @@ func StoreProcess(procName, containerXID string, podsXIDs []string, creationTime
 			logrus.Errorf("Unable to create proc: %s", procXID)
 			return err
 		}
+		log.Infof("Process with xid: (%s) persisted in dgraph", procXID)
 		procUID = assigned.Uids["blank-0"]
 	}
 

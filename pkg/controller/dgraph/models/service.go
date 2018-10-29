@@ -39,8 +39,9 @@ type Service struct {
 	Name      string     `json:"name,omitempty"`
 	StartTime time.Time  `json:"startTime,omitempty"`
 	EndTime   time.Time  `json:"endTime,omitempty"`
-	Pod       []*Pod     `json:"servicePods,omitempty"`
+	Pod       []*Pod     `json:"pod,omitempty"`
 	Interacts []*Service `json:"interacts,omitempty"`
+	Namespace *Namespace `json:"namespace,omitempty"`
 }
 
 func newService(svc api_v1.Service) (*api.Assigned, error) {
@@ -49,6 +50,10 @@ func newService(svc api_v1.Service) (*api.Assigned, error) {
 		IsService: true,
 		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
 		StartTime: svc.GetCreationTimestamp().Time,
+	}
+	namespaceUID := createOrGetNamespaceByID(svc.Namespace)
+	if namespaceUID != "" {
+		newService.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: svc.Namespace}}
 	}
 	return dgraph.MutateNode(newService, dgraph.CREATE)
 }
@@ -63,6 +68,7 @@ func StoreService(service api_v1.Service) error {
 		if err != nil {
 			return err
 		}
+		log.Infof("Service with xid: (%s) persisted in dgraph", xid)
 		uid = assigned.Uids["blank-0"]
 	}
 
@@ -107,7 +113,7 @@ func StorePodServiceEdges(svcXID string, podsXIDsInService []string) error {
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		return err
 	}
-	return nil
+	return fmt.Errorf("Service with xid: (%s) not in dgraph", svcXID)
 }
 
 // RetrieveAllServices returns all pods in the dgraph
@@ -140,6 +146,7 @@ func RetrieveAllServices() ([]Service, error) {
 func RetrieveAllServicesWithDstPods() ([]Service, error) {
 	const q = `query {
 		services(func: has(isService)) {
+			xid
 			name
 			pod {
 				name
