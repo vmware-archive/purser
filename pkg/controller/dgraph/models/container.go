@@ -95,6 +95,7 @@ func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID string)
 			log.Errorf("Unable to create container: %s", containerXid)
 			return container, err
 		}
+		log.Infof("Container with xid: (%s) persisted in dgraph", containerXid)
 		containerUID = assigned.Uids["blank-0"]
 	}
 

@@ -76,6 +76,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 		if err != nil {
 			return err
 		}
+		log.Infof("Pod with xid: (%s) persisted in dgraph", xid)
 		uid = assigned.Uids["blank-0"]
 	}
 
