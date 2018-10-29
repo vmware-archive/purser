@@ -35,12 +35,13 @@ const (
 // Container schema in dgraph
 type Container struct {
 	dgraph.ID
-	IsContainer bool      `json:"isContainer,omitempty"`
-	Name        string    `json:"name,omitempty"`
-	StartTime   time.Time `json:"startTime,omitempty"`
-	EndTime     time.Time `json:"endTime,omitempty"`
-	Pod         Pod       `json:"pod,omitempty"`
-	Procs       []*Proc   `json:"procs,omitempty"`
+	IsContainer bool       `json:"isContainer,omitempty"`
+	Name        string     `json:"name,omitempty"`
+	StartTime   time.Time  `json:"startTime,omitempty"`
+	EndTime     time.Time  `json:"endTime,omitempty"`
+	Pod         Pod        `json:"pod,omitempty"`
+	Procs       []*Proc    `json:"procs,omitempty"`
+	Namespace   *Namespace `json:"namespace,omitempty"`
 }
 
 func newContainer(containerXid, containerName, podUID string, pod api_v1.Pod) (*api.Assigned, error) {
@@ -50,6 +51,10 @@ func newContainer(containerXid, containerName, podUID string, pod api_v1.Pod) (*
 		IsContainer: true,
 		StartTime:   pod.GetCreationTimestamp().Time,
 		Pod:         Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
+	}
+	namespaceUID, err := createOrGetNamespaceByID(pod.Namespace)
+	if err == nil {
+		container.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: pod.Namespace}}
 	}
 	return dgraph.MutateNode(container, dgraph.CREATE)
 }

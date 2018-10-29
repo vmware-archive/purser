@@ -41,6 +41,7 @@ type Service struct {
 	EndTime   time.Time  `json:"endTime,omitempty"`
 	Pod       []*Pod     `json:"pod,omitempty"`
 	Interacts []*Service `json:"interacts,omitempty"`
+	Namespace *Namespace `json:"namespace,omitempty"`
 }
 
 func newService(svc api_v1.Service) (*api.Assigned, error) {
@@ -49,6 +50,10 @@ func newService(svc api_v1.Service) (*api.Assigned, error) {
 		IsService: true,
 		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
 		StartTime: svc.GetCreationTimestamp().Time,
+	}
+	namespaceUID, err := createOrGetNamespaceByID(svc.Namespace)
+	if err == nil {
+		newService.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: svc.Namespace}}
 	}
 	return dgraph.MutateNode(newService, dgraph.CREATE)
 }
