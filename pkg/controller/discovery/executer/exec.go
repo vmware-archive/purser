@@ -32,12 +32,13 @@ import (
 )
 
 // ExecToPodThroughAPI uninterractively exec to the pod with the command specified.
-func ExecToPodThroughAPI(conf controller.Config, command, containerName, podName string, stdin io.Reader) (string, string, error) {
+func ExecToPodThroughAPI(conf controller.Config, pod corev1.Pod, command, containerName string, stdin io.Reader) (string, string, error) {
 	// Prepare the API URL used to execute another process within the Pod. In this case,
 	// we'll run a remote shell.
 	req := conf.Kubeclient.CoreV1().RESTClient().Post().
 		Resource("pods").
-		Name(podName).
+		Name(pod.Name).
+		Namespace(pod.Namespace).
 		SubResource("exec")
 
 	scheme := runtime.NewScheme()

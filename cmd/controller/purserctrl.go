@@ -18,8 +18,6 @@
 package main
 
 import (
-	"time"
-
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/robfig/cron"
@@ -40,14 +38,11 @@ func init() {
 
 func main() {
 	go eventprocessor.ProcessEvents(&conf)
-	controller.Start(&conf)
 	startCronJobs()
+	controller.Start(&conf)
 }
 
 func startCronJobs() {
-	// wait for the inventory process to complete
-	time.Sleep(time.Minute * 2)
-
 	c := cron.New()
 	err := c.AddFunc("@every 0h30m", runDiscovery)
 	if err != nil {
