@@ -20,6 +20,9 @@ package models
 import (
 	"time"
 
+	"fmt"
+
+	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	api_v1 "k8s.io/api/core/v1"
 )
@@ -53,14 +56,17 @@ func createNodeObject(node api_v1.Node) Node {
 	return newNode
 }
 
-// CreateOrGetNodeByID create and returns the node if not present, otherwise simply returns node.
-func CreateOrGetNodeByID(xid string) (string, error) {
+// createOrGetNodeByID create and returns the node if not present, otherwise simply returns node.
+func createOrGetNodeByID(xid string) (string, error) {
+	if xid == "" {
+		return "", fmt.Errorf("Node xid is empty")
+	}
 	uid := dgraph.GetUID(xid, IsNode)
 	if uid != "" {
 		return uid, nil
 	}
 	newNode := Node{
-		Name:	xid,
+		Name:   xid,
 		IsNode: true,
 		ID:     dgraph.ID{Xid: xid},
 	}
@@ -68,6 +74,7 @@ func CreateOrGetNodeByID(xid string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Infof("Node with xid: (%s) persisted", xid)
 	return assigned.Uids["blank-0"], nil
 }
 
@@ -83,6 +90,10 @@ func StoreNode(node api_v1.Node) (string, error) {
 	assigned, err := dgraph.MutateNode(newNode, dgraph.CREATE)
 	if err != nil {
 		return "", err
+	}
+
+	if uid == "" {
+		log.Infof("Node with xid: (%s) persisted", xid)
 	}
 	return assigned.Uids["blank-0"], nil
 }

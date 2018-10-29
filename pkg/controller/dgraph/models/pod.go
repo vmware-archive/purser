@@ -45,6 +45,7 @@ type Pod struct {
 	Interacts  []*Pod       `json:"interacts,omitempty"`
 	Count      float64      `json:"interacts|count,omitempty"`
 	Node       *Node        `json:"podNode,omitempty"`
+	Namespace  *Namespace   `json:"namespace,omitempty"`
 }
 
 // newPod creates a new node for the pod in the Dgraph
@@ -55,11 +56,13 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 		ID:        dgraph.ID{Xid: k8sPod.Namespace + ":" + k8sPod.Name},
 		StartTime: k8sPod.GetCreationTimestamp().Time,
 	}
-	if k8sPod.Spec.NodeName != "" {
-		nodeUID, err := CreateOrGetNodeByID(k8sPod.Spec.NodeName)
-		if err == nil {
-			pod.Node = &Node{ID:dgraph.ID{UID:nodeUID, Xid:k8sPod.Spec.NodeName}}
-		}
+	nodeUID, err := createOrGetNodeByID(k8sPod.Spec.NodeName)
+	if err == nil {
+		pod.Node = &Node{ID: dgraph.ID{UID: nodeUID, Xid: k8sPod.Spec.NodeName}}
+	}
+	namespaceUID := createOrGetNamespaceByID(k8sPod.Namespace)
+	if namespaceUID != "" {
+		pod.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: k8sPod.Namespace}}
 	}
 	return dgraph.MutateNode(pod, dgraph.CREATE)
 }
@@ -88,9 +91,10 @@ func StorePod(k8sPod api_v1.Pod) error {
 		}
 		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
 	} else {
+		namespaceUID := createOrGetNamespaceByID(k8sPod.Namespace)
 		pod = Pod{
 			ID:         dgraph.ID{Xid: xid, UID: uid},
-			Containers: StoreAndRetrieveContainers(k8sPod, uid),
+			Containers: StoreAndRetrieveContainers(k8sPod, uid, namespaceUID),
 		}
 	}
 
