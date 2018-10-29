@@ -110,6 +110,16 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error while persisting namespace %v", err)
 			}
+		} else if payload.ResourceType == "Deployment" {
+			deployment := apps_v1beta1.Deployment{}
+			err := json.Unmarshal([]byte(payload.Data), &deployment)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreDeployment(deployment)
+			if err != nil {
+				log.Errorf("Error while persisting deployment %v", err)
+			}
 		} else if payload.ResourceType == "ReplicaSet" {
 			replicaset := ext_v1beta1.ReplicaSet{}
 			err := json.Unmarshal([]byte(payload.Data), &replicaset)
@@ -129,16 +139,6 @@ func PersistPayloads(payloads []*interface{}) {
 			_, err = models.StoreStatefulset(statefulset)
 			if err != nil {
 				log.Errorf("Error while persisting statefulset %v", err)
-			}
-		} else if payload.ResourceType == "Namespace" {
-			ns := api_v1.Namespace{}
-			err := json.Unmarshal([]byte(payload.Data), &ns)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreNamespace(ns)
-			if err != nil {
-				log.Errorf("Error while persisting namespace %v", err)
 			}
 		}
 	}
