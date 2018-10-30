@@ -37,14 +37,16 @@ type Statefulset struct {
 	StartTime     time.Time `json:"startTime,omitempty"`
 	EndTime       time.Time `json:"endTime,omitempty"`
 	Pods          []*Pod    `json:"pods,omitempty"`
+	Type          string    `json:"type,omitempty"`
 }
 
 func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
 	newStatefulset := Statefulset{
-		Name:         statefulset.Name,
+		Name:          statefulset.Name,
 		IsStatefulset: true,
-		ID:           dgraph.ID{Xid: statefulset.Namespace + ":" + statefulset.Name},
-		StartTime:    statefulset.GetCreationTimestamp().Time,
+		Type:          "statefulset",
+		ID:            dgraph.ID{Xid: statefulset.Namespace + ":" + statefulset.Name},
+		StartTime:     statefulset.GetCreationTimestamp().Time,
 	}
 	statefulsetDeletionTimestamp := statefulset.GetDeletionTimestamp()
 	if !statefulsetDeletionTimestamp.IsZero() {

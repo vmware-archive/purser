@@ -39,6 +39,7 @@ type Namespace struct {
 	Name        string    `json:"name,omitempty"`
 	StartTime   time.Time `json:"startTime,omitempty"`
 	EndTime     time.Time `json:"endTime,omitempty"`
+	Type        string    `json:"type,omitempty"`
 }
 
 func newNamespace(namespace api_v1.Namespace) Namespace {
@@ -46,6 +47,7 @@ func newNamespace(namespace api_v1.Namespace) Namespace {
 		ID:          dgraph.ID{Xid: namespace.Name},
 		Name:        namespace.Name,
 		IsNamespace: true,
+		Type:        "namespace",
 		StartTime:   namespace.GetCreationTimestamp().Time,
 	}
 	nsDeletionTimestamp := namespace.GetDeletionTimestamp()

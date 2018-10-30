@@ -19,6 +19,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -42,12 +43,14 @@ type Proc struct {
 	StartTime time.Time  `json:"startTime,omitempty"`
 	EndTime   time.Time  `json:"endTime,omitempty"`
 	Namespace *Namespace `json:"namespace,omitempty"`
+	Type      string     `json:"type,omitempty"`
 }
 
 func newProc(procXID, procName, containerUID, containerXID string, creationTimeStamp time.Time) (*api.Assigned, error) {
 	newProc := Proc{
 		ID:        dgraph.ID{Xid: procXID},
 		IsProc:    true,
+		Type:      "process",
 		Name:      procName,
 		Container: Container{ID: dgraph.ID{UID: containerUID, Xid: containerXID}},
 		StartTime: creationTimeStamp,
@@ -56,8 +59,9 @@ func newProc(procXID, procName, containerUID, containerXID string, creationTimeS
 }
 
 // StoreProcess ...
-func StoreProcess(procName, containerXID string, podsXIDs []string, creationTimeStamp time.Time) error {
-	procXID := containerXID + ":" + procName
+func StoreProcess(procXID, containerXID string, podsXIDs []string, creationTimeStamp time.Time) error {
+	// fetch the 4th field from ns : podName : containerName : procID : procName
+	procName := strings.Join(strings.Split(procXID, ":")[4:], "-")
 	containerUID := dgraph.GetUID(containerXID, IsContainer)
 	if containerUID == "" {
 		return fmt.Errorf("Container not persisted yet")
