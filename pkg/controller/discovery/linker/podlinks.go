@@ -38,11 +38,6 @@ var (
 	mu sync.Mutex
 )
 
-// Process holds the details for the executing processes inside the container
-type Process struct {
-	ID, Name string
-}
-
 const (
 	// KeySpliter splits the key into resource namespace and name used for processing Xids
 	KeySpliter = ":"
@@ -73,13 +68,20 @@ func GenerateAndStorePodInteractions() {
 }
 
 // PopulateMappingTables updates PodToPodTable
-func PopulateMappingTables(tcpDump []string, pod corev1.Pod, containerName string, podInteractions map[string](map[string]float64)) {
+func PopulateMappingTables(tcpDump []string, pod corev1.Pod, process Process, containerName string, podInteractions map[string](map[string]float64)) {
+	processPodInteraction := make(map[string](map[string]bool))
+	podXID := pod.Namespace + KeySpliter + pod.Name
+	containerXID := podXID + KeySpliter + containerName
+	procXID := containerXID + KeySpliter + process.ID + KeySpliter + process.Name
+	containerProcessInteraction := populateContainerProcessTable(containerXID, procXID)
 	for _, address := range tcpDump {
 		address := strings.Split(address, KeySpliter)
 		srcIP, dstIP := address[0], address[2]
 		srcName, dstName := podIPTable[srcIP], podIPTable[dstIP]
 		updatePodInteractions(srcName, dstName, podInteractions)
+		updatePodProcessInteractions(procXID, dstName, processPodInteraction)
 	}
+	storeProcessInteractions(containerProcessInteraction, processPodInteraction, pod.GetCreationTimestamp().Time)
 }
 
 func updatePodInteractions(srcName, dstName string, podInteractions map[string](map[string]float64)) {

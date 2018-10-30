@@ -74,7 +74,7 @@ func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string
 		if err == nil {
 			//to clean dump only to have required fields
 			tcpDump := utils.PurgeTCPData(tcpOutput)
-			linker.PopulateMappingTables(tcpDump, pod, containerName, podInteractions)
+			linker.PopulateMappingTables(tcpDump, pod, process, containerName, podInteractions)
 		}
 
 		tcp6Command := "cat /proc/" + process.ID + "/net/tcp6"
@@ -82,7 +82,7 @@ func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string
 		if err == nil {
 			//to clean dump only to have required fields
 			tcp6Dump := utils.PurgeTCP6Data(tcp6Output)
-			linker.PopulateMappingTables(tcp6Dump, pod, containerName, podInteractions)
+			linker.PopulateMappingTables(tcp6Dump, pod, process, containerName, podInteractions)
 		}
 	}
 }
