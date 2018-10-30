@@ -24,7 +24,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/vmware/purser/pkg/controller/dgraph"
+	"github.com/vmware/purser/pkg/controller/utils"
 	api_v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // Dgraph Model Constants
@@ -35,40 +37,63 @@ const (
 // Container schema in dgraph
 type Container struct {
 	dgraph.ID
-	IsContainer bool       `json:"isContainer,omitempty"`
-	Name        string     `json:"name,omitempty"`
-	StartTime   time.Time  `json:"startTime,omitempty"`
-	EndTime     time.Time  `json:"endTime,omitempty"`
-	Pod         Pod        `json:"pod,omitempty"`
-	Procs       []*Proc    `json:"procs,omitempty"`
-	Namespace   *Namespace `json:"namespace,omitempty"`
+	IsContainer   bool       `json:"isContainer,omitempty"`
+	Name          string     `json:"name,omitempty"`
+	StartTime     time.Time  `json:"startTime,omitempty"`
+	EndTime       time.Time  `json:"endTime,omitempty"`
+	Pod           Pod        `json:"pod,omitempty"`
+	Procs         []*Proc    `json:"procs,omitempty"`
+	Namespace     *Namespace `json:"namespace,omitempty"`
+	CPURequest    float64    `json:"cpuRequest,omitempty"`
+	CPULimit      float64    `json:"cpuLimit,omitempty"`
+	MemoryRequest float64    `json:"memoryRequest,omitempty"`
+	MemoryLimit   float64    `json:"memoryLimit,omitempty"`
 }
 
-func newContainer(containerXid, containerName, podUID, namespaceUID string, pod api_v1.Pod) (*api.Assigned, error) {
-	container := &Container{
-		ID:          dgraph.ID{Xid: containerXid},
-		Name:        containerName,
-		IsContainer: true,
-		StartTime:   pod.GetCreationTimestamp().Time,
-		Pod:         Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
+func newContainer(container api_v1.Container, podUID, namespaceUID string, pod api_v1.Pod) (*api.Assigned, error) {
+	containerXid := pod.Namespace + ":" + pod.Name + ":" + container.Name
+	requests := container.Resources.Requests
+	limits := container.Resources.Limits
+	c := &Container{
+		ID:            dgraph.ID{Xid: containerXid},
+		Name:          container.Name,
+		IsContainer:   true,
+		StartTime:     pod.GetCreationTimestamp().Time,
+		Pod:           Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
+		CPURequest:    utils.ResourceToFloat64(requests.Cpu()),
+		CPULimit:      utils.ResourceToFloat64(limits.Cpu()),
+		MemoryRequest: utils.ResourceToFloat64(requests.Memory()),
+		MemoryLimit:   utils.ResourceToFloat64(limits.Memory()),
 	}
 	if namespaceUID != "" {
-		container.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: pod.Namespace}}
+		c.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: pod.Namespace}}
 	}
-	return dgraph.MutateNode(container, dgraph.CREATE)
+	return dgraph.MutateNode(c, dgraph.CREATE)
 }
 
-// StoreAndRetrieveContainers fetchs the list of containers in given pod
+// StoreAndRetrieveContainersAndMetrics fetchs the list of containers in given pod
 // Create a new container in dgraph if container is not in it.
-func StoreAndRetrieveContainers(pod api_v1.Pod, podUID, namespaceUID string) []*Container {
+func StoreAndRetrieveContainersAndMetrics(pod api_v1.Pod, podUID, namespaceUID string) ([]*Container, Metrics) {
 	containers := []*Container{}
+	var cpuRequest, memoryRequest, cpuLimit, memoryLimit *resource.Quantity
 	for _, c := range pod.Spec.Containers {
 		container, err := storeContainerIfNotExist(c, pod, podUID, namespaceUID)
 		if err == nil {
 			containers = append(containers, container)
+			requests := c.Resources.Requests
+			limits := c.Resources.Limits
+			utils.AddResourceAToResourceB(requests.Cpu(), cpuRequest)
+			utils.AddResourceAToResourceB(requests.Memory(), memoryRequest)
+			utils.AddResourceAToResourceB(limits.Cpu(), cpuLimit)
+			utils.AddResourceAToResourceB(limits.Memory(), memoryLimit)
 		}
 	}
-	return containers
+	return containers, Metrics{
+		CPURequest:    utils.ResourceToFloat64(cpuRequest),
+		CPULimit:      utils.ResourceToFloat64(cpuLimit),
+		MemoryRequest: utils.ResourceToFloat64(memoryRequest),
+		MemoryLimit:   utils.ResourceToFloat64(memoryLimit),
+	}
 }
 
 // StoreContainerProcessEdge ...
@@ -94,7 +119,7 @@ func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID, namesp
 
 	var container *Container
 	if containerUID == "" {
-		assigned, err := newContainer(containerXid, c.Name, podUID, namespaceUID, pod)
+		assigned, err := newContainer(c, podUID, namespaceUID, pod)
 		if err != nil {
 			log.Errorf("Unable to create container: %s", containerXid)
 			return container, err
