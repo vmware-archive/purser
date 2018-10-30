@@ -48,6 +48,7 @@ type Container struct {
 	CPULimit      float64    `json:"cpuLimit,omitempty"`
 	MemoryRequest float64    `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64    `json:"memoryLimit,omitempty"`
+	Type          string     `json:"type,omitempty"`
 }
 
 func newContainer(container api_v1.Container, podUID, namespaceUID string, pod api_v1.Pod) (*api.Assigned, error) {
@@ -58,12 +59,13 @@ func newContainer(container api_v1.Container, podUID, namespaceUID string, pod a
 		ID:            dgraph.ID{Xid: containerXid},
 		Name:          container.Name,
 		IsContainer:   true,
+		Type:          "container",
 		StartTime:     pod.GetCreationTimestamp().Time,
 		Pod:           Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
-		CPURequest:    utils.ResourceToFloat64(requests.Cpu()),
-		CPULimit:      utils.ResourceToFloat64(limits.Cpu()),
-		MemoryRequest: utils.ResourceToFloat64(requests.Memory()),
-		MemoryLimit:   utils.ResourceToFloat64(limits.Memory()),
+		CPURequest:    utils.ConvertToFloat64CPU(requests.Cpu()),
+		CPULimit:      utils.ConvertToFloat64CPU(limits.Cpu()),
+		MemoryRequest: utils.ConvertToFloat64GB(requests.Memory()),
+		MemoryLimit:   utils.ConvertToFloat64GB(limits.Memory()),
 	}
 	if namespaceUID != "" {
 		c.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: pod.Namespace}}
@@ -75,7 +77,10 @@ func newContainer(container api_v1.Container, podUID, namespaceUID string, pod a
 // Create a new container in dgraph if container is not in it.
 func StoreAndRetrieveContainersAndMetrics(pod api_v1.Pod, podUID, namespaceUID string) ([]*Container, Metrics) {
 	containers := []*Container{}
-	var cpuRequest, memoryRequest, cpuLimit, memoryLimit *resource.Quantity
+	cpuRequest := &resource.Quantity{}
+	memoryRequest := &resource.Quantity{}
+	cpuLimit := &resource.Quantity{}
+	memoryLimit := &resource.Quantity{}
 	for _, c := range pod.Spec.Containers {
 		container, err := storeContainerIfNotExist(c, pod, podUID, namespaceUID)
 		if err == nil {
@@ -89,10 +94,10 @@ func StoreAndRetrieveContainersAndMetrics(pod api_v1.Pod, podUID, namespaceUID s
 		}
 	}
 	return containers, Metrics{
-		CPURequest:    utils.ResourceToFloat64(cpuRequest),
-		CPULimit:      utils.ResourceToFloat64(cpuLimit),
-		MemoryRequest: utils.ResourceToFloat64(memoryRequest),
-		MemoryLimit:   utils.ResourceToFloat64(memoryLimit),
+		CPURequest:    utils.ConvertToFloat64CPU(cpuRequest),
+		CPULimit:      utils.ConvertToFloat64CPU(cpuLimit),
+		MemoryRequest: utils.ConvertToFloat64GB(memoryRequest),
+		MemoryLimit:   utils.ConvertToFloat64GB(memoryLimit),
 	}
 }
 

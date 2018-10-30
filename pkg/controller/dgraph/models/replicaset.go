@@ -37,12 +37,14 @@ type Replicaset struct {
 	StartTime    time.Time `json:"startTime,omitempty"`
 	EndTime      time.Time `json:"endTime,omitempty"`
 	Pods         []*Pod    `json:"pods,omitempty"`
+	Type         string    `json:"type,omitempty"`
 }
 
 func createReplicasetObject(replicaset ext_v1beta1.ReplicaSet) Replicaset {
-	newReplicaset := Replicaset {
+	newReplicaset := Replicaset{
 		Name:         replicaset.Name,
 		IsReplicaset: true,
+		Type:         "replicaset",
 		ID:           dgraph.ID{Xid: replicaset.Namespace + ":" + replicaset.Name},
 		StartTime:    replicaset.GetCreationTimestamp().Time,
 	}
