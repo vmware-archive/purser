@@ -18,22 +18,25 @@
 package utils
 
 import (
+	"strconv"
+
 	log "github.com/Sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // BytesToGB converts from bytes(int64) to GB(float64)
 func BytesToGB(val int64) float64 {
-	return float64(val) / (1024.0 * 1024.0 * 1024.0)
+	return float64BytesToFloat64GB(float64(val))
 }
 
-// ResourceToFloat64 ...
-func ResourceToFloat64(quantity *resource.Quantity) float64 {
-	val, isSuccess := quantity.AsInt64()
-	if !isSuccess {
-		log.Error("Unable to convert resource to int")
-	}
-	return float64(val) // 0 if not isSuccess
+// ConvertToFloat64GB quantity to float64 GB
+func ConvertToFloat64GB(quantity *resource.Quantity) float64 {
+	return float64BytesToFloat64GB(resourceToFloat64(quantity))
+}
+
+// ConvertToFloat64CPU quantity to float64 vCPU
+func ConvertToFloat64CPU(quantity *resource.Quantity) float64 {
+	return resourceToFloat64(quantity)
 }
 
 // AddResourceAToResourceB ...
@@ -41,4 +44,19 @@ func AddResourceAToResourceB(resA, resB *resource.Quantity) {
 	if resA != nil {
 		resB.Add(*resA)
 	}
+}
+
+// float64BytesToFloat64GB from bytes (float64) to GB(float64)
+func float64BytesToFloat64GB(val float64) float64 {
+	return val / (1024.0 * 1024.0 * 1024.0)
+}
+
+// resourceToFloat64 ...
+func resourceToFloat64(quantity *resource.Quantity) float64 {
+	decVal := quantity.AsDec()
+	decValueFloat, err := strconv.ParseFloat(decVal.String(), 64)
+	if err != nil {
+		log.Errorf("error while converting into string: (%s) to float\n", decVal.String())
+	}
+	return decValueFloat // 0 if not isSuccess
 }

@@ -51,8 +51,8 @@ func createNodeObject(node api_v1.Node) Node {
 		IsNode:         true,
 		ID:             dgraph.ID{Xid: node.Name},
 		StartTime:      node.GetCreationTimestamp().Time,
-		CPUCapity:      utils.ResourceToFloat64(node.Status.Capacity.Cpu()),
-		MemoryCapacity: utils.ResourceToFloat64(node.Status.Capacity.Memory()),
+		CPUCapity:      utils.ConvertToFloat64CPU(node.Status.Capacity.Cpu()),
+		MemoryCapacity: utils.ConvertToFloat64GB(node.Status.Capacity.Memory()),
 	}
 	nodeDeletionTimestamp := node.GetDeletionTimestamp()
 	if !nodeDeletionTimestamp.IsZero() {
