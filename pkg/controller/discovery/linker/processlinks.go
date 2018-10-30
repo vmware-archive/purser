@@ -18,7 +18,6 @@
 package linker
 
 import (
-	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -30,16 +29,16 @@ type Process struct {
 	ID, Name string
 }
 
-func storeProcessInteractions(containerProcessInteraction map[string][]string, processPodInteraction map[string](map[string]bool), creationTime time.Time) {
+// StoreProcessInteractions stores process, container to process edge, process to pods edge
+func StoreProcessInteractions(containerProcessInteraction map[string][]string, processPodInteraction map[string](map[string]bool), creationTime time.Time) {
 	for containerXID, procsXIDs := range containerProcessInteraction {
 		for _, procXID := range procsXIDs {
 			podsXIDs := []string{}
 			for podXID := range processPodInteraction[procXID] {
 				podsXIDs = append(podsXIDs, podXID)
 			}
-			// fetch the 4th field from ns : podName : containerName : procID : procName
-			procName := strings.Split(procXID, KeySpliter)[4]
-			err := models.StoreProcess(procName, containerXID, podsXIDs, creationTime)
+
+			err := models.StoreProcess(procXID, containerXID, podsXIDs, creationTime)
 			if err != nil {
 				log.Errorf("failed to store process details: %s", procXID)
 			}
@@ -51,20 +50,18 @@ func storeProcessInteractions(containerProcessInteraction map[string][]string, p
 	}
 }
 
-func populateContainerProcessTable(containerXID, procXID string) map[string][]string {
-	containerProcessInteraction := make(map[string][]string)
-	if _, isPresent := containerProcessInteraction[containerXID]; !isPresent {
-		containerProcessInteraction[containerXID] = []string{}
+func populateContainerProcessTable(containerXID, procXID string, interactions *InteractionsWrapper) {
+	if _, isPresent := interactions.ContainerProcessInteraction[containerXID]; !isPresent {
+		interactions.ContainerProcessInteraction[containerXID] = []string{}
 	}
-	containerProcessInteraction[containerXID] = append(containerProcessInteraction[containerXID], procXID)
-	return containerProcessInteraction
+	interactions.ContainerProcessInteraction[containerXID] = append(interactions.ContainerProcessInteraction[containerXID], procXID)
 }
 
-func updatePodProcessInteractions(procXID, dstName string, processPodInteraction map[string](map[string]bool)) {
+func updatePodProcessInteractions(procXID, dstName string, interactions *InteractionsWrapper) {
 	if dstName != "" {
-		if _, isPresent := processPodInteraction[procXID]; !isPresent {
-			processPodInteraction[procXID] = make(map[string]bool)
+		if _, isPresent := interactions.ProcessToPodInteraction[procXID]; !isPresent {
+			interactions.ProcessToPodInteraction[procXID] = make(map[string]bool)
 		}
-		processPodInteraction[procXID][dstName] = true
+		interactions.ProcessToPodInteraction[procXID][dstName] = true
 	}
 }

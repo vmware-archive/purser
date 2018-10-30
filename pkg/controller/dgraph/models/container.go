@@ -48,6 +48,7 @@ type Container struct {
 	CPULimit      float64    `json:"cpuLimit,omitempty"`
 	MemoryRequest float64    `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64    `json:"memoryLimit,omitempty"`
+	Type          string     `json:"type,omitempty"`
 }
 
 func newContainer(container api_v1.Container, podUID, namespaceUID string, pod api_v1.Pod) (*api.Assigned, error) {
@@ -58,6 +59,7 @@ func newContainer(container api_v1.Container, podUID, namespaceUID string, pod a
 		ID:            dgraph.ID{Xid: containerXid},
 		Name:          container.Name,
 		IsContainer:   true,
+		Type:          "container",
 		StartTime:     pod.GetCreationTimestamp().Time,
 		Pod:           Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
 		CPURequest:    utils.ConvertToFloat64CPU(requests.Cpu()),

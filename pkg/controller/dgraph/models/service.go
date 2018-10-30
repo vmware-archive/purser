@@ -42,12 +42,14 @@ type Service struct {
 	Pod       []*Pod     `json:"pod,omitempty"`
 	Interacts []*Service `json:"interacts,omitempty"`
 	Namespace *Namespace `json:"namespace,omitempty"`
+	Type      string     `json:"type,omitempty"`
 }
 
 func newService(svc api_v1.Service) (*api.Assigned, error) {
 	newService := Service{
 		Name:      svc.Name,
 		IsService: true,
+		Type:      "service",
 		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
 		StartTime: svc.GetCreationTimestamp().Time,
 	}

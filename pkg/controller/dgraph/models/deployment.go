@@ -37,12 +37,14 @@ type Deployment struct {
 	StartTime    time.Time `json:"startTime,omitempty"`
 	EndTime      time.Time `json:"endTime,omitempty"`
 	Pods         []*Pod    `json:"pods,omitempty"`
+	Type         string    `json:"type,omitempty"`
 }
 
 func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
 	newDeployment := Deployment{
 		Name:         deployment.Name,
 		IsDeployment: true,
+		Type:         "deployment",
 		ID:           dgraph.ID{Xid: deployment.Namespace + ":" + deployment.Name},
 		StartTime:    deployment.GetCreationTimestamp().Time,
 	}

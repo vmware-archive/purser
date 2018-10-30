@@ -43,12 +43,14 @@ type Node struct {
 	Pods           []*Pod    `json:"pods,omitempty"`
 	CPUCapity      float64   `json:"cpuCapacity,omitempty"`
 	MemoryCapacity float64   `json:"memoryCapacity,omitempty"`
+	Type           string    `json:"type,omitempty"`
 }
 
 func createNodeObject(node api_v1.Node) Node {
 	newNode := Node{
 		Name:           node.Name,
 		IsNode:         true,
+		Type:           "node",
 		ID:             dgraph.ID{Xid: node.Name},
 		StartTime:      node.GetCreationTimestamp().Time,
 		CPUCapity:      utils.ConvertToFloat64CPU(node.Status.Capacity.Cpu()),

@@ -31,17 +31,20 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func processContainerDetails(conf controller.Config, pod corev1.Pod,
-	containers []corev1.Container) map[string](map[string]float64) {
-	podInteractions := make(map[string](map[string]float64))
+func processContainerDetails(conf controller.Config, pod corev1.Pod, containers []corev1.Container) linker.InteractionsWrapper {
+	interactions := linker.InteractionsWrapper{
+		PodInteractions:             make(map[string](map[string]float64)),
+		ProcessToPodInteraction:     make(map[string](map[string]bool)),
+		ContainerProcessInteraction: make(map[string][]string),
+	}
 	for _, container := range containers {
 		pidList, cmdList := getPIDList(conf, pod, container.Name)
 		for index, pid := range pidList {
 			process := linker.Process{ID: pid, Name: cmdList[index]}
-			getProcessDump(conf, pod, container.Name, process, podInteractions)
+			getProcessDump(conf, pod, container.Name, process, &interactions)
 		}
 	}
-	return podInteractions
+	return interactions
 }
 
 func getPIDList(conf controller.Config, pod corev1.Pod, containerName string) ([]string, []string) {
@@ -58,15 +61,14 @@ func getPIDList(conf controller.Config, pod corev1.Pod, containerName string) ([
 		if pidCMD != "" {
 			pidCMDClean := strings.Split((strings.TrimSpace(pidCMD)), " ")
 			pidList = append(pidList, pidCMDClean[0])
-			cmdList = append(cmdList, strings.Join(pidCMDClean[1:], " "))
+			cmdList = append(cmdList, strings.Join(pidCMDClean[1:], "-"))
 		}
 	}
 	// ignore first line i.e, PID CMD headers
 	return pidList[1:], cmdList[1:]
 }
 
-func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string,
-	process linker.Process, podInteractions map[string](map[string]float64)) {
+func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string, process linker.Process, interactions *linker.InteractionsWrapper) {
 	//get tcp information from /proc/pid/net/tcp for each process
 	if process.ID != "" {
 		tcpCommand := "cat /proc/" + process.ID + "/net/tcp"
@@ -74,7 +76,7 @@ func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string
 		if err == nil {
 			//to clean dump only to have required fields
 			tcpDump := utils.PurgeTCPData(tcpOutput)
-			linker.PopulateMappingTables(tcpDump, pod, process, containerName, podInteractions)
+			linker.PopulateMappingTables(tcpDump, pod, process, containerName, interactions)
 		}
 
 		tcp6Command := "cat /proc/" + process.ID + "/net/tcp6"
@@ -82,7 +84,7 @@ func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string
 		if err == nil {
 			//to clean dump only to have required fields
 			tcp6Dump := utils.PurgeTCP6Data(tcp6Output)
-			linker.PopulateMappingTables(tcp6Dump, pod, process, containerName, podInteractions)
+			linker.PopulateMappingTables(tcp6Dump, pod, process, containerName, interactions)
 		}
 	}
 }

@@ -50,6 +50,7 @@ type Pod struct {
 	CPULimit      float64      `json:"cpuLimit,omitempty"`
 	MemoryRequest float64      `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64      `json:"memoryLimit,omitempty"`
+	Type          string       `json:"type,omitempty"`
 }
 
 // Metrics ...
@@ -65,6 +66,7 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	pod := Pod{
 		Name:      k8sPod.Name,
 		IsPod:     true,
+		Type:      "pod",
 		ID:        dgraph.ID{Xid: k8sPod.Namespace + ":" + k8sPod.Name},
 		StartTime: k8sPod.GetCreationTimestamp().Time,
 	}

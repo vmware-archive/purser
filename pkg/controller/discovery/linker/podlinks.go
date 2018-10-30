@@ -27,6 +27,13 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
+// InteractionsWrapper ...
+type InteractionsWrapper struct {
+	PodInteractions             map[string](map[string]float64)
+	ProcessToPodInteraction     map[string](map[string]bool)
+	ContainerProcessInteraction map[string][]string
+}
+
 // podIPTable: maps pod name with pod IP address
 // podToPodTable: maps src pod to the interacting dest pod along with the interaction frequency count.
 var (
@@ -68,32 +75,30 @@ func GenerateAndStorePodInteractions() {
 }
 
 // PopulateMappingTables updates PodToPodTable
-func PopulateMappingTables(tcpDump []string, pod corev1.Pod, process Process, containerName string, podInteractions map[string](map[string]float64)) {
-	processPodInteraction := make(map[string](map[string]bool))
+func PopulateMappingTables(tcpDump []string, pod corev1.Pod, process Process, containerName string, interactions *InteractionsWrapper) {
 	podXID := pod.Namespace + KeySpliter + pod.Name
 	containerXID := podXID + KeySpliter + containerName
 	procXID := containerXID + KeySpliter + process.ID + KeySpliter + process.Name
-	containerProcessInteraction := populateContainerProcessTable(containerXID, procXID)
+	populateContainerProcessTable(containerXID, procXID, interactions)
 	for _, address := range tcpDump {
 		address := strings.Split(address, KeySpliter)
 		srcIP, dstIP := address[0], address[2]
 		srcName, dstName := podIPTable[srcIP], podIPTable[dstIP]
-		updatePodInteractions(srcName, dstName, podInteractions)
-		updatePodProcessInteractions(procXID, dstName, processPodInteraction)
+		updatePodInteractions(srcName, dstName, interactions)
+		updatePodProcessInteractions(procXID, dstName, interactions)
 	}
-	storeProcessInteractions(containerProcessInteraction, processPodInteraction, pod.GetCreationTimestamp().Time)
 }
 
-func updatePodInteractions(srcName, dstName string, podInteractions map[string](map[string]float64)) {
+func updatePodInteractions(srcName, dstName string, interactions *InteractionsWrapper) {
 	if dstName != "" && srcName != "" {
-		if _, ok := podInteractions[srcName]; !ok {
-			podInteractions[srcName] = make(map[string]float64)
+		if _, ok := interactions.PodInteractions[srcName]; !ok {
+			interactions.PodInteractions[srcName] = make(map[string]float64)
 		}
 
-		if _, isPresent := podInteractions[srcName][dstName]; !isPresent {
-			podInteractions[srcName][dstName] = 1
+		if _, isPresent := interactions.PodInteractions[srcName][dstName]; !isPresent {
+			interactions.PodInteractions[srcName][dstName] = 1
 		} else {
-			podInteractions[srcName][dstName]++
+			interactions.PodInteractions[srcName][dstName]++
 		}
 	}
 }

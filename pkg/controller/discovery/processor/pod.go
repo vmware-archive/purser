@@ -56,8 +56,10 @@ func processPodDetails(conf controller.Config, pods *corev1.PodList) {
 				defer wg.Done()
 
 				containers := pod.Spec.Containers
-				podInteractions := processContainerDetails(conf, pod, containers)
-				linker.UpdatePodToPodTable(podInteractions)
+				interactions := processContainerDetails(conf, pod, containers)
+				linker.UpdatePodToPodTable(interactions.PodInteractions)
+				linker.StoreProcessInteractions(interactions.ContainerProcessInteraction, interactions.ProcessToPodInteraction,
+					pod.GetCreationTimestamp().Time)
 				log.Debugf("Finished processing Pod (%d/%d)", index+1, podsCount)
 			}(pod, index)
 		}
