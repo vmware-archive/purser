@@ -35,7 +35,7 @@ import (
 // Case New PVC:
 //		Not present in old podVolumeClaims. Present in activePodVolumeClaims.
 // Case Bound an unbounded pvc:
-//		Present as 'unbounded' in old podVolumClaimss. Present in activePodVolumeClaims.
+//		Present as 'unbounded' in old podVolumeClaims. Present in activePodVolumeClaims.
 func UpdatePodVolumeClaims(pod api_v1.Pod, podDetails groups_v1.PodDetails, eventTime meta_v1.Time) groups_v1.PodDetails {
 	activePodVolumeClaims := getactivePodVolumeClaims(pod)
 
