@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
+	"log"
 )
 
 // Dgraph Model Constants
@@ -32,12 +33,13 @@ const (
 // Deployment schema in dgraph
 type Deployment struct {
 	dgraph.ID
-	IsDeployment bool      `json:"isDeployment,omitempty"`
-	Name         string    `json:"name,omitempty"`
-	StartTime    time.Time `json:"startTime,omitempty"`
-	EndTime      time.Time `json:"endTime,omitempty"`
-	Pods         []*Pod    `json:"pods,omitempty"`
-	Type         string    `json:"type,omitempty"`
+	IsDeployment bool       `json:"isDeployment,omitempty"`
+	Name         string     `json:"name,omitempty"`
+	StartTime    time.Time  `json:"startTime,omitempty"`
+	EndTime      time.Time  `json:"endTime,omitempty"`
+	Namespace    *Namespace `json:"namespace,omitempty"`
+	Pods         []*Pod     `json:"pods,omitempty"`
+	Type         string     `json:"type,omitempty"`
 }
 
 func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
@@ -47,6 +49,10 @@ func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
 		Type:         "deployment",
 		ID:           dgraph.ID{Xid: deployment.Namespace + ":" + deployment.Name},
 		StartTime:    deployment.GetCreationTimestamp().Time,
+	}
+	namespaceUID := CreateOrGetNamespaceByID(deployment.Namespace)
+	if namespaceUID != "" {
+		newDeployment.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: deployment.Namespace}}
 	}
 	deploymentDeletionTimestamp := deployment.GetDeletionTimestamp()
 	if !deploymentDeletionTimestamp.IsZero() {
@@ -69,4 +75,29 @@ func StoreDeployment(deployment apps_v1beta1.Deployment) (string, error) {
 		return "", err
 	}
 	return assigned.Uids["blank-0"], nil
+}
+
+// CreateOrGetDeploymentByID returns the uid of namespace if exists,
+// otherwise creates the deployment and returns uid.
+func CreateOrGetDeploymentByID(xid string) string {
+	if xid == "" {
+		return ""
+	}
+	uid := dgraph.GetUID(xid, IsDeployment)
+
+	if uid != "" {
+		return uid
+	}
+
+	d := Deployment{
+		ID:           dgraph.ID{Xid: xid},
+		Name:         xid,
+		IsDeployment: true,
+	}
+	assigned, err := dgraph.MutateNode(d, dgraph.CREATE)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return assigned.Uids["blank-0"]
 }
