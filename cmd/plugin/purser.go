@@ -31,19 +31,84 @@ import (
 	"github.com/vmware/purser/pkg/utils"
 )
 
-var groupClient *groups_client_v1.GroupClient
+const (
+	pluginVersion = "version v0.1-alpha.2"
+)
+
+var (
+	groupClient *groups_client_v1.GroupClient
+
+	// Variables used for cmd interface
+	kubeconfig string
+	info       string
+	version    string
+
+	description   = fmt.Sprintf("Purser gives cost insights of kubernetes deployments.\n\n")
+	usage         = fmt.Sprintf("Usage:\n  kubectl plugin purser [options] <command> <args>\n\n")
+	supportedCmds = fmt.Sprintf("The supported commands are:\n  get  Get resource information.\n  set  Set resource information.\n\n")
+
+	optionHelp       = fmt.Sprintf("\n  --info            Show more details about the plugin.")
+	optionKubeConfig = fmt.Sprintf("\n  --kubeconfig      Absolute path for the kube config file.")
+	optionVersion    = fmt.Sprintf("\n  --version         Show plugin version.")
+	options          = fmt.Sprintf("options:%s%s%s\n\n", optionHelp, optionKubeConfig, optionVersion)
+
+	kubecltOption = fmt.Sprintf("\nUse \"kubectl options\" for a list of global command-line options (applies to all commands).\n\n")
+)
 
 func init() {
-	kubeconfig := flag.String("kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), "path to Kubernetes config file")
-	flag.Parse()
+	flag.StringVar(&kubeconfig, "kubeconfig", os.Getenv("KUBECTL_PLUGINS_GLOBAL_FLAG_KUBECONFIG"), "path to Kubernetes config file")
 
-	config, err := utils.GetKubeconfig(*kubeconfig)
+	flag.StringVar(&info, "info", os.Getenv("KUBECTL_PLUGINS_LOCAL_FLAG_INFO"), "Show help documentation")
+	flag.StringVar(&version, "version", os.Getenv("KUBECTL_PLUGINS_LOCAL_FLAG_VERSION"), "Show version number")
+
+	flag.Usage = func() {
+		_, err := fmt.Fprintf(flag.CommandLine.Output(), description)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = fmt.Fprintf(flag.CommandLine.Output(), usage)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = fmt.Fprintf(flag.CommandLine.Output(), supportedCmds)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = fmt.Fprintf(flag.CommandLine.Output(), options)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = fmt.Fprintf(flag.CommandLine.Output(), "Example(s):\n\n")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		printHelp()
+		_, err = fmt.Fprintf(flag.CommandLine.Output(), kubecltOption)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if version != "" {
+		fmt.Println(pluginVersion)
+		os.Exit(0)
+	}
+
+	if info != "" {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	config, err := utils.GetKubeconfig(kubeconfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 	plugin.ProvideClientSetInstance(utils.GetKubeclient(config))
 
-	client, clusterConfig := client.GetAPIExtensionClient(*kubeconfig)
+	client, clusterConfig := client.GetAPIExtensionClient(kubeconfig)
 	groupClient = groups_client_v1.NewGroupClient(client, clusterConfig)
 }
 
