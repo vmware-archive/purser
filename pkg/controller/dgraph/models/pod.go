@@ -46,6 +46,9 @@ type Pod struct {
 	Count         float64      `json:"interacts|count,omitempty"`
 	Node          *Node        `json:"podNode,omitempty"`
 	Namespace     *Namespace   `json:"namespace,omitempty"`
+	Deployment    *Deployment  `json:"deployment,omitempty"`
+	Replicaset    *Replicaset  `json:"replicaset,omitempty"`
+	Statefulset   *Statefulset `json:"statefulset,omitempty"`
 	CPURequest    float64      `json:"cpuRequest,omitempty"`
 	CPULimit      float64      `json:"cpuLimit,omitempty"`
 	MemoryRequest float64      `json:"memoryRequest,omitempty"`
@@ -74,10 +77,11 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	if err == nil {
 		pod.Node = &Node{ID: dgraph.ID{UID: nodeUID, Xid: k8sPod.Spec.NodeName}}
 	}
-	namespaceUID := createOrGetNamespaceByID(k8sPod.Namespace)
+	namespaceUID := CreateOrGetNamespaceByID(k8sPod.Namespace)
 	if namespaceUID != "" {
 		pod.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: k8sPod.Namespace}}
 	}
+	setPodOwners(&pod, k8sPod)
 	return dgraph.MutateNode(pod, dgraph.CREATE)
 }
 
@@ -105,7 +109,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 		}
 		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
 	} else {
-		namespaceUID := createOrGetNamespaceByID(k8sPod.Namespace)
+		namespaceUID := CreateOrGetNamespaceByID(k8sPod.Namespace)
 		containers, metrics := StoreAndRetrieveContainersAndMetrics(k8sPod, uid, namespaceUID)
 		pod = Pod{
 			ID:            dgraph.ID{Xid: xid, UID: uid},
@@ -181,7 +185,7 @@ func retrievePodsWithCountAsEdgeWeightFromPodsXIDs(podsXIDs []string, counts []f
 	for index, podXID := range podsXIDs {
 		podUID := dgraph.GetUID(podXID, IsPod)
 		if podUID == "" {
-			log.Printf("Destination pod: %s is not persistet yet", podXID)
+			log.Printf("Destination pod: %s is not persisted yet", podXID)
 			continue
 		}
 
@@ -192,4 +196,39 @@ func retrievePodsWithCountAsEdgeWeightFromPodsXIDs(podsXIDs []string, counts []f
 		pods = append(pods, pod)
 	}
 	return pods
+}
+
+// nolint: gocyclo
+func setPodOwners(pod *Pod, k8sPod api_v1.Pod) {
+	owners := k8sPod.GetObjectMeta().GetOwnerReferences()
+	if owners == nil {
+		return
+	}
+	for _, owner := range owners {
+		if owner.Kind == "Deployment" {
+			deploymentXID := k8sPod.Namespace + ":" + owner.Name
+			deploymentUID := CreateOrGetDeploymentByID(deploymentXID)
+			if deploymentUID != "" {
+				pod.Deployment = &Deployment{ID: dgraph.ID{UID: deploymentUID, Xid: deploymentXID}}
+			}
+		} else if owner.Kind == "ReplicaSet" {
+			replicasetXID := k8sPod.Namespace + ":" + owner.Name
+			replicasetUID := CreateOrGetReplicasetByID(replicasetXID)
+			if replicasetUID != "" {
+				pod.Replicaset = &Replicaset{ID: dgraph.ID{UID: replicasetUID, Xid: replicasetXID}}
+			}
+		} else if owner.Kind == "StatefulSet" {
+			statefulsetXID := k8sPod.Namespace + ":" + owner.Name
+			statefulsetUID := CreateOrGetStatefulsetByID(statefulsetXID)
+			if statefulsetUID != "" {
+				pod.Statefulset = &Statefulset{ID: dgraph.ID{UID: statefulsetUID, Xid: statefulsetXID}}
+			}
+		} else if owner.Kind == "Job" {
+			//TODO: populate when Jobs are persisted.
+		} else if owner.Kind == "DaemonSet" {
+			//TODO: populate when Daemonsets are persisted.
+		} else {
+			log.Error("Unknown owner type " + owner.Kind + " for pod.")
+		}
+	}
 }
