@@ -57,7 +57,9 @@ func newNamespace(namespace api_v1.Namespace) Namespace {
 	return ns
 }
 
-func createOrGetNamespaceByID(xid string) string {
+// CreateOrGetNamespaceByID returns the uid of namespace if exists,
+// otherwise creates the namespace and returns uid.
+func CreateOrGetNamespaceByID(xid string) string {
 	if xid == "" {
 		log.Error("Namespace is empty")
 		return ""

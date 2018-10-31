@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
+	log "github.com/Sirupsen/logrus"
 )
 
 // Dgraph Model Constants
@@ -32,12 +33,14 @@ const (
 // Replicaset schema in dgraph
 type Replicaset struct {
 	dgraph.ID
-	IsReplicaset bool      `json:"isReplicaset,omitempty"`
-	Name         string    `json:"name,omitempty"`
-	StartTime    time.Time `json:"startTime,omitempty"`
-	EndTime      time.Time `json:"endTime,omitempty"`
-	Pods         []*Pod    `json:"pods,omitempty"`
-	Type         string    `json:"type,omitempty"`
+	IsReplicaset bool        `json:"isReplicaset,omitempty"`
+	Name         string      `json:"name,omitempty"`
+	StartTime    time.Time   `json:"startTime,omitempty"`
+	EndTime      time.Time   `json:"endTime,omitempty"`
+	Namespace    *Namespace  `json:"namespace,omitempty"`
+	Deployment   *Deployment `json:"deployment,omitempty"`
+	Pods         []*Pod      `json:"pods,omitempty"`
+	Type         string      `json:"type,omitempty"`
 }
 
 func createReplicasetObject(replicaset ext_v1beta1.ReplicaSet) Replicaset {
@@ -48,10 +51,15 @@ func createReplicasetObject(replicaset ext_v1beta1.ReplicaSet) Replicaset {
 		ID:           dgraph.ID{Xid: replicaset.Namespace + ":" + replicaset.Name},
 		StartTime:    replicaset.GetCreationTimestamp().Time,
 	}
+	namespaceUID := CreateOrGetNamespaceByID(replicaset.Namespace)
+	if namespaceUID != "" {
+		newReplicaset.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: replicaset.Namespace}}
+	}
 	replicasetDeletionTimestamp := replicaset.GetDeletionTimestamp()
 	if !replicasetDeletionTimestamp.IsZero() {
 		newReplicaset.EndTime = replicasetDeletionTimestamp.Time
 	}
+	setReplicasetOwners(&newReplicaset, replicaset)
 	return newReplicaset
 }
 
@@ -70,3 +78,47 @@ func StoreReplicaset(replicaset ext_v1beta1.ReplicaSet) (string, error) {
 	}
 	return assigned.Uids["blank-0"], nil
 }
+
+func setReplicasetOwners(r *Replicaset, replicaset ext_v1beta1.ReplicaSet) {
+	owners := replicaset.GetObjectMeta().GetOwnerReferences()
+	if owners == nil {
+		return
+	}
+	for _, owner := range owners {
+		if owner.Kind == "Deployment" {
+			deploymentXID := replicaset.Namespace + ":" + owner.Name
+			deploymentUID := CreateOrGetDeploymentByID(deploymentXID)
+			if deploymentUID != "" {
+				r.Deployment = &Deployment{ID: dgraph.ID{UID: deploymentUID, Xid: deploymentXID}}
+			}
+		} else {
+			log.Error("Unknown owner type " + owner.Kind + " for replicaset.")
+		}
+	}
+}
+
+// CreateOrGetReplicasetByID returns the uid of namespace if exists,
+// otherwise creates the replicaset and returns uid.
+func CreateOrGetReplicasetByID(xid string) string {
+	if xid == "" {
+		return ""
+	}
+	uid := dgraph.GetUID(xid, IsReplicaset)
+
+	if uid != "" {
+		return uid
+	}
+
+	d := Replicaset{
+		ID:           dgraph.ID{Xid: xid},
+		Name:         xid,
+		IsReplicaset: true,
+	}
+	assigned, err := dgraph.MutateNode(d, dgraph.CREATE)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return assigned.Uids["blank-0"]
+}
+

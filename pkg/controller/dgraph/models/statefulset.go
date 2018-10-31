@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
+	"log"
 )
 
 // Dgraph Model Constants
@@ -32,12 +33,13 @@ const (
 // Statefulset schema in dgraph
 type Statefulset struct {
 	dgraph.ID
-	IsStatefulset bool      `json:"isStatefulset,omitempty"`
-	Name          string    `json:"name,omitempty"`
-	StartTime     time.Time `json:"startTime,omitempty"`
-	EndTime       time.Time `json:"endTime,omitempty"`
-	Pods          []*Pod    `json:"pods,omitempty"`
-	Type          string    `json:"type,omitempty"`
+	IsStatefulset bool       `json:"isStatefulset,omitempty"`
+	Name          string     `json:"name,omitempty"`
+	StartTime     time.Time  `json:"startTime,omitempty"`
+	EndTime       time.Time  `json:"endTime,omitempty"`
+	Namespace     *Namespace `json:"namespace,omitempty"`
+	Pods          []*Pod     `json:"pods,omitempty"`
+	Type          string     `json:"type,omitempty"`
 }
 
 func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
@@ -47,6 +49,10 @@ func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
 		Type:          "statefulset",
 		ID:            dgraph.ID{Xid: statefulset.Namespace + ":" + statefulset.Name},
 		StartTime:     statefulset.GetCreationTimestamp().Time,
+	}
+	namespaceUID := CreateOrGetNamespaceByID(statefulset.Namespace)
+	if namespaceUID != "" {
+		newStatefulset.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: statefulset.Namespace}}
 	}
 	statefulsetDeletionTimestamp := statefulset.GetDeletionTimestamp()
 	if !statefulsetDeletionTimestamp.IsZero() {
@@ -69,4 +75,29 @@ func StoreStatefulset(statefulset apps_v1beta1.StatefulSet) (string, error) {
 		return "", err
 	}
 	return assigned.Uids["blank-0"], nil
+}
+
+// CreateOrGetStatefulsetByID returns the uid of namespace if exists,
+// otherwise creates the stateful and returns uid.
+func CreateOrGetStatefulsetByID(xid string) string {
+	if xid == "" {
+		return ""
+	}
+	uid := dgraph.GetUID(xid, IsStatefulset)
+
+	if uid != "" {
+		return uid
+	}
+
+	d := Statefulset{
+		ID:            dgraph.ID{Xid: xid},
+		Name:          xid,
+		IsStatefulset: true,
+	}
+	assigned, err := dgraph.MutateNode(d, dgraph.CREATE)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return assigned.Uids["blank-0"]
 }
