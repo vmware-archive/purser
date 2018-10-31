@@ -31,7 +31,7 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 )
 
-// ExecToPodThroughAPI uninterractively exec to the pod with the command specified.
+// ExecToPodThroughAPI uninteractively exec to the pod with the command specified.
 func ExecToPodThroughAPI(conf controller.Config, pod corev1.Pod, command, containerName string, stdin io.Reader) (string, string, error) {
 	// Prepare the API URL used to execute another process within the Pod. In this case,
 	// we'll run a remote shell.
