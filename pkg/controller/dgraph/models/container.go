@@ -39,8 +39,8 @@ type Container struct {
 	dgraph.ID
 	IsContainer   bool       `json:"isContainer,omitempty"`
 	Name          string     `json:"name,omitempty"`
-	StartTime     time.Time  `json:"startTime,omitempty"`
-	EndTime       time.Time  `json:"endTime,omitempty"`
+	StartTime     string  `json:"startTime,omitempty"`
+	EndTime       string  `json:"endTime,omitempty"`
 	Pod           Pod        `json:"pod,omitempty"`
 	Procs         []*Proc    `json:"procs,omitempty"`
 	Namespace     *Namespace `json:"namespace,omitempty"`
@@ -60,7 +60,7 @@ func newContainer(container api_v1.Container, podUID, namespaceUID string, pod a
 		Name:          container.Name,
 		IsContainer:   true,
 		Type:          "container",
-		StartTime:     pod.GetCreationTimestamp().Time,
+		StartTime:     pod.GetCreationTimestamp().Time.Format(time.RFC3339),
 		Pod:           Pod{ID: dgraph.ID{UID: podUID, Xid: pod.Namespace + ":" + pod.Name}},
 		CPURequest:    utils.ConvertToFloat64CPU(requests.Cpu()),
 		CPULimit:      utils.ConvertToFloat64CPU(limits.Cpu()),
@@ -141,7 +141,7 @@ func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID, namesp
 
 func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time) {
 	for _, container := range containers {
-		container.EndTime = endTime
+		container.EndTime = endTime.Format(time.RFC3339)
 	}
 	_, err := dgraph.MutateNode(containers, dgraph.UPDATE)
 	if err != nil {

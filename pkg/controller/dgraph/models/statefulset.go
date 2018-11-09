@@ -35,8 +35,8 @@ type Statefulset struct {
 	dgraph.ID
 	IsStatefulset bool       `json:"isStatefulset,omitempty"`
 	Name          string     `json:"name,omitempty"`
-	StartTime     time.Time  `json:"startTime,omitempty"`
-	EndTime       time.Time  `json:"endTime,omitempty"`
+	StartTime     string  `json:"startTime,omitempty"`
+	EndTime       string  `json:"endTime,omitempty"`
 	Namespace     *Namespace `json:"namespace,omitempty"`
 	Pods          []*Pod     `json:"pods,omitempty"`
 	Type          string     `json:"type,omitempty"`
@@ -48,7 +48,7 @@ func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
 		IsStatefulset: true,
 		Type:          "statefulset",
 		ID:            dgraph.ID{Xid: statefulset.Namespace + ":" + statefulset.Name},
-		StartTime:     statefulset.GetCreationTimestamp().Time,
+		StartTime:     statefulset.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	namespaceUID := CreateOrGetNamespaceByID(statefulset.Namespace)
 	if namespaceUID != "" {
@@ -56,7 +56,7 @@ func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
 	}
 	statefulsetDeletionTimestamp := statefulset.GetDeletionTimestamp()
 	if !statefulsetDeletionTimestamp.IsZero() {
-		newStatefulset.EndTime = statefulsetDeletionTimestamp.Time
+		newStatefulset.EndTime = statefulsetDeletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return newStatefulset
 }

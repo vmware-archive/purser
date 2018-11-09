@@ -35,8 +35,8 @@ type Deployment struct {
 	dgraph.ID
 	IsDeployment bool       `json:"isDeployment,omitempty"`
 	Name         string     `json:"name,omitempty"`
-	StartTime    time.Time  `json:"startTime,omitempty"`
-	EndTime      time.Time  `json:"endTime,omitempty"`
+	StartTime    string  `json:"startTime,omitempty"`
+	EndTime      string  `json:"endTime,omitempty"`
 	Namespace    *Namespace `json:"namespace,omitempty"`
 	Pods         []*Pod     `json:"pods,omitempty"`
 	Type         string     `json:"type,omitempty"`
@@ -48,7 +48,7 @@ func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
 		IsDeployment: true,
 		Type:         "deployment",
 		ID:           dgraph.ID{Xid: deployment.Namespace + ":" + deployment.Name},
-		StartTime:    deployment.GetCreationTimestamp().Time,
+		StartTime:    deployment.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	namespaceUID := CreateOrGetNamespaceByID(deployment.Namespace)
 	if namespaceUID != "" {
@@ -56,7 +56,7 @@ func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
 	}
 	deploymentDeletionTimestamp := deployment.GetDeletionTimestamp()
 	if !deploymentDeletionTimestamp.IsZero() {
-		newDeployment.EndTime = deploymentDeletionTimestamp.Time
+		newDeployment.EndTime = deploymentDeletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return newDeployment
 }

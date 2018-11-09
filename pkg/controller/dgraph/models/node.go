@@ -38,8 +38,8 @@ type Node struct {
 	dgraph.ID
 	IsNode         bool      `json:"isNode,omitempty"`
 	Name           string    `json:"name,omitempty"`
-	StartTime      time.Time `json:"startTime,omitempty"`
-	EndTime        time.Time `json:"endTime,omitempty"`
+	StartTime      string `json:"startTime,omitempty"`
+	EndTime        string `json:"endTime,omitempty"`
 	Pods           []*Pod    `json:"pods,omitempty"`
 	CPUCapity      float64   `json:"cpuCapacity,omitempty"`
 	MemoryCapacity float64   `json:"memoryCapacity,omitempty"`
@@ -52,13 +52,13 @@ func createNodeObject(node api_v1.Node) Node {
 		IsNode:         true,
 		Type:           "node",
 		ID:             dgraph.ID{Xid: node.Name},
-		StartTime:      node.GetCreationTimestamp().Time,
+		StartTime:      node.GetCreationTimestamp().Time.Format(time.RFC3339),
 		CPUCapity:      utils.ConvertToFloat64CPU(node.Status.Capacity.Cpu()),
 		MemoryCapacity: utils.ConvertToFloat64GB(node.Status.Capacity.Memory()),
 	}
 	nodeDeletionTimestamp := node.GetDeletionTimestamp()
 	if !nodeDeletionTimestamp.IsZero() {
-		newNode.EndTime = nodeDeletionTimestamp.Time
+		newNode.EndTime = nodeDeletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return newNode
 }

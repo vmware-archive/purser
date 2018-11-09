@@ -35,8 +35,8 @@ type Replicaset struct {
 	dgraph.ID
 	IsReplicaset bool        `json:"isReplicaset,omitempty"`
 	Name         string      `json:"name,omitempty"`
-	StartTime    time.Time   `json:"startTime,omitempty"`
-	EndTime      time.Time   `json:"endTime,omitempty"`
+	StartTime    string   `json:"startTime,omitempty"`
+	EndTime      string   `json:"endTime,omitempty"`
 	Namespace    *Namespace  `json:"namespace,omitempty"`
 	Deployment   *Deployment `json:"deployment,omitempty"`
 	Pods         []*Pod      `json:"pods,omitempty"`
@@ -49,7 +49,7 @@ func createReplicasetObject(replicaset ext_v1beta1.ReplicaSet) Replicaset {
 		IsReplicaset: true,
 		Type:         "replicaset",
 		ID:           dgraph.ID{Xid: replicaset.Namespace + ":" + replicaset.Name},
-		StartTime:    replicaset.GetCreationTimestamp().Time,
+		StartTime:    replicaset.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	namespaceUID := CreateOrGetNamespaceByID(replicaset.Namespace)
 	if namespaceUID != "" {
@@ -57,7 +57,7 @@ func createReplicasetObject(replicaset ext_v1beta1.ReplicaSet) Replicaset {
 	}
 	replicasetDeletionTimestamp := replicaset.GetDeletionTimestamp()
 	if !replicasetDeletionTimestamp.IsZero() {
-		newReplicaset.EndTime = replicasetDeletionTimestamp.Time
+		newReplicaset.EndTime = replicasetDeletionTimestamp.Time.Format(time.RFC3339)
 	}
 	setReplicasetOwners(&newReplicaset, replicaset)
 	return newReplicaset

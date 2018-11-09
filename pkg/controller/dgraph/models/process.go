@@ -40,8 +40,8 @@ type Proc struct {
 	Name      string     `json:"name,omitempty"`
 	Interacts []*Pod     `json:"interacts,omitempty"`
 	Container Container  `json:"container,omitempty"`
-	StartTime time.Time  `json:"startTime,omitempty"`
-	EndTime   time.Time  `json:"endTime,omitempty"`
+	StartTime string  `json:"startTime,omitempty"`
+	EndTime   string  `json:"endTime,omitempty"`
 	Namespace *Namespace `json:"namespace,omitempty"`
 	Type      string     `json:"type,omitempty"`
 }
@@ -53,7 +53,7 @@ func newProc(procXID, procName, containerUID, containerXID string, creationTimeS
 		Type:      "process",
 		Name:      procName,
 		Container: Container{ID: dgraph.ID{UID: containerUID, Xid: containerXID}},
-		StartTime: creationTimeStamp,
+		StartTime: creationTimeStamp.Format(time.RFC3339),
 	}
 	return dgraph.MutateNode(newProc, dgraph.CREATE)
 }
