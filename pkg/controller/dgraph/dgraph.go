@@ -95,6 +95,7 @@ func CreateSchema() error {
 		isPod: bool .
 		isContainer: bool .
 		isProc: bool .
+		namespace: uid @reverse .
 	`
 	ctx := context.Background()
 	err := client.Alter(ctx, op)
@@ -130,12 +131,13 @@ func ExecuteQuery(query string, root interface{}) error {
 
 	resp, err := client.NewTxn().Query(ctx, query)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
 	err = json.Unmarshal(resp.Json, root)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 		return err
 	}
 

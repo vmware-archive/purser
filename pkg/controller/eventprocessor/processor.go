@@ -39,7 +39,7 @@ func ProcessEvents(conf *controller.Config) {
 		for {
 			// TODO: listen for subscriber and group crd updates and update
 			// in memory copy instead of querying everytime.
-			subscribers := getSubscribers(conf)
+			//subscribers := getSubscribers(conf)
 			groups := getAllGroups(conf.Groupcrdclient)
 
 			data, size := conf.RingBuffer.ReadN(ReadSize)
@@ -53,7 +53,7 @@ func ProcessEvents(conf *controller.Config) {
 			PersistPayloads(data)
 
 			// Post data to subscribers.
-			notifySubscribers(data, subscribers)
+			//notifySubscribers(data, subscribers)
 
 			// Update user created groups.
 			updateCustomGroups(data, groups, conf.Groupcrdclient)

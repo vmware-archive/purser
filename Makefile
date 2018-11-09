@@ -24,7 +24,7 @@ PKG := pkg
 CMD := cmd/controller
 
 # Where to push the docker image.
-REGISTRY ?= gurusreekanth
+REGISTRY ?= kreddyj
 
 # Which architecture to build - see $(ALL_ARCH) for options.
 ARCH ?= amd64
@@ -33,7 +33,7 @@ ARCH ?= amd64
 #VERSION := $(shell git describe --tags --always --dirty)
 #
 # This version-strategy uses a manual value to set the version string
-VERSION := 1.0.0
+VERSION := 1.0.0-test
 
 ###
 ### These variables should not need tweaking.

@@ -21,6 +21,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/robfig/cron"
+	"github.com/vmware/purser/cmd/controller/api"
 	"github.com/vmware/purser/cmd/controller/config"
 	"github.com/vmware/purser/pkg/controller"
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -38,13 +39,14 @@ func init() {
 
 func main() {
 	go eventprocessor.ProcessEvents(&conf)
-	startCronJobs()
+	go startCronJobs()
+	go api.StartServer()
 	controller.Start(&conf)
 }
 
 func startCronJobs() {
 	c := cron.New()
-	err := c.AddFunc("@every 0h30m", runDiscovery)
+	err := c.AddFunc("@every 0h40m", runDiscovery)
 	if err != nil {
 		log.Fatal(err)
 	}

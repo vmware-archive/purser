@@ -142,12 +142,56 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 	return err
 }
 
-// RetrieveAllPods returns all pods in the dgraph
-func RetrieveAllPods() ([]Pod, error) {
+// RetrievePodsInteractionsForAllPodsOrphanedTrue returns all pods in the dgraph
+func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]Pod, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
 			name
-			interacts @facets {
+						interacts {
+				name
+			}
+		}
+	}`
+
+	type root struct {
+		Pods []Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+	return newRoot.Pods, nil
+}
+
+// RetrievePodsInteractionsForAllPodsOrphanedFalse returns all pods in the dgraph which has edge interacts
+func RetrievePodsInteractionsForAllPodsOrphanedFalse() ([]Pod, error) {
+	const q = `query {
+		pods(func: has(isPod)) @filter(has(interacts)) {
+			name
+			interacts {
+				name
+			}
+		}
+	}`
+
+	type root struct {
+		Pods []Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+	return newRoot.Pods, nil
+}
+
+// RetrievePodsInteractionsForGivenPod ...
+func RetrievePodsInteractionsForGivenPod(name string) ([]Pod, error) {
+	q := `query {
+		pods(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+			name
+			interacts {
 				name
 			}
 		}

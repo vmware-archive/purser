@@ -22,7 +22,7 @@ import (
 
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
-	"log"
+	log "github.com/Sirupsen/logrus"
 )
 
 // Dgraph Model Constants

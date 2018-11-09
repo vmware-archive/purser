@@ -40,12 +40,12 @@ func StoreProcessInteractions(containerProcessInteraction map[string][]string, p
 
 			err := models.StoreProcess(procXID, containerXID, podsXIDs, creationTime)
 			if err != nil {
-				log.Errorf("failed to store process details: %s", procXID)
+				log.Errorf("failed to store process details: %s, err: (%v)", procXID, err)
 			}
 		}
 		err := models.StoreContainerProcessEdge(containerXID, procsXIDs)
 		if err != nil {
-			log.Errorf("failed to store edge from container: %s to procs", containerXID)
+			log.Errorf("failed to store edge from container: %s to procs, err: (%v)", containerXID, err)
 		}
 	}
 }
