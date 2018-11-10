@@ -152,6 +152,29 @@ func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetStatefulsetHierarchy listens on /hierarchy/statefulset endpoint and returns all replicasets and their children up to 2 levels
+func GetStatefulsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	var statefulset []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		statefulset, err = models.RetrieveStatefulset(name[0])
+	} else {
+		statefulset, err = models.RetrieveAllStatefulsets()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(statefulset)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
 
 func addHeaders(w http.ResponseWriter, r *http.Request) {
 	if origin := r.Header.Get("Origin"); origin != "" {

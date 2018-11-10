@@ -101,3 +101,52 @@ func CreateOrGetStatefulsetByID(xid string) string {
 	}
 	return assigned.Uids["blank-0"]
 }
+
+// RetrieveAllStatefulsets ...
+func RetrieveAllStatefulsets() ([]byte, error) {
+	const q = `query {
+		result(func: has(isStatefulset)) {
+			name
+			type
+			~statefulset @filter(has(isPod) {
+				name
+				type
+				~pod @filter(has(isContainer)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveStatefulset ...
+func RetrieveStatefulset(name string) ([]byte, error) {
+	q := `query {
+		result(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			~statefulset @filter(has(isPod)) {
+				name
+				type
+				~pod @filter(has(isContainer)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
