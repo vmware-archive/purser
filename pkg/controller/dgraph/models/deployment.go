@@ -101,3 +101,52 @@ func CreateOrGetDeploymentByID(xid string) string {
 	}
 	return assigned.Uids["blank-0"]
 }
+
+// RetrieveAllDeployments ...
+func RetrieveAllDeployments() ([]byte, error) {
+	const q = `query {
+		result(func: has(isDeployment)) {
+			name
+			type
+			~deployment @filter(has(isReplicaset) {
+				name
+				type
+				~replicaset @filter(has(isPod)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveDeployment ...
+func RetrieveDeployment(name string) ([]byte, error) {
+	q := `query {
+		result(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			~deployment @filter(has(isReplicaset)) {
+				name
+				type
+				~replicaset @filter(has(isPod)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

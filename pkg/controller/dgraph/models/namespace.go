@@ -107,7 +107,7 @@ func StoreNamespace(namespace api_v1.Namespace) (string, error) {
 // RetrieveAllNamespaces ...
 func RetrieveAllNamespaces() ([]byte, error) {
 	const q = `query {
-		allNamespace(func: has(isNamespace)) {
+		result(func: has(isNamespace)) {
 			name
 			type
 			~namespace @filter(has(isDeployment) OR has(isStatefulset)) {
@@ -135,7 +135,7 @@ func RetrieveAllNamespaces() ([]byte, error) {
 // RetrieveNamespace ...
 func RetrieveNamespace(name string) ([]byte, error) {
 	q := `query {
-		singleNamespace(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
+		result(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			~namespace @filter(has(isDeployment) OR has(isStatefulset)) {

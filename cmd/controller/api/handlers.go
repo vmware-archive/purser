@@ -83,7 +83,7 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all namespace and their decedents up to 2 levels
+// GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all namespace and their children up to 2 levels
 func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
 	var namespace []byte
 	var err error
@@ -95,6 +95,30 @@ func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
 		namespace, err = models.RetrieveNamespace(name[0])
 	} else {
 		namespace, err = models.RetrieveAllNamespaces()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	logrus.Debugf("result namespace in bytes: (%v)", namespace)
+	_, err = w.Write(namespace)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetDeploymentHierarchy listens on /hierarchy/deployment endpoint and returns all deployments and their children up to 2 levels
+func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
+	var namespace []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		namespace, err = models.RetrieveDeployment(name[0])
+	} else {
+		namespace, err = models.RetrieveAllDeployments()
 	}
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
