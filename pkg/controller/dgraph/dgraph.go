@@ -131,6 +131,17 @@ func GetUID(id string, nodeType string) string {
 	return unmarshalDgraphResponse(resp, id)
 }
 
+// ExecuteQueryRaw given a query and it fetches and writes result into interface
+func ExecuteQueryRaw(query string) ([]byte, error) {
+	ctx := context.Background()
+
+	resp, err := client.NewTxn().Query(ctx, query)
+	if err != nil {
+		log.Error(err)
+	}
+	return resp.Json, err
+}
+
 // ExecuteQuery given a query and it fetches and writes result into interface
 func ExecuteQuery(query string, root interface{}) error {
 	ctx := context.Background()

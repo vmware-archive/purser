@@ -59,38 +59,51 @@ func GetInventoryPods(w http.ResponseWriter, r *http.Request) {
 
 // GetPodInteractions listens on /interactions/pod endpoint and returns pod interactions
 func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
+	var pod []models.Pod
+	var err error
+
 	addHeaders(w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
 	if name, isName := queryParams["name"]; isName {
-		jsonResp, err := models.RetrievePodsInteractionsForGivenPod(name[0])
-		if err != nil {
-			logrus.Errorf("Unable to get response: (%v)", err)
-		}
-		err = json.NewEncoder(w).Encode(jsonResp)
-		if err != nil {
-			logrus.Errorf("Unable to encode to json: (%v)", err)
-		}
+		pod, err = models.RetrievePodsInteractionsForGivenPod(name[0])
 	} else {
 		if orphanVal, isOrphan := queryParams["orphan"]; isOrphan && orphanVal[0] == "true" {
-			jsonResp, err := models.RetrievePodsInteractionsForAllPodsOrphanedTrue()
-			if err != nil {
-				logrus.Errorf("Unable to get response: (%v)", err)
-			}
-			err = json.NewEncoder(w).Encode(jsonResp)
-			if err != nil {
-				logrus.Errorf("Unable to encode to json: (%v)", err)
-			}
+			pod, err = models.RetrievePodsInteractionsForAllPodsOrphanedTrue()
 		} else {
-			jsonResp, err := models.RetrievePodsInteractionsForAllPodsOrphanedFalse()
-			if err != nil {
-				logrus.Errorf("Unable to get response: (%v)", err)
-			}
-			err = json.NewEncoder(w).Encode(jsonResp)
-			if err != nil {
-				logrus.Errorf("Unable to encode to json: (%v)", err)
-			}
+			pod, err = models.RetrievePodsInteractionsForAllPodsOrphanedFalse()
 		}
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+	err = json.NewEncoder(w).Encode(pod)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all namespace and their decedents up to 2 levels
+func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
+	var namespace []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		namespace, err = models.RetrieveNamespace(name[0])
+	} else {
+		namespace, err = models.RetrieveAllNamespaces()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	logrus.Debugf("result namespace in bytes: (%v)", namespace)
+	_, err = w.Write(namespace)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
 }
 

@@ -103,3 +103,60 @@ func StoreNamespace(namespace api_v1.Namespace) (string, error) {
 	}
 	return assigned.Uids["blank-0"], nil
 }
+
+// RetrieveAllNamespaces ...
+func RetrieveAllNamespaces() ([]byte, error) {
+	const q = `query {
+		allNamespace(func: has(isNamespace)) {
+			name
+			type
+			~namespace @filter(has(isDeployment) OR has(isStatefulset)) {
+				name
+				type
+				~deployment @filter(has(isReplicaset)) {
+					name
+					type
+				}
+				~statefulset @filter(has(isPod)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveNamespace ...
+func RetrieveNamespace(name string) ([]byte, error) {
+	q := `query {
+		singleNamespace(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			~namespace @filter(has(isDeployment) OR has(isStatefulset)) {
+				name
+				type
+				~deployment @filter(has(isReplicaset)) {
+					name
+					type
+				}
+				~statefulset @filter(has(isPod)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

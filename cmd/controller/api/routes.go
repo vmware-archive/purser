@@ -42,13 +42,19 @@ var routes = Routes{
 	Route{
 		"GetInventoryPods",
 		"GET",
-		"/inventory/pods",
+		"/inventory/pod",
 		GetInventoryPods,
 	},
 	Route{
 		"GetPodInteractions",
 		"GET",
-		"/interactions/pods",
+		"/interactions/pod",
 		GetPodInteractions,
+	},
+	Route{
+		"GetNamespaceHierarchy",
+		"GET",
+		"/hierarchy/namespace",
+		GetNamespaceHierarchy,
 	},
 }
