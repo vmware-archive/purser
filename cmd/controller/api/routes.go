@@ -93,4 +93,10 @@ var routes = Routes{
 		"/hierarchy/process",
 		GetProcessHierarchy,
 	},
+	Route{
+		"GetNodeHierarchy",
+		"GET",
+		"/hierarchy/node",
+		GetNodeHierarchy,
+	},
 }

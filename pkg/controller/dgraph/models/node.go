@@ -104,3 +104,53 @@ func StoreNode(node api_v1.Node) (string, error) {
 	}
 	return assigned.Uids["blank-0"], nil
 }
+
+// RetrieveAllNodes ...
+func RetrieveAllNodes() ([]byte, error) {
+	const q = `query {
+		result(func: has(isNode)) {
+			name
+			type
+			~node @filter(has(isPod) {
+				name
+				type
+				~pod @filter(has(isContainer)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveNode ...
+func RetrieveNode(name string) ([]byte, error) {
+	q := `query {
+		result(func: has(isNode)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			~node @filter(has(isPod)) {
+				name
+				type
+				~pod @filter(has(isContainer)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+

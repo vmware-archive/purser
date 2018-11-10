@@ -244,6 +244,29 @@ func GetProcessHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetNodeHierarchy listens on /hierarchy/node endpoint and returns all nodes with their children up to 2 levels
+func GetNodeHierarchy(w http.ResponseWriter, r *http.Request) {
+	var node []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		node, err = models.RetrieveNode(name[0])
+	} else {
+		node, err = models.RetrieveAllNodes()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(node)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
 func addHeaders(w http.ResponseWriter, r *http.Request) {
 	if origin := r.Header.Get("Origin"); origin != "" {
 		w.Header().Set("Access-Control-Allow-Origin", origin)

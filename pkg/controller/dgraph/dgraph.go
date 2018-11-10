@@ -102,6 +102,7 @@ func CreateSchema() error {
 		pod: uid @reverse .
 		container: uid @reverse .
 		service: uid @reverse .
+		node: uid @reverse .
 	`
 	ctx := context.Background()
 	err := client.Alter(ctx, op)
