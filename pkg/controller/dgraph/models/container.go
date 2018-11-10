@@ -149,3 +149,45 @@ func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time)
 	}
 	deleteProcessesInTerminatedContainers(containers)
 }
+
+// RetrieveAllContainers ...
+func RetrieveAllContainers() ([]byte, error) {
+	const q = `query {
+		result(func: has(isContainer)) {
+			name
+			type
+			~container @filter(has(isProc) {
+				name
+				type
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveContainer ...
+func RetrieveContainer(name string) ([]byte, error) {
+	q := `query {
+		result(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			~container @filter(has(isProc)) {
+				name
+				type
+			}
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+

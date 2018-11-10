@@ -114,3 +114,35 @@ func retrieveProcessesFromProcessesXIDs(procsXIDs []string) []*Proc {
 	}
 	return procs
 }
+
+// RetrieveAllProcess ...
+func RetrieveAllProcess() ([]byte, error) {
+	const q = `query {
+		result(func: has(isProc)) {
+			name
+			type
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveProcess ...
+func RetrieveProcess(name string) ([]byte, error) {
+	q := `query {
+		result(func: has(isProc)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

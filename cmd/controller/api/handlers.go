@@ -198,6 +198,51 @@ func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetContainerHierarchy listens on /hierarchy/container endpoint and returns all containers along with process in them.
+func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
+	var container []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		container, err = models.RetrieveContainer(name[0])
+	} else {
+		container, err = models.RetrieveAllContainers()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(container)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetProcessHierarchy listens on /hierarchy/process endpoint and returns all processes
+func GetProcessHierarchy(w http.ResponseWriter, r *http.Request) {
+	var process []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		process, err = models.RetrieveProcess(name[0])
+	} else {
+		process, err = models.RetrieveAllProcess()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(process)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
 
 func addHeaders(w http.ResponseWriter, r *http.Request) {
 	if origin := r.Header.Get("Origin"); origin != "" {
