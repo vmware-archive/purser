@@ -99,4 +99,10 @@ var routes = Routes{
 		"/hierarchy/node",
 		GetNodeHierarchy,
 	},
+	Route{
+		"GetDaemonsettHierarchy",
+		"GET",
+		"/hierarchy/daemonset",
+		GetDeamonsetHierarchy,
+	},
 }

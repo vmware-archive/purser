@@ -160,6 +160,16 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error while persisting persistent volume claim %v", err)
 			}
+		} else if payload.ResourceType == "DaemonSet" {
+			daemonset := ext_v1beta1.DaemonSet{}
+			err := json.Unmarshal([]byte(payload.Data), &daemonset)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreDaemonset(daemonset)
+			if err != nil {
+				log.Errorf("Error while persisting daemonset %v", err)
+			}
 		}
 	}
 }

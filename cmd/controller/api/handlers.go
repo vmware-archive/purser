@@ -267,6 +267,29 @@ func GetNodeHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetDeamonsetHierarchy listens on /hierarchy/daemonset endpoint and returns all daemonsets and their children upto 2 levels
+func GetDeamonsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	var daemonset []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		daemonset, err = models.RetrieveDaemonset(name[0])
+	} else {
+		daemonset, err = models.RetrieveAllDaemonsets()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(daemonset)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
 func addHeaders(w http.ResponseWriter, r *http.Request) {
 	if origin := r.Header.Get("Origin"); origin != "" {
 		w.Header().Set("Access-Control-Allow-Origin", origin)
