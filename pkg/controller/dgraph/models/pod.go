@@ -276,3 +276,52 @@ func setPodOwners(pod *Pod, k8sPod api_v1.Pod) {
 		}
 	}
 }
+
+// RetrieveAllPods ...
+func RetrieveAllPods() ([]byte, error) {
+	const q = `query {
+		result(func: has(isPod)) {
+			name
+			type
+			~pod @filter(has(isContainer) {
+				name
+				type
+				~container @filter(has(isProc)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrievePod ...
+func RetrievePod(name string) ([]byte, error) {
+	q := `query {
+		result(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			~pod @filter(has(isContainer)) {
+				name
+				type
+				~container @filter(has(isProc)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

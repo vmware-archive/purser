@@ -75,4 +75,10 @@ var routes = Routes{
 		"/hierarchy/statefulset",
 		GetStatefulsetHierarchy,
 	},
+	Route{
+		"GetPodHierarchy",
+		"GET",
+		"/hierarchy/pod",
+		GetPodHierarchy,
+	},
 }

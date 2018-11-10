@@ -152,7 +152,7 @@ func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetStatefulsetHierarchy listens on /hierarchy/statefulset endpoint and returns all replicasets and their children up to 2 levels
+// GetStatefulsetHierarchy listens on /hierarchy/statefulset endpoint and returns all statefulsets and their children up to 2 levels
 func GetStatefulsetHierarchy(w http.ResponseWriter, r *http.Request) {
 	var statefulset []byte
 	var err error
@@ -170,6 +170,29 @@ func GetStatefulsetHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = w.Write(statefulset)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetPodHierarchy listens on /hierarchy/pod endpoint and returns all pods and their children up to 2 levels
+func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
+	var pod []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		pod, err = models.RetrievePod(name[0])
+	} else {
+		pod, err = models.RetrieveAllPods()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(pod)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
