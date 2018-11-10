@@ -290,6 +290,29 @@ func GetDeamonsetHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetJobHierarchy listens on /hierarchy/job endpoint and returns all jobs and their children upto 2 levels
+func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
+	var job []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		job, err = models.RetrieveJob(name[0])
+	} else {
+		job, err = models.RetrieveAllJobs()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(job)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
 func addHeaders(w http.ResponseWriter, r *http.Request) {
 	if origin := r.Header.Get("Origin"); origin != "" {
 		w.Header().Set("Access-Control-Allow-Origin", origin)

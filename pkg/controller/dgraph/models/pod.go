@@ -50,6 +50,7 @@ type Pod struct {
 	Replicaset    *Replicaset  `json:"replicaset,omitempty"`
 	Statefulset   *Statefulset `json:"statefulset,omitempty"`
 	Daemonset   *Daemonset `json:"daemonset,omitempty"`
+	Job   		*Job 			`json:"job,omitempty"`
 	CPURequest    float64      `json:"cpuRequest,omitempty"`
 	CPULimit      float64      `json:"cpuLimit,omitempty"`
 	MemoryRequest float64      `json:"memoryRequest,omitempty"`
@@ -269,7 +270,11 @@ func setPodOwners(pod *Pod, k8sPod api_v1.Pod) {
 				pod.Statefulset = &Statefulset{ID: dgraph.ID{UID: statefulsetUID, Xid: statefulsetXID}}
 			}
 		} else if owner.Kind == "Job" {
-			//TODO: populate when Jobs are persisted.
+			jobXID := k8sPod.Namespace + ":" + owner.Name
+			jobUID := CreateOrGetDaemonsetByID(jobXID)
+			if jobUID != "" {
+				pod.Job = &Job{ID: dgraph.ID{UID: jobUID, Xid: jobXID}}
+			}
 		} else if owner.Kind == "DaemonSet" {
 			daemonsetXID := k8sPod.Namespace + ":" + owner.Name
 			daemonsetUID := CreateOrGetDaemonsetByID(daemonsetXID)

@@ -110,7 +110,7 @@ func RetrieveAllNamespaces() ([]byte, error) {
 		result(func: has(isNamespace)) {
 			name
 			type
-			~namespace @filter(has(isDeployment) OR has(isStatefulset)) {
+			~namespace @filter(has(isDeployment) OR has(isStatefulset) OR has(isJob) OR has(isDaemonset) OR (has(isReplicaset) AND (NOT has(deployment)))) {
 				name
 				type
 				~deployment @filter(has(isReplicaset)) {
@@ -118,6 +118,18 @@ func RetrieveAllNamespaces() ([]byte, error) {
 					type
 				}
 				~statefulset @filter(has(isPod)) {
+					name
+					type
+				}
+				~job @filter(has(isPod)) {
+					name
+					type
+				}
+				~daemonset @filter(has(isPod)) {
+					name
+					type
+				}
+				~replicaset @filter(has(isPod)) {
 					name
 					type
 				}

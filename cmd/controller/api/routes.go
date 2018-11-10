@@ -100,9 +100,15 @@ var routes = Routes{
 		GetNodeHierarchy,
 	},
 	Route{
-		"GetDaemonsettHierarchy",
+		"GetDaemonsetHierarchy",
 		"GET",
 		"/hierarchy/daemonset",
 		GetDeamonsetHierarchy,
+	},
+	Route{
+		"GetJobHierarchy",
+		"GET",
+		"/hierarchy/job",
+		GetJobHierarchy,
 	},
 }
