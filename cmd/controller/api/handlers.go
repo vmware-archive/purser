@@ -100,7 +100,6 @@ func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	logrus.Debugf("result namespace in bytes: (%v)", namespace)
 	_, err = w.Write(namespace)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
@@ -109,27 +108,50 @@ func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetDeploymentHierarchy listens on /hierarchy/deployment endpoint and returns all deployments and their children up to 2 levels
 func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
-	var namespace []byte
+	var deployment []byte
 	var err error
 
 	addHeaders(w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
 	if name, isName := queryParams["name"]; isName {
-		namespace, err = models.RetrieveDeployment(name[0])
+		deployment, err = models.RetrieveDeployment(name[0])
 	} else {
-		namespace, err = models.RetrieveAllDeployments()
+		deployment, err = models.RetrieveAllDeployments()
 	}
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	logrus.Debugf("result namespace in bytes: (%v)", namespace)
-	_, err = w.Write(namespace)
+	_, err = w.Write(deployment)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
 }
+
+// GetReplicasetHierarchy listens on /hierarchy/replicaset endpoint and returns all replicasets and their children up to 2 levels
+func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
+	var replicaset []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		replicaset, err = models.RetrieveReplicaset(name[0])
+	} else {
+		replicaset, err = models.RetrieveAllReplicasets()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(replicaset)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
 
 func addHeaders(w http.ResponseWriter, r *http.Request) {
 	if origin := r.Header.Get("Origin"); origin != "" {

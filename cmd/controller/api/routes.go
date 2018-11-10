@@ -63,4 +63,10 @@ var routes = Routes{
 		"/hierarchy/deployment",
 		GetDeploymentHierarchy,
 	},
+	Route{
+		"GetReplicasetHierarchy",
+		"GET",
+		"/hierarchy/replicaset",
+		GetReplicasetHierarchy,
+	},
 }

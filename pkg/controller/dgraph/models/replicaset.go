@@ -122,3 +122,51 @@ func CreateOrGetReplicasetByID(xid string) string {
 	return assigned.Uids["blank-0"]
 }
 
+// RetrieveAllReplicasets ...
+func RetrieveAllReplicasets() ([]byte, error) {
+	const q = `query {
+		result(func: has(isReplicaset)) {
+			name
+			type
+			~replicaset @filter(has(isPod) {
+				name
+				type
+				~pod @filter(has(isContainer)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveReplicaset ...
+func RetrieveReplicaset(name string) ([]byte, error) {
+	q := `query {
+		result(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			~replicaset @filter(has(isPod)) {
+				name
+				type
+				~pod @filter(has(isContainer)) {
+					name
+					type
+				}
+			}
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
