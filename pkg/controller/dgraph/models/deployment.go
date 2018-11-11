@@ -105,13 +105,13 @@ func CreateOrGetDeploymentByID(xid string) string {
 // RetrieveAllDeployments ...
 func RetrieveAllDeployments() ([]byte, error) {
 	const q = `query {
-		result(func: has(isDeployment)) {
+		deployment(func: has(isDeployment)) {
 			name
 			type
-			~deployment @filter(has(isReplicaset) {
+			replicaset: ~deployment @filter(has(isReplicaset) {
 				name
 				type
-				~replicaset @filter(has(isPod)) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 				}
@@ -129,13 +129,13 @@ func RetrieveAllDeployments() ([]byte, error) {
 // RetrieveDeployment ...
 func RetrieveDeployment(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
+		deployment(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~deployment @filter(has(isReplicaset)) {
+			replicaset: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
-				~replicaset @filter(has(isPod)) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 				}

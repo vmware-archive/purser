@@ -125,13 +125,13 @@ func CreateOrGetReplicasetByID(xid string) string {
 // RetrieveAllReplicasets ...
 func RetrieveAllReplicasets() ([]byte, error) {
 	const q = `query {
-		result(func: has(isReplicaset)) {
+		replicaset(func: has(isReplicaset)) {
 			name
 			type
-			~replicaset @filter(has(isPod) {
+			pod: "~replicaset @filter(has(isPod) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}
@@ -149,13 +149,13 @@ func RetrieveAllReplicasets() ([]byte, error) {
 // RetrieveReplicaset ...
 func RetrieveReplicaset(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
+		replicaset(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~replicaset @filter(has(isPod)) {
+			pod: ~replicaset @filter(has(isPod)) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}

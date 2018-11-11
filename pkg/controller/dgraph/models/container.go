@@ -153,10 +153,10 @@ func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time)
 // RetrieveAllContainers ...
 func RetrieveAllContainers() ([]byte, error) {
 	const q = `query {
-		result(func: has(isContainer)) {
+		container(func: has(isContainer)) {
 			name
 			type
-			~container @filter(has(isProc) {
+			process: ~container @filter(has(isProc) {
 				name
 				type
 			}
@@ -173,10 +173,10 @@ func RetrieveAllContainers() ([]byte, error) {
 // RetrieveContainer ...
 func RetrieveContainer(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
+		container(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~container @filter(has(isProc)) {
+			process: ~container @filter(has(isProc)) {
 				name
 				type
 			}

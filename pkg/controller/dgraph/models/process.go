@@ -118,7 +118,7 @@ func retrieveProcessesFromProcessesXIDs(procsXIDs []string) []*Proc {
 // RetrieveAllProcess ...
 func RetrieveAllProcess() ([]byte, error) {
 	const q = `query {
-		result(func: has(isProc)) {
+		process(func: has(isProc)) {
 			name
 			type
 		}
@@ -134,7 +134,7 @@ func RetrieveAllProcess() ([]byte, error) {
 // RetrieveProcess ...
 func RetrieveProcess(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isProc)) @filter(eq(name, "` + name + `")) {
+		process(func: has(isProc)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 		}

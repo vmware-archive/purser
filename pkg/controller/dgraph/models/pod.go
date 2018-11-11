@@ -271,7 +271,7 @@ func setPodOwners(pod *Pod, k8sPod api_v1.Pod) {
 			}
 		} else if owner.Kind == "Job" {
 			jobXID := k8sPod.Namespace + ":" + owner.Name
-			jobUID := CreateOrGetDaemonsetByID(jobXID)
+			jobUID := CreateOrGetJobByID(jobXID)
 			if jobUID != "" {
 				pod.Job = &Job{ID: dgraph.ID{UID: jobUID, Xid: jobXID}}
 			}
@@ -290,13 +290,13 @@ func setPodOwners(pod *Pod, k8sPod api_v1.Pod) {
 // RetrieveAllPods ...
 func RetrieveAllPods() ([]byte, error) {
 	const q = `query {
-		result(func: has(isPod)) {
+		pod(func: has(isPod)) {
 			name
 			type
-			~pod @filter(has(isContainer) {
+			container: ~pod @filter(has(isContainer) {
 				name
 				type
-				~container @filter(has(isProc)) {
+				process: ~container @filter(has(isProc)) {
 					name
 					type
 				}
@@ -314,13 +314,13 @@ func RetrieveAllPods() ([]byte, error) {
 // RetrievePod ...
 func RetrievePod(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~pod @filter(has(isContainer)) {
+			container: ~pod @filter(has(isContainer)) {
 				name
 				type
-				~container @filter(has(isProc)) {
+				process: ~container @filter(has(isProc)) {
 					name
 					type
 				}

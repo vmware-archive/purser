@@ -121,7 +121,7 @@ func StorePodServiceEdges(svcXID string, podsXIDsInService []string) error {
 // RetrieveAllServices returns all pods in the dgraph
 func RetrieveAllServices() ([]Service, error) {
 	const q = `query {
-		services(func: has(isService)) {
+		service(func: has(isService)) {
 			name
 			interacts @facets {
 				name
@@ -147,7 +147,7 @@ func RetrieveAllServices() ([]Service, error) {
 // RetrieveAllServicesWithDstPods returns all pods in the dgraph
 func RetrieveAllServicesWithDstPods() ([]Service, error) {
 	const q = `query {
-		services(func: has(isService)) {
+		service(func: has(isService)) {
 			xid
 			name
 			pod {

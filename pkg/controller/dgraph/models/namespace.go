@@ -107,28 +107,44 @@ func StoreNamespace(namespace api_v1.Namespace) (string, error) {
 // RetrieveAllNamespaces ...
 func RetrieveAllNamespaces() ([]byte, error) {
 	const q = `query {
-		result(func: has(isNamespace)) {
+		namespace(func: has(isNamespace)) {
 			name
 			type
-			~namespace @filter(has(isDeployment) OR has(isStatefulset) OR has(isJob) OR has(isDaemonset) OR (has(isReplicaset) AND (NOT has(deployment)))) {
+			deployment: ~namespace @filter(has(isDeployment)) {
 				name
 				type
 				~deployment @filter(has(isReplicaset)) {
 					name
 					type
 				}
+			}
+			statefulset: ~namespace @filter(has(isStatefulset)) {
+				name
+				type
 				~statefulset @filter(has(isPod)) {
 					name
 					type
 				}
+			}
+			job: ~namespace @filter(has(isJob)) {
+				name
+				type
 				~job @filter(has(isPod)) {
 					name
 					type
 				}
+			}
+			daemonset: ~namespace @filter(has(isDaemonset)) {
+				name
+				type
 				~daemonset @filter(has(isPod)) {
 					name
 					type
 				}
+			}
+			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
+				name
+				type
 				~replicaset @filter(has(isPod)) {
 					name
 					type
@@ -147,17 +163,45 @@ func RetrieveAllNamespaces() ([]byte, error) {
 // RetrieveNamespace ...
 func RetrieveNamespace(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
+		namespace(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~namespace @filter(has(isDeployment) OR has(isStatefulset)) {
+			deployment: ~namespace @filter(has(isDeployment)) {
 				name
 				type
 				~deployment @filter(has(isReplicaset)) {
 					name
 					type
 				}
+			}
+			statefulset: ~namespace @filter(has(isStatefulset)) {
+				name
+				type
 				~statefulset @filter(has(isPod)) {
+					name
+					type
+				}
+			}
+			job: ~namespace @filter(has(isJob)) {
+				name
+				type
+				~job @filter(has(isPod)) {
+					name
+					type
+				}
+			}
+			daemonset: ~namespace @filter(has(isDaemonset)) {
+				name
+				type
+				~daemonset @filter(has(isPod)) {
+					name
+					type
+				}
+			}
+			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
+				name
+				type
+				~replicaset @filter(has(isPod)) {
 					name
 					type
 				}

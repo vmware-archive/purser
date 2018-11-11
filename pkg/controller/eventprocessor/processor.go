@@ -177,7 +177,7 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error un marshalling payload " + payload.Data)
 			}
-			err = models.StoreJob(job)
+			_, err = models.StoreJob(job)
 			if err != nil {
 				log.Errorf("Error while persisting job %v", err)
 			}

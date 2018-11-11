@@ -105,13 +105,13 @@ func CreateOrGetDaemonsetByID(xid string) string {
 // RetrieveAllDaemonsets ...
 func RetrieveAllDaemonsets() ([]byte, error) {
 	const q = `query {
-		result(func: has(isDaemonset)) {
+		daemonset(func: has(isDaemonset)) {
 			name
 			type
-			~daemonset @filter(has(isPod) {
+			pod: ~daemonset @filter(has(isPod) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}
@@ -129,13 +129,13 @@ func RetrieveAllDaemonsets() ([]byte, error) {
 // RetrieveDaemonset ...
 func RetrieveDaemonset(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
+		daemonset(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~daemonset @filter(has(isPod)) {
+			pod: ~daemonset @filter(has(isPod)) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}

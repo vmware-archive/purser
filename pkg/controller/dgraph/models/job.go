@@ -105,13 +105,13 @@ func CreateOrGetJobByID(xid string) string {
 // RetrieveAllJobs ...
 func RetrieveAllJobs() ([]byte, error) {
 	const q = `query {
-		result(func: has(isJob)) {
+		job(func: has(isJob)) {
 			name
 			type
-			~job @filter(has(isPod) {
+			pod: ~job @filter(has(isPod) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}
@@ -129,13 +129,13 @@ func RetrieveAllJobs() ([]byte, error) {
 // RetrieveJob ...
 func RetrieveJob(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isJob)) @filter(eq(name, "` + name + `")) {
+		job(func: has(isJob)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~job @filter(has(isPod)) {
+			pod: ~job @filter(has(isPod)) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}

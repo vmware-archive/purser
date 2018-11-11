@@ -105,13 +105,13 @@ func CreateOrGetStatefulsetByID(xid string) string {
 // RetrieveAllStatefulsets ...
 func RetrieveAllStatefulsets() ([]byte, error) {
 	const q = `query {
-		result(func: has(isStatefulset)) {
+		statefulset(func: has(isStatefulset)) {
 			name
 			type
-			~statefulset @filter(has(isPod) {
+			pod: ~statefulset @filter(has(isPod) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}
@@ -129,13 +129,13 @@ func RetrieveAllStatefulsets() ([]byte, error) {
 // RetrieveStatefulset ...
 func RetrieveStatefulset(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
+		statefulset(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~statefulset @filter(has(isPod)) {
+			pod: ~statefulset @filter(has(isPod)) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}

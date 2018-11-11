@@ -108,13 +108,13 @@ func StoreNode(node api_v1.Node) (string, error) {
 // RetrieveAllNodes ...
 func RetrieveAllNodes() ([]byte, error) {
 	const q = `query {
-		result(func: has(isNode)) {
+		node(func: has(isNode)) {
 			name
 			type
-			~node @filter(has(isPod) {
+			pod: ~node @filter(has(isPod) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}
@@ -132,13 +132,13 @@ func RetrieveAllNodes() ([]byte, error) {
 // RetrieveNode ...
 func RetrieveNode(name string) ([]byte, error) {
 	q := `query {
-		result(func: has(isNode)) @filter(eq(name, "` + name + `")) {
+		node(func: has(isNode)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			~node @filter(has(isPod)) {
+			pod: ~node @filter(has(isPod)) {
 				name
 				type
-				~pod @filter(has(isContainer)) {
+				container: ~pod @filter(has(isContainer)) {
 					name
 					type
 				}
