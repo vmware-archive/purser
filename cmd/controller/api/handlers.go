@@ -313,6 +313,213 @@ func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetNamespaceWithMetrics ...
+func GetNamespaceWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var namespace []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		namespace, err = models.RetrieveNamespaceWithMetrics(name[0])
+	} else {
+		namespace, err = models.RetrieveAllNamespacesWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(namespace)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetDeploymentWithMetrics ...
+func GetDeploymentWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var deployment []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		deployment, err = models.RetrieveDeploymentWithMetrics(name[0])
+	} else {
+		deployment, err = models.RetrieveAllDeploymentsWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(deployment)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetDaemonsetWithMetrics ...
+func GetDaemonsetWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var daemonset []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		daemonset, err = models.RetrieveDaemonsetWithMetrics(name[0])
+	} else {
+		daemonset, err = models.RetrieveAllDaemonsetsWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(daemonset)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetStatefulsetWithMetrics ...
+func GetStatefulsetWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var statefulset []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		statefulset, err = models.RetrieveStatefulsetWithMetrics(name[0])
+	} else {
+		statefulset, err = models.RetrieveAllStatefulsetsWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(statefulset)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetReplicasetWithMetrics ...
+func GetReplicasetWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var replicaset []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		replicaset, err = models.RetrieveReplicasetWithMetrics(name[0])
+	} else {
+		replicaset, err = models.RetrieveAllReplicasetsWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(replicaset)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetJobWithMetrics ...
+func GetJobWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var job []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		job, err = models.RetrieveJobWithMetrics(name[0])
+	} else {
+		job, err = models.RetrieveAllJobsWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(job)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetNodeWithMetrics ...
+func GetNodeWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var node []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		node, err = models.RetrieveNodeWithMetrics(name[0])
+	} else {
+		node, err = models.RetrieveAllNodesWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(node)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetPodWithMetrics ...
+func GetPodWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var pod []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		pod, err = models.RetrievePodWithMetrics(name[0])
+	} else {
+		pod, err = models.RetrieveAllPodsWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(pod)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetContainerWithMetrics ...
+func GetContainerWithMetrics(w http.ResponseWriter, r *http.Request) {
+	var container []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		container, err = models.RetrieveContainerWithMetrics(name[0])
+	} else {
+		container, err = models.RetrieveAllContainersWithMetrics()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	_, err = w.Write(container)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
 func addHeaders(w http.ResponseWriter, r *http.Request) {
 	if origin := r.Header.Get("Origin"); origin != "" {
 		w.Header().Set("Access-Control-Allow-Origin", origin)

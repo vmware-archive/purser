@@ -150,3 +150,64 @@ func RetrieveDaemonset(name string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+// RetrieveAllDaemonsetsWithMetrics ...
+func RetrieveAllDaemonsetsWithMetrics() ([]byte, error) {
+	const q = `query {
+		daemonset(func: has(isDaemonset)) {
+			name
+			type
+			pod: ~daemonset @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveDaemonsetWithMetrics ...
+func RetrieveDaemonsetWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		daemonset(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			pod: ~daemonset @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

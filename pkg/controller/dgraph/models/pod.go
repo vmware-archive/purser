@@ -335,3 +335,52 @@ func RetrievePod(name string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+
+// RetrieveAllPodsWithMetrics ...
+func RetrieveAllPodsWithMetrics() ([]byte, error) {
+	q := `query {
+		pod(func: has(isPod)) {
+			name
+			type
+			container: ~pod @filter(has(isContainer)) {
+				name
+				type
+				cpu: cpuRequest
+				memory: memoryRequest
+			}
+			cpu: cpuRequest
+			memory: memoryRequest
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveReplicasetsWithMetrics ...
+func RetrievePodWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			container: ~pod @filter(has(isContainer)) {
+				name
+				type
+				cpu: cpuRequest
+				memory: memoryRequest
+			}
+			cpu: cpuRequest
+			memory: memoryRequest
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

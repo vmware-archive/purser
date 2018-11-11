@@ -216,3 +216,232 @@ func RetrieveNamespace(name string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+// RetrieveAllNamespacesWithMetrics ...
+func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
+	const q = `query {
+		namespace(func: has(isNamespace)) {
+			name
+			type
+			deployment: ~namespace @filter(has(isDeployment)) {
+				name
+				type
+				replicaset: ~deployment @filter(has(isReplicaset) {
+					name
+					type
+					pod: ~replicaset @filter(has(isPod) {
+						name
+						type
+						container: ~pod @filter(has(isContainer)) {
+							name
+							type
+							cpu: cpuRequest
+							memory: memoryRequest
+						}
+						cpu: podCpu as cpuRequest
+						memory: podMemory as memoryRequest
+					}
+					cpu: dreplicasetCpu as sum(val(podCpu))
+					memory: dreplicasetMemory as sum(val(podMemory))
+				}
+				cpu: deploymentCpu as sum(val(dreplicasetCpu))
+				memory: deploymentMemory as sum(val(dreplicasetMemory)
+			}
+			statefulset: ~namespace @filter(has(isStatefulset)) {
+				name
+				type
+				pod: ~statefulset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: statefulsetCpu as sum(val(podCpu))
+				memory: statefulsetMemory as sum(val(podMemory))
+			}
+			job: ~namespace @filter(has(isJob)) {
+				name
+				type
+				pod: ~job @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: jobCpu as sum(val(podCpu))
+				memory: jobMemory as sum(val(podMemory))
+			}
+			daemonset: ~namespace @filter(has(isDaemonset)) {
+				name
+				type
+				pod: ~daemonset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: daemonsetCpu as sum(val(podCpu))
+				memory: daemonsetMemory as sum(val(podMemory))
+			}
+			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
+				name
+				type
+				pod: ~replicaset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: replicasetCpu as sum(val(podCpu))
+				memory: replicasetMemory as sum(val(podMemory))
+			}
+			cpu: math(deploymentCpu + daemonsetCpu + jobCpu + statefulsetCpu + replicasetCpu)
+			memory: math(deploymentMemory + daemonsetMemory + jobMemory + statefulsetMemory + replicasetMemory)
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveNamespaceWithMetrics ...
+func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		namespace(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			deployment: ~namespace @filter(has(isDeployment)) {
+				name
+				type
+				replicaset: ~deployment @filter(has(isReplicaset) {
+					name
+					type
+					pod: ~replicaset @filter(has(isPod) {
+						name
+						type
+						container: ~pod @filter(has(isContainer)) {
+							name
+							type
+							cpu: cpuRequest
+							memory: memoryRequest
+						}
+						cpu: podCpu as cpuRequest
+						memory: podMemory as memoryRequest
+					}
+					cpu: dreplicasetCpu as sum(val(podCpu))
+					memory: dreplicasetMemory as sum(val(podMemory))
+				}
+				cpu: deploymentCpu as sum(val(dreplicasetCpu))
+				memory: deploymentMemory as sum(val(dreplicasetMemory)
+			}
+			statefulset: ~namespace @filter(has(isStatefulset)) {
+				name
+				type
+				pod: ~statefulset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: statefulsetCpu as sum(val(podCpu))
+				memory: statefulsetMemory as sum(val(podMemory))
+			}
+			job: ~namespace @filter(has(isJob)) {
+				name
+				type
+				pod: ~job @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: jobCpu as sum(val(podCpu))
+				memory: jobMemory as sum(val(podMemory))
+			}
+			daemonset: ~namespace @filter(has(isDaemonset)) {
+				name
+				type
+				pod: ~daemonset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: daemonsetCpu as sum(val(podCpu))
+				memory: daemonsetMemory as sum(val(podMemory))
+			}
+			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
+				name
+				type
+				pod: ~replicaset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: replicasetCpu as sum(val(podCpu))
+				memory: replicasetMemory as sum(val(podMemory))
+			}
+			cpu: math(deploymentCpu + daemonsetCpu + jobCpu + statefulsetCpu + replicasetCpu)
+			memory: math(deploymentMemory + daemonsetMemory + jobMemory + statefulsetMemory + replicasetMemory)
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

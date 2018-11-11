@@ -150,3 +150,76 @@ func RetrieveDeployment(name string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+// RetrieveAllDeploymentsWithMetrics ...
+func RetrieveAllDeploymentsWithMetrics() ([]byte, error) {
+	const q = `query {
+		deployment(func: has(isDeployment)) {
+			name
+			type
+			replicaset: ~deployment @filter(has(isReplicaset) {
+				name
+				type
+				pod: ~replicaset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: replicasetCpu as sum(val(podCpu))
+				memory: replicasetMemory as sum(val(podMemory))
+			}
+			cpu: sum(val(replicasetCpu))
+			memory: sum(val(replicasetMemory)
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveDeploymentWithMetrics ...
+func RetrieveDeploymentWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		deployment(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			replicaset: ~deployment @filter(has(isReplicaset) {
+				name
+				type
+				pod: ~replicaset @filter(has(isPod) {
+					name
+					type
+					container: ~pod @filter(has(isContainer)) {
+						name
+						type
+						cpu: cpuRequest
+						memory: memoryRequest
+					}
+					cpu: podCpu as cpuRequest
+					memory: podMemory as memoryRequest
+				}
+				cpu: replicasetCpu as sum(val(podCpu))
+				memory: replicasetMemory as sum(val(podMemory))
+			}
+			cpu: sum(val(replicasetCpu))
+			memory: sum(val(replicasetMemory)
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

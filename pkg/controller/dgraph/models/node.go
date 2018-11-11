@@ -154,3 +154,63 @@ func RetrieveNode(name string) ([]byte, error) {
 	return result, nil
 }
 
+// RetrieveAllNodesWithMetrics ...
+func RetrieveAllNodesWithMetrics() ([]byte, error) {
+	const q = `query {
+		node(func: has(isNode)) {
+			name
+			type
+			pod: ~node @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveNodeWithMetrics ...
+func RetrieveNodeWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		node(func: has(isNode)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			pod: ~node @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: puRequest
+				memory: memoryRequest
+			}
+			cpu: cpuCapacity
+			memory: memoryCapacity
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

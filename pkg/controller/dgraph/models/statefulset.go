@@ -150,3 +150,64 @@ func RetrieveStatefulset(name string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+// RetrieveAllStatefulsetsWithMetrics ...
+func RetrieveAllStatefulsetsWithMetrics() ([]byte, error) {
+	const q = `query {
+		statefulset(func: has(isStatefulset)) {
+			name
+			type
+			pod: ~statefulset @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveStatefulsetWithMetrics ...
+func RetrieveStatefulsetWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		statefulset(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			pod: ~statefulset @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

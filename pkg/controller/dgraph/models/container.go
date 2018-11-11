@@ -191,3 +191,40 @@ func RetrieveContainer(name string) ([]byte, error) {
 	return result, nil
 }
 
+// RetrieveAllContainersWithMetrics ...
+func RetrieveAllContainersWithMetrics() ([]byte, error) {
+	const q = `query {
+		container(func: has(isContainer)) {
+			name
+			type
+			cpu: cpuRequest
+			memory: memoryRequest
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveContainerWithMetrics ...
+func RetrieveContainerWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		container(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			cpu: cpuRequest
+			memory: memoryRequest
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+

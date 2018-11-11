@@ -170,3 +170,63 @@ func RetrieveReplicaset(name string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+// RetrieveAllReplicasetsWithMetrics ...
+func RetrieveAllReplicasetsWithMetrics() ([]byte, error) {
+	const q = `query {
+		replicaset(func: has(isReplicaset)) {
+			name
+			type
+			pod: ~replicaset @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveReplicasetWithMetrics ...
+func RetrieveReplicasetWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		replicaset(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			pod: ~replicaset @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

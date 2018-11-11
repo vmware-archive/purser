@@ -150,3 +150,64 @@ func RetrieveJob(name string) ([]byte, error) {
 	}
 	return result, nil
 }
+
+// RetrieveAllJobsWithMetrics ...
+func RetrieveAllJobsWithMetrics() ([]byte, error) {
+	const q = `query {
+		job(func: has(isJob)) {
+			name
+			type
+			pod: ~job @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// RetrieveJobWithMetrics ...
+func RetrieveJobWithMetrics(name string) ([]byte, error) {
+	q := `query {
+		job(func: has(isJob)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			pod: ~job @filter(has(isPod) {
+				name
+				type
+				container: ~pod @filter(has(isContainer)) {
+					name
+					type
+					cpu: cpuRequest
+					memory: memoryRequest
+				}
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+			}
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+		}
+	}`
+
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
