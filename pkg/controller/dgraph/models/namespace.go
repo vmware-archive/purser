@@ -268,13 +268,6 @@ func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
 func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
 	q := `query {
 		ns as var(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
-			~namespace @filter(has(isPod)){
-				namespacePodCpu as cpuRequest
-				namespacePodMem as memoryRequest
-			}
-			namespaceCpu as sum(val(namespacePodCpu))
-			namespaceMem as sum(val(namespacePodMem))
-
 			childs as ~namespace @filter(has(isDeployment) OR has(isStatefulset) OR has(isJob) OR has(isDaemonset) OR (has(isReplicaset) AND (NOT has(deployment)))) {
 				name
 				type
@@ -339,8 +332,8 @@ func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
 				cpu: namespaceChildCpu
 				memory: namespaceChildMemory
 			}
-			cpu: val(namespaceCpu)
-			memory: val(namespaceMem)
+			cpu: sum(val(namespaceChildCpu))
+			memory: sum(val(namespaceChildMemory))
         }
     }`
 	namespaceRoot := NamespacesWithMetrics{}
