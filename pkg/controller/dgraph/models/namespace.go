@@ -251,7 +251,7 @@ func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
 			namespaceMem as sum(val(namespacePodMem))
         }
 
-		cluster(func: uid(ns)) {
+		namespace(func: uid(ns)) {
 			name
             type
 			cpu: val(namespaceCpu)
@@ -314,8 +314,19 @@ func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
                     replicasetSimplePodCpu as cpuRequest
                     replicasetSimplePodMemory as memoryRequest
                 }
-				namespaceChildCpu as math(sum(val(replicasetSimplePodCpu)) + sum(val(daemonsetPodCpu)) + sum(val(jobPodCpu)) + sum(val(statefulsetPodCpu)) + sum(val(deploymentReplicasetCpu)))
-				namespaceChildMemory as math(sum(val(replicasetSimplePodMemory)) + sum(val(daemonsetPodMemory)) + sum(val(jobPodMemory)) + sum(val(statefulsetPodMemory)) + sum(val(deploymentReplicasetMemory)))
+				sumReplicasetSimplePodCpu as sum(val(replicasetSimplePodCpu))
+				sumDaemonsetPodCpu as sum(val(daemonsetPodCpu))
+				sumJobPodCpu as sum(val(jobPodCpu))
+				sumStatefulsetPodCpu as sum(val(statefulsetPodCpu))
+				sumDeploymentPodCpu as sum(val(deploymentReplicasetCpu))
+				namespaceChildCpu as math(sumReplicasetSimplePodCpu + sumDaemonsetPodCpu + sumJobPodCpu + sumStatefulsetPodCpu + sumDeploymentPodCpu)
+
+				sumReplicasetSimplePodMemory as sum(val(replicasetSimplePodMemory))
+				sumDaemonsetPodMemory as sum(val(daemonsetPodMemory))
+				sumJobPodMemory as sum(val(jobPodMemory))
+				sumStatefulsetPodMemory as sum(val(statefulsetPodMemory))
+				sumDeploymentPodMemory as sum(val(deploymentReplicasetMemory))
+				namespaceChildMemory as math(sumReplicasetSimplePodMemory + sumDaemonsetPodMemory + sumJobPodMemory + sumStatefulsetPodMemory + sumDeploymentPodMemory)
         	}
 		}
 
