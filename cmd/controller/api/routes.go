@@ -142,6 +142,12 @@ var routes = Routes{
 		GetReplicasetWithMetrics,
 	},
 	Route{
+		"GetDaemonsetWithMetrics",
+		"GET",
+		"/metrics/daemonset",
+		GetDaemonsetWithMetrics,
+	},
+	Route{
 		"GetJobWithMetrics",
 		"GET",
 		"/metrics/job",

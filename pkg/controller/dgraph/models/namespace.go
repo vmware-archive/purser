@@ -234,109 +234,118 @@ func RetrieveNamespace(name string) ([]byte, error) {
 // RetrieveAllNamespacesWithMetrics ...
 func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
 	const q = `query {
-		namespace(func: has(isNamespace)) {
+		ns as var(func: has(isNamespace)) {
+			~namespace @filter(has(isPod)){
+				namespacePodCpu as cpuRequest
+				namespacePodMem as memoryRequest
+			}
+			namespaceCpu as sum(val(namespacePodCpu))
+			namespaceMem as sum(val(namespacePodMem))
+        }
+
+		namespace(func: uid(ns)) {
 			name
-			type
+            type
 			deployment: ~namespace @filter(has(isDeployment)) {
 				name
-				type
-				replicaset: ~deployment @filter(has(isReplicaset)) {
-					name
-					type
+                type
+                replicaset: ~deployment @filter(has(isReplicaset)) {
+                    name
+                    type
 					pod: ~replicaset @filter(has(isPod)) {
 						name
 						type
-						container: ~pod @filter(has(isContainer)) {
+				        container: ~pod @filter(has(isContainer)) {
 							name
-							type
-							cpu: cpuRequest
-							memory: memoryRequest
-						}
-						cpu: podCpu as cpuRequest
-						memory: podMemory as memoryRequest
-					}
-					cpu: dreplicasetCpu as sum(val(podCpu))
-					memory: dreplicasetMemory as sum(val(podMemory))
-				}
-				cpu: deploymentCpu as sum(val(dreplicasetCpu))
-				memory: deploymentMemory as sum(val(dreplicasetMemory)
-			}
-			statefulset: ~namespace @filter(has(isStatefulset)) {
-				name
-				type
-				pod: ~statefulset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: statefulsetCpu as sum(val(podCpu))
-				memory: statefulsetMemory as sum(val(podMemory))
-			}
-			job: ~namespace @filter(has(isJob)) {
-				name
-				type
-				pod: ~job @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: jobCpu as sum(val(podCpu))
-				memory: jobMemory as sum(val(podMemory))
-			}
-			daemonset: ~namespace @filter(has(isDaemonset)) {
-				name
-				type
-				pod: ~daemonset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: daemonsetCpu as sum(val(podCpu))
-				memory: daemonsetMemory as sum(val(podMemory))
-			}
-			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
-				name
-				type
-				pod: ~replicaset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: replicasetCpu as sum(val(podCpu))
-				memory: replicasetMemory as sum(val(podMemory))
-			}
-			cpu: math(deploymentCpu + daemonsetCpu + jobCpu + statefulsetCpu + replicasetCpu)
-			memory: math(deploymentMemory + daemonsetMemory + jobMemory + statefulsetMemory + replicasetMemory)
-		}
-	}`
+				            type
+					        cpu: cpuRequest
+				            memory: memoryRequest
+                        }
+				        cpu: replicasetPodCpu as cpuRequest
+				        memory: replicasetPodMemory as memoryRequest
+			        }
+    	            cpu: deploymentReplicasetCpu as sum(val(replicasetPodCpu))
+			        memory: deploymentReplicasetMemory as sum(val(replicasetPodMemory))
+                }
+			    cpu: sum(val(deploymentReplicasetCpu))
+			    memory: sum(val(deploymentReplicasetMemory))
+		    }
+            statefulset: ~namespace @filter(has(isStatefulset)) {
+                name
+                type
+                pod: ~statefulset @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: statefulsetPodCpu as cpuRequest
+                    memory: statefulsetPodMemory as memoryRequest
+                }
+                cpu: sum(val(statefulsetPodCpu))
+                memory: sum(val(statefulsetPodMemory))
+            }
+            job: ~namespace @filter(has(isJob)) {
+                name
+                type
+                pod: ~job @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: jobPodCpu as cpuRequest
+                    memory: jobPodMemory as memoryRequest
+                }
+                cpu: sum(val(jobPodCpu))
+                memory: sum(val(jobPodMemory))
+            }
+            daemonset: ~namespace @filter(has(isDaemonset)) {
+                name
+                type
+                pod: ~daemonset @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: daemonsetPodCpu as cpuRequest
+                    memory: daemonsetPodMemory as memoryRequest
+                }
+                cpu: sum(val(daemonsetPodCpu))
+                memory: sum(val(daemonsetPodMemory))
+            }
+            replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
+                name
+                type
+                pod: ~replicaset @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: replicasetSimplePodCpu as cpuRequest
+                    memory: replicasetSimplePodMemory as memoryRequest
+                }
+                cpu: sum(val(replicasetSimplePodCpu))
+                memory: sum(val(replicasetSimplePodMemory))
+            }
+			cpu: val(namespaceCpu)
+			memory: val(namespaceMem)
+        }
+    }`
 	namespaceRoot := NamespacesWithMetrics{}
 	err := dgraph.ExecuteQuery(q, &namespaceRoot)
 	calculateTotalNamespaceMetrics(&namespaceRoot)
@@ -346,109 +355,118 @@ func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
 // RetrieveNamespaceWithMetrics ...
 func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
 	q := `query {
-		namespace(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
+		ns as var(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
+			~namespace @filter(has(isPod)){
+				namespacePodCpu as cpuRequest
+				namespacePodMem as memoryRequest
+			}
+			namespaceCpu as sum(val(namespacePodCpu))
+			namespaceMem as sum(val(namespacePodMem))
+        }
+
+		namespace(func: uid(ns)) {
 			name
-			type
+            type
 			deployment: ~namespace @filter(has(isDeployment)) {
 				name
-				type
-				replicaset: ~deployment @filter(has(isReplicaset) {
-					name
-					type
+                type
+                replicaset: ~deployment @filter(has(isReplicaset)) {
+                    name
+                    type
 					pod: ~replicaset @filter(has(isPod)) {
 						name
 						type
-						container: ~pod @filter(has(isContainer)) {
+				        container: ~pod @filter(has(isContainer)) {
 							name
-							type
-							cpu: cpuRequest
-							memory: memoryRequest
-						}
-						cpu: podCpu as cpuRequest
-						memory: podMemory as memoryRequest
-					}
-					cpu: dreplicasetCpu as sum(val(podCpu))
-					memory: dreplicasetMemory as sum(val(podMemory))
-				}
-				cpu: deploymentCpu as sum(val(dreplicasetCpu))
-				memory: deploymentMemory as sum(val(dreplicasetMemory)
-			}
-			statefulset: ~namespace @filter(has(isStatefulset)) {
-				name
-				type
-				pod: ~statefulset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: statefulsetCpu as sum(val(podCpu))
-				memory: statefulsetMemory as sum(val(podMemory))
-			}
-			job: ~namespace @filter(has(isJob)) {
-				name
-				type
-				pod: ~job @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: jobCpu as sum(val(podCpu))
-				memory: jobMemory as sum(val(podMemory))
-			}
-			daemonset: ~namespace @filter(has(isDaemonset)) {
-				name
-				type
-				pod: ~daemonset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: daemonsetCpu as sum(val(podCpu))
-				memory: daemonsetMemory as sum(val(podMemory))
-			}
-			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
-				name
-				type
-				pod: ~replicaset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: replicasetCpu as sum(val(podCpu))
-				memory: replicasetMemory as sum(val(podMemory))
-			}
-			cpu: math(deploymentCpu + daemonsetCpu + jobCpu + statefulsetCpu + replicasetCpu)
-			memory: math(deploymentMemory + daemonsetMemory + jobMemory + statefulsetMemory + replicasetMemory)
-		}
-	}`
+				            type
+					        cpu: cpuRequest
+				            memory: memoryRequest
+                        }
+				        cpu: replicasetPodCpu as cpuRequest
+				        memory: replicasetPodMemory as memoryRequest
+			        }
+    	            cpu: deploymentReplicasetCpu as sum(val(replicasetPodCpu))
+			        memory: deploymentReplicasetMemory as sum(val(replicasetPodMemory))
+                }
+			    cpu: sum(val(deploymentReplicasetCpu))
+			    memory: sum(val(deploymentReplicasetMemory))
+		    }
+            statefulset: ~namespace @filter(has(isStatefulset)) {
+                name
+                type
+                pod: ~statefulset @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: statefulsetPodCpu as cpuRequest
+                    memory: statefulsetPodMemory as memoryRequest
+                }
+                cpu: sum(val(statefulsetPodCpu))
+                memory: sum(val(statefulsetPodMemory))
+            }
+            job: ~namespace @filter(has(isJob)) {
+                name
+                type
+                pod: ~job @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: jobPodCpu as cpuRequest
+                    memory: jobPodMemory as memoryRequest
+                }
+                cpu: sum(val(jobPodCpu))
+                memory: sum(val(jobPodMemory))
+            }
+            daemonset: ~namespace @filter(has(isDaemonset)) {
+                name
+                type
+                pod: ~daemonset @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: daemonsetPodCpu as cpuRequest
+                    memory: daemonsetPodMemory as memoryRequest
+                }
+                cpu: sum(val(daemonsetPodCpu))
+                memory: sum(val(daemonsetPodMemory))
+            }
+            replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
+                name
+                type
+                pod: ~replicaset @filter(has(isPod)) {
+                    name
+                    type
+                    container: ~pod @filter(has(isContainer)) {
+                        name
+                        type
+                        cpu: cpuRequest
+                        memory: memoryRequest
+                    }
+                    cpu: replicasetSimplePodCpu as cpuRequest
+                    memory: replicasetSimplePodMemory as memoryRequest
+                }
+                cpu: sum(val(replicasetSimplePodCpu))
+                memory: sum(val(replicasetSimplePodMemory))
+            }
+			cpu: val(namespaceCpu)
+			memory: val(namespaceMem)
+        }
+    }`
 	namespaceRoot := NamespacesWithMetrics{}
 	err := dgraph.ExecuteQuery(q, &namespaceRoot)
 	calculateTotalNamespaceMetrics(&namespaceRoot)

@@ -186,7 +186,7 @@ func RetrieveAllReplicasetsWithMetrics() (ReplicasetsWithMetrics, error) {
 		replicaset(func: has(isReplicaset)) {
 			name
 			type
-			pod: ~replicaset @filter(has(isPod) {
+			pod: ~replicaset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -214,7 +214,7 @@ func RetrieveReplicasetWithMetrics(name string) (ReplicasetsWithMetrics, error) 
 		replicaset(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~replicaset @filter(has(isPod) {
+			pod: ~replicaset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {

@@ -65,6 +65,7 @@ func createNodeObject(node api_v1.Node) Node {
 		CPUCapity:      utils.ConvertToFloat64CPU(node.Status.Capacity.Cpu()),
 		MemoryCapacity: utils.ConvertToFloat64GB(node.Status.Capacity.Memory()),
 	}
+	log.Infof("cpu capacity of node: (%v)", newNode.CPUCapity)
 	nodeDeletionTimestamp := node.GetDeletionTimestamp()
 	if !nodeDeletionTimestamp.IsZero() {
 		newNode.EndTime = nodeDeletionTimestamp.Time.Format(time.RFC3339)
