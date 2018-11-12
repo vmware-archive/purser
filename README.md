@@ -1,41 +1,85 @@
 # Purser extension for K8s
-[![Build Status](https://travis-ci.org/vmware/purser.svg?branch=master)](https://travis-ci.org/vmware/purser)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vmware/purser)](https://goreportcard.com/report/github.com/vmware/purser)
 
-Cost visbility for Kubernetes based Cloud Native Applications.
+[![Build Status](https://travis-ci.org/vmware/purser.svg?branch=master)](https://travis-ci.org/vmware/purser) [![Go Report Card](https://goreportcard.com/badge/github.com/vmware/purser)](https://goreportcard.com/report/github.com/vmware/purser)
 
-## Why?
+- [What is Purser?](#purser)
+- [Features](#features)
+- [Setup and Installation](#setup-and-installation)
+- [Uninstallation](#uninstallation)
+- [Purser Plugin Usage](#plugin-usage)
+- [Additional Documentation](#additional-documentation)
+- [Community, Discussion, Contribution and Support](#community-discussion-contribution-and-support)
 
-Today, the cost visibility in the world of Cloud Native Applications is very limited. It is mostly restricted to cost of cloud 
-infrastructure at a high level and usually involves a lot of manual steps or custom scripting.
+## Purser
 
-Wouldn't it be great if you know the cost of you Kubernetes deployed applications, not matter the cloud of your choice? Don't 
-you wish there was an easy way to incorporate your budgeting and cost savings at a level of control that was entirely based on 
-application level components rather than infrastructure? 
+Purser is an extension to Kubernetes tasked at providing *application discovery*, *budgeting* and *capacity planning* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
 
-## What is Purser
+It comprises of two components: a controller and a plugin.  
 
-Purser provides cost visibility of services, microservices and applications deployed with Kubernetes in a cloud neutral 
-manner. It does so at a granular level and over time ranges that match with budget planning.
+The controller component deployed inside the cluster watches for K8s resources associated with the application, thereby, periodically building not just an inventory but also performing application discovery by generating and storing the interactions among the resources such as containers, pods and services.
 
-Purser is an extension to Kubernetes. More specifically, it is a tool interfacing with ``kubectl`` that helps you query for 
-cost based on native Kubernetes artifacts as well as your own custom defined services. In addition, Purser allows for alerting 
-on budget adherence and helps enforce budgets and savings.
+The plugin component is a CLI tool interfacing with the `kubectl` that helps query savings defined at a level of control of the application level components such as the _Memory and CPU consumptions and utilizations_ rather than at the infrastructure level.
 
-Purser currently supports Kubernetes deployments on Amazon Web Services. Support for VMware vSphere, Azure, Google Compute 
-Engine are planned.
+### Demo
+
+![demo](/docs/img/example.gif)
 
 ## Features
 
-* Query cost associated with Kubernetes native groups.
-* Extend Purser with YAML based declarative custom service, microservice and application definitions.
-* Capability for control over time range for cost query.
-* Capability for cost analysis based on resource Usage or Allocation.
-* Visibility into Cost savings opportunities.
-* Set budget limits on Kubernetes native or custom defined groups.
-* Capability to enforce budget for Kubernetes native or custom defined groups.
+- Visibility into cost savings opportunities.
+- Visibility into application heirarchy and K8s resource interactions. 
+- Query cost associated with Kubernetes native groups or custom defined groups.
 
-## Use Case
+## Setup and Installation
+
+Follow the instructions below to set up Purser in your environment.  
+
+### Prerequisites
+
+- Kubernetes version 1.9 or greater.
+- `kubectl` installed and configured. For details see [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+
+### Installation
+
+The preferred and the quickest way to install purser is through Binary installation.
+
+#### OS-specific installation methods
+
+#### Linux and macOS
+
+``` bash
+# Binary installation
+wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-install.sh && sh purser-install.sh
+```
+
+Enter your cluster's configuration path when prompted. The plugin binary needs to be in your `PATH` environment variable, so once the download of the binary is finished the script tries to move it to `/usr/local/bin`. This may need your sudo permission.
+
+#### Windows
+
+For installation on Windows follow the steps in the [manual installation guide](./docs/ManualInstallation.md).
+
+#### Other Installation Methods
+
+For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs). 
+
+## Uninstallation
+
+### Linux/macOS
+
+``` bash
+wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-uninstall.sh && sh purser-uninstall.sh
+```
+
+### Others
+
+``` bash
+kubectl delete -f custom_controller.yaml
+kubectl delete -f crd.yaml
+```
+
+_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
+
+## Plugin Usage
 
 Currenty the below list of commands are supported for the Purser plugin. 
 
@@ -59,60 +103,17 @@ _**NOTE:** Use flag `--kubeconfig=<absolute path to config>`, if your cluster co
 
 For detailed usage with examples see [here](./docs/Usage.md).
 
-## Installation
+## Additional Documentation
 
-### Prerequisites
+Additional documentation can be found below:
 
-* Kubernetes version 1.9 or greater.
-* ``kubectl`` installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+- [Manual Installation Guide](https://github.com/vmware/purser/blob/master/docs/ManualInstallation.md)
+- [Source Code Installation Guide](https://github.com/vmware/purser/blob/master/docs/SourceCodeInstallation.md)
+- [Purser Architecture and Workflow](https://github.com/vmware/purser/blob/master/docs/ARCHITECTURE_AND_WORKFLOW.md)
+- [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/Usage.md)
 
-### Installation Methods
+## Community, Discussion, Contribution and Support
 
-* [Binary (Preferred method)](#Binary-Installation)
-* [Manual Installation](./docs/ManualInstallation.md)
-* [Source Code](./docs/SourceCodeInstallation.md)
+**Issues:** Have an issue with Purser, please [log it](https://github.com/vmware/purser/issues).
 
-### Binary Installation
-
-#### Linux and macOS:
-
-``` bash
-wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-install.sh && sh purser-install.sh
-```
-
-Enter your cluster's configuration path when prompted. We need the plugin binary to be in your `PATH` environment variable, so 
-once the download of the binary is finished the script tries to move it to `/usr/local/bin`. This may need your sudo 
-permission.
-
-#### Windows:
-
-Windows users, follow the steps under [manual installation](./docs/ManualInstallation.md) section.
-
-### Manual Installation
-
-Refer [manual installation docs](./docs/ManualInstallation.md).
-
-### Source Code
-
-For detailed installation throught source code, refer [this](./docs/SourceCodeInstallation.md).
-
-## Uninstallation
-
-**For Linux and Mac Users:**
-
-``` bash
-wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-uninstall.sh && sh purser-uninstall.sh
-```
-
-**For Others:**
-
-``` bash
-kubectl delete -f custom_controller.yaml
-kubectl delete -f crd.yaml
-```
-
-_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
-
-## Contributors
-
-For developers who would like to contribute to our project refer [How to contribute](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md) docs.
+**Contributing:** Would you like to contribute to our project, refer [How to contribute](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md) docs.
