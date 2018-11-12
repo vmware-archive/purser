@@ -49,6 +49,15 @@ type Container struct {
 	MemoryRequest float64    `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64    `json:"memoryLimit,omitempty"`
 	Type          string     `json:"type,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// ContainersWithMetrics ...
+type ContainersWithMetrics struct {
+	Container []Container  `json:"container,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 func newContainer(container api_v1.Container, podUID, namespaceUID string, pod api_v1.Pod) (*api.Assigned, error) {
@@ -156,7 +165,7 @@ func RetrieveAllContainers() ([]byte, error) {
 		container(func: has(isContainer)) {
 			name
 			type
-			process: ~container @filter(has(isProc) {
+			process: ~container @filter(has(isProc)) {
 				name
 				type
 			}
@@ -192,7 +201,7 @@ func RetrieveContainer(name string) ([]byte, error) {
 }
 
 // RetrieveAllContainersWithMetrics ...
-func RetrieveAllContainersWithMetrics() ([]byte, error) {
+func RetrieveAllContainersWithMetrics() (ContainersWithMetrics, error) {
 	const q = `query {
 		container(func: has(isContainer)) {
 			name
@@ -202,15 +211,14 @@ func RetrieveAllContainersWithMetrics() ([]byte, error) {
 		}
 	}`
 
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	containerRoot := ContainersWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &containerRoot)
+	calculateTotalContainerMetrics(&containerRoot)
+	return containerRoot, err
 }
 
 // RetrieveContainerWithMetrics ...
-func RetrieveContainerWithMetrics(name string) ([]byte, error) {
+func RetrieveContainerWithMetrics(name string) (ContainersWithMetrics, error) {
 	q := `query {
 		container(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
 			name
@@ -219,12 +227,16 @@ func RetrieveContainerWithMetrics(name string) ([]byte, error) {
 			memory: memoryRequest
 		}
 	}`
+	containerRoot := ContainersWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &containerRoot)
+	calculateTotalContainerMetrics(&containerRoot)
+	return containerRoot, err
+}
 
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalContainerMetrics(objRoot *ContainersWithMetrics) {
+	for _, obj := range objRoot.Container {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
 	}
-	return result, nil
 }
 

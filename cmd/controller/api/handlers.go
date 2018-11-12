@@ -315,7 +315,7 @@ func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetNamespaceWithMetrics ...
 func GetNamespaceWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var namespace []byte
+	var namespace models.NamespacesWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -330,7 +330,7 @@ func GetNamespaceWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(namespace)
+	err = json.NewEncoder(w).Encode(namespace)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -338,7 +338,7 @@ func GetNamespaceWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetDeploymentWithMetrics ...
 func GetDeploymentWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var deployment []byte
+	var deployment models.DeploymentsWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -353,7 +353,7 @@ func GetDeploymentWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(deployment)
+	err = json.NewEncoder(w).Encode(deployment)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -361,7 +361,7 @@ func GetDeploymentWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetDaemonsetWithMetrics ...
 func GetDaemonsetWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var daemonset []byte
+	var daemonset models.DaemonsetsWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -376,7 +376,7 @@ func GetDaemonsetWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(daemonset)
+	err = json.NewEncoder(w).Encode(daemonset)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -384,7 +384,7 @@ func GetDaemonsetWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetStatefulsetWithMetrics ...
 func GetStatefulsetWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var statefulset []byte
+	var statefulset models.StatefulsetsWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -399,7 +399,7 @@ func GetStatefulsetWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(statefulset)
+	err = json.NewEncoder(w).Encode(statefulset)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -407,7 +407,7 @@ func GetStatefulsetWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetReplicasetWithMetrics ...
 func GetReplicasetWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var replicaset []byte
+	var replicaset models.ReplicasetsWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -422,7 +422,7 @@ func GetReplicasetWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(replicaset)
+	err = json.NewEncoder(w).Encode(replicaset)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -430,7 +430,7 @@ func GetReplicasetWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetJobWithMetrics ...
 func GetJobWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var job []byte
+	var job models.JobsWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -445,7 +445,7 @@ func GetJobWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(job)
+	err = json.NewEncoder(w).Encode(job)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -453,7 +453,7 @@ func GetJobWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetNodeWithMetrics ...
 func GetNodeWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var node []byte
+	var node models.NodesWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -468,7 +468,7 @@ func GetNodeWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(node)
+	err = json.NewEncoder(w).Encode(node)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -476,7 +476,7 @@ func GetNodeWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetPodWithMetrics ...
 func GetPodWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var pod []byte
+	var pod models.PodsWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -491,7 +491,7 @@ func GetPodWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(pod)
+	err = json.NewEncoder(w).Encode(pod)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -499,7 +499,7 @@ func GetPodWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetContainerWithMetrics ...
 func GetContainerWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var container []byte
+	var container models.ContainersWithMetrics
 	var err error
 
 	addHeaders(w, r)
@@ -514,7 +514,7 @@ func GetContainerWithMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(container)
+	err = json.NewEncoder(w).Encode(container)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}

@@ -40,6 +40,20 @@ type Namespace struct {
 	StartTime   string `json:"startTime,omitempty"`
 	EndTime     string `json:"endTime,omitempty"`
 	Type        string    `json:"type,omitempty"`
+	Deployments []*Deployment `json:"deployment,omitempty"`
+	Statefulsets []*Statefulset `json:"statefulset,omitempty"`
+	Jobs []*Job `json:"job,omitempty"`
+	Daemonsets []*Daemonset `json:"daemonset,omitempty"`
+	Replicasets []*Replicaset `json:"replicaset,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// NamespacesWithMetrics ...
+type NamespacesWithMetrics struct {
+	Namespace []Namespace  `json:"namespace,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 func newNamespace(namespace api_v1.Namespace) Namespace {
@@ -218,7 +232,7 @@ func RetrieveNamespace(name string) ([]byte, error) {
 }
 
 // RetrieveAllNamespacesWithMetrics ...
-func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
+func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
 	const q = `query {
 		namespace(func: has(isNamespace)) {
 			name
@@ -226,10 +240,10 @@ func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
 			deployment: ~namespace @filter(has(isDeployment)) {
 				name
 				type
-				replicaset: ~deployment @filter(has(isReplicaset) {
+				replicaset: ~deployment @filter(has(isReplicaset)) {
 					name
 					type
-					pod: ~replicaset @filter(has(isPod) {
+					pod: ~replicaset @filter(has(isPod)) {
 						name
 						type
 						container: ~pod @filter(has(isContainer)) {
@@ -250,7 +264,7 @@ func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
 			statefulset: ~namespace @filter(has(isStatefulset)) {
 				name
 				type
-				pod: ~statefulset @filter(has(isPod) {
+				pod: ~statefulset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -268,7 +282,7 @@ func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
 			job: ~namespace @filter(has(isJob)) {
 				name
 				type
-				pod: ~job @filter(has(isPod) {
+				pod: ~job @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -286,7 +300,7 @@ func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
 			daemonset: ~namespace @filter(has(isDaemonset)) {
 				name
 				type
-				pod: ~daemonset @filter(has(isPod) {
+				pod: ~daemonset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -304,7 +318,7 @@ func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
 			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
 				name
 				type
-				pod: ~replicaset @filter(has(isPod) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -323,16 +337,14 @@ func RetrieveAllNamespacesWithMetrics() ([]byte, error) {
 			memory: math(deploymentMemory + daemonsetMemory + jobMemory + statefulsetMemory + replicasetMemory)
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	namespaceRoot := NamespacesWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &namespaceRoot)
+	calculateTotalNamespaceMetrics(&namespaceRoot)
+	return namespaceRoot, err
 }
 
 // RetrieveNamespaceWithMetrics ...
-func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
+func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
 	q := `query {
 		namespace(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
 			name
@@ -343,7 +355,7 @@ func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
 				replicaset: ~deployment @filter(has(isReplicaset) {
 					name
 					type
-					pod: ~replicaset @filter(has(isPod) {
+					pod: ~replicaset @filter(has(isPod)) {
 						name
 						type
 						container: ~pod @filter(has(isContainer)) {
@@ -364,7 +376,7 @@ func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
 			statefulset: ~namespace @filter(has(isStatefulset)) {
 				name
 				type
-				pod: ~statefulset @filter(has(isPod) {
+				pod: ~statefulset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -382,7 +394,7 @@ func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
 			job: ~namespace @filter(has(isJob)) {
 				name
 				type
-				pod: ~job @filter(has(isPod) {
+				pod: ~job @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -400,7 +412,7 @@ func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
 			daemonset: ~namespace @filter(has(isDaemonset)) {
 				name
 				type
-				pod: ~daemonset @filter(has(isPod) {
+				pod: ~daemonset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -418,7 +430,7 @@ func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
 			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
 				name
 				type
-				pod: ~replicaset @filter(has(isPod) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -437,11 +449,15 @@ func RetrieveNamespaceWithMetrics(name string) ([]byte, error) {
 			memory: math(deploymentMemory + daemonsetMemory + jobMemory + statefulsetMemory + replicasetMemory)
 		}
 	}`
+	namespaceRoot := NamespacesWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &namespaceRoot)
+	calculateTotalNamespaceMetrics(&namespaceRoot)
+	return namespaceRoot, err
+}
 
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalNamespaceMetrics(objRoot *NamespacesWithMetrics) {
+	for _, obj := range objRoot.Namespace {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
 	}
-	return result, nil
 }

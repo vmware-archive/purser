@@ -39,8 +39,17 @@ type Replicaset struct {
 	EndTime      string   `json:"endTime,omitempty"`
 	Namespace    *Namespace  `json:"namespace,omitempty"`
 	Deployment   *Deployment `json:"deployment,omitempty"`
-	Pods         []*Pod      `json:"pods,omitempty"`
+	Pods         []*Pod      `json:"pod,omitempty"`
 	Type         string      `json:"type,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// ReplicasetsWithMetrics ...
+type ReplicasetsWithMetrics struct {
+	Replicaset []Replicaset  `json:"replicaset,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 func createReplicasetObject(replicaset ext_v1beta1.ReplicaSet) Replicaset {
@@ -128,7 +137,7 @@ func RetrieveAllReplicasets() ([]byte, error) {
 		replicaset(func: has(isReplicaset)) {
 			name
 			type
-			pod: "~replicaset @filter(has(isPod) {
+			pod: "~replicaset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -172,7 +181,7 @@ func RetrieveReplicaset(name string) ([]byte, error) {
 }
 
 // RetrieveAllReplicasetsWithMetrics ...
-func RetrieveAllReplicasetsWithMetrics() ([]byte, error) {
+func RetrieveAllReplicasetsWithMetrics() (ReplicasetsWithMetrics, error) {
 	const q = `query {
 		replicaset(func: has(isReplicaset)) {
 			name
@@ -193,16 +202,14 @@ func RetrieveAllReplicasetsWithMetrics() ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	replicasetRoot := ReplicasetsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &replicasetRoot)
+	calculateTotalReplicasetMetrics(&replicasetRoot)
+	return replicasetRoot, err
 }
 
 // RetrieveReplicasetWithMetrics ...
-func RetrieveReplicasetWithMetrics(name string) ([]byte, error) {
+func RetrieveReplicasetWithMetrics(name string) (ReplicasetsWithMetrics, error) {
 	q := `query {
 		replicaset(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
 			name
@@ -223,10 +230,15 @@ func RetrieveReplicasetWithMetrics(name string) ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
+	replicasetRoot := ReplicasetsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &replicasetRoot)
+	calculateTotalReplicasetMetrics(&replicasetRoot)
+	return replicasetRoot, err
+}
 
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalReplicasetMetrics(replicasetRoot *ReplicasetsWithMetrics) {
+	for _, replicaset := range replicasetRoot.Replicaset {
+		replicasetRoot.CPU += replicaset.CPU
+		replicasetRoot.Memory += replicaset.Memory
 	}
-	return result, nil
 }

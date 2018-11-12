@@ -40,6 +40,15 @@ type Statefulset struct {
 	Namespace     *Namespace `json:"namespace,omitempty"`
 	Pods          []*Pod     `json:"pods,omitempty"`
 	Type          string     `json:"type,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// ReplicasetsWithMetrics ...
+type StatefulsetsWithMetrics struct {
+	Statefulset []Statefulset `json:"statefulset,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
@@ -108,7 +117,7 @@ func RetrieveAllStatefulsets() ([]byte, error) {
 		statefulset(func: has(isStatefulset)) {
 			name
 			type
-			pod: ~statefulset @filter(has(isPod) {
+			pod: ~statefulset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -152,12 +161,12 @@ func RetrieveStatefulset(name string) ([]byte, error) {
 }
 
 // RetrieveAllStatefulsetsWithMetrics ...
-func RetrieveAllStatefulsetsWithMetrics() ([]byte, error) {
+func RetrieveAllStatefulsetsWithMetrics() (StatefulsetsWithMetrics, error) {
 	const q = `query {
 		statefulset(func: has(isStatefulset)) {
 			name
 			type
-			pod: ~statefulset @filter(has(isPod) {
+			pod: ~statefulset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -173,21 +182,19 @@ func RetrieveAllStatefulsetsWithMetrics() ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	statefulsetRoot := StatefulsetsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &statefulsetRoot)
+	calculateTotalStatefulsetMetrics(&statefulsetRoot)
+	return statefulsetRoot, err
 }
 
 // RetrieveStatefulsetWithMetrics ...
-func RetrieveStatefulsetWithMetrics(name string) ([]byte, error) {
+func RetrieveStatefulsetWithMetrics(name string) (StatefulsetsWithMetrics, error) {
 	q := `query {
 		statefulset(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~statefulset @filter(has(isPod) {
+			pod: ~statefulset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -203,11 +210,15 @@ func RetrieveStatefulsetWithMetrics(name string) ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
+	statefulsetRoot := StatefulsetsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &statefulsetRoot)
+	calculateTotalStatefulsetMetrics(&statefulsetRoot)
+	return statefulsetRoot, err
+}
 
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalStatefulsetMetrics(objRoot *StatefulsetsWithMetrics) {
+	for _, obj := range objRoot.Statefulset {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
 	}
-	return result, nil
 }

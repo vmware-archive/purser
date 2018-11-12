@@ -38,8 +38,18 @@ type Deployment struct {
 	StartTime    string  `json:"startTime,omitempty"`
 	EndTime      string  `json:"endTime,omitempty"`
 	Namespace    *Namespace `json:"namespace,omitempty"`
-	Pods         []*Pod     `json:"pods,omitempty"`
+	Pods         []*Pod     `json:"pod,omitempty"`
 	Type         string     `json:"type,omitempty"`
+	Replicasets []*Replicaset `json:"replicaset,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// DeploymentsWithMetrics ...
+type DeploymentsWithMetrics struct {
+	Deployment []Deployment  `json:"deployment,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
@@ -108,7 +118,7 @@ func RetrieveAllDeployments() ([]byte, error) {
 		deployment(func: has(isDeployment)) {
 			name
 			type
-			replicaset: ~deployment @filter(has(isReplicaset) {
+			replicaset: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
 				pod: ~replicaset @filter(has(isPod)) {
@@ -152,15 +162,15 @@ func RetrieveDeployment(name string) ([]byte, error) {
 }
 
 // RetrieveAllDeploymentsWithMetrics ...
-func RetrieveAllDeploymentsWithMetrics() ([]byte, error) {
+func RetrieveAllDeploymentsWithMetrics() (DeploymentsWithMetrics, error) {
 	const q = `query {
 		deployment(func: has(isDeployment)) {
 			name
 			type
-			replicaset: ~deployment @filter(has(isReplicaset) {
+			replicaset: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
-				pod: ~replicaset @filter(has(isPod) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -179,24 +189,21 @@ func RetrieveAllDeploymentsWithMetrics() ([]byte, error) {
 			memory: sum(val(replicasetMemory)
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	deploymentRoot := DeploymentsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &deploymentRoot)
+	return deploymentRoot, err
 }
 
 // RetrieveDeploymentWithMetrics ...
-func RetrieveDeploymentWithMetrics(name string) ([]byte, error) {
+func RetrieveDeploymentWithMetrics(name string) (DeploymentsWithMetrics, error) {
 	q := `query {
 		deployment(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			replicaset: ~deployment @filter(has(isReplicaset) {
+			replicaset: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
-				pod: ~replicaset @filter(has(isPod) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 					container: ~pod @filter(has(isContainer)) {
@@ -215,11 +222,15 @@ func RetrieveDeploymentWithMetrics(name string) ([]byte, error) {
 			memory: sum(val(replicasetMemory)
 		}
 	}`
+	deploymentRoot := DeploymentsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &deploymentRoot)
+	calculateTotalDeploymentMetrics(&deploymentRoot)
+	return deploymentRoot, err
+}
 
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalDeploymentMetrics(objRoot *DeploymentsWithMetrics) {
+	for _, obj := range objRoot.Deployment {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
 	}
-	return result, nil
 }

@@ -56,6 +56,15 @@ type Pod struct {
 	MemoryRequest float64      `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64      `json:"memoryLimit,omitempty"`
 	Type          string       `json:"type,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// PodsWithMetrics ...
+type PodsWithMetrics struct {
+	Pod []Pod  `json:"pod,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 // Metrics ...
@@ -293,7 +302,7 @@ func RetrieveAllPods() ([]byte, error) {
 		pod(func: has(isPod)) {
 			name
 			type
-			container: ~pod @filter(has(isContainer) {
+			container: ~pod @filter(has(isContainer)) {
 				name
 				type
 				process: ~container @filter(has(isProc)) {
@@ -338,7 +347,7 @@ func RetrievePod(name string) ([]byte, error) {
 
 
 // RetrieveAllPodsWithMetrics ...
-func RetrieveAllPodsWithMetrics() ([]byte, error) {
+func RetrieveAllPodsWithMetrics() (PodsWithMetrics, error) {
 	q := `query {
 		pod(func: has(isPod)) {
 			name
@@ -353,16 +362,14 @@ func RetrieveAllPodsWithMetrics() ([]byte, error) {
 			memory: memoryRequest
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	podRoot := PodsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &podRoot)
+	calculateTotalPodMetrics(&podRoot)
+	return podRoot, err
 }
 
 // RetrieveReplicasetsWithMetrics ...
-func RetrievePodWithMetrics(name string) ([]byte, error) {
+func RetrievePodWithMetrics(name string) (PodsWithMetrics, error) {
 	q := `query {
 		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
@@ -377,10 +384,15 @@ func RetrievePodWithMetrics(name string) ([]byte, error) {
 			memory: memoryRequest
 		}
 	}`
+	podRoot := PodsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &podRoot)
+	calculateTotalPodMetrics(&podRoot)
+	return podRoot, err
+}
 
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalPodMetrics(podRoot *PodsWithMetrics) {
+	for _, pod := range podRoot.Pod {
+		podRoot.CPU += pod.CPU
+		podRoot.Memory += pod.Memory
 	}
-	return result, nil
 }

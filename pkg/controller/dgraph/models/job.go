@@ -38,9 +38,19 @@ type Job struct {
 	StartTime     string  `json:"startTime,omitempty"`
 	EndTime       string  `json:"endTime,omitempty"`
 	Namespace     *Namespace `json:"namespace,omitempty"`
-	Pods          []*Pod     `json:"pods,omitempty"`
+	Pods          []*Pod     `json:"pod,omitempty"`
 	Type          string     `json:"type,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
+
+// JobsWithMetrics ...
+type JobsWithMetrics struct {
+	Job []Job  `json:"job,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
 
 func createJobObject(job batch_v1.Job) Job {
 	newJob := Job{
@@ -108,7 +118,7 @@ func RetrieveAllJobs() ([]byte, error) {
 		job(func: has(isJob)) {
 			name
 			type
-			pod: ~job @filter(has(isPod) {
+			pod: ~job @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -152,12 +162,12 @@ func RetrieveJob(name string) ([]byte, error) {
 }
 
 // RetrieveAllJobsWithMetrics ...
-func RetrieveAllJobsWithMetrics() ([]byte, error) {
+func RetrieveAllJobsWithMetrics() (JobsWithMetrics, error) {
 	const q = `query {
 		job(func: has(isJob)) {
 			name
 			type
-			pod: ~job @filter(has(isPod) {
+			pod: ~job @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -173,21 +183,19 @@ func RetrieveAllJobsWithMetrics() ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	jobRoot := JobsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &jobRoot)
+	calculateTotalJobMetrics(&jobRoot)
+	return jobRoot, err
 }
 
 // RetrieveJobWithMetrics ...
-func RetrieveJobWithMetrics(name string) ([]byte, error) {
+func RetrieveJobWithMetrics(name string) (JobsWithMetrics, error) {
 	q := `query {
 		job(func: has(isJob)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~job @filter(has(isPod) {
+			pod: ~job @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -203,11 +211,15 @@ func RetrieveJobWithMetrics(name string) ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
+	jobRoot := JobsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &jobRoot)
+	calculateTotalJobMetrics(&jobRoot)
+	return jobRoot, err
+}
 
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalJobMetrics(objRoot *JobsWithMetrics) {
+	for _, obj := range objRoot.Job {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
 	}
-	return result, nil
 }

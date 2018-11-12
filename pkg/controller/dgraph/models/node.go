@@ -44,6 +44,15 @@ type Node struct {
 	CPUCapity      float64   `json:"cpuCapacity,omitempty"`
 	MemoryCapacity float64   `json:"memoryCapacity,omitempty"`
 	Type           string    `json:"type,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// NodesWithMetrics ...
+type NodesWithMetrics struct {
+	Node []Node  `json:"node,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 func createNodeObject(node api_v1.Node) Node {
@@ -111,7 +120,7 @@ func RetrieveAllNodes() ([]byte, error) {
 		node(func: has(isNode)) {
 			name
 			type
-			pod: ~node @filter(has(isPod) {
+			pod: ~node @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -155,12 +164,12 @@ func RetrieveNode(name string) ([]byte, error) {
 }
 
 // RetrieveAllNodesWithMetrics ...
-func RetrieveAllNodesWithMetrics() ([]byte, error) {
+func RetrieveAllNodesWithMetrics() (NodesWithMetrics, error) {
 	const q = `query {
 		node(func: has(isNode)) {
 			name
 			type
-			pod: ~node @filter(has(isPod) {
+			pod: ~node @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -176,21 +185,19 @@ func RetrieveAllNodesWithMetrics() ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	nodeRoot := NodesWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &nodeRoot)
+	calculateTotalNodeMetrics(&nodeRoot)
+	return nodeRoot, err
 }
 
 // RetrieveNodeWithMetrics ...
-func RetrieveNodeWithMetrics(name string) ([]byte, error) {
+func RetrieveNodeWithMetrics(name string) (NodesWithMetrics, error) {
 	q := `query {
 		node(func: has(isNode)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~node @filter(has(isPod) {
+			pod: ~node @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -206,11 +213,15 @@ func RetrieveNodeWithMetrics(name string) ([]byte, error) {
 			memory: memoryCapacity
 		}
 	}`
+	nodeRoot := NodesWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &nodeRoot)
+	calculateTotalNodeMetrics(&nodeRoot)
+	return nodeRoot, err
+}
 
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalNodeMetrics(objRoot *NodesWithMetrics) {
+	for _, obj := range objRoot.Node {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
 	}
-	return result, nil
 }

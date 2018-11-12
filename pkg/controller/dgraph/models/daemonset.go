@@ -38,8 +38,17 @@ type Daemonset struct {
 	StartTime     string  `json:"startTime,omitempty"`
 	EndTime       string  `json:"endTime,omitempty"`
 	Namespace     *Namespace `json:"namespace,omitempty"`
-	Pods          []*Pod     `json:"pods,omitempty"`
+	Pods          []*Pod     `json:"pod,omitempty"`
 	Type          string     `json:"type,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
+// DaemonsetsWithMetrics ...
+type DaemonsetsWithMetrics struct {
+	Daemonset []Daemonset  `json:"daemonset,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
 func createDaemonsetObject(daemonset ext_v1beta1.DaemonSet) Daemonset {
@@ -108,7 +117,7 @@ func RetrieveAllDaemonsets() ([]byte, error) {
 		daemonset(func: has(isDaemonset)) {
 			name
 			type
-			pod: ~daemonset @filter(has(isPod) {
+			pod: ~daemonset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -152,12 +161,12 @@ func RetrieveDaemonset(name string) ([]byte, error) {
 }
 
 // RetrieveAllDaemonsetsWithMetrics ...
-func RetrieveAllDaemonsetsWithMetrics() ([]byte, error) {
+func RetrieveAllDaemonsetsWithMetrics() (DaemonsetsWithMetrics, error) {
 	const q = `query {
 		daemonset(func: has(isDaemonset)) {
 			name
 			type
-			pod: ~daemonset @filter(has(isPod) {
+			pod: ~daemonset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -173,21 +182,19 @@ func RetrieveAllDaemonsetsWithMetrics() ([]byte, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	daemonsetRoot := DaemonsetsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &daemonsetRoot)
+	calculateTotalDaemonsetMetrics(&daemonsetRoot)
+	return daemonsetRoot, err
 }
 
 // RetrieveDaemonsetWithMetrics ...
-func RetrieveDaemonsetWithMetrics(name string) ([]byte, error) {
+func RetrieveDaemonsetWithMetrics(name string) (DaemonsetsWithMetrics, error) {
 	q := `query {
 		daemonset(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~daemonset @filter(has(isPod) {
+			pod: ~daemonset @filter(has(isPod)) {
 				name
 				type
 				container: ~pod @filter(has(isContainer)) {
@@ -204,10 +211,15 @@ func RetrieveDaemonsetWithMetrics(name string) ([]byte, error) {
 		}
 	}`
 
+	daemonsetRoot := DaemonsetsWithMetrics{}
+	err := dgraph.ExecuteQuery(q, &daemonsetRoot)
+	calculateTotalDaemonsetMetrics(&daemonsetRoot)
+	return daemonsetRoot, err
+}
 
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+func calculateTotalDaemonsetMetrics(objRoot *DaemonsetsWithMetrics) {
+	for _, obj := range objRoot.Daemonset {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
 	}
-	return result, nil
 }
