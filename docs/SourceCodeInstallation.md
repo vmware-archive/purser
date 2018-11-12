@@ -1,55 +1,96 @@
-# Installation through source code
+# Installation Through Source Code
+
+- [Prerequisites](#prerequisites)
+- [Server Side Installation (Controller Installation)](#server_side_installation)
+- [Client Side Installation (Plugin Installation)](#client_side_installation)
 
 ## Prerequisites
 
-1. Kubernetes version 1.9 or greater
-    * ``kubectl`` installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+1. Kubernetes Version 1.9 or greater
 
-1. Install dependencies 
-    * Install [Go](https://golang.org/dl/)
-        - Version atleast 1.7
-        - Setup GOPATH environment variable by following [https://github.com/golang/go/wiki/SettingGOPATH](https://github.com/golang/go/wiki/SettingGOPATH)
-        - Add $GOPATH/bin directory to your environment $PATH variable
-    * Install [Docker](https://www.docker.com/get-started)
+    - `kubectl` installed and configured. For details refer [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
-1. Get Purser source code
-    * `go get github.com/vmware/purser`
+2. Dependencies
 
-1. Change directory to project root
-    * `cd $GOPATH/src/github.com/vmware/purser`
+    - [Go](https://golang.org/dl/)
 
-1. For windows users, install gnu `make` from [here](http://gnuwin32.sourceforge.net/packages/make.htm)
+        - version > 1.7
+        - setup `GOPATH` environment variable by as per the [Golang documentation](https://github.com/golang/go/wiki/SettingGOPATH).
+        - add `$GOPATH/bin` directory to your environment `$PATH` variable.
 
-1. Run the following commands which downloads dependencies
-    * `make tools`
-    * `make deps`
-    * `make update`
+    - [Docker](https://www.docker.com/get-started)
 
-## Server side installation
+3. Fetch the Purser source code from GitHub.
 
-The following two steps installs purser controller and custom resource definitions for user groups in kubernetes cluster.
+   ``` go
+   go get github.com/vmware/purser
+   ```
 
-1. In [Makefile](./Makefile) update `REGISTRY` field to your docker username.
+   ``` bash
+   # change directory to project root
+   cd $GOPATH/src/github.com/vmware/purser
+   ```
 
-1. Build purser_controller binary using `make build`
+4. For Windows users, install gnu `make` from [here](http://gnuwin32.sourceforge.net/packages/make.htm).
 
-1. Create container(docker image) using `make container`
+5. Download project dependencies with `make`.
 
-1. Authenticate your docker credentials using `docker login`
+   ``` bash
+   # download project tools
+   make tools
 
-1. Push your docker image to docker hub using `make push`
+   # download project dependencies
+   make deps
 
-1. In [`custom_controller.yaml`](./custom_controller.yaml) update image name to your docker image name that you pushed
+   # update project depedencies
+   make update
+   ```
 
-1. Install the controller in the cluster using `kubectl create -f custom_controller.yaml`
-    * Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at default location.
+## Server Side Installation (Controller Installation)
 
-## Client side installation
+Follow the below steps to install the purser controller and custom resource definitions for the user groups in the Kubernetes cluster.
 
-1. Run the following command to create a purser plugin binary in 
-   `GOPATH/bin` directory
+### Build Controller Binary
 
-    `go build -o $GOPATH/bin/purser_plugin github.com/vmware/purser/cmd/plugin`
+Build the purser controller binary using `make` target.
 
-1. Copy the [plugin.yaml](./plugin.yaml) into one of the paths specified under 
-   section [Installing kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/)
+``` bash
+make build
+```
+
+### Build Container Image
+
+Update the [Makefile](./Makefile) to set the `REGISTRY` field to your Docker username and execute the following `make` targets to build and publish the docker images.
+
+``` bash
+# create the container(docker image)
+make container
+
+# authenticate your Docker credentials
+docker login
+
+# publish your docker image to docker hub
+make push
+```
+
+### Install Custom Controller
+
+- Update the image name in [`custom_controller.yaml`](./custom_controller.yaml) to the docker image name that you pushed.
+
+- Install the controller in the cluster using `kubectl`.
+
+  ``` bash
+  kubectl create -f custom_controller.yaml`
+  ```
+
+  _Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
+
+## Client Side Installation (Plugin Installation)
+
+- Build the purser plugin binary in the `GOPATH/bin` directory.
+
+  ``` go
+  go build -o $GOPATH/bin/purser_plugin github.com/vmware/purser/cmd/plugin
+  ```
+
+- Install the Purser plugin by copying the [`plugin.yaml`](./plugin.yaml) into one of the paths specified under the Kubernetes documentation section [installing kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/).

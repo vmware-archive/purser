@@ -27,7 +27,7 @@ The plugin component is a CLI tool interfacing with the `kubectl` that helps que
 ## Features
 
 - Visibility into cost savings opportunities.
-- Visibility into application heirarchy and K8s resource interactions. 
+- Visibility into application heirarchy and K8s resource interactions.
 - Query cost associated with Kubernetes native groups or custom defined groups.
 
 ## Setup and Installation
@@ -56,11 +56,11 @@ Enter your cluster's configuration path when prompted. The plugin binary needs t
 
 #### Windows
 
-For installation on Windows follow the steps in the [manual installation guide](./docs/ManualInstallation.md).
+For installation on Windows follow the steps in the [manual installation guide](./docs/manualInstallation.md).
 
 #### Other Installation Methods
 
-For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs). 
+For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs).
 
 ## Uninstallation
 
@@ -81,10 +81,10 @@ _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster con
 
 ## Plugin Usage
 
-Currenty the below list of commands are supported for the Purser plugin. 
+Currenty the below list of commands are supported for the Purser plugin.
 
 ``` bash
-# Query cluster visibility in terms of savings and summary for the application. 
+# Query cluster visibility in terms of savings and summary for the application.
 kubectl plugin purser get [summary|savings]
 
 # Query resources filtered by associated namespace, labels and groups.
@@ -101,16 +101,17 @@ kubectl plugin purser [set|get] user-costs
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>`, if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)_.
 
-For detailed usage with examples see [here](./docs/Usage.md).
+For detailed usage with examples see [here](./docs/usage.md).
 
 ## Additional Documentation
 
 Additional documentation can be found below:
 
-- [Manual Installation Guide](https://github.com/vmware/purser/blob/master/docs/ManualInstallation.md)
-- [Source Code Installation Guide](https://github.com/vmware/purser/blob/master/docs/SourceCodeInstallation.md)
-- [Purser Architecture and Workflow](https://github.com/vmware/purser/blob/master/docs/ARCHITECTURE_AND_WORKFLOW.md)
-- [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/Usage.md)
+- [Manual Installation Guide](https://github.com/vmware/purser/blob/master/docs/manualInstallation.md)
+- [Source Code Installation Guide](https://github.com/vmware/purser/blob/master/docs/sourcecodeInstallation.md)
+- [Purser Architecture and Workflow](https://github.com/vmware/purser/blob/master/docs/architecture.md)
+- [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/usage.md)
+- [Developers Guide](https://github.com/vmware/purser/blob/master/docs/developersGuide.md)
 
 ## Community, Discussion, Contribution and Support
 
