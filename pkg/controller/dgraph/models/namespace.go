@@ -321,6 +321,8 @@ func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
 				sumDeploymentPodMemory as sum(val(deploymentReplicasetMemory))
 				namespaceChildMemory as math(sumReplicasetSimplePodMemory + sumDaemonsetPodMemory + sumJobPodMemory + sumStatefulsetPodMemory + sumDeploymentPodMemory)
         	}
+			namespaceCpu as sum(val(namespaceChildCpu))
+			namespaceMemory as sum(val(namespaceChildMemory))
 		}
 
 		namespace(func: uid(ns)) {
@@ -329,11 +331,11 @@ func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
 			children: ~namespace @filter(uid(childs)) {
 				name
 				type
-				cpu: namespaceChildCpu
-				memory: namespaceChildMemory
+				cpu: val(namespaceChildCpu)
+				memory: val(namespaceChildMemory)
 			}
-			cpu: sum(val(namespaceChildCpu))
-			memory: sum(val(namespaceChildMemory))
+			cpu: val(namespaceCpu)
+			memory: val(namespaceMemory)
         }
     }`
 	namespaceRoot := NamespacesWithMetrics{}
