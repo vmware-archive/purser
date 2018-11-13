@@ -160,20 +160,11 @@ func RetrieveNode(name string) ([]byte, error) {
 // RetrieveAllNodesWithMetrics ...
 func RetrieveAllNodesWithMetrics() (JsonDataWrapper, error) {
 	const q = `query {
-		nd as var(func: has(isNode)) {
-			~node @filter(has(isPod)){
-				nodePodCpu as cpuRequest
-				nodePodMem as memoryRequest
-			}
-			nodeCpu as sum(val(nodePodCpu))
-			nodeMem as sum(val(nodePodMem))
-        }
-
-		children(func: uid(nd)) {
+		children(func: has(isNode)) {
 			name
             type
-			cpu: val(nodeCpu)
-			memory: val(nodeMem)
+			cpu: cpuCapacity
+			memory: memoryCapacity
         }
 	}`
 	parentRoot := ParentWrapper{}
@@ -199,7 +190,7 @@ func RetrieveNodeWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~node @filter(has(isPod)) {
 				name
 				type
-				cpu: puRequest
+				cpu: cpuRequest
 				memory: memoryRequest
 			}
 			cpu: cpuCapacity
