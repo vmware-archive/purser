@@ -273,7 +273,7 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 			namespaceMem as sum(val(namespacePodMem))
         }
 
-		namespace(func: uid(ns)) {
+		children(func: uid(ns)) {
 			name
             type
 			cpu: val(namespaceCpu)
