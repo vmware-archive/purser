@@ -148,7 +148,7 @@ func RetrieveAllNamespaces() ([]byte, error) {
 			deployment: ~namespace @filter(has(isDeployment)) {
 				name
 				type
-				~deployment @filter(has(isReplicaset)) {
+				replicaset: ~deployment @filter(has(isReplicaset)) {
 					name
 					type
 				}
@@ -156,7 +156,7 @@ func RetrieveAllNamespaces() ([]byte, error) {
 			statefulset: ~namespace @filter(has(isStatefulset)) {
 				name
 				type
-				~statefulset @filter(has(isPod)) {
+				statefulset: ~statefulset @filter(has(isPod)) {
 					name
 					type
 				}
@@ -164,7 +164,7 @@ func RetrieveAllNamespaces() ([]byte, error) {
 			job: ~namespace @filter(has(isJob)) {
 				name
 				type
-				~job @filter(has(isPod)) {
+				job: ~job @filter(has(isPod)) {
 					name
 					type
 				}
@@ -172,7 +172,7 @@ func RetrieveAllNamespaces() ([]byte, error) {
 			daemonset: ~namespace @filter(has(isDaemonset)) {
 				name
 				type
-				~daemonset @filter(has(isPod)) {
+				pod: ~daemonset @filter(has(isPod)) {
 					name
 					type
 				}
@@ -180,7 +180,7 @@ func RetrieveAllNamespaces() ([]byte, error) {
 			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
 				name
 				type
-				~replicaset @filter(has(isPod)) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 				}
