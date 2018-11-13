@@ -52,6 +52,12 @@ var routes = Routes{
 		GetPodInteractions,
 	},
 	Route{
+		"GetClusterHierarchy",
+		"GET",
+		"/hierarchy",
+		GetClusterHierarchy,
+	},
+	Route{
 		"GetNamespaceHierarchy",
 		"GET",
 		"/hierarchy/namespace",
@@ -114,7 +120,7 @@ var routes = Routes{
 	Route{
 		"GetClusterWithMetrics",
 		"GET",
-		"/metrics/cluster",
+		"/metrics",
 		GetClusterWithMetrics,
 	},
 	Route{

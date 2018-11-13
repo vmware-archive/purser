@@ -112,7 +112,7 @@ func StoreNode(node api_v1.Node) (string, error) {
 // RetrieveAllNodes ...
 func RetrieveAllNodes() ([]byte, error) {
 	const q = `query {
-		node(func: has(isNode)) {
+		cluster(func: has(isNode)) {
 			name
 			type
 			pod: ~node @filter(has(isPod)) {

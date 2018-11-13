@@ -83,6 +83,33 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if view, isView := queryParams["view"]; isView && view[0] == "physical" {
+		cluster, err := models.RetrieveAllNodes()
+		if err != nil {
+			logrus.Errorf("Unable to get response: (%v)", err)
+		}
+
+		_, err = w.Write(cluster)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
+	} else {
+		cluster, err := models.RetrieveAllNamespaces()
+		if err != nil {
+			logrus.Errorf("Unable to get response: (%v)", err)
+		}
+
+		_, err = w.Write(cluster)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
+	}
+}
+
 // GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all namespace and their children up to 2 levels
 func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
 	var namespace []byte

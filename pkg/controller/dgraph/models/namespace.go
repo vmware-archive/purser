@@ -142,7 +142,7 @@ func StoreNamespace(namespace api_v1.Namespace) (string, error) {
 // RetrieveAllNamespaces ...
 func RetrieveAllNamespaces() ([]byte, error) {
 	const q = `query {
-		namespace(func: has(isNamespace)) {
+		cluster(func: has(isNamespace)) {
 			name
 			type
 			deployment: ~namespace @filter(has(isDeployment)) {
@@ -204,7 +204,7 @@ func RetrieveNamespace(name string) ([]byte, error) {
 			deployment: ~namespace @filter(has(isDeployment)) {
 				name
 				type
-				~deployment @filter(has(isReplicaset)) {
+				replicaset: ~deployment @filter(has(isReplicaset)) {
 					name
 					type
 				}
@@ -220,7 +220,7 @@ func RetrieveNamespace(name string) ([]byte, error) {
 			job: ~namespace @filter(has(isJob)) {
 				name
 				type
-				~job @filter(has(isPod)) {
+				pod: ~job @filter(has(isPod)) {
 					name
 					type
 				}
@@ -228,7 +228,7 @@ func RetrieveNamespace(name string) ([]byte, error) {
 			daemonset: ~namespace @filter(has(isDaemonset)) {
 				name
 				type
-				~daemonset @filter(has(isPod)) {
+				pod: ~daemonset @filter(has(isPod)) {
 					name
 					type
 				}
@@ -236,7 +236,7 @@ func RetrieveNamespace(name string) ([]byte, error) {
 			replicaset: ~namespace @filter(has(isReplicaset) AND (NOT has(deployment))) {
 				name
 				type
-				~replicaset @filter(has(isPod)) {
+				pod: ~replicaset @filter(has(isPod)) {
 					name
 					type
 				}
