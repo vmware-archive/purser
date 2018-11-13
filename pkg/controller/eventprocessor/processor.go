@@ -140,6 +140,26 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error while persisting statefulset %v", err)
 			}
+		} else if payload.ResourceType == "PersistentVolume" {
+			pv := api_v1.PersistentVolume{}
+			err := json.Unmarshal([]byte(payload.Data), &pv)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StorePersistentVolume(pv)
+			if err != nil {
+				log.Errorf("Error while persisting persistent volume %v", err)
+			}
+		} else if payload.ResourceType == "PersistentVolumeClaim" {
+			pvc := api_v1.PersistentVolumeClaim{}
+			err := json.Unmarshal([]byte(payload.Data), &pvc)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StorePersistentVolumeClaim(pvc)
+			if err != nil {
+				log.Errorf("Error while persisting persistent volume claim %v", err)
+			}
 		}
 	}
 }
