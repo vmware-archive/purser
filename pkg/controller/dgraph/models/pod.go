@@ -172,31 +172,13 @@ func RetrievePodsInteractionsForAllPodsWithCount() ([]Pod, error) {
 }
 
 // RetrievePodsInteractionsForAllPodsOrphanedTrue returns all pods in the dgraph
-func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]Pod, error) {
+func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]byte, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
 			name
-			interacts {
+			outbound: interacts {
 				name
 			}
-		}
-	}`
-
-	type root struct {
-		Pods []Pod `json:"pods"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
-	if err != nil {
-		return nil, err
-	}
-	return newRoot.Pods, nil
-}
-
-func RetrievePodsInboundInteractionsForAllPods() ([]byte, error) {
-	const q = `query {
-		pods(func: has(isPod)) {
-			name
 			inbound: ~pod @filter(has(isPod)) {
 				name
 			}
@@ -211,53 +193,34 @@ func RetrievePodsInboundInteractionsForAllPods() ([]byte, error) {
 }
 
 // RetrievePodsInteractionsForAllPodsOrphanedFalse returns all pods in the dgraph which has edge interacts
-func RetrievePodsInteractionsForAllPodsOrphanedFalse() ([]Pod, error) {
+func RetrievePodsInteractionsForAllPodsOrphanedFalse() ([]byte, error) {
 	const q = `query {
 		pods(func: has(isPod)) @filter(has(interacts)) {
 			name
-			interacts {
+			outbound: interacts {
+				name
+			}
+			inbound: ~pod @filter(has(isPod)) {
 				name
 			}
 		}
 	}`
 
-	type root struct {
-		Pods []Pod `json:"pods"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
+	result, err := dgraph.ExecuteQueryRaw(q)
 	if err != nil {
 		return nil, err
 	}
-	return newRoot.Pods, nil
+	return result, nil
 }
 
 // RetrievePodsInteractionsForGivenPod ...
-func RetrievePodsInteractionsForGivenPod(name string) ([]Pod, error) {
+func RetrievePodsInteractionsForGivenPod(name string) ([]byte, error) {
 	q := `query {
 		pods(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
-			interacts {
+			outbound: interacts {
 				name
 			}
-		}
-	}`
-
-	type root struct {
-		Pods []Pod `json:"pods"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
-	if err != nil {
-		return nil, err
-	}
-	return newRoot.Pods, nil
-}
-
-func RetrievePodsInboundInteractionsForGivenPod(name string) ([]byte, error) {
-	q := `query {
-		pods(func: has(isPod)) @filter(eq(name, "` + name + `")) {
-			name
 			inbound: ~pod @filter(has(isPod)) {
 				name
 			}

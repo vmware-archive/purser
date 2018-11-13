@@ -52,12 +52,6 @@ var routes = Routes{
 		GetPodInteractions,
 	},
 	Route{
-		"GetPodInteractions",
-		"GET",
-		"/interactions/inbound/pod",
-		GetPodInboundInteractions,
-	},
-	Route{
 		"GetClusterHierarchy",
 		"GET",
 		"/hierarchy",

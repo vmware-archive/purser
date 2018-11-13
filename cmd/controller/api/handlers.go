@@ -45,7 +45,7 @@ func GetInventoryPods(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			logrus.Errorf("Unable to get response: (%v)", err)
 		}
-		err = json.NewEncoder(w).Encode(jsonResp)
+		_, err = w.Write(jsonResp)
 		if err != nil {
 			logrus.Errorf("Unable to encode to json: (%v)", err)
 		}
@@ -54,7 +54,7 @@ func GetInventoryPods(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			logrus.Errorf("Unable to get response: (%v)", err)
 		}
-		err = json.NewEncoder(w).Encode(jsonResp)
+		_, err = w.Write(jsonResp)
 		if err != nil {
 			logrus.Errorf("Unable to encode to json: (%v)", err)
 		}
@@ -63,7 +63,7 @@ func GetInventoryPods(w http.ResponseWriter, r *http.Request) {
 
 // GetPodInteractions listens on /interactions/pod endpoint and returns pod interactions
 func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
-	var pod []models.Pod
+	var pod []byte
 	var err error
 
 	addHeaders(w, r)
@@ -77,27 +77,6 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 		} else {
 			pod, err = models.RetrievePodsInteractionsForAllPodsOrphanedFalse()
 		}
-	}
-	if err != nil {
-		logrus.Errorf("Unable to get response: (%v)", err)
-	}
-	err = json.NewEncoder(w).Encode(pod)
-	if err != nil {
-		logrus.Errorf("Unable to encode to json: (%v)", err)
-	}
-}
-
-func GetPodInboundInteractions(w http.ResponseWriter, r *http.Request) {
-	var pod []byte
-	var err error
-
-	addHeaders(w, r)
-	queryParams := r.URL.Query()
-	logrus.Debugf("Query params: (%v)", queryParams)
-	if name, isName := queryParams["name"]; isName {
-		pod, err = models.RetrievePodsInboundInteractionsForGivenPod(name[0])
-	} else {
-			pod, err = models.RetrievePodsInboundInteractionsForAllPods()
 	}
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
