@@ -49,15 +49,6 @@ type Container struct {
 	MemoryRequest float64    `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64    `json:"memoryLimit,omitempty"`
 	Type          string     `json:"type,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-}
-
-// ContainersWithMetrics ...
-type ContainersWithMetrics struct {
-	Container []Container  `json:"container,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
 }
 
 func newContainer(container api_v1.Container, podUID, namespaceUID string, pod api_v1.Pod) (*api.Assigned, error) {
@@ -200,43 +191,26 @@ func RetrieveContainer(name string) ([]byte, error) {
 	return result, nil
 }
 
-// RetrieveAllContainersWithMetrics ...
-func RetrieveAllContainersWithMetrics() (ContainersWithMetrics, error) {
-	const q = `query {
-		container(func: has(isContainer)) {
-			name
-			type
-			cpu: cpuRequest
-			memory: memoryRequest
-		}
-	}`
-
-	containerRoot := ContainersWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &containerRoot)
-	calculateTotalContainerMetrics(&containerRoot)
-	return containerRoot, err
-}
-
 // RetrieveContainerWithMetrics ...
-func RetrieveContainerWithMetrics(name string) (ContainersWithMetrics, error) {
+func RetrieveContainerWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
-		container(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			cpu: cpuRequest
 			memory: memoryRequest
 		}
 	}`
-	containerRoot := ContainersWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &containerRoot)
-	calculateTotalContainerMetrics(&containerRoot)
-	return containerRoot, err
-}
-
-func calculateTotalContainerMetrics(objRoot *ContainersWithMetrics) {
-	for _, obj := range objRoot.Container {
-		objRoot.CPU += obj.CPU
-		objRoot.Memory += obj.Memory
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
+	return root, err
 }
 

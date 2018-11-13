@@ -40,16 +40,6 @@ type Daemonset struct {
 	Namespace     *Namespace `json:"namespace,omitempty"`
 	Pods          []*Pod     `json:"pod,omitempty"`
 	Type          string     `json:"type,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-	Children []*Children `json:"children,omitempty"`
-}
-
-// DaemonsetsWithMetrics ...
-type DaemonsetsWithMetrics struct {
-	Daemonset []Daemonset  `json:"daemonset,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
 }
 
 func createDaemonsetObject(daemonset ext_v1beta1.DaemonSet) Daemonset {
@@ -153,7 +143,6 @@ func RetrieveDaemonset(name string) ([]byte, error) {
 		}
 	}`
 
-
 	result, err := dgraph.ExecuteQueryRaw(q)
 	if err != nil {
 		return nil, err
@@ -161,35 +150,10 @@ func RetrieveDaemonset(name string) ([]byte, error) {
 	return result, nil
 }
 
-// RetrieveAllDaemonsetsWithMetrics ...
-func RetrieveAllDaemonsetsWithMetrics() (DaemonsetsWithMetrics, error) {
-	const q = `query {
-		ds as var(funch: has(isDaemonset)) {
-			~daemonset @filter(has(isPod)) {
-				podCpu as cpuRequest
-				podMemory as memoryRequest
-			}
-			daemonsetCpu as sum(val(podCpu))
-			daemonsetMemory as sum(val(podMemory))
-		}
-
-		daemonset(func: uid(ds)) {
-			name
-			type
-			cpu: val(daemonsetCpu)
-			memory: val(daemonsetMemory)
-		}
-	}`
-	daemonsetRoot := DaemonsetsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &daemonsetRoot)
-	calculateTotalDaemonsetMetrics(&daemonsetRoot)
-	return daemonsetRoot, err
-}
-
 // RetrieveDaemonsetWithMetrics ...
-func RetrieveDaemonsetWithMetrics(name string) (DaemonsetsWithMetrics, error) {
+func RetrieveDaemonsetWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
-		daemonset(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			children: ~daemonset @filter(has(isPod)) {
@@ -202,16 +166,15 @@ func RetrieveDaemonsetWithMetrics(name string) (DaemonsetsWithMetrics, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
-
-	daemonsetRoot := DaemonsetsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &daemonsetRoot)
-	calculateTotalDaemonsetMetrics(&daemonsetRoot)
-	return daemonsetRoot, err
-}
-
-func calculateTotalDaemonsetMetrics(objRoot *DaemonsetsWithMetrics) {
-	for _, obj := range objRoot.Daemonset {
-		objRoot.CPU += obj.CPU
-		objRoot.Memory += obj.Memory
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
+	return root, err
 }

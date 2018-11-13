@@ -49,25 +49,6 @@ type Node struct {
 	Children []*Children `json:"children,omitempty"`
 }
 
-// NodesWithMetrics ...
-type NodesWithMetrics struct {
-	Node []Node  `json:"node,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-}
-
-type PhysicalCluster struct {
-	Name        string    `json:"name,omitempty"`
-	Type        string    `json:"type,omitempty"`
-	Children []Node `json:"children,omitempty"`
-}
-
-type PhysicalClusterWithMetrics struct {
-	PhysicalCluster PhysicalCluster `json:"data,omitempty"`
-	CPU float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-}
-
 func createNodeObject(node api_v1.Node) Node {
 	newNode := Node{
 		Name:           node.Name,
@@ -169,7 +150,6 @@ func RetrieveNode(name string) ([]byte, error) {
 		}
 	}`
 
-
 	result, err := dgraph.ExecuteQueryRaw(q)
 	if err != nil {
 		return nil, err
@@ -178,7 +158,7 @@ func RetrieveNode(name string) ([]byte, error) {
 }
 
 // RetrieveAllNodesWithMetrics ...
-func RetrieveAllNodesWithMetrics() (PhysicalClusterWithMetrics, error) {
+func RetrieveAllNodesWithMetrics() (JsonDataWrapper, error) {
 	const q = `query {
 		nd as var(func: has(isNode)) {
 			~node @filter(has(isPod)){
@@ -189,31 +169,31 @@ func RetrieveAllNodesWithMetrics() (PhysicalClusterWithMetrics, error) {
 			nodeMem as sum(val(nodePodMem))
         }
 
-		node(func: uid(nd)) {
+		children(func: uid(nd)) {
 			name
             type
 			cpu: val(nodeCpu)
 			memory: val(nodeMem)
         }
 	}`
-	nodeRoot := NodesWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &nodeRoot)
-	calculateTotalNodeMetrics(&nodeRoot)
-	clusterRoot := PhysicalClusterWithMetrics{}
-	clusterRoot.CPU = nodeRoot.CPU
-	clusterRoot.Memory = nodeRoot.Memory
-	clusterRoot.PhysicalCluster = PhysicalCluster{
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	calculateTotal(&parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
 		Name: "cluster",
 		Type: "cluster",
-		Children: nodeRoot.Node,
+		Children: parentRoot.Children,
+		CPU: parentRoot.CPU,
+		Memory: parentRoot.Memory,
 	}
-	return clusterRoot, err
+	return root, err
 }
 
 // RetrieveNodeWithMetrics ...
-func RetrieveNodeWithMetrics(name string) (NodesWithMetrics, error) {
+func RetrieveNodeWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
-		node(func: has(isNode)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isNode)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			children: ~node @filter(has(isPod)) {
@@ -226,15 +206,15 @@ func RetrieveNodeWithMetrics(name string) (NodesWithMetrics, error) {
 			memory: memoryCapacity
 		}
 	}`
-	nodeRoot := NodesWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &nodeRoot)
-	calculateTotalNodeMetrics(&nodeRoot)
-	return nodeRoot, err
-}
-
-func calculateTotalNodeMetrics(objRoot *NodesWithMetrics) {
-	for _, obj := range objRoot.Node {
-		objRoot.CPU += obj.CPU
-		objRoot.Memory += obj.Memory
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
+	return root, err
 }

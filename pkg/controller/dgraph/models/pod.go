@@ -56,16 +56,6 @@ type Pod struct {
 	MemoryRequest float64      `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64      `json:"memoryLimit,omitempty"`
 	Type          string       `json:"type,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-	Children []*Children `json:"children,omitempty"`
-}
-
-// PodsWithMetrics ...
-type PodsWithMetrics struct {
-	Pod []Pod  `json:"pod,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
 }
 
 // Metrics ...
@@ -159,7 +149,7 @@ func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]Pod, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
 			name
-						interacts {
+			interacts {
 				name
 			}
 		}
@@ -346,33 +336,10 @@ func RetrievePod(name string) ([]byte, error) {
 	return result, nil
 }
 
-
-// RetrieveAllPodsWithMetrics ...
-func RetrieveAllPodsWithMetrics() (PodsWithMetrics, error) {
-	q := `query {
-		pod(func: has(isPod)) {
-			name
-			type
-			container: ~pod @filter(has(isContainer)) {
-				name
-				type
-				cpu: cpuRequest
-				memory: memoryRequest
-			}
-			cpu: cpuRequest
-			memory: memoryRequest
-		}
-	}`
-	podRoot := PodsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &podRoot)
-	calculateTotalPodMetrics(&podRoot)
-	return podRoot, err
-}
-
 // RetrieveReplicasetsWithMetrics ...
-func RetrievePodWithMetrics(name string) (PodsWithMetrics, error) {
+func RetrievePodWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
-		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			children: ~pod @filter(has(isContainer)) {
@@ -385,15 +352,15 @@ func RetrievePodWithMetrics(name string) (PodsWithMetrics, error) {
 			memory: memoryRequest
 		}
 	}`
-	podRoot := PodsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &podRoot)
-	calculateTotalPodMetrics(&podRoot)
-	return podRoot, err
-}
-
-func calculateTotalPodMetrics(podRoot *PodsWithMetrics) {
-	for _, pod := range podRoot.Pod {
-		podRoot.CPU += pod.CPU
-		podRoot.Memory += pod.Memory
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
+	return root, err
 }

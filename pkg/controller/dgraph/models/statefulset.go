@@ -40,16 +40,6 @@ type Statefulset struct {
 	Namespace     *Namespace `json:"namespace,omitempty"`
 	Pods          []*Pod     `json:"pods,omitempty"`
 	Type          string     `json:"type,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-	Children []*Children `json:"children,omitempty"`
-}
-
-// ReplicasetsWithMetrics ...
-type StatefulsetsWithMetrics struct {
-	Statefulset []Statefulset `json:"statefulset,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
 }
 
 func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
@@ -161,38 +151,10 @@ func RetrieveStatefulset(name string) ([]byte, error) {
 	return result, nil
 }
 
-// RetrieveAllStatefulsetsWithMetrics ...
-func RetrieveAllStatefulsetsWithMetrics() (StatefulsetsWithMetrics, error) {
-	const q = `query {
-		statefulset(func: has(isStatefulset)) {
-			name
-			type
-			pod: ~statefulset @filter(has(isPod)) {
-				name
-				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
-				cpu: podCpu as cpuRequest
-				memory: podMemory as memoryRequest
-			}
-			cpu: sum(val(podCpu))
-			memory: sum(val(podMemory))
-		}
-	}`
-	statefulsetRoot := StatefulsetsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &statefulsetRoot)
-	calculateTotalStatefulsetMetrics(&statefulsetRoot)
-	return statefulsetRoot, err
-}
-
 // RetrieveStatefulsetWithMetrics ...
-func RetrieveStatefulsetWithMetrics(name string) (StatefulsetsWithMetrics, error) {
+func RetrieveStatefulsetWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
-		statefulset(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			children: ~statefulset @filter(has(isPod)) {
@@ -205,15 +167,15 @@ func RetrieveStatefulsetWithMetrics(name string) (StatefulsetsWithMetrics, error
 			memory: sum(val(podMemory))
 		}
 	}`
-	statefulsetRoot := StatefulsetsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &statefulsetRoot)
-	calculateTotalStatefulsetMetrics(&statefulsetRoot)
-	return statefulsetRoot, err
-}
-
-func calculateTotalStatefulsetMetrics(objRoot *StatefulsetsWithMetrics) {
-	for _, obj := range objRoot.Statefulset {
-		objRoot.CPU += obj.CPU
-		objRoot.Memory += obj.Memory
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
+	return root, err
 }

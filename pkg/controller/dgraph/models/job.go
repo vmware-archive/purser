@@ -40,18 +40,7 @@ type Job struct {
 	Namespace     *Namespace `json:"namespace,omitempty"`
 	Pods          []*Pod     `json:"pod,omitempty"`
 	Type          string     `json:"type,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-	Children []*Children `json:"children,omitempty"`
 }
-
-// JobsWithMetrics ...
-type JobsWithMetrics struct {
-	Job []Job  `json:"job,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-}
-
 
 func createJobObject(job batch_v1.Job) Job {
 	newJob := Job{
@@ -162,38 +151,10 @@ func RetrieveJob(name string) ([]byte, error) {
 	return result, nil
 }
 
-// RetrieveAllJobsWithMetrics ...
-func RetrieveAllJobsWithMetrics() (JobsWithMetrics, error) {
-	const q = `query {
-		job(func: has(isJob)) {
-			name
-			type
-			pod: ~job @filter(has(isPod)) {
-				name
-				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
-				cpu: podCpu as cpuRequest
-				memory: podMemory as memoryRequest
-			}
-			cpu: sum(val(podCpu))
-			memory: sum(val(podMemory))
-		}
-	}`
-	jobRoot := JobsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &jobRoot)
-	calculateTotalJobMetrics(&jobRoot)
-	return jobRoot, err
-}
-
 // RetrieveJobWithMetrics ...
-func RetrieveJobWithMetrics(name string) (JobsWithMetrics, error) {
+func RetrieveJobWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
-		job(func: has(isJob)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isJob)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			children: ~job @filter(has(isPod)) {
@@ -206,15 +167,15 @@ func RetrieveJobWithMetrics(name string) (JobsWithMetrics, error) {
 			memory: sum(val(podMemory))
 		}
 	}`
-	jobRoot := JobsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &jobRoot)
-	calculateTotalJobMetrics(&jobRoot)
-	return jobRoot, err
-}
-
-func calculateTotalJobMetrics(objRoot *JobsWithMetrics) {
-	for _, obj := range objRoot.Job {
-		objRoot.CPU += obj.CPU
-		objRoot.Memory += obj.Memory
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
+	return root, err
 }

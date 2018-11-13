@@ -41,16 +41,6 @@ type Deployment struct {
 	Pods         []*Pod     `json:"pod,omitempty"`
 	Type         string     `json:"type,omitempty"`
 	Replicasets []*Replicaset `json:"replicaset,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-	Children []*Children `json:"children,omitempty"`
-}
-
-// DeploymentsWithMetrics ...
-type DeploymentsWithMetrics struct {
-	Deployment []Deployment  `json:"deployment,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
 }
 
 func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
@@ -162,41 +152,8 @@ func RetrieveDeployment(name string) ([]byte, error) {
 	return result, nil
 }
 
-// RetrieveAllDeploymentsWithMetrics ...
-func RetrieveAllDeploymentsWithMetrics() (DeploymentsWithMetrics, error) {
-	const q = `query {
-		deployment(func: has(isDeployment)) {
-			name
-			type
-			replicaset: ~deployment @filter(has(isReplicaset)) {
-				name
-				type
-				pod: ~replicaset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: replicasetCpu as sum(val(podCpu))
-				memory: replicasetMemory as sum(val(podMemory))
-			}
-			cpu: sum(val(replicasetCpu))
-			memory: sum(val(replicasetMemory))
-		}
-	}`
-	deploymentRoot := DeploymentsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &deploymentRoot)
-	return deploymentRoot, err
-}
-
 // RetrieveDeploymentWithMetrics ...
-func RetrieveDeploymentWithMetrics(name string) (DeploymentsWithMetrics, error) {
+func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
 		dep as var(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
 			~deployment @filter(has(isReplicaset)) {
@@ -211,7 +168,7 @@ func RetrieveDeploymentWithMetrics(name string) (DeploymentsWithMetrics, error) 
 			deploymentMemory as sum(val(deploymentReplicasetMemory))
 		}
 
-		deployment(func: uid(dep)) {
+		parent(func: uid(dep)) {
 			name
 			type
 			children: ~deployment @filter(has(isReplicaset)) {
@@ -224,15 +181,15 @@ func RetrieveDeploymentWithMetrics(name string) (DeploymentsWithMetrics, error) 
 			memory: val(deploymentMemory)
 		}
 	}`
-	deploymentRoot := DeploymentsWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &deploymentRoot)
-	calculateTotalDeploymentMetrics(&deploymentRoot)
-	return deploymentRoot, err
-}
-
-func calculateTotalDeploymentMetrics(objRoot *DeploymentsWithMetrics) {
-	for _, obj := range objRoot.Deployment {
-		objRoot.CPU += obj.CPU
-		objRoot.Memory += obj.Memory
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
+	return root, err
 }

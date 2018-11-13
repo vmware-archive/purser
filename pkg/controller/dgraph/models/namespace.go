@@ -47,7 +47,6 @@ type Namespace struct {
 	Replicasets []*Replicaset `json:"replicaset,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
-	Children []Children `json:"children,omitempty"`
 }
 
 type Children struct {
@@ -57,27 +56,19 @@ type Children struct {
 	Memory float64    `json:"memory,omitempty"`
 }
 
-// NamespacesWithMetrics ...
-type NamespacesWithMetrics struct {
-	Namespace []Namespace  `json:"namespace,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
-}
-
-type ChildrenWithMetrics struct {
+type Parent struct {
+	Name        string    `json:"name,omitempty"`
+	Type        string    `json:"type,omitempty"`
 	Children []Children  `json:"children,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
-}
-
-type NamespaceWrapper struct {
-	NamespaceMetricsData NamespacesWithMetrics `json:"data,omitempty"`
 }
 
 type ParentWrapper struct {
 	Name        string    `json:"name,omitempty"`
 	Type        string    `json:"type,omitempty"`
 	Children []Children `json:"children,omitempty"`
+	Parent []Parent  `json:"parent,omitempty"`
 	CPU float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
 }
@@ -280,18 +271,18 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 			memory: val(namespaceMem)
         }
     }`
-	namespaceRoot := ChildrenWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &namespaceRoot)
-	calculateTotal(&namespaceRoot)
-	clusterRoot := JsonDataWrapper{}
-	clusterRoot.Data = ParentWrapper{
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	calculateTotal(&parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
 		Name: "cluster",
 		Type: "cluster",
-		Children: namespaceRoot.Children,
-		CPU: namespaceRoot.CPU,
-		Memory: namespaceRoot.Memory,
+		Children: parentRoot.Children,
+		CPU: parentRoot.CPU,
+		Memory: parentRoot.Memory,
 	}
-	return clusterRoot, err
+	return root, err
 }
 
 // RetrieveNamespaceWithMetrics ...
@@ -355,7 +346,7 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 			namespaceMemory as sum(val(namespaceChildMemory))
 		}
 
-		namespace(func: uid(ns)) {
+		parent(func: uid(ns)) {
 			name
             type
 			children: ~namespace @filter(uid(childs)) {
@@ -368,20 +359,20 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 			memory: val(namespaceMemory)
         }
     }`
-	namespaceRoot := NamespacesWithMetrics{}
-	err := dgraph.ExecuteQuery(q, &namespaceRoot)
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
 	root := JsonDataWrapper{}
 	root.Data = ParentWrapper{
-		Name: namespaceRoot.Namespace[0].Name,
-		Type: namespaceRoot.Namespace[0].Type,
-		Children: namespaceRoot.Namespace[0].Children,
-		CPU: namespaceRoot.Namespace[0].CPU,
-		Memory: namespaceRoot.Namespace[0].Memory,
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
 	}
 	return root, err
 }
 
-func calculateTotal(objRoot *ChildrenWithMetrics) {
+func calculateTotal(objRoot *ParentWrapper) {
 	for _, obj := range objRoot.Children {
 		objRoot.CPU += obj.CPU
 		objRoot.Memory += obj.Memory
