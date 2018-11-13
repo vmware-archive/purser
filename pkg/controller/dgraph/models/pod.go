@@ -44,7 +44,7 @@ type Pod struct {
 	Containers    []*Container `json:"containers,omitempty"`
 	Pods     []*Pod       `json:"pod,omitempty"`
 	Count         float64      `json:"pod|count,omitempty"`
-	Node          *Node        `json:"podNode,omitempty"`
+	Node          *Node        `json:"node,omitempty"`
 	Namespace     *Namespace   `json:"namespace,omitempty"`
 	Deployment    *Deployment  `json:"deployment,omitempty"`
 	Replicaset    *Replicaset  `json:"replicaset,omitempty"`
