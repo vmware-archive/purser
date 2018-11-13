@@ -20,11 +20,15 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/vmware/purser/pkg/controller/discovery/graph"
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
+
+var graphNodes []graph.Node
+var graphEdges []graph.Edge
 
 // GetHomePage is the default appD home page
 func GetHomePage(w http.ResponseWriter, r *http.Request) {
@@ -536,6 +540,37 @@ func GetContainerWithMetrics(w http.ResponseWriter, r *http.Request) {
 
 	}
 	err = json.NewEncoder(w).Encode(data)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetPodDiscoveryNodes listens on /discovery/pod/nodes endpoint and returns pod interactions
+func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
+	var pod []models.Pod
+	var err error
+
+	addHeaders(w, r)
+	pod, err = models.RetrievePodsInteractionsForAllPodsWithCount()
+	graphNodes, graphEdges = graph.GetPodNodesAndEdges(pod)
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+	err = json.NewEncoder(w).Encode(graphNodes)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetPodDiscoveryEdges listens on /discovery/pod/nodes endpoint and returns pod interactions
+func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
+	var err error
+	addHeaders(w, r)
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	err = json.NewEncoder(w).Encode(graphEdges)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}

@@ -183,4 +183,16 @@ var routes = Routes{
 		"/metrics/container",
 		GetContainerWithMetrics,
 	},
+	Route{
+		"GetPodDiscoveryNodes",
+		"GET",
+		"/nodes",
+		GetPodDiscoveryNodes,
+	},
+	Route{
+		"GetPodDiscoveryEdges",
+		"GET",
+		"/edges",
+		GetPodDiscoveryEdges,
+	},
 }

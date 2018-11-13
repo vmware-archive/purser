@@ -145,6 +145,29 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 }
 
 // RetrievePodsInteractionsForAllPodsOrphanedTrue returns all pods in the dgraph
+func RetrievePodsInteractionsForAllPodsWithCount() ([]Pod, error) {
+	const q = `query {
+		pods(func: has(isPod)) {
+			name
+			interacts {
+				name
+				count
+			}
+		}
+	}`
+
+	type root struct {
+		Pods []Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+	return newRoot.Pods, nil
+}
+
+// RetrievePodsInteractionsForAllPodsOrphanedTrue returns all pods in the dgraph
 func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]Pod, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
