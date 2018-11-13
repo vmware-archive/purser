@@ -315,14 +315,28 @@ func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
 
 func GetClusterWithMetrics(w http.ResponseWriter, r *http.Request) {
 	addHeaders(w, r)
-	cluster, err := models.RetrieveAllNamespacesWithMetrics()
-	if err != nil {
-		logrus.Errorf("Unable to get response: (%v)", err)
-	}
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if view, isView := queryParams["view"]; isView && view[0] == "physical" {
+		cluster, err := models.RetrieveAllNodesWithMetrics()
+		if err != nil {
+			logrus.Errorf("Unable to get response: (%v)", err)
+		}
 
-	err = json.NewEncoder(w).Encode(cluster)
-	if err != nil {
-		logrus.Errorf("Unable to encode to json: (%v)", err)
+		err = json.NewEncoder(w).Encode(cluster)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
+	} else {
+		cluster, err := models.RetrieveAllNamespacesWithMetrics()
+		if err != nil {
+			logrus.Errorf("Unable to get response: (%v)", err)
+		}
+
+		err = json.NewEncoder(w).Encode(cluster)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
 	}
 }
 
@@ -472,16 +486,14 @@ func GetNodeWithMetrics(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Query params: (%v)", queryParams)
 	if name, isName := queryParams["name"]; isName {
 		node, err = models.RetrieveNodeWithMetrics(name[0])
-	} else {
-		node, err = models.RetrieveAllNodesWithMetrics()
-	}
-	if err != nil {
-		logrus.Errorf("Unable to get response: (%v)", err)
-	}
+		if err != nil {
+			logrus.Errorf("Unable to get response: (%v)", err)
+		}
 
-	err = json.NewEncoder(w).Encode(node)
-	if err != nil {
-		logrus.Errorf("Unable to encode to json: (%v)", err)
+		err = json.NewEncoder(w).Encode(node)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
 	}
 }
 

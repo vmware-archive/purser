@@ -42,6 +42,7 @@ type Daemonset struct {
 	Type          string     `json:"type,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Children []*Children `json:"children,omitempty"`
 }
 
 // DaemonsetsWithMetrics ...
@@ -163,23 +164,20 @@ func RetrieveDaemonset(name string) ([]byte, error) {
 // RetrieveAllDaemonsetsWithMetrics ...
 func RetrieveAllDaemonsetsWithMetrics() (DaemonsetsWithMetrics, error) {
 	const q = `query {
-		daemonset(func: has(isDaemonset)) {
+		ds as var(funch: has(isDaemonset)) {
+			~daemonset @filter(has(isPod)) {
+				podCpu as cpuRequest
+				podMemory as memoryRequest
+			}
+			daemonsetCpu as sum(val(podCpu))
+			daemonsetMemory as sum(val(podMemory))
+		}
+
+		daemonset(func: uid(ds)) {
 			name
 			type
-			pod: ~daemonset @filter(has(isPod)) {
-				name
-				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
-				cpu: podCpu as cpuRequest
-				memory: podMemory as memoryRequest
-			}
-			cpu: sum(val(podCpu))
-			memory: sum(val(podMemory))
+			cpu: val(daemonsetCpu)
+			memory: val(daemonsetMemory)
 		}
 	}`
 	daemonsetRoot := DaemonsetsWithMetrics{}
@@ -194,15 +192,9 @@ func RetrieveDaemonsetWithMetrics(name string) (DaemonsetsWithMetrics, error) {
 		daemonset(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~daemonset @filter(has(isPod)) {
+			children: ~daemonset @filter(has(isPod)) {
 				name
 				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
 				cpu: podCpu as cpuRequest
 				memory: podMemory as memoryRequest
 			}

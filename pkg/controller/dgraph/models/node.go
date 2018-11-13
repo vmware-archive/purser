@@ -46,6 +46,7 @@ type Node struct {
 	Type           string    `json:"type,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Children []*Children `json:"children,omitempty"`
 }
 
 // NodesWithMetrics ...
@@ -53,6 +54,12 @@ type NodesWithMetrics struct {
 	Node []Node  `json:"node,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+}
+
+type PhysicalCluster struct {
+	Name        string    `json:"name,omitempty"`
+	Type        string    `json:"type,omitempty"`
+	Children []Node `json:"children,omitempty"`
 }
 
 func createNodeObject(node api_v1.Node) Node {
@@ -165,31 +172,36 @@ func RetrieveNode(name string) ([]byte, error) {
 }
 
 // RetrieveAllNodesWithMetrics ...
-func RetrieveAllNodesWithMetrics() (NodesWithMetrics, error) {
+func RetrieveAllNodesWithMetrics() (ClusterWithMetrics, error) {
 	const q = `query {
-		node(func: has(isNode)) {
-			name
-			type
-			pod: ~node @filter(has(isPod)) {
-				name
-				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
-				cpu: podCpu as cpuRequest
-				memory: podMemory as memoryRequest
+		nd as var(func: has(isNode)) {
+			~node @filter(has(isPod)){
+				nodePodCpu as cpuRequest
+				nodePodMem as memoryRequest
 			}
-			cpu: sum(val(podCpu))
-			memory: sum(val(podMemory))
-		}
+			naodeCpu as sum(val(nodePodCpu))
+			nodeeMem as sum(val(nodePodMem))
+        }
+
+		node(func: uid(nd)) {
+			name
+            type
+			cpu: val(nodeCpu)
+			memory: val(nodeMem)
+        }
 	}`
 	nodeRoot := NodesWithMetrics{}
 	err := dgraph.ExecuteQuery(q, &nodeRoot)
 	calculateTotalNodeMetrics(&nodeRoot)
-	return nodeRoot, err
+	clusterRoot := ClusterWithMetrics{}
+	clusterRoot.CPU = nodeRoot.CPU
+	clusterRoot.Memory = nodeRoot.Memory
+	clusterRoot.PhysicalCluster = append(clusterRoot.PhysicalCluster, PhysicalCluster{
+		Name: "cluster",
+		Type: "cluster",
+		Children: nodeRoot.Node,
+	})
+	return clusterRoot, err
 }
 
 // RetrieveNodeWithMetrics ...
@@ -198,15 +210,9 @@ func RetrieveNodeWithMetrics(name string) (NodesWithMetrics, error) {
 		node(func: has(isNode)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~node @filter(has(isPod)) {
+			children: ~node @filter(has(isPod)) {
 				name
 				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
 				cpu: puRequest
 				memory: memoryRequest
 			}

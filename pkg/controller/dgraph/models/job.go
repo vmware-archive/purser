@@ -42,6 +42,7 @@ type Job struct {
 	Type          string     `json:"type,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Children []*Children `json:"children,omitempty"`
 }
 
 // JobsWithMetrics ...
@@ -195,15 +196,9 @@ func RetrieveJobWithMetrics(name string) (JobsWithMetrics, error) {
 		job(func: has(isJob)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~job @filter(has(isPod)) {
+			children: ~job @filter(has(isPod)) {
 				name
 				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
 				cpu: podCpu as cpuRequest
 				memory: podMemory as memoryRequest
 			}

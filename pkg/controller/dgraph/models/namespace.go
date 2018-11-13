@@ -64,14 +64,15 @@ type NamespacesWithMetrics struct {
 	Memory float64    `json:"memory,omitempty"`
 }
 
-type Cluster struct {
+type LogicalCluster struct {
 	Name        string    `json:"name,omitempty"`
 	Type        string    `json:"type,omitempty"`
 	Children []Namespace `json:"children,omitempty"`
 }
 
 type ClusterWithMetrics struct {
-	Cluster []Cluster `json:"cluster,omitempty"`
+	LogicalCluster []LogicalCluster `json:"logicalCluster,omitempty"`
+	PhysicalCluster []PhysicalCluster `json:"physicalCluster,omitempty"`
 	CPU float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
 }
@@ -276,7 +277,7 @@ func RetrieveAllNamespacesWithMetrics() (ClusterWithMetrics, error) {
 	clusterRoot := ClusterWithMetrics{}
 	clusterRoot.CPU = namespaceRoot.CPU
 	clusterRoot.Memory = namespaceRoot.Memory
-	clusterRoot.Cluster = append(clusterRoot.Cluster, Cluster{
+	clusterRoot.LogicalCluster = append(clusterRoot.LogicalCluster, LogicalCluster{
 		Name: "cluster",
 		Type: "cluster",
 		Children: namespaceRoot.Namespace,

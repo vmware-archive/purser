@@ -42,6 +42,7 @@ type Statefulset struct {
 	Type          string     `json:"type,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Children []*Children `json:"children,omitempty"`
 }
 
 // ReplicasetsWithMetrics ...
@@ -194,15 +195,9 @@ func RetrieveStatefulsetWithMetrics(name string) (StatefulsetsWithMetrics, error
 		statefulset(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			pod: ~statefulset @filter(has(isPod)) {
+			children: ~statefulset @filter(has(isPod)) {
 				name
 				type
-				container: ~pod @filter(has(isContainer)) {
-					name
-					type
-					cpu: cpuRequest
-					memory: memoryRequest
-				}
 				cpu: podCpu as cpuRequest
 				memory: podMemory as memoryRequest
 			}

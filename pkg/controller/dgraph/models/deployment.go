@@ -43,6 +43,7 @@ type Deployment struct {
 	Replicasets []*Replicaset `json:"replicaset,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Children []*Children `json:"children,omitempty"`
 }
 
 // DeploymentsWithMetrics ...
@@ -186,7 +187,7 @@ func RetrieveAllDeploymentsWithMetrics() (DeploymentsWithMetrics, error) {
 				memory: replicasetMemory as sum(val(podMemory))
 			}
 			cpu: sum(val(replicasetCpu))
-			memory: sum(val(replicasetMemory)
+			memory: sum(val(replicasetMemory))
 		}
 	}`
 	deploymentRoot := DeploymentsWithMetrics{}
@@ -197,29 +198,30 @@ func RetrieveAllDeploymentsWithMetrics() (DeploymentsWithMetrics, error) {
 // RetrieveDeploymentWithMetrics ...
 func RetrieveDeploymentWithMetrics(name string) (DeploymentsWithMetrics, error) {
 	q := `query {
-		deployment(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
+		dep as var(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
+			~deployment @filter(has(isReplicaset)) {
+				~replicaset @filter(has(isPod)) {
+					replicasetPodCpu as cpuRequest
+					replicasetPodMemory as memoryRequest
+				}
+				deploymentReplicasetCpu as sum(val(replicasetPodCpu))
+				deploymentReplicasetMemory as sum(val(replicasetPodMemory))
+			}
+			deploymentCpu as sum(val(deploymentReplicasetCpu))
+			deploymentMemory as sum(val(deploymentReplicasetMemory))
+		}
+
+		deployment(func: uid(dep)) {
 			name
 			type
-			replicaset: ~deployment @filter(has(isReplicaset)) {
+			children: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
-				pod: ~replicaset @filter(has(isPod)) {
-					name
-					type
-					container: ~pod @filter(has(isContainer)) {
-						name
-						type
-						cpu: cpuRequest
-						memory: memoryRequest
-					}
-					cpu: podCpu as cpuRequest
-					memory: podMemory as memoryRequest
-				}
-				cpu: replicasetCpu as sum(val(podCpu))
-				memory: replicasetMemory as sum(val(podMemory))
+				cpu: val(deploymentReplicasetCpu)
+				memory: val(deploymentReplicasetMemory)
 			}
-			cpu: sum(val(replicasetCpu))
-			memory: sum(val(replicasetMemory)
+			cpu: val(deploymentCpu)
+			memory: val(deploymentMemory)
 		}
 	}`
 	deploymentRoot := DeploymentsWithMetrics{}

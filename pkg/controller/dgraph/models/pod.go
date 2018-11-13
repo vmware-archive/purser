@@ -58,6 +58,7 @@ type Pod struct {
 	Type          string       `json:"type,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Children []*Children `json:"children,omitempty"`
 }
 
 // PodsWithMetrics ...
@@ -374,7 +375,7 @@ func RetrievePodWithMetrics(name string) (PodsWithMetrics, error) {
 		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			container: ~pod @filter(has(isContainer)) {
+			children: ~pod @filter(has(isContainer)) {
 				name
 				type
 				cpu: cpuRequest
