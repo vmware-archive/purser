@@ -132,17 +132,19 @@ func RetrieveAllProcess() ([]byte, error) {
 }
 
 // RetrieveProcess ...
-func RetrieveProcess(name string) ([]byte, error) {
+func RetrieveProcess(name string) (JsonDataWrapper, error) {
 	q := `query {
-		process(func: has(isProc)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isProc)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
 	}
-	return result, nil
+	return root, err
 }

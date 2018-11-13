@@ -153,6 +153,9 @@ func RetrievePodsInteractionsForAllPodsWithCount() ([]Pod, error) {
 				name
 				count
 			}
+			cid: ~pod @filter(has(isService)) {
+				name
+			}
 		}
 	}`
 
@@ -187,6 +190,23 @@ func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]Pod, error) {
 		return nil, err
 	}
 	return newRoot.Pods, nil
+}
+
+func RetrievePodsInboundInteractionsForAllPods() ([]byte, error) {
+	const q = `query {
+		pods(func: has(isPod)) {
+			name
+			inbound: ~pod @filter(has(isPod)) {
+				name
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // RetrievePodsInteractionsForAllPodsOrphanedFalse returns all pods in the dgraph which has edge interacts
@@ -231,6 +251,23 @@ func RetrievePodsInteractionsForGivenPod(name string) ([]Pod, error) {
 		return nil, err
 	}
 	return newRoot.Pods, nil
+}
+
+func RetrievePodsInboundInteractionsForGivenPod(name string) ([]byte, error) {
+	q := `query {
+		pods(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+			name
+			inbound: ~pod @filter(has(isPod)) {
+				name
+			}
+		}
+	}`
+
+	result, err := dgraph.ExecuteQueryRaw(q)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func retrievePodsFromPodsXIDs(podsXIDs []string) []*Pod {

@@ -71,6 +71,7 @@ type ParentWrapper struct {
 	Parent []Parent  `json:"parent,omitempty"`
 	CPU float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Storage float64    `json:"cpu,omitempty"`
 }
 
 type JsonDataWrapper struct {

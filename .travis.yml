@@ -14,7 +14,6 @@ script:
   - make deps
   - make install
   - make travis-build
-  - make check
 
 notifications:
   email: false

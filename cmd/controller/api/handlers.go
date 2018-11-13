@@ -87,6 +87,27 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetPodInboundInteractions(w http.ResponseWriter, r *http.Request) {
+	var pod []byte
+	var err error
+
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		pod, err = models.RetrievePodsInboundInteractionsForGivenPod(name[0])
+	} else {
+			pod, err = models.RetrievePodsInboundInteractionsForAllPods()
+	}
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+	_, err = w.Write(pod)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
 func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
 	addHeaders(w, r)
 	queryParams := r.URL.Query()
@@ -254,7 +275,7 @@ func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetProcessHierarchy listens on /hierarchy/process endpoint and returns all processes
 func GetProcessHierarchy(w http.ResponseWriter, r *http.Request) {
-	var process []byte
+	var process models.JsonDataWrapper
 	var err error
 
 	addHeaders(w, r)
@@ -262,14 +283,12 @@ func GetProcessHierarchy(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Query params: (%v)", queryParams)
 	if name, isName := queryParams["name"]; isName {
 		process, err = models.RetrieveProcess(name[0])
-	} else {
-		process, err = models.RetrieveAllProcess()
 	}
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(process)
+	err = json.NewEncoder(w).Encode(process)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
