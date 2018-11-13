@@ -64,6 +64,18 @@ type NamespacesWithMetrics struct {
 	Memory float64    `json:"memory,omitempty"`
 }
 
+type Cluster struct {
+	Name        string    `json:"name,omitempty"`
+	Type        string    `json:"type,omitempty"`
+	Children []Namespace `json:"children,omitempty"`
+}
+
+type ClusterWithMetrics struct {
+	Cluster Cluster `json:"cluster,omitempty"`
+	CPU float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
 func newNamespace(namespace api_v1.Namespace) Namespace {
 	ns := Namespace{
 		ID:          dgraph.ID{Xid: namespace.Name},
@@ -240,7 +252,7 @@ func RetrieveNamespace(name string) ([]byte, error) {
 }
 
 // RetrieveAllNamespacesWithMetrics ...
-func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
+func RetrieveAllNamespacesWithMetrics() (ClusterWithMetrics, error) {
 	const q = `query {
 		ns as var(func: has(isNamespace)) {
 			~namespace @filter(has(isPod)){
@@ -251,7 +263,7 @@ func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
 			namespaceMem as sum(val(namespacePodMem))
         }
 
-		namespace(func: uid(ns)) {
+		children(func: uid(ns)) {
 			name
             type
 			cpu: val(namespaceCpu)
@@ -261,7 +273,15 @@ func RetrieveAllNamespacesWithMetrics() (NamespacesWithMetrics, error) {
 	namespaceRoot := NamespacesWithMetrics{}
 	err := dgraph.ExecuteQuery(q, &namespaceRoot)
 	calculateTotalNamespaceMetrics(&namespaceRoot)
-	return namespaceRoot, err
+	clusterRoot := ClusterWithMetrics{}
+	clusterRoot.CPU = namespaceRoot.CPU
+	clusterRoot.Memory = namespaceRoot.Memory
+	clusterRoot.Cluster = Cluster{
+		Name: "cluster",
+		Type: "cluster",
+		Children: namespaceRoot.Namespace,
+	}
+	return clusterRoot, err
 }
 
 // RetrieveNamespaceWithMetrics ...

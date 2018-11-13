@@ -313,27 +313,38 @@ func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetNamespaceWithMetrics ...
-func GetNamespaceWithMetrics(w http.ResponseWriter, r *http.Request) {
-	var namespace models.NamespacesWithMetrics
-	var err error
-
+func GetClusterWithMetrics(w http.ResponseWriter, r *http.Request) {
 	addHeaders(w, r)
-	queryParams := r.URL.Query()
-	logrus.Debugf("Query params: (%v)", queryParams)
-	if name, isName := queryParams["name"]; isName {
-		namespace, err = models.RetrieveNamespaceWithMetrics(name[0])
-	} else {
-		namespace, err = models.RetrieveAllNamespacesWithMetrics()
-	}
+	cluster, err := models.RetrieveAllNamespacesWithMetrics()
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	err = json.NewEncoder(w).Encode(namespace)
+	err = json.NewEncoder(w).Encode(cluster)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
+}
+
+// GetNamespaceWithMetrics ...
+func GetNamespaceWithMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+	if name, isName := queryParams["name"]; isName {
+		namespace, err := models.RetrieveNamespaceWithMetrics(name[0])
+		if err != nil {
+			logrus.Errorf("Unable to get response: (%v)", err)
+		}
+
+		err = json.NewEncoder(w).Encode(namespace)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
+	} else {
+		GetClusterWithMetrics(w, r)
+	}
+
 }
 
 // GetDeploymentWithMetrics ...

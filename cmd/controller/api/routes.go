@@ -112,6 +112,12 @@ var routes = Routes{
 		GetJobHierarchy,
 	},
 	Route{
+		"GetClusterWithMetrics",
+		"GET",
+		"/metrics/Cluster",
+		GetClusterWithMetrics,
+	},
+	Route{
 		"GetNamespaceWithMetrics",
 		"GET",
 		"/metrics/namespace",
