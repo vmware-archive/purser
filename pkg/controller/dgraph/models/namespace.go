@@ -71,7 +71,7 @@ type Cluster struct {
 }
 
 type ClusterWithMetrics struct {
-	Cluster Cluster `json:"cluster,omitempty"`
+	Cluster []Cluster `json:"cluster,omitempty"`
 	CPU float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
 }
@@ -263,7 +263,7 @@ func RetrieveAllNamespacesWithMetrics() (ClusterWithMetrics, error) {
 			namespaceMem as sum(val(namespacePodMem))
         }
 
-		children(func: uid(ns)) {
+		namespace(func: uid(ns)) {
 			name
             type
 			cpu: val(namespaceCpu)
@@ -276,11 +276,11 @@ func RetrieveAllNamespacesWithMetrics() (ClusterWithMetrics, error) {
 	clusterRoot := ClusterWithMetrics{}
 	clusterRoot.CPU = namespaceRoot.CPU
 	clusterRoot.Memory = namespaceRoot.Memory
-	clusterRoot.Cluster = Cluster{
+	clusterRoot.Cluster = append(clusterRoot.Cluster, Cluster{
 		Name: "cluster",
 		Type: "cluster",
 		Children: namespaceRoot.Namespace,
-	}
+	})
 	return clusterRoot, err
 }
 

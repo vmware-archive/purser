@@ -114,7 +114,7 @@ var routes = Routes{
 	Route{
 		"GetClusterWithMetrics",
 		"GET",
-		"/metrics/Cluster",
+		"/metrics/cluster",
 		GetClusterWithMetrics,
 	},
 	Route{
