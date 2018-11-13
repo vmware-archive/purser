@@ -395,12 +395,17 @@ func RetrievePodWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~pod @filter(has(isContainer)) {
 				name
 				type
-				cpu: cpuRequest
-				memory: memoryRequest
+				cpu: cpu as cpuRequest
+				memory: memory as memoryRequest
+				cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 			}
-			cpu: cpuRequest
-			memory: memoryRequest
-			storage: storageRequest
+			cpu: podCpu as cpuRequest
+			memory: podMemory as memoryRequest
+			storage: pvcStorage as storageRequest
+			cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(podStorage * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -413,6 +418,9 @@ func RetrievePodWithMetrics(name string) (JsonDataWrapper, error) {
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
 		Storage: parentRoot.Parent[0].Memory,
+		CPUCost: parentRoot.Parent[0].CPUCost,
+		MemoryCost: parentRoot.Parent[0].MemoryCost,
+		StorageCost: parentRoot.Parent[0].StorageCost,
 	}
 	return root, err
 }

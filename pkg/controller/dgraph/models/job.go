@@ -160,13 +160,16 @@ func RetrieveJobWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~job @filter(has(isPod)) {
 				name
 				type
-				cpu: podCpu as cpuRequest
-				memory: podMemory as memoryRequest
-				storage: pvcStorage as storageRequest
+				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(podStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: sum(val(podCpu))
-			memory: sum(val(podMemory))
-			storage: sum(val(pvcStorage))
+			cpu: cpu as sum(val(podCpu))
+			memory: memory as sum(val(podMemory))
+			storage: storage as sum(val(pvcStorage))
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -179,6 +182,9 @@ func RetrieveJobWithMetrics(name string) (JsonDataWrapper, error) {
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
 		Storage: parentRoot.Parent[0].Storage,
+		CPUCost: parentRoot.Parent[0].CPUCost,
+		MemoryCost: parentRoot.Parent[0].MemoryCost,
+		StorageCost: parentRoot.Parent[0].StorageCost,
 	}
 	return root, err
 }

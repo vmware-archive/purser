@@ -177,13 +177,19 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
-				cpu: val(deploymentReplicasetCpu)
-				memory: val(deploymentReplicasetMemory)
-				storage: val(deploymentReplicasetStorage)
+				cpu: childCpu as val(deploymentReplicasetCpu)
+				memory: childMemory as val(deploymentReplicasetMemory)
+				storage: childStorage as val(deploymentReplicasetStorage)
+				cpuCost: math(childCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(childMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(childStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: val(deploymentCpu)
-			memory: val(deploymentMemory)
-			storage: val(deploymentStorage)
+			cpu: cpu as val(deploymentCpu)
+			memory: memory as val(deploymentMemory)
+			storage: storage as val(deploymentStorage)
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -196,6 +202,9 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
 		Storage: parentRoot.Parent[0].Storage,
+		CPUCost: parentRoot.Parent[0].CPUCost,
+		MemoryCost: parentRoot.Parent[0].MemoryCost,
+		StorageCost: parentRoot.Parent[0].StorageCost,
 	}
 	return root, err
 }

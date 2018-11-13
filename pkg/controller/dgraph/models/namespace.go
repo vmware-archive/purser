@@ -30,6 +30,9 @@ import (
 // Dgraph Model Constants
 const (
 	IsNamespace = "isNamespace"
+	defaultCPUCostPerCPUPerHour    = "0.024"
+	defaultMemCostPerGBPerHour     = "0.01"
+	defaultStorageCostPerGBPerHour = "0.00013888888"
 )
 
 // Namespace schema in dgraph
@@ -53,6 +56,9 @@ type Children struct {
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
 	Storage float64    `json:"storage,omitempty"`
+	CPUCost float64    `json:"cpuCost,omitempty"`
+	MemoryCost float64    `json:"memoryCost,omitempty"`
+	StorageCost float64    `json:"storageCost,omitempty"`
 }
 
 type Parent struct {
@@ -62,6 +68,9 @@ type Parent struct {
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
 	Storage float64    `json:"storage,omitempty"`
+	CPUCost float64    `json:"cpuCost,omitempty"`
+	MemoryCost float64    `json:"memoryCost,omitempty"`
+	StorageCost float64    `json:"storageCost,omitempty"`
 }
 
 type ParentWrapper struct {
@@ -72,6 +81,9 @@ type ParentWrapper struct {
 	CPU float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
 	Storage float64    `json:"storage,omitempty"`
+	CPUCost float64    `json:"cpuCost,omitempty"`
+	MemoryCost float64    `json:"memoryCost,omitempty"`
+	StorageCost float64    `json:"storageCost,omitempty"`
 }
 
 type JsonDataWrapper struct {
@@ -270,9 +282,12 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 		children(func: uid(ns)) {
 			name
             type
-			cpu: val(namespaceCpu)
-			memory: val(namespaceMem)
-			storage: val(namespaceStorage)
+			cpu: cpu as val(namespaceCpu)
+			memory: memory as val(namespaceMem)
+			storage: storage as val(namespaceStorage)
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
         }
     }`
 	parentRoot := ParentWrapper{}
@@ -286,6 +301,9 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 		CPU: parentRoot.CPU,
 		Memory: parentRoot.Memory,
 		Storage: parentRoot.Storage,
+		CPUCost: parentRoot.CPUCost,
+		MemoryCost: parentRoot.MemoryCost,
+		StorageCost: parentRoot.StorageCost,
 	}
 	return root, err
 }
@@ -371,13 +389,19 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~namespace @filter(uid(childs)) {
 				name
 				type
-				cpu: val(namespaceChildCpu)
-				memory: val(namespaceChildMemory)
-				storage: val(namespaceChildStorage)
+				cpu: childCpu as val(namespaceChildCpu)
+				memory: childMemory as val(namespaceChildMemory)
+				storage: childStorage as val(namespaceChildStorage)
+				cpuCost: math(childCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(childMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(childStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: val(namespaceCpu)
-			memory: val(namespaceMemory)
-			storage: val(namespaceStorage)
+			cpu: cpu as val(namespaceCpu)
+			memory: memory as val(namespaceMemory)
+			storage: storage as val(namespaceStorage)
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
         }
     }`
 	parentRoot := ParentWrapper{}
@@ -390,6 +414,9 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
 		Storage: parentRoot.Parent[0].Storage,
+		CPUCost: parentRoot.Parent[0].CPUCost,
+		MemoryCost: parentRoot.Parent[0].MemoryCost,
+		StorageCost: parentRoot.Parent[0].StorageCost,
 	}
 	return root, err
 }
@@ -399,5 +426,8 @@ func calculateTotal(objRoot *ParentWrapper) {
 		objRoot.CPU += obj.CPU
 		objRoot.Memory += obj.Memory
 		objRoot.Storage += obj.Storage
+		objRoot.CPUCost += obj.CPUCost
+		objRoot.MemoryCost += obj.MemoryCost
+		objRoot.StorageCost += obj.StorageCost
 	}
 }

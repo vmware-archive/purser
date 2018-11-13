@@ -197,8 +197,10 @@ func RetrieveContainerWithMetrics(name string) (JsonDataWrapper, error) {
 		parent(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			cpu: cpuRequest
-			memory: memoryRequest
+			cpu: cpu as cpuRequest
+			memory: memory as memoryRequest
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -210,6 +212,8 @@ func RetrieveContainerWithMetrics(name string) (JsonDataWrapper, error) {
 		Children: parentRoot.Parent[0].Children,
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
+		CPUCost: parentRoot.Parent[0].CPUCost,
+		MemoryCost: parentRoot.Parent[0].MemoryCost,
 	}
 	return root, err
 }

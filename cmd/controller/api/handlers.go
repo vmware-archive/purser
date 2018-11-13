@@ -347,7 +347,7 @@ func GetClusterWithMetrics(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
 	if view, isView := queryParams["view"]; isView && view[0] == "physical" {
-		cluster, err := models.RetrieveAllNodesWithMetrics()
+		cluster, err := models.RetrieveAllNodesAndDisksWithMetrics()
 		if err != nil {
 			logrus.Errorf("Unable to get response: (%v)", err)
 		}

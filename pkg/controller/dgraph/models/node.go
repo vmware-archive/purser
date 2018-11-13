@@ -163,9 +163,12 @@ func RetrieveAllNodesAndDisksWithMetrics() (JsonDataWrapper, error) {
 		children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
 			name
             type
-			cpu: cpuCapacity
-			memory: memoryCapacity
-			storage: storageCapacity
+			cpu: cpu as cpuCapacity
+			memory: memory as memoryCapacity
+			storage: storage as storageCapacity
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
         }
 	}`
 	parentRoot := ParentWrapper{}
@@ -179,6 +182,9 @@ func RetrieveAllNodesAndDisksWithMetrics() (JsonDataWrapper, error) {
 		CPU: parentRoot.CPU,
 		Memory: parentRoot.Memory,
 		Storage: parentRoot.Storage,
+		CPUCost: parentRoot.CPUCost,
+		MemoryCost: parentRoot.MemoryCost,
+		StorageCost: parentRoot.StorageCost,
 	}
 	return root, err
 }
@@ -192,13 +198,19 @@ func RetrieveNodeWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~node @filter(has(isPod)) {
 				name
 				type
-				cpu: cpuRequest
-				memory: memoryRequest
-				storage: storageRequest
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+				storage: podStorage as storageRequest
+				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(podStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: cpuCapacity
-			memory: memoryCapacity
-			storage: sum(storage)
+			cpu: cpu as cpuCapacity
+			memory: memory as memoryCapacity
+			storage: storage as sum(storage)
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -211,6 +223,9 @@ func RetrieveNodeWithMetrics(name string) (JsonDataWrapper, error) {
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
 		Storage: parentRoot.Parent[0].Storage,
+		CPUCost: parentRoot.Parent[0].CPUCost,
+		MemoryCost: parentRoot.Parent[0].MemoryCost,
+		StorageCost: parentRoot.Parent[0].StorageCost,
 	}
 	return root, err
 }
