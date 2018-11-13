@@ -47,7 +47,7 @@ type Namespace struct {
 	Replicasets []*Replicaset `json:"replicaset,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
-	Children []*Children `json:"children,omitempty"`
+	Children []Children `json:"children,omitempty"`
 }
 
 type Children struct {
@@ -64,17 +64,26 @@ type NamespacesWithMetrics struct {
 	Memory float64    `json:"memory,omitempty"`
 }
 
-type LogicalCluster struct {
-	Name        string    `json:"name,omitempty"`
-	Type        string    `json:"type,omitempty"`
-	Children []Namespace `json:"children,omitempty"`
+type ChildrenWithMetrics struct {
+	Children []Children  `json:"children,omitempty"`
+	CPU    float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
 }
 
-type ClusterWithMetrics struct {
-	LogicalCluster []LogicalCluster `json:"logicalCluster,omitempty"`
-	PhysicalCluster []PhysicalCluster `json:"physicalCluster,omitempty"`
+type NamespaceWrapper struct {
+	NamespaceMetricsData NamespacesWithMetrics `json:"data,omitempty"`
+}
+
+type ParentWrapper struct {
+	Name        string    `json:"name,omitempty"`
+	Type        string    `json:"type,omitempty"`
+	Children []Children `json:"children,omitempty"`
 	CPU float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+}
+
+type JsonDataWrapper struct {
+	Data ParentWrapper `json:"data,omitempty"`
 }
 
 func newNamespace(namespace api_v1.Namespace) Namespace {
@@ -253,7 +262,7 @@ func RetrieveNamespace(name string) ([]byte, error) {
 }
 
 // RetrieveAllNamespacesWithMetrics ...
-func RetrieveAllNamespacesWithMetrics() (ClusterWithMetrics, error) {
+func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 	const q = `query {
 		ns as var(func: has(isNamespace)) {
 			~namespace @filter(has(isPod)){
@@ -271,22 +280,22 @@ func RetrieveAllNamespacesWithMetrics() (ClusterWithMetrics, error) {
 			memory: val(namespaceMem)
         }
     }`
-	namespaceRoot := NamespacesWithMetrics{}
+	namespaceRoot := ChildrenWithMetrics{}
 	err := dgraph.ExecuteQuery(q, &namespaceRoot)
-	calculateTotalNamespaceMetrics(&namespaceRoot)
-	clusterRoot := ClusterWithMetrics{}
-	clusterRoot.CPU = namespaceRoot.CPU
-	clusterRoot.Memory = namespaceRoot.Memory
-	clusterRoot.LogicalCluster = append(clusterRoot.LogicalCluster, LogicalCluster{
+	calculateTotal(&namespaceRoot)
+	clusterRoot := JsonDataWrapper{}
+	clusterRoot.Data = ParentWrapper{
 		Name: "cluster",
 		Type: "cluster",
-		Children: namespaceRoot.Namespace,
-	})
+		Children: namespaceRoot.Children,
+		CPU: namespaceRoot.CPU,
+		Memory: namespaceRoot.Memory,
+	}
 	return clusterRoot, err
 }
 
 // RetrieveNamespaceWithMetrics ...
-func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
+func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 	q := `query {
 		ns as var(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
 			childs as ~namespace @filter(has(isDeployment) OR has(isStatefulset) OR has(isJob) OR has(isDaemonset) OR (has(isReplicaset) AND (NOT has(deployment)))) {
@@ -361,12 +370,19 @@ func RetrieveNamespaceWithMetrics(name string) (NamespacesWithMetrics, error) {
     }`
 	namespaceRoot := NamespacesWithMetrics{}
 	err := dgraph.ExecuteQuery(q, &namespaceRoot)
-	calculateTotalNamespaceMetrics(&namespaceRoot)
-	return namespaceRoot, err
+	root := JsonDataWrapper{}
+	root.Data = ParentWrapper{
+		Name: namespaceRoot.Namespace[0].Name,
+		Type: namespaceRoot.Namespace[0].Type,
+		Children: namespaceRoot.Namespace[0].Children,
+		CPU: namespaceRoot.Namespace[0].CPU,
+		Memory: namespaceRoot.Namespace[0].Memory,
+	}
+	return root, err
 }
 
-func calculateTotalNamespaceMetrics(objRoot *NamespacesWithMetrics) {
-	for _, obj := range objRoot.Namespace {
+func calculateTotal(objRoot *ChildrenWithMetrics) {
+	for _, obj := range objRoot.Children {
 		objRoot.CPU += obj.CPU
 		objRoot.Memory += obj.Memory
 	}

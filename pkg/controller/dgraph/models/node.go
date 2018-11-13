@@ -62,6 +62,12 @@ type PhysicalCluster struct {
 	Children []Node `json:"children,omitempty"`
 }
 
+type PhysicalClusterWithMetrics struct {
+	PhysicalCluster PhysicalCluster `json:"data,omitempty"`
+	CPU float64    `json:"cpu,omitempty"`
+	Memory float64    `json:"memory,omitempty"`
+}
+
 func createNodeObject(node api_v1.Node) Node {
 	newNode := Node{
 		Name:           node.Name,
@@ -172,7 +178,7 @@ func RetrieveNode(name string) ([]byte, error) {
 }
 
 // RetrieveAllNodesWithMetrics ...
-func RetrieveAllNodesWithMetrics() (ClusterWithMetrics, error) {
+func RetrieveAllNodesWithMetrics() (PhysicalClusterWithMetrics, error) {
 	const q = `query {
 		nd as var(func: has(isNode)) {
 			~node @filter(has(isPod)){
@@ -193,14 +199,14 @@ func RetrieveAllNodesWithMetrics() (ClusterWithMetrics, error) {
 	nodeRoot := NodesWithMetrics{}
 	err := dgraph.ExecuteQuery(q, &nodeRoot)
 	calculateTotalNodeMetrics(&nodeRoot)
-	clusterRoot := ClusterWithMetrics{}
+	clusterRoot := PhysicalClusterWithMetrics{}
 	clusterRoot.CPU = nodeRoot.CPU
 	clusterRoot.Memory = nodeRoot.Memory
-	clusterRoot.PhysicalCluster = append(clusterRoot.PhysicalCluster, PhysicalCluster{
+	clusterRoot.PhysicalCluster = PhysicalCluster{
 		Name: "cluster",
 		Type: "cluster",
 		Children: nodeRoot.Node,
-	})
+	}
 	return clusterRoot, err
 }
 
