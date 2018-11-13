@@ -19,6 +19,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/vmware/purser/pkg/controller/utils"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -57,6 +58,8 @@ type Pod struct {
 	MemoryLimit   float64      `json:"memoryLimit,omitempty"`
 	Type          string       `json:"type,omitempty"`
 	Cid []Service `json:"cid,omitempty"`
+	Pvcs []*PersistentVolumeClaim `json:"pvc,omitempty"`
+	StorageRequest float64 `json:"storageRequest,omitempty"`
 }
 
 // Metrics ...
@@ -84,8 +87,31 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	if namespaceUID != "" {
 		pod.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: k8sPod.Namespace}}
 	}
+	pod.Pvcs, pod.StorageRequest = getPodVolumes(k8sPod)
 	setPodOwners(&pod, k8sPod)
 	return dgraph.MutateNode(pod, dgraph.CREATE)
+}
+
+func getPodVolumes(k8sPod api_v1.Pod) ([]*PersistentVolumeClaim, float64) {
+	podVolumes := []*PersistentVolumeClaim{}
+	storage := 0.0
+	for j := 0; j < len(k8sPod.Spec.Volumes); j++ {
+		vol := k8sPod.Spec.Volumes[j]
+		if vol.PersistentVolumeClaim != nil {
+			pvcXID := k8sPod.Namespace + ":" + vol.PersistentVolumeClaim.ClaimName
+			pvcUID := CreateOrGetPersistentVolumeClaimByID(pvcXID)
+			if pvcUID != "" {
+				podVolumes = append(podVolumes, &PersistentVolumeClaim{ID: dgraph.ID{UID: pvcUID, Xid: pvcXID}})
+				pvc, err := getPVCFromUID(pvcUID)
+				if err == nil {
+					storage += pvc.StorageCapacity
+				} else {
+					log.Errorf("error while getting pvc from uid: (%v), error: (%v)", pvcUID, err)
+				}
+			}
+		}
+	}
+	return podVolumes, storage
 }
 
 // StorePod updates the pod details and create it a new node if not exists.
@@ -374,6 +400,7 @@ func RetrievePodWithMetrics(name string) (JsonDataWrapper, error) {
 			}
 			cpu: cpuRequest
 			memory: memoryRequest
+			storage: storageRequest
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -385,6 +412,7 @@ func RetrievePodWithMetrics(name string) (JsonDataWrapper, error) {
 		Children: parentRoot.Parent[0].Children,
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
+		Storage: parentRoot.Parent[0].Memory,
 	}
 	return root, err
 }

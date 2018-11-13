@@ -45,8 +45,6 @@ type Namespace struct {
 	Jobs []*Job `json:"job,omitempty"`
 	Daemonsets []*Daemonset `json:"daemonset,omitempty"`
 	Replicasets []*Replicaset `json:"replicaset,omitempty"`
-	CPU    float64    `json:"cpu,omitempty"`
-	Memory float64    `json:"memory,omitempty"`
 }
 
 type Children struct {
@@ -54,6 +52,7 @@ type Children struct {
 	Type        string    `json:"type,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Storage float64    `json:"storage,omitempty"`
 }
 
 type Parent struct {
@@ -62,6 +61,7 @@ type Parent struct {
 	Children []Children  `json:"children,omitempty"`
 	CPU    float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
+	Storage float64    `json:"storage,omitempty"`
 }
 
 type ParentWrapper struct {
@@ -71,7 +71,7 @@ type ParentWrapper struct {
 	Parent []Parent  `json:"parent,omitempty"`
 	CPU float64    `json:"cpu,omitempty"`
 	Memory float64    `json:"memory,omitempty"`
-	Storage float64    `json:"cpu,omitempty"`
+	Storage float64    `json:"storage,omitempty"`
 }
 
 type JsonDataWrapper struct {
@@ -260,9 +260,11 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 			~namespace @filter(has(isPod)){
 				namespacePodCpu as cpuRequest
 				namespacePodMem as memoryRequest
+				namespacePvcStorage as storageRequst
 			}
 			namespaceCpu as sum(val(namespacePodCpu))
 			namespaceMem as sum(val(namespacePodMem))
+			namespaceStorage as sum(val(namespacePvcStorage))
         }
 
 		children(func: uid(ns)) {
@@ -270,6 +272,7 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
             type
 			cpu: val(namespaceCpu)
 			memory: val(namespaceMem)
+			storage: val(namespaceStorage)
         }
     }`
 	parentRoot := ParentWrapper{}
@@ -282,6 +285,7 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 		Children: parentRoot.Children,
 		CPU: parentRoot.CPU,
 		Memory: parentRoot.Memory,
+		Storage: parentRoot.Storage,
 	}
 	return root, err
 }
@@ -301,33 +305,39 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 						type
 				        replicasetPodCpu as cpuRequest
 				        replicasetPodMemory as memoryRequest
+						replicasetPvcStorage as storageRequest
 			        }
     	            deploymentReplicasetCpu as sum(val(replicasetPodCpu))
 			        deploymentReplicasetMemory as sum(val(replicasetPodMemory))
+					deploymentReplicasetStorage as sum(val(replicasetPvcStorage))
                 }
 				~statefulset @filter(has(isPod)) {
                     name
                     type
-                    cpu: statefulsetPodCpu as cpuRequest
-                    memory: statefulsetPodMemory as memoryRequest
+                    statefulsetPodCpu as cpuRequest
+                    statefulsetPodMemory as memoryRequest
+					statefulsetPvcStorage as storageRequest
                 }
 				~job @filter(has(isPod)) {
                     name
                     type
                     jobPodCpu as cpuRequest
                     jobPodMemory as memoryRequest
+					jobPvcStorage as jobRequest
                 }
 				~daemonset @filter(has(isPod)) {
                     name
                     type
                     daemonsetPodCpu as cpuRequest
                     daemonsetPodMemory as memoryRequest
+					daemonsetPvcStorage as daemonsetRequest
                 }
 				~replicaset @filter(has(isPod)) {
                     name
                     type
                     replicasetSimplePodCpu as cpuRequest
                     replicasetSimplePodMemory as memoryRequest
+					replicasetPvcStorage as replicasetRequest
                 }
 				sumReplicasetSimplePodCpu as sum(val(replicasetSimplePodCpu))
 				sumDaemonsetPodCpu as sum(val(daemonsetPodCpu))
@@ -342,9 +352,17 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 				sumStatefulsetPodMemory as sum(val(statefulsetPodMemory))
 				sumDeploymentPodMemory as sum(val(deploymentReplicasetMemory))
 				namespaceChildMemory as math(sumReplicasetSimplePodMemory + sumDaemonsetPodMemory + sumJobPodMemory + sumStatefulsetPodMemory + sumDeploymentPodMemory)
-        	}
+        	
+				sumReplicasetSimplePvcStorage as sum(val(replicasetSimplePvcStorage))
+				sumDaemonsetPvcStorage as sum(val(daemonsetPvcStorage))
+				sumJobPvcStorage as sum(val(jobPvcStorage))
+				sumStatefulsetPvcStorage as sum(val(statefulsetPvcStorage))
+				sumDeploymentPvcStorage as sum(val(deploymentReplicasetStorage))
+				namespaceChildStorage as math(sumReplicasetSimplePvcStorage + sumDaemonsetPvcStorage + sumJobPvcStorage + sumStatefulsetPvcStorage + sumDeploymentPvcStorage)
+			}
 			namespaceCpu as sum(val(namespaceChildCpu))
 			namespaceMemory as sum(val(namespaceChildMemory))
+			namespaceStorage as sum(val(namespaceChildStorage))
 		}
 
 		parent(func: uid(ns)) {
@@ -355,9 +373,11 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 				type
 				cpu: val(namespaceChildCpu)
 				memory: val(namespaceChildMemory)
+				storage: val(namespaceChildStorage)
 			}
 			cpu: val(namespaceCpu)
 			memory: val(namespaceMemory)
+			storage: val(namespaceStorage)
         }
     }`
 	parentRoot := ParentWrapper{}
@@ -369,6 +389,7 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 		Children: parentRoot.Parent[0].Children,
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
+		Storage: parentRoot.Parent[0].Storage,
 	}
 	return root, err
 }
@@ -377,5 +398,6 @@ func calculateTotal(objRoot *ParentWrapper) {
 	for _, obj := range objRoot.Children {
 		objRoot.CPU += obj.CPU
 		objRoot.Memory += obj.Memory
+		objRoot.Storage += obj.Storage
 	}
 }

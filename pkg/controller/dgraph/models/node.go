@@ -158,13 +158,14 @@ func RetrieveNode(name string) ([]byte, error) {
 }
 
 // RetrieveAllNodesWithMetrics ...
-func RetrieveAllNodesWithMetrics() (JsonDataWrapper, error) {
+func RetrieveAllNodesAndDisksWithMetrics() (JsonDataWrapper, error) {
 	const q = `query {
-		children(func: has(isNode)) {
+		children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
 			name
             type
 			cpu: cpuCapacity
 			memory: memoryCapacity
+			storage: storageCapacity
         }
 	}`
 	parentRoot := ParentWrapper{}
@@ -177,6 +178,7 @@ func RetrieveAllNodesWithMetrics() (JsonDataWrapper, error) {
 		Children: parentRoot.Children,
 		CPU: parentRoot.CPU,
 		Memory: parentRoot.Memory,
+		Storage: parentRoot.Storage,
 	}
 	return root, err
 }
@@ -192,9 +194,11 @@ func RetrieveNodeWithMetrics(name string) (JsonDataWrapper, error) {
 				type
 				cpu: cpuRequest
 				memory: memoryRequest
+				storage: storageRequest
 			}
 			cpu: cpuCapacity
 			memory: memoryCapacity
+			storage: sum(storage)
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -206,6 +210,7 @@ func RetrieveNodeWithMetrics(name string) (JsonDataWrapper, error) {
 		Children: parentRoot.Parent[0].Children,
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
+		Storage: parentRoot.Parent[0].Storage,
 	}
 	return root, err
 }

@@ -112,3 +112,23 @@ func CreateOrGetPersistentVolumeClaimByID(xid string) string {
 	}
 	return assigned.Uids["blank-0"]
 }
+
+func getPVCFromUID(uid string) (PersistentVolumeClaim, error) {
+	q := `query {
+		pvcs(func: uid(`+ uid + `)) {
+			name
+			type
+			storageCapacity
+		}
+	}`
+
+	type root struct {
+		Pvcs []PersistentVolumeClaim `json:"pvcs"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return PersistentVolumeClaim{}, err
+	}
+	return newRoot.Pvcs[0], nil
+}

@@ -160,12 +160,15 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 				~replicaset @filter(has(isPod)) {
 					replicasetPodCpu as cpuRequest
 					replicasetPodMemory as memoryRequest
+					replicasetPvcStorage as storageRequest
 				}
 				deploymentReplicasetCpu as sum(val(replicasetPodCpu))
 				deploymentReplicasetMemory as sum(val(replicasetPodMemory))
+				deploymentReplicasetStorage as sum(val(replicasetPvcStorage))
 			}
 			deploymentCpu as sum(val(deploymentReplicasetCpu))
 			deploymentMemory as sum(val(deploymentReplicasetMemory))
+			deploymentStorage as sum(val(deploymentReplicasetStorage))
 		}
 
 		parent(func: uid(dep)) {
@@ -176,9 +179,11 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 				type
 				cpu: val(deploymentReplicasetCpu)
 				memory: val(deploymentReplicasetMemory)
+				storage: val(deploymentReplicasetStorage)
 			}
 			cpu: val(deploymentCpu)
 			memory: val(deploymentMemory)
+			storage: val(deploymentStorage)
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -190,6 +195,7 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 		Children: parentRoot.Parent[0].Children,
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
+		Storage: parentRoot.Parent[0].Storage,
 	}
 	return root, err
 }

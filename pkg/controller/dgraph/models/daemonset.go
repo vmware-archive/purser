@@ -161,9 +161,11 @@ func RetrieveDaemonsetWithMetrics(name string) (JsonDataWrapper, error) {
 				type
 				cpu: podCpu as cpuRequest
 				memory: podMemory as memoryRequest
+				storage: pvcStorage as storageRequest
 			}
 			cpu: sum(val(podCpu))
 			memory: sum(val(podMemory))
+			storage: sum(val(pvcStorage))
 		}
 	}`
 	parentRoot := ParentWrapper{}
@@ -175,6 +177,7 @@ func RetrieveDaemonsetWithMetrics(name string) (JsonDataWrapper, error) {
 		Children: parentRoot.Parent[0].Children,
 		CPU: parentRoot.Parent[0].CPU,
 		Memory: parentRoot.Parent[0].Memory,
+		Storage: parentRoot.Parent[0].Storage,
 	}
 	return root, err
 }
