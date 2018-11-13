@@ -53,7 +53,7 @@ func setPodUniqueIDsAndNumConnections(pod models.Pod, uniqueIDs, numConnections 
 	if _, isPresent := uniqueIDs[pod.Name]; !isPresent {
 		uniqueIDs[pod.Name] = uniqueID
 		numConnections[pod.Name] = 0
-		for _, dstPod := range pod.Interacts {
+		for _, dstPod := range pod.Pods {
 			numConnections[pod.Name] += int(dstPod.Count)
 		}
 	}
@@ -76,7 +76,7 @@ func createPodEdges(pods []models.Pod, uniqueIDs map[string]int) []Edge {
 	edges := []Edge{}
 	for _, pod := range pods {
 		srcID := uniqueIDs[pod.Name]
-		for _, dstPod := range pod.Interacts {
+		for _, dstPod := range pod.Pods {
 			destID := uniqueIDs[dstPod.Name]
 			edges = append(edges, createPodEdge(srcID, destID, int(dstPod.Count)))
 		}

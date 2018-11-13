@@ -42,8 +42,8 @@ type Pod struct {
 	StartTime     string    `json:"startTime,omitempty"`
 	EndTime       string    `json:"endTime,omitempty"`
 	Containers    []*Container `json:"containers,omitempty"`
-	Interacts     []*Pod       `json:"interacts,omitempty"`
-	Count         float64      `json:"interacts|count,omitempty"`
+	Pods     []*Pod       `json:"pod,omitempty"`
+	Count         float64      `json:"pod|count,omitempty"`
 	Node          *Node        `json:"podNode,omitempty"`
 	Namespace     *Namespace   `json:"namespace,omitempty"`
 	Deployment    *Deployment  `json:"deployment,omitempty"`
@@ -139,7 +139,7 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 	pods := retrievePodsWithCountAsEdgeWeightFromPodsXIDs(destinationPodsXIDs, counts)
 	source := Pod{
 		ID:        dgraph.ID{UID: uid, Xid: sourcePodXID},
-		Interacts: pods,
+		Pods: pods,
 	}
 	_, err := dgraph.MutateNode(source, dgraph.UPDATE)
 	return err
@@ -150,7 +150,7 @@ func RetrievePodsInteractionsForAllPodsWithCount() ([]Pod, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
 			name
-			interacts {
+			pod {
 				name
 				count
 			}
@@ -176,7 +176,7 @@ func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]byte, error) {
 	const q = `query {
 		pods(func: has(isPod)) {
 			name
-			outbound: interacts {
+			outbound: pod {
 				name
 			}
 			inbound: ~pod @filter(has(isPod)) {
@@ -195,9 +195,9 @@ func RetrievePodsInteractionsForAllPodsOrphanedTrue() ([]byte, error) {
 // RetrievePodsInteractionsForAllPodsOrphanedFalse returns all pods in the dgraph which has edge interacts
 func RetrievePodsInteractionsForAllPodsOrphanedFalse() ([]byte, error) {
 	const q = `query {
-		pods(func: has(isPod)) @filter(has(interacts)) {
+		pods(func: has(isPod)) @filter(has(pod)) {
 			name
-			outbound: interacts {
+			outbound: pod {
 				name
 			}
 			inbound: ~pod @filter(has(isPod)) {
@@ -218,7 +218,7 @@ func RetrievePodsInteractionsForGivenPod(name string) ([]byte, error) {
 	q := `query {
 		pods(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
-			outbound: interacts {
+			outbound: pod {
 				name
 			}
 			inbound: ~pod @filter(has(isPod)) {
