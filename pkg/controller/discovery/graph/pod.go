@@ -18,7 +18,7 @@ type Node struct {
 	Title    string   `json:"title"`
 	Value    int      `json:"value"`
 	Group    int      `json:"group"`
-	Contains []string `json:"contains"`
+	Cid []string `json:"cid"`
 }
 
 // Edge represents each edge in the graph
@@ -62,7 +62,11 @@ func setPodUniqueIDsAndNumConnections(pod models.Pod, uniqueIDs, numConnections 
 func createPodNodes(pods []models.Pod, uniqueIDs, numConnections map[string]int) []Node {
 	nodes := []Node{}
 	for _, pod := range pods {
-		newPodNode := createPodNode(pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name])
+		svcCid := []string{}
+		for _, svc := range pod.Cid {
+			svcCid = append(svcCid, svc.Name)
+		}
+		newPodNode := createPodNode(pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name], svcCid)
 		nodes = append(nodes, newPodNode)
 	}
 	return nodes
@@ -80,13 +84,14 @@ func createPodEdges(pods []models.Pod, uniqueIDs map[string]int) []Edge {
 	return edges
 }
 
-func createPodNode(podName string, podID int, podConnections int) Node {
+func createPodNode(podName string, podID int, podConnections int, cid []string) Node {
 	return Node{
 		ID:    podID,
 		Label: podName,
 		Title: "pods",
 		Value: podConnections,
 		Group: 1,
+		Cid: cid,
 	}
 }
 

@@ -56,6 +56,7 @@ type Pod struct {
 	MemoryRequest float64      `json:"memoryRequest,omitempty"`
 	MemoryLimit   float64      `json:"memoryLimit,omitempty"`
 	Type          string       `json:"type,omitempty"`
+	Cid []Service `json:"cid,omitempty"`
 }
 
 // Metrics ...
