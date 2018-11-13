@@ -57,7 +57,7 @@ func newContainer(container api_v1.Container, podUID, namespaceUID string, pod a
 	limits := container.Resources.Limits
 	c := &Container{
 		ID:            dgraph.ID{Xid: containerXid},
-		Name:          container.Name,
+		Name:          "container-" + container.Name,
 		IsContainer:   true,
 		Type:          "container",
 		StartTime:     pod.GetCreationTimestamp().Time.Format(time.RFC3339),

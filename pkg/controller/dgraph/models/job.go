@@ -44,7 +44,7 @@ type Job struct {
 
 func createJobObject(job batch_v1.Job) Job {
 	newJob := Job{
-		Name:          job.Name,
+		Name:          "job-" + job.Name,
 		IsJob: true,
 		Type:          "job",
 		ID:            dgraph.ID{Xid: job.Namespace + ":" + job.Name},

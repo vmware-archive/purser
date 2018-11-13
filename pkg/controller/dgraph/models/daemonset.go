@@ -44,7 +44,7 @@ type Daemonset struct {
 
 func createDaemonsetObject(daemonset ext_v1beta1.DaemonSet) Daemonset {
 	newDaemonset := Daemonset{
-		Name:          daemonset.Name,
+		Name:          "daemonset-" + daemonset.Name,
 		IsDaemonset: true,
 		Type:          "daemonset",
 		ID:            dgraph.ID{Xid: daemonset.Namespace + ":" + daemonset.Name},

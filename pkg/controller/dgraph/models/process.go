@@ -51,7 +51,7 @@ func newProc(procXID, procName, containerUID, containerXID string, creationTimeS
 		ID:        dgraph.ID{Xid: procXID},
 		IsProc:    true,
 		Type:      "process",
-		Name:      procName,
+		Name:      "process-" + procName,
 		Container: Container{ID: dgraph.ID{UID: containerUID, Xid: containerXID}},
 		StartTime: creationTimeStamp.Format(time.RFC3339),
 	}

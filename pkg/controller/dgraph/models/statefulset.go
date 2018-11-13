@@ -44,7 +44,7 @@ type Statefulset struct {
 
 func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
 	newStatefulset := Statefulset{
-		Name:          statefulset.Name,
+		Name:          "statefulset-" + statefulset.Name,
 		IsStatefulset: true,
 		Type:          "statefulset",
 		ID:            dgraph.ID{Xid: statefulset.Namespace + ":" + statefulset.Name},

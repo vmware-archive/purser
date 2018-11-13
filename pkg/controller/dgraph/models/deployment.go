@@ -45,7 +45,7 @@ type Deployment struct {
 
 func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
 	newDeployment := Deployment{
-		Name:         deployment.Name,
+		Name:         "deployment-" + deployment.Name,
 		IsDeployment: true,
 		Type:         "deployment",
 		ID:           dgraph.ID{Xid: deployment.Namespace + ":" + deployment.Name},
