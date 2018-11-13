@@ -179,8 +179,8 @@ func RetrieveAllNodesWithMetrics() (ClusterWithMetrics, error) {
 				nodePodCpu as cpuRequest
 				nodePodMem as memoryRequest
 			}
-			naodeCpu as sum(val(nodePodCpu))
-			nodeeMem as sum(val(nodePodMem))
+			nodeCpu as sum(val(nodePodCpu))
+			nodeMem as sum(val(nodePodMem))
         }
 
 		node(func: uid(nd)) {
