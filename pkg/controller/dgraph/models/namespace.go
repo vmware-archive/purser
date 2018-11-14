@@ -355,7 +355,7 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
                     type
                     replicasetSimplePodCpu as cpuRequest
                     replicasetSimplePodMemory as memoryRequest
-					replicasetPvcStorage as replicasetRequest
+					replicasetSimplePvcStorage as replicasetRequest
                 }
 				sumReplicasetSimplePodCpu as sum(val(replicasetSimplePodCpu))
 				sumDaemonsetPodCpu as sum(val(daemonsetPodCpu))
