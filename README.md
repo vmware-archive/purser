@@ -12,7 +12,7 @@
 
 ## Purser
 
-Purser is an extension to Kubernetes tasked at providing *application discovery*, *budgeting* and *capacity planning* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
+Purser is an extension to Kubernetes tasked at providing an insight into *application topology*, *budgeting*, *capacity planning* and *resource interactions* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
 
 It comprises of two components: a controller and a plugin.  
 

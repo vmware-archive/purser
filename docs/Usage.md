@@ -117,5 +117,5 @@ Query the cost of the `Cost Insight` infrastructure deployed in `default` namesp
 3. Get the cost of CI group defined above.
 
     ``` bash
-    kubectl get cost group CI
+    kubectl get cost group ci-group
     ```
