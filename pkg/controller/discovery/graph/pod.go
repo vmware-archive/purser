@@ -31,6 +31,10 @@ type Edge struct {
 	Title string `json:"title"`
 }
 
+var(
+	uniqueID = 1
+)
+
 // GetPodNodesAndEdges ...
 func GetPodNodesAndEdges(pods []models.Pod) ([]Node, []Edge) {
 	uniqueIDs, numConnections := getPodUniqueIDsAndNumConnections(pods)
@@ -49,8 +53,8 @@ func getPodUniqueIDsAndNumConnections(pods []models.Pod) (map[string]int, map[st
 }
 
 func setPodUniqueIDsAndNumConnections(pod models.Pod, uniqueIDs, numConnections map[string]int) {
-	uniqueID := len(uniqueIDs) + 1
 	if _, isPresent := uniqueIDs[pod.Name]; !isPresent {
+		uniqueID++
 		uniqueIDs[pod.Name] = uniqueID
 		numConnections[pod.Name] = 0
 		for _, dstPod := range pod.Pods {

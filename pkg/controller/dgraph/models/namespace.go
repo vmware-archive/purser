@@ -272,7 +272,7 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 			~namespace @filter(has(isPod)){
 				namespacePodCpu as cpuRequest
 				namespacePodMem as memoryRequest
-				namespacePvcStorage as storageRequst
+				namespacePvcStorage as storageRequest
 			}
 			namespaceCpu as sum(val(namespacePodCpu))
 			namespaceMem as sum(val(namespacePodMem))
