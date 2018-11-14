@@ -147,6 +147,7 @@ func ExecuteQueryRaw(query string) ([]byte, error) {
 
 // ExecuteQuery given a query and it fetches and writes result into interface
 func ExecuteQuery(query string, root interface{}) error {
+	log.Debugf("query: (%v)", query)
 	ctx := context.Background()
 
 	resp, err := client.NewTxn().Query(ctx, query)

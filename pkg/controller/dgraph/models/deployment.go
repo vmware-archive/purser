@@ -195,6 +195,9 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 	parentRoot := ParentWrapper{}
 	err := dgraph.ExecuteQuery(q, &parentRoot)
 	root := JsonDataWrapper{}
+	if len(parentRoot.Parent) == 0 {
+		return root, err
+	}
 	root.Data = ParentWrapper{
 		Name: parentRoot.Parent[0].Name,
 		Type: parentRoot.Parent[0].Type,
