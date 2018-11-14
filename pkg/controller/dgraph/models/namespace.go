@@ -390,16 +390,16 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~namespace @filter(uid(childs)) {
 				name
 				type
-				cpu: namespaceChildCpu
-				memory: namespaceChildMemory
-				storage: namespaceChildStorage
+				cpu: val(namespaceChildCpu)
+				memory: val(namespaceChildMemory)
+				storage: val(namespaceChildStorage)
 				cpuCost: math(namespaceChildCpu * ` + defaultCPUCostPerCPUPerHour + `)
 				memoryCost: math(namespaceChildMemory * ` + defaultMemCostPerGBPerHour + `)
 				storageCost: math(namespaceChildStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: namespaceCpu
-			memory: namespaceMemory
-			storage: namespaceStorage
+			cpu: val(namespaceCpu)
+			memory: val(namespaceMemory)
+			storage: val(namespaceStorage)
 			cpuCost: math(namespaceCpu * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(namespaceMemory * ` + defaultMemCostPerGBPerHour + `)
 			storageCost: math(namespaceStorage * ` + defaultStorageCostPerGBPerHour + `)

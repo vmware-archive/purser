@@ -207,7 +207,7 @@ func RetrieveNodeWithMetrics(name string) (JsonDataWrapper, error) {
 			}
 			cpu: cpu as cpuCapacity
 			memory: memory as memoryCapacity
-			storage: storage as sum(storage)
+			storage: storage as sum(val(podStorage))
 			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
