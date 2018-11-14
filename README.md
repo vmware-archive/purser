@@ -6,19 +6,18 @@
 - [Features](#features)
 - [Setup and Installation](#setup-and-installation)
 - [Uninstallation](#uninstallation)
-- [Purser Plugin Usage](#plugin-usage)
 - [Additional Documentation](#additional-documentation)
 - [Community, Discussion, Contribution and Support](#community-discussion-contribution-and-support)
 
 ## Purser
 
-Purser is an extension to Kubernetes tasked at providing *application discovery*, *budgeting* and *capacity planning* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
+Purser is an extension to Kubernetes tasked at providing an insight into *cluster topology*, *costing*, *logical grouping of resources* and *resource interactions* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
 
 It comprises of two components: a controller and a plugin.  
 
 The controller component deployed inside the cluster watches for K8s resources associated with the application, thereby, periodically building not just an inventory but also performing application discovery by generating and storing the interactions among the resources such as containers, pods and services.
 
-The plugin component is a CLI tool interfacing with the `kubectl` that helps query savings defined at a level of control of the application level components such as the _Memory and CPU consumptions and utilizations_ rather than at the infrastructure level.
+The plugin component is a CLI tool interfacing with the `kubectl` that helps query costs, savings defined at a level of control of the application level components such as the _Memory and CPU consumptions and utilizations_ rather than at the infrastructure level.
 
 ### Demo
 
@@ -26,9 +25,12 @@ The plugin component is a CLI tool interfacing with the `kubectl` that helps que
 
 ## Features
 
-- Visibility into cost savings opportunities.
-- Visibility into application heirarchy and K8s resource interactions. 
-- Query cost associated with Kubernetes native groups or custom defined groups.
+- Visibility in terms of
+  - workload cost
+  - savings opportunities
+  - cluster heirarchy
+  - resource (pod, service) interactions
+  - logical grouping of resources
 
 ## Setup and Installation
 
@@ -56,11 +58,11 @@ Enter your cluster's configuration path when prompted. The plugin binary needs t
 
 #### Windows
 
-For installation on Windows follow the steps in the [manual installation guide](./docs/ManualInstallation.md).
+For installation on Windows follow the steps in the [manual installation guide](./docs/manual-installation.md).
 
 #### Other Installation Methods
 
-For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs). 
+For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs).
 
 ## Uninstallation
 
@@ -79,38 +81,15 @@ kubectl delete -f crd.yaml
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
-## Plugin Usage
-
-Currenty the below list of commands are supported for the Purser plugin. 
-
-``` bash
-# Query cluster visibility in terms of savings and summary for the application. 
-kubectl plugin purser get [summary|savings]
-
-# Query resources filtered by associated namespace, labels and groups.
-kubectl plugin purser get resources group <group-name>
-
-# Query cost filtered by associated labels, pods and node.
-kubectl plugin purser get cost label <key=val>
-kubectl plugin purser get cost pod <pod name>
-kubectl plugin purser get cost node all
-
-# Configure user-costs for the choice of deployment.
-kubectl plugin purser [set|get] user-costs
-```
-
-_**NOTE:** Use flag `--kubeconfig=<absolute path to config>`, if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)_.
-
-For detailed usage with examples see [here](./docs/Usage.md).
-
 ## Additional Documentation
 
 Additional documentation can be found below:
 
-- [Manual Installation Guide](https://github.com/vmware/purser/blob/master/docs/ManualInstallation.md)
-- [Source Code Installation Guide](https://github.com/vmware/purser/blob/master/docs/SourceCodeInstallation.md)
-- [Purser Architecture and Workflow](https://github.com/vmware/purser/blob/master/docs/ARCHITECTURE_AND_WORKFLOW.md)
-- [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/Usage.md)
+- [Manual Installation Guide](https://github.com/vmware/purser/blob/master/docs/manual-installation.md)
+- [Source Code Installation Guide](https://github.com/vmware/purser/blob/master/docs/sourcecode-installation.md)
+- [Purser Architecture and Workflow](https://github.com/vmware/purser/blob/master/docs/architecture.md)
+- [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/plugin-usage.md)
+- [Developers Guide](https://github.com/vmware/purser/blob/master/docs/developers-guide.md)
 
 ## Community, Discussion, Contribution and Support
 
