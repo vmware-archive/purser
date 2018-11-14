@@ -66,13 +66,17 @@ func setPodUniqueIDsAndNumConnections(pod models.Pod, uniqueIDs, numConnections 
 
 func createPodNodes(pods []models.Pod, uniqueIDs, numConnections map[string]int) []Node {
 	nodes := []Node{}
+	duplicateChecker := make(map[string]bool)
 	for _, pod := range pods {
-		svcCid := []string{}
-		for _, svc := range pod.Cid {
-			svcCid = append(svcCid, svc.Name)
+		if _, isPresent := duplicateChecker[pod.Name]; !isPresent {
+			duplicateChecker[pod.Name] = true
+			svcCid := []string{}
+			for _, svc := range pod.Cid {
+				svcCid = append(svcCid, svc.Name)
+			}
+			newPodNode := createPodNode(pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name], svcCid)
+			nodes = append(nodes, newPodNode)
 		}
-		newPodNode := createPodNode(pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name], svcCid)
-		nodes = append(nodes, newPodNode)
 	}
 	return nodes
 }
