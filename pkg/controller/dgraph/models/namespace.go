@@ -282,9 +282,9 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 		children(func: uid(ns)) {
 			name
             type
-			cpu: cpu as val(namespaceCpu)
-			memory: memory as val(namespaceMem)
-			storage: storage as val(namespaceStorage)
+			cpu: cpu as namespaceCpu
+			memory: memory as namespaceMem
+			storage: storage as namespaceStorage
 			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
@@ -389,16 +389,16 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~namespace @filter(uid(childs)) {
 				name
 				type
-				cpu: childCpu as val(namespaceChildCpu)
-				memory: childMemory as val(namespaceChildMemory)
-				storage: childStorage as val(namespaceChildStorage)
+				cpu: childCpu as namespaceChildCpu
+				memory: childMemory namespaceChildMemory
+				storage: childStorage namespaceChildStorage
 				cpuCost: math(childCpu * ` + defaultCPUCostPerCPUPerHour + `)
 				memoryCost: math(childMemory * ` + defaultMemCostPerGBPerHour + `)
 				storageCost: math(childStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: cpu as val(namespaceCpu)
-			memory: memory as val(namespaceMemory)
-			storage: storage as val(namespaceStorage)
+			cpu: cpu namespaceCpu
+			memory: memory namespaceMemory
+			storage: storage namespaceStorage
 			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)

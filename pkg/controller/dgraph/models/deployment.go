@@ -177,16 +177,16 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
-				cpu: childCpu as val(deploymentReplicasetCpu)
-				memory: childMemory as val(deploymentReplicasetMemory)
-				storage: childStorage as val(deploymentReplicasetStorage)
+				cpu: childCpu as deploymentReplicasetCpu
+				memory: childMemory deploymentReplicasetMemory
+				storage: childStorage deploymentReplicasetStorage
 				cpuCost: math(childCpu * ` + defaultCPUCostPerCPUPerHour + `)
 				memoryCost: math(childMemory * ` + defaultMemCostPerGBPerHour + `)
 				storageCost: math(childStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: cpu as val(deploymentCpu)
-			memory: memory as val(deploymentMemory)
-			storage: storage as val(deploymentStorage)
+			cpu: cpu deploymentCpu
+			memory: memory deploymentMemory
+			storage: storage deploymentStorage
 			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
