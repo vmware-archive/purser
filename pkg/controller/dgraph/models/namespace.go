@@ -282,12 +282,12 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 		children(func: uid(ns)) {
 			name
             type
-			cpu: cpu as namespaceCpu
-			memory: memory as namespaceMem
-			storage: storage as namespaceStorage
-			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+			cpu: namespaceCpu
+			memory: namespaceMem
+			storage: namespaceStorage
+			cpuCost: math(namespaceCpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(namespaceMem * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(namespaceStorage * ` + defaultStorageCostPerGBPerHour + `)
         }
     }`
 	parentRoot := ParentWrapper{}
@@ -389,19 +389,19 @@ func RetrieveNamespaceWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~namespace @filter(uid(childs)) {
 				name
 				type
-				cpu: childCpu as namespaceChildCpu
-				memory: childMemory namespaceChildMemory
-				storage: childStorage namespaceChildStorage
-				cpuCost: math(childCpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(childMemory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(childStorage * ` + defaultStorageCostPerGBPerHour + `)
+				cpu: namespaceChildCpu
+				memory: namespaceChildMemory
+				storage: namespaceChildStorage
+				cpuCost: math(namespaceChildCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(namespaceChildMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(namespaceChildStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: cpu namespaceCpu
-			memory: memory namespaceMemory
-			storage: storage namespaceStorage
-			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+			cpu: namespaceCpu
+			memory: namespaceMemory
+			storage: namespaceStorage
+			cpuCost: math(namespaceCpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(namespaceMemory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(namespaceStorage * ` + defaultStorageCostPerGBPerHour + `)
         }
     }`
 	parentRoot := ParentWrapper{}

@@ -177,19 +177,19 @@ func RetrieveDeploymentWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~deployment @filter(has(isReplicaset)) {
 				name
 				type
-				cpu: childCpu as deploymentReplicasetCpu
-				memory: childMemory deploymentReplicasetMemory
-				storage: childStorage deploymentReplicasetStorage
-				cpuCost: math(childCpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(childMemory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(childStorage * ` + defaultStorageCostPerGBPerHour + `)
+				cpu: deploymentReplicasetCpu
+				memory: deploymentReplicasetMemory
+				storage: deploymentReplicasetStorage
+				cpuCost: math(deploymentReplicasetCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(deploymentReplicasetMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(deploymentReplicasetStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: cpu deploymentCpu
-			memory: memory deploymentMemory
-			storage: storage deploymentStorage
-			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+			cpu: deploymentCpu
+			memory: deploymentMemory
+			storage: deploymentStorage
+			cpuCost: math(deploymentCpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(deploymentMemory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(deploymentStorage * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	parentRoot := ParentWrapper{}
