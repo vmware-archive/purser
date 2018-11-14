@@ -151,44 +151,64 @@ func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time)
 }
 
 // RetrieveAllContainers ...
-func RetrieveAllContainers() ([]byte, error) {
-	const q = `query {
-		container(func: has(isContainer)) {
+func RetrieveAllContainers() (JsonDataWrapper, error) {
+	q := `query {
+		parent(func: has(isContainer)) {
 			name
 			type
-			process: ~container @filter(has(isProc)) {
-				name
-				type
-			}
+			cpu: cpu as cpuRequest
+			memory: memory as memoryRequest
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 		}
 	}`
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	calculateTotal(&parentRoot)
+	root := JsonDataWrapper{}
+	if len(parentRoot.Parent) == 0 {
+		return root, err
 	}
-	return result, nil
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Children,
+		CPU: parentRoot.CPU,
+		Memory: parentRoot.Memory,
+		CPUCost: parentRoot.CPUCost,
+		MemoryCost: parentRoot.MemoryCost,
+	}
+	return root, err
 }
 
 // RetrieveContainer ...
-func RetrieveContainer(name string) ([]byte, error) {
+func RetrieveContainer(name string) (JsonDataWrapper, error) {
 	q := `query {
-		container(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			process: ~container @filter(has(isProc)) {
-				name
-				type
-			}
+			cpu: cpu as cpuRequest
+			memory: memory as memoryRequest
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
 		}
 	}`
-
-
-	result, err := dgraph.ExecuteQueryRaw(q)
-	if err != nil {
-		return nil, err
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(q, &parentRoot)
+	root := JsonDataWrapper{}
+	if len(parentRoot.Parent) == 0 {
+		return root, err
 	}
-	return result, nil
+	root.Data = ParentWrapper{
+		Name: parentRoot.Parent[0].Name,
+		Type: parentRoot.Parent[0].Type,
+		Children: parentRoot.Parent[0].Children,
+		CPU: parentRoot.Parent[0].CPU,
+		Memory: parentRoot.Parent[0].Memory,
+		CPUCost: parentRoot.Parent[0].CPUCost,
+		MemoryCost: parentRoot.Parent[0].MemoryCost,
+	}
+	return root, err
 }
 
 // RetrieveContainerWithMetrics ...

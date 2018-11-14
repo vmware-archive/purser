@@ -91,7 +91,7 @@ var routes = Routes{
 		"GetContainerHierarchy",
 		"GET",
 		"/hierarchy/container",
-		GetContainerWithMetrics,
+		GetContainerHierarchy,
 	},
 	Route{
 		"GetProcessHierarchy",

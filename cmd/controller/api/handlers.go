@@ -231,7 +231,7 @@ func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetContainerHierarchy listens on /hierarchy/container endpoint and returns all containers along with process in them.
 func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
-	var container []byte
+	var container models.JsonDataWrapper
 	var err error
 
 	addHeaders(w, r)
@@ -246,7 +246,7 @@ func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
 
-	_, err = w.Write(container)
+	err = json.NewEncoder(w).Encode(container)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
