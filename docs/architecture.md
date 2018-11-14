@@ -2,7 +2,7 @@
 
 The following diagram represents the architecture of Purser.
 
-![Architecture](/docs/img/architecture.png)
+![Architecture](/docs/img/architecture01.png)
 
 The following are the main componenets installed in Kubernetes for Purser.
 
