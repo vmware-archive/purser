@@ -32,11 +32,12 @@ type Edge struct {
 }
 
 var(
-	uniqueID = 1
+	uniqueID = 0
 )
 
 // GetPodNodesAndEdges ...
 func GetPodNodesAndEdges(pods []models.Pod) ([]Node, []Edge) {
+	uniqueID = 0
 	uniqueIDs, numConnections := getPodUniqueIDsAndNumConnections(pods)
 	nodes := createPodNodes(pods, uniqueIDs, numConnections)
 	edges := createPodEdges(pods, uniqueIDs)
