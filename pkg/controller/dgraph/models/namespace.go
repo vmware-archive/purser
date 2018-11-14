@@ -282,9 +282,9 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 		children(func: uid(ns)) {
 			name
             type
-			cpu: namespaceCpu
-			memory: namespaceMem
-			storage: namespaceStorage
+			cpu: val(namespaceCpu)
+			memory: val(namespaceMem)
+			storage: val(namespaceStorage)
 			cpuCost: math(namespaceCpu * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(namespaceMem * ` + defaultMemCostPerGBPerHour + `)
 			storageCost: math(namespaceStorage * ` + defaultStorageCostPerGBPerHour + `)
