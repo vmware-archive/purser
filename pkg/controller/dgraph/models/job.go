@@ -160,9 +160,12 @@ func RetrieveJobWithMetrics(name string) (JsonDataWrapper, error) {
 			children: ~job @filter(has(isPod)) {
 				name
 				type
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+				storage: pvcStorage as storageRequest
 				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
 				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(podStorage * ` + defaultStorageCostPerGBPerHour + `)
+				storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
 			}
 			cpu: cpu as sum(val(podCpu))
 			memory: memory as sum(val(podMemory))

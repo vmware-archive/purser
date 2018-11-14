@@ -404,7 +404,7 @@ func RetrievePodWithMetrics(name string) (JsonDataWrapper, error) {
 			storage: pvcStorage as storageRequest
 			cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(podStorage * ` + defaultStorageCostPerGBPerHour + `)
+			storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	parentRoot := ParentWrapper{}
