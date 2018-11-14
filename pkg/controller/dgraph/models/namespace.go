@@ -305,6 +305,7 @@ func RetrieveAllNamespacesWithMetrics() (JsonDataWrapper, error) {
 		MemoryCost: parentRoot.MemoryCost,
 		StorageCost: parentRoot.StorageCost,
 	}
+	log.Debugf("data: (%v)", root.Data)
 	return root, err
 }
 

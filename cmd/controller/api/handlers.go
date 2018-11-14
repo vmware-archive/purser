@@ -358,6 +358,7 @@ func GetClusterWithMetrics(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		cluster, err := models.RetrieveAllNamespacesWithMetrics()
+		logrus.Debugf("cluster: (%v)", cluster)
 		if err != nil {
 			logrus.Errorf("Unable to get response: (%v)", err)
 		}
