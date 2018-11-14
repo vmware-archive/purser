@@ -27,12 +27,12 @@ import (
 	api_v1 "k8s.io/api/core/v1"
 )
 
-// Dgraph Model Constants
+// Dgraph Model Constants, cost per 254 hours
 const (
 	IsNamespace = "isNamespace"
-	defaultCPUCostPerCPUPerHour    = "0.024"
-	defaultMemCostPerGBPerHour     = "0.01"
-	defaultStorageCostPerGBPerHour = "0.00013888888"
+	defaultCPUCostPerCPUPerHour    = "6.096"
+	defaultMemCostPerGBPerHour     = "2.54"
+	defaultStorageCostPerGBPerHour = "0.03527777552"
 )
 
 // Namespace schema in dgraph
