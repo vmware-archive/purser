@@ -40,13 +40,14 @@ func init() {
 
 func main() {
 	go api.StartServer()
-	time.Sleep(time.Minute * 1)
 	go eventprocessor.ProcessEvents(&conf)
 	go startCronJobs()
 	controller.Start(&conf)
 }
 
 func startCronJobs() {
+	time.Sleep(time.Minute * 10)
+	runDiscovery()
 	c := cron.New()
 	err := c.AddFunc("@every 0h30m", runDiscovery)
 	if err != nil {
