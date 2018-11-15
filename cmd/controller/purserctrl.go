@@ -19,6 +19,7 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"time"
 
 	"github.com/robfig/cron"
 	"github.com/vmware/purser/cmd/controller/api"
@@ -38,9 +39,10 @@ func init() {
 }
 
 func main() {
+	go api.StartServer()
+	time.Sleep(time.Minute * 1)
 	go eventprocessor.ProcessEvents(&conf)
 	go startCronJobs()
-	go api.StartServer()
 	controller.Start(&conf)
 }
 

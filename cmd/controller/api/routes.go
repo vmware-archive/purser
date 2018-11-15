@@ -195,4 +195,10 @@ var routes = Routes{
 		"/edges",
 		GetPodDiscoveryEdges,
 	},
+	Route {
+		"DropDatabase",
+		"GET",
+		"/dropall/true",
+		DropDatabase,
+	},
 }

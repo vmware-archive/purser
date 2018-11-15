@@ -68,6 +68,24 @@ func retrieveResourcesWithEndTimeBeforeCurrentMonthStart() ([]resource, error) {
 	return newRoot.Resources, nil
 }
 
+func DeleteAllData() ([]resource, error) {
+	q := `query {
+		resources(func: has(name)) {
+			uid
+		}
+	}`
+
+	type root struct {
+		Resources []resource `json:"resources"`
+	}
+	newRoot := root{}
+	err := ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+	return newRoot.Resources, nil
+}
+
 // getCurrentMonthStartTime returns month start time as k8s apimachinery Time object
 func getCurrentMonthStartTime() string {
 	now := time.Now()

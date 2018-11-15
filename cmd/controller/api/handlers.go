@@ -20,6 +20,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/discovery/graph"
 	"net/http"
 
@@ -575,12 +576,21 @@ func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func addHeaders(w http.ResponseWriter, r *http.Request) {
-	if origin := r.Header.Get("Origin"); origin != "" {
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-	} else {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+func DropDatabase(w http.ResponseWriter, r *http.Request) {
+	var err error
+	addHeaders(w, r)
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
 	}
+	dgraph.DeleteAllData()
+	err = json.NewEncoder(w).Encode("success")
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+func addHeaders(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.WriteHeader(http.StatusOK)
