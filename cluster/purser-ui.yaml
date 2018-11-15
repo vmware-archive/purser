@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: purser-ui
+  labels:
+    run: purser-ui
+spec:
+  type: NodePort
+  ports:
+  - port: 4200
+    protocol: TCP
+  selector:
+    run: purser-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: purser-ui
+spec:
+  selector:
+    matchLabels:
+      run: purser-ui
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: purser-ui
+    spec:
+      containers:
+      - name: purser-ui
+        image: vmwareh/purser-ui:1.0.0
+        ports:
+        - containerPort: 4200

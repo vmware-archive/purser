@@ -257,3 +257,5 @@ update: ## Updates all dependencies defined for dep
 .PHONY: check
 check: ## Concurrently runs a whole bunch of static analysis tools
 	gometalinter --enable=misspell --enable=gosimple --enable-gc --vendor --deadline 300s ./...	
+
+include ./.make/Makefile.deploy	

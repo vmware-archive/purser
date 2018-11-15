@@ -1,0 +1,36 @@
+DEPLOY_DOCKERFILE?=Dockerfile.deploy
+
+REGISTRY?=docker.io
+CLUSTER_DIR?=${PWD}/cluster
+DOCKER_REPO?=vmwareh
+
+COMMIT:=$(shell git rev-parse --short HEAD)
+TIMESTAMP:=$(shell date +%s)
+TAG?=$(COMMIT)-$(TIMESTAMP)
+
+.PHONY: kubectl-deploy-purser-ui
+kubectl-deploy-purser-ui: 
+	@echo "Deploys purser-ui service"
+	@kubectl create -f $(CLUSTER_DIR)/purser-ui.yaml 
+
+.PHONY: deploy-purser-ui
+deploy-purser-ui: build-purser-ui-image push-purser-ui-image
+
+.PHONY: build-purser-ui-image
+build-purser-ui-image:
+	$(DOCKER) build --build-arg BINARY=purser-ui -t $(REGISTRY)/$(DOCKER_REPO)/purser-ui -f $(DEPLOY_DOCKERFILE) .
+	$(DOCKER) tag $(REGISTRY)/$(DOCKER_REPO)/purser-ui $(REGISTRY)/$(DOCKER_REPO)/purser-ui:$(TAG)
+
+.PHONY: push-purser-ui-image
+push-purser-ui-image: build-purser-ui-image
+	$(DOCKER) push $(REGISTRY)/$(DOCKER_REPO)/purser-ui
+
+.PHONY: clean-purser-ui-image
+clean-purser-ui-image:
+	$(DOCKER) rmi -f $(REGISTRY)/$(DOCKER_REPO)/purser-ui
+
+.PHONY: kubectl-deploy-purser-dgraph
+kubectl-deploy-purser-dgraph: 
+    @echo "Deploys purser dgraph service"
+    @kubectl create -f $(CLUSTER_DIR)/purser-db.yaml
+
