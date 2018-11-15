@@ -171,9 +171,9 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 }
 
 // RetrievePodsInteractionsForAllPodsOrphanedTrue returns all pods in the dgraph
-func RetrievePodsInteractionsForAllPodsWithCount() ([]Pod, error) {
-	const q = `query {
-		pods(func: has(isPod)) {
+func RetrievePodsInteractionsForAllLivePodsWithCount() ([]Pod, error) {
+	q := `query {
+		pods(func: has(isPod)) @filter((NOT has(endTime))) {
 			name
 			pod {
 				name

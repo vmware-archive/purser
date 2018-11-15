@@ -550,7 +550,7 @@ func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	addHeaders(w, r)
-	pod, err = models.RetrievePodsInteractionsForAllPodsWithCount()
+	pod, err = models.RetrievePodsInteractionsForAllLivePodsWithCount()
 	graphNodes, graphEdges = graph.GetPodNodesAndEdges(pod)
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
