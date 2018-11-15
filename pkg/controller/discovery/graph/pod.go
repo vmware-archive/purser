@@ -38,44 +38,49 @@ var(
 // GetPodNodesAndEdges ...
 func GetPodNodesAndEdges(pods []models.Pod) ([]Node, []Edge) {
 	uniqueID = 0
-	uniqueIDs, numConnections := getPodUniqueIDsAndNumConnections(pods)
-	nodes := createPodNodes(pods, uniqueIDs, numConnections)
+	uniqueIDs, numConnections, inboundAndOutboundConnections := getPodUniqueIDsAndNumConnections(pods)
+	nodes := createPodNodes(pods, uniqueIDs, numConnections, inboundAndOutboundConnections)
 	edges := createPodEdges(pods, uniqueIDs)
 	return nodes, edges
 }
 
-func getPodUniqueIDsAndNumConnections(pods []models.Pod) (map[string]int, map[string]int) {
+func getPodUniqueIDsAndNumConnections(pods []models.Pod) (map[string]int, map[string]int, map[string]int) {
 	uniqueIDs := make(map[string]int)
 	numConnections := make(map[string]int)
+	inboundAndOutboundConnections := make(map[string]int)
 	for _, pod := range pods {
-		setPodUniqueIDsAndNumConnections(pod, uniqueIDs, numConnections)
+		setPodUniqueIDsAndNumConnections(pod, uniqueIDs, numConnections, inboundAndOutboundConnections)
 	}
-	return uniqueIDs, numConnections
+	return uniqueIDs, numConnections, inboundAndOutboundConnections
 }
 
-func setPodUniqueIDsAndNumConnections(pod models.Pod, uniqueIDs, numConnections map[string]int) {
+func setPodUniqueIDsAndNumConnections(pod models.Pod, uniqueIDs, numConnections, inboundAndOutboundConnections map[string]int) {
 	if _, isPresent := uniqueIDs[pod.Name]; !isPresent {
 		uniqueID++
 		uniqueIDs[pod.Name] = uniqueID
 		numConnections[pod.Name] = 0
 		for _, dstPod := range pod.Pods {
 			numConnections[pod.Name] += int(dstPod.Count)
+			inboundAndOutboundConnections[pod.Name] += int(dstPod.Count)
+			inboundAndOutboundConnections[dstPod.Name] += int(dstPod.Count)
 		}
 	}
 }
 
-func createPodNodes(pods []models.Pod, uniqueIDs, numConnections map[string]int) []Node {
+func createPodNodes(pods []models.Pod, uniqueIDs, numConnections, inboundAndOutboundConnections map[string]int) []Node {
 	nodes := []Node{}
 	duplicateChecker := make(map[string]bool)
 	for _, pod := range pods {
-		if _, isPresent := duplicateChecker[pod.Name]; !isPresent {
-			duplicateChecker[pod.Name] = true
-			svcCid := []string{}
-			for _, svc := range pod.Cid {
-				svcCid = append(svcCid, svc.Name)
+		if _, isNotOrphan := inboundAndOutboundConnections[pod.Name]; isNotOrphan {
+			if _, isPresent := duplicateChecker[pod.Name]; !isPresent {
+				duplicateChecker[pod.Name] = true
+				svcCid := []string{}
+				for _, svc := range pod.Cid {
+					svcCid = append(svcCid, svc.Name)
+				}
+				newPodNode := createPodNode(pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name], svcCid)
+				nodes = append(nodes, newPodNode)
 			}
-			newPodNode := createPodNode(pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name], svcCid)
-			nodes = append(nodes, newPodNode)
 		}
 	}
 	return nodes
