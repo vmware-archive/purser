@@ -46,7 +46,7 @@ func main() {
 
 func startCronJobs() {
 	c := cron.New()
-	err := c.AddFunc("@every 0h40m", runDiscovery)
+	err := c.AddFunc("@every 0h30m", runDiscovery)
 	if err != nil {
 		log.Fatal(err)
 	}
