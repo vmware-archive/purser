@@ -122,8 +122,8 @@ func printPodsVerbose(pods []*Pod) {
 	totalStorageCost := 0.0
 
 	for i := 0; i <= len(pods)-1; i++ {
-		fmt.Printf("%-30s%s\n", "Pod Name:", pods[i].name)
-		fmt.Printf("%-30s%s\n", "Node:", pods[i].nodeName)
+		fmt.Printf("%-30s    %s\n", "Pod Name:", pods[i].name)
+		fmt.Printf("%-30s    %s\n", "Node:", pods[i].nodeName)
 		fmt.Printf("%-30s\n", "Persistent Volume Claims:")
 
 		for j := 0; j <= len(pods[i].pvcs)-1; j++ {
@@ -131,9 +131,9 @@ func printPodsVerbose(pods []*Pod) {
 
 		}
 		fmt.Printf("%-30s\n", "Cost:")
-		fmt.Printf("    %-21s%f$\n", "Total Cost:", pods[i].cost.TotalCost)
-		fmt.Printf("    %-21s%f$\n", "Compute Cost:", pods[i].cost.CPUCost+pods[i].cost.MemoryCost)
-		fmt.Printf("    %-21s%f$\n", "Storage Cost:", pods[i].cost.StorageCost)
+		fmt.Printf("    %-30s%f$\n", "Total Cost:", pods[i].cost.TotalCost)
+		fmt.Printf("    %-30s%f$\n", "Compute Cost:", pods[i].cost.CPUCost+pods[i].cost.MemoryCost)
+		fmt.Printf("    %-30s%f$\n", "Storage Cost:", pods[i].cost.StorageCost)
 		fmt.Printf("\n")
 
 		totalCost += pods[i].cost.TotalCost
@@ -143,7 +143,7 @@ func printPodsVerbose(pods []*Pod) {
 	}
 
 	fmt.Printf("%-30s\n", "Total Cost Summary:")
-	fmt.Printf("    %-21s%f$\n", "Total Cost:", totalCost)
-	fmt.Printf("    %-21s%f$\n", "Compute Cost:", totalCPUCost+totalMemoryCost)
-	fmt.Printf("    %-21s%f$\n", "Storage Cost:", totalStorageCost)
+	fmt.Printf("    %-30s%f$\n", "Total Cost:", totalCost)
+	fmt.Printf("    %-30s%f$\n", "Compute Cost:", totalCPUCost+totalMemoryCost)
+	fmt.Printf("    %-30s%f$\n", "Storage Cost:", totalStorageCost)
 }

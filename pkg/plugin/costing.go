@@ -90,7 +90,7 @@ func GetClusterSummary() {
 	fmt.Printf("\t\t%s\t\t\t%.2f\n", "Capacity(GB):", bytesToGB(storageCapacity))
 
 	pvcs := GetClusterPersistentVolumeClaims()
-	pvcCost, pvcCapacity := getPvcCostAndCapacity(pvcs)
+	_, pvcCapacity := getPvcCostAndCapacity(pvcs)
 	fmt.Printf("\t\t%s\t\t\t%d\n", "PV Claim count:", len(pvcs))
 
 	fmt.Printf("\t\t%s\t\t%.2f\n", "PV Claim Capacity(GB):", bytesToGB(pvcCapacity))
@@ -100,21 +100,6 @@ func GetClusterSummary() {
 	fmt.Printf("\t\t%s\t\t%.2f\n", "Compute cost($):", computeCost)
 	fmt.Printf("\t\t%s\t\t%.2f\n", "Storage cost($):", storageCost)
 	fmt.Printf("\t\t%s\t\t\t%.2f\n", "Total cost($):", computeCost+storageCost)
-
-	fmt.Println()
-	// Savings
-	fmt.Println("==============================")
-	fmt.Printf("Savings Summary\n")
-	fmt.Println("==============================")
-
-	fmt.Printf("\tStorage:\n")
-	mtdSaving := storageCost - pvcCost
-	projectedSaving := projectToMonth(mtdSaving)
-
-	fmt.Printf("\t\t%s\t\t\t%d\n", "Unused Volumes:", len(pvs)-len(pvcs))
-	fmt.Printf("\t\t%s\t\t%.2f\n", "Unused Capacity(GB):", bytesToGB(storageCapacity-pvcCapacity))
-	fmt.Printf("\t\t%s\t%.2f\n", "Month To Date Savings($):", mtdSaving)
-	fmt.Printf("\t\t%s\t%.2f\n", "Projected Monthly Savings($):", projectedSaving)
 }
 
 // GetSavings returns the savings summary.
@@ -130,10 +115,10 @@ func GetSavings() {
 	mtdSaving := storageCost - pvcCost
 	projectedSaving := projectToMonth(mtdSaving)
 
-	fmt.Printf("   %-25s   %d\n", "Unused Volumes:", len(pvs)-len(pvcs))
-	fmt.Printf("   %-25s   %.2f\n", "Unused Capacity(GB):", bytesToGB(storageCapacity-pvcCapacity))
-	fmt.Printf("   %-25s   %.2f\n", "Month To Date Savings($):", mtdSaving)
-	fmt.Printf("   %-25s   %.2f\n", "Projected Monthly Savings($):", projectedSaving)
+	fmt.Printf("   %-30s   %d\n", "Unused Volumes:", len(pvs)-len(pvcs))
+	fmt.Printf("   %-30s   %.2f\n", "Unused Capacity(GB):", bytesToGB(storageCapacity-pvcCapacity))
+	fmt.Printf("   %-30s   %.2f\n", "Month To Date Savings($):", mtdSaving)
+	fmt.Printf("   %-30s   %.2f\n", "Projected Monthly Savings($):", projectedSaving)
 }
 
 // GetPodCost returns the cumulative cost for the pods.
