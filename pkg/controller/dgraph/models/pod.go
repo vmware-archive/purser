@@ -42,9 +42,9 @@ type Pod struct {
 	StartTime     time.Time    `json:"startTime,omitempty"`
 	EndTime       time.Time    `json:"endTime,omitempty"`
 	Containers    []*Container `json:"containers,omitempty"`
-	Interacts     []*Pod       `json:"interacts,omitempty"`
-	Count         float64      `json:"interacts|count,omitempty"`
-	Node          *Node        `json:"podNode,omitempty"`
+	Pods          []*Pod       `json:"pod,omitempty"`
+	Count         float64      `json:"pod|count,omitempty"`
+	Node          *Node        `json:"node,omitempty"`
 	Namespace     *Namespace   `json:"namespace,omitempty"`
 	Deployment    *Deployment  `json:"deployment,omitempty"`
 	Replicaset    *Replicaset  `json:"replicaset,omitempty"`
@@ -136,32 +136,10 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 	pods := retrievePodsWithCountAsEdgeWeightFromPodsXIDs(destinationPodsXIDs, counts)
 	source := Pod{
 		ID:        dgraph.ID{UID: uid, Xid: sourcePodXID},
-		Interacts: pods,
+		Pods: pods,
 	}
 	_, err := dgraph.MutateNode(source, dgraph.UPDATE)
 	return err
-}
-
-// RetrieveAllPods returns all pods in the dgraph
-func RetrieveAllPods() ([]Pod, error) {
-	const q = `query {
-		pods(func: has(isPod)) {
-			name
-			interacts @facets {
-				name
-			}
-		}
-	}`
-
-	type root struct {
-		Pods []Pod `json:"pods"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
-	if err != nil {
-		return nil, err
-	}
-	return newRoot.Pods, nil
 }
 
 func retrievePodsFromPodsXIDs(podsXIDs []string) []*Pod {
