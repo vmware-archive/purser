@@ -29,7 +29,7 @@ import (
 func GetHomePage(w http.ResponseWriter, r *http.Request) {
 	_, err := fmt.Fprintf(w, "Welcome to the Purser!")
 	if err != nil {
-		logrus.Errorf("Unable to write  srting to Homepage: (%v)", err)
+		logrus.Errorf("Unable to write welcome message to Homepage: (%v)", err)
 	}
 }
 
