@@ -1,9 +1,9 @@
 # Developers Guide
 
-- [Prerequisites](prerequisites)
-- [Database Setup](database_setup)
-- [Binary Compilation](binary_compilation)
-- [Local Execution](local_execution)
+- [Prerequisites](#prerequisites)
+- [Database Setup](#database-setup)
+- [Binary Compilation](#binary-compilation)
+- [Local Execution](#local-execution)
 
 ## Prerequisites
 
