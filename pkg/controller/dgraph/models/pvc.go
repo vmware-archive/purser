@@ -58,7 +58,7 @@ func createPvcObject(pvc api_v1.PersistentVolumeClaim) PersistentVolumeClaim {
 	volume := pvc.Spec.VolumeName
 	pvUID := CreateOrGetPersistentVolumeByID(volume)
 	if volume != "" {
-		newPvc.PersistentVolume = &PersistentVolume{ID: dgraph.ID{UID:pvUID}}
+		newPvc.PersistentVolume = &PersistentVolume{ID: dgraph.ID{UID: pvUID}}
 	}
 
 	namespaceUID := CreateOrGetNamespaceByID(pvc.Namespace)
