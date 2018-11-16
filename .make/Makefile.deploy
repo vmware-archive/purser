@@ -1,0 +1,37 @@
+DEPLOY_DOCKERFILE?=Dockerfile.deploy
+
+CLUSTER_DIR?=${PWD}/cluster
+
+COMMIT:=$(shell git rev-parse --short HEAD)
+TIMESTAMP:=$(shell date +%s)
+TAG?=$(COMMIT)-$(TIMESTAMP)
+
+.PHONY: deploy-purser
+deploy-purser: kubectl-deploy-purser-db kubectl-deploy-purser-ui
+
+.PHONY: kubectl-deploy-purser-ui
+kubectl-deploy-purser-ui: 
+	@echo "Deploys purser-ui service"
+	@kubectl create -f $(CLUSTER_DIR)/purser-ui.yaml 
+
+.PHONY: deploy-purser-ui
+deploy-purser-ui: build-purser-ui-image push-purser-ui-image
+
+.PHONY: build-purser-ui-image
+build-purser-ui-image:
+	@docker build --build-arg BINARY=purser-ui -t $(REGISTRY)/$(DOCKER_REPO)/purser-ui -f $(DEPLOY_DOCKERFILE) .
+	@docker tag $(REGISTRY)/$(DOCKER_REPO)/purser-ui $(REGISTRY)/$(DOCKER_REPO)/purser-ui:$(TAG)
+
+.PHONY: push-purser-ui-image
+push-purser-ui-image: build-purser-ui-image
+	@docker push $(REGISTRY)/$(DOCKER_REPO)/purser-ui
+
+.PHONY: clean-purser-ui-image
+clean-purser-ui-image:
+	@docker rmi -f $(REGISTRY)/$(DOCKER_REPO)/purser-ui
+
+.PHONY: kubectl-deploy-purser-db
+kubectl-deploy-purser-db: 
+	@echo "Deploys purser purser-db service"
+	@kubectl create -f $(CLUSTER_DIR)/purser-db.yaml
+

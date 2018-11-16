@@ -24,7 +24,8 @@ PKG := pkg
 CMD := cmd/controller
 
 # Where to push the docker image.
-REGISTRY ?= gurusreekanth
+REGISTRY?=docker.io
+DOCKER_REPO?=vmwareh
 
 # Which architecture to build - see $(ALL_ARCH) for options.
 ARCH ?= amd64
@@ -55,7 +56,7 @@ ifeq ($(ARCH),ppc64le)
     BASEIMAGE?=ppc64le/busybox
 endif
 
-IMAGE := $(REGISTRY)/$(BIN)-$(ARCH)
+IMAGE := $(DOCKER_REPO)/$(BIN)-$(ARCH)
 
 BUILD_IMAGE ?= golang:1.8-alpine
 
@@ -155,7 +156,7 @@ container-name:
 .PHONY: push
 push: .push-$(DOTFILE_IMAGE) push-name
 .push-$(DOTFILE_IMAGE): .container-$(DOTFILE_IMAGE)
-ifeq ($(findstring gcr.io,$(REGISTRY)),gcr.io)
+ifeq ($(findstring gcr.io,$(DOCKER_REPO)),gcr.io)
 	@gcloud docker -- push $(IMAGE):$(VERSION)
 else
 	@docker push $(IMAGE):$(VERSION)
@@ -235,6 +236,8 @@ $(VENDOR_DIR): Gopkg.toml Gopkg.lock
 	@$(DEP_BIN) ensure -v
 
 GOFORMAT_FILES := $(shell find  . -name '*.go')
+
+include ./.make/Makefile.deploy	
 
 .PHONY: format ## Formats any go file that differs from gofmt's style and removes unused imports
 format: 
