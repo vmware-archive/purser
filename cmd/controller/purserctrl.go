@@ -19,8 +19,10 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"time"
 
 	"github.com/robfig/cron"
+	"github.com/vmware/purser/cmd/controller/api"
 	"github.com/vmware/purser/cmd/controller/config"
 	"github.com/vmware/purser/pkg/controller"
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -37,12 +39,17 @@ func init() {
 }
 
 func main() {
+	go api.StartServer()
 	go eventprocessor.ProcessEvents(&conf)
-	startCronJobs()
+	go startCronJobs()
 	controller.Start(&conf)
 }
 
+// starts first discovery after 10 mins of controller starting. Next runs will occur in every 30 min
 func startCronJobs() {
+	time.Sleep(time.Minute * 10)
+	runDiscovery()
+
 	c := cron.New()
 	err := c.AddFunc("@every 0h30m", runDiscovery)
 	if err != nil {

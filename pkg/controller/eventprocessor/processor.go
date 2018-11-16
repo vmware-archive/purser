@@ -25,8 +25,8 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	log "github.com/Sirupsen/logrus"
-	api_v1 "k8s.io/api/core/v1"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
+	api_v1 "k8s.io/api/core/v1"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
 )
 

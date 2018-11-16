@@ -20,9 +20,9 @@ package models
 import (
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
-	log "github.com/Sirupsen/logrus"
 )
 
 // Dgraph Model Constants
@@ -121,4 +121,3 @@ func CreateOrGetReplicasetByID(xid string) string {
 	}
 	return assigned.Uids["blank-0"]
 }
-
