@@ -70,7 +70,7 @@ func GenerateAndStoreSvcInteractions() {
 func getDestinationPods(podsInService []*models.Pod) []*models.Pod {
 	var destinationPods []*models.Pod
 	for _, pod := range podsInService {
-		destinationPods = append(destinationPods, pod.Interacts...)
+		destinationPods = append(destinationPods, pod.Pods...)
 	}
 	return destinationPods
 }

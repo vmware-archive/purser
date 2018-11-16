@@ -136,7 +136,7 @@ func StorePodsInteraction(sourcePodXID string, destinationPodsXIDs []string, cou
 	pods := retrievePodsWithCountAsEdgeWeightFromPodsXIDs(destinationPodsXIDs, counts)
 	source := Pod{
 		ID:        dgraph.ID{UID: uid, Xid: sourcePodXID},
-		Interacts: pods,
+		Pods: pods,
 	}
 	_, err := dgraph.MutateNode(source, dgraph.UPDATE)
 	return err
