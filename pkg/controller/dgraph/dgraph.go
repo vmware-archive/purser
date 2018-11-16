@@ -95,6 +95,7 @@ func CreateSchema() error {
 		isPod: bool .
 		isContainer: bool .
 		isProc: bool .
+		pod: uid @reverse .
 	`
 	ctx := context.Background()
 	err := client.Alter(ctx, op)
@@ -124,21 +125,29 @@ func GetUID(id string, nodeType string) string {
 	return unmarshalDgraphResponse(resp, id)
 }
 
-// ExecuteQuery given a query and it fetches and writes result into interface
-func ExecuteQuery(query string, root interface{}) error {
+// ExecuteQueryRaw given a query and it fetches and writes result into interface
+func ExecuteQueryRaw(query string) ([]byte, error) {
 	ctx := context.Background()
 
 	resp, err := client.NewTxn().Query(ctx, query)
 	if err != nil {
+		log.Error(err)
+	}
+	return resp.Json, err
+}
+
+// ExecuteQuery given a query and it fetches and writes result into interface
+func ExecuteQuery(query string, root interface{}) error {
+	respJSON, err := ExecuteQueryRaw(query)
+	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(resp.Json, root)
+	err = json.Unmarshal(respJSON, root)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-
 	return nil
 }
 

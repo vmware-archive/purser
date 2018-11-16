@@ -45,7 +45,7 @@ func main() {
 	controller.Start(&conf)
 }
 
-// starts first discovery after 10 mins of controller starting. Next runs will occur in every 30 min
+// starts first discovery after 10 min of controller starting. Next runs will occur in every 30 min
 func startCronJobs() {
 	time.Sleep(time.Minute * 10)
 	runDiscovery()
