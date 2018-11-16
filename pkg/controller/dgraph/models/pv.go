@@ -34,12 +34,12 @@ const (
 // PersistentVolume schema in dgraph
 type PersistentVolume struct {
 	dgraph.ID
-	IsPersistentVolume bool       `json:"isPersistentVolume,omitempty"`
-	Name               string     `json:"name,omitempty"`
-	StartTime          time.Time  `json:"startTime,omitempty"`
-	EndTime            time.Time  `json:"endTime,omitempty"`
-	Type               string     `json:"type,omitempty"`
-	StorageCapacity    float64    `json:"storageCapacity,omitempty"`
+	IsPersistentVolume bool      `json:"isPersistentVolume,omitempty"`
+	Name               string    `json:"name,omitempty"`
+	StartTime          time.Time `json:"startTime,omitempty"`
+	EndTime            time.Time `json:"endTime,omitempty"`
+	Type               string    `json:"type,omitempty"`
+	StorageCapacity    float64   `json:"storageCapacity,omitempty"`
 }
 
 func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
