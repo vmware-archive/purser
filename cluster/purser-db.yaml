@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: purser-dgraph
+  name: purser-db
   labels:
     app: purser
     service-app: cmf
@@ -97,7 +97,7 @@ spec:
             set -ex
             dgraph server --my=$(hostname -f):7080 --lru_mb 2048 --zero dgraph-0.dgraph.default.svc.cluster.local:5080
       - name: purser-controller
-        image: vmwareh/controller-amd64:1.0.0-test
+        image: vmwareh/controller-amd64:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3030

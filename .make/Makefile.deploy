@@ -6,6 +6,9 @@ COMMIT:=$(shell git rev-parse --short HEAD)
 TIMESTAMP:=$(shell date +%s)
 TAG?=$(COMMIT)-$(TIMESTAMP)
 
+.PHONY: deploy-purser
+deploy-purser: kubectl-deploy-purser-db kubectl-deploy-purser-ui
+
 .PHONY: kubectl-deploy-purser-ui
 kubectl-deploy-purser-ui: 
 	@echo "Deploys purser-ui service"
@@ -27,8 +30,8 @@ push-purser-ui-image: build-purser-ui-image
 clean-purser-ui-image:
 	@docker rmi -f $(REGISTRY)/$(DOCKER_REPO)/purser-ui
 
-.PHONY: kubectl-deploy-purser-dgraph
-kubectl-deploy-purser-dgraph: 
-	@echo "Deploys purser dgraph service"
+.PHONY: kubectl-deploy-purser-db
+kubectl-deploy-purser-db: 
+	@echo "Deploys purser purser-db service"
 	@kubectl create -f $(CLUSTER_DIR)/purser-db.yaml
 

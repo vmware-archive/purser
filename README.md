@@ -90,6 +90,7 @@ Additional documentation can be found below:
 - [Purser Architecture and Workflow](https://github.com/vmware/purser/blob/master/docs/architecture.md)
 - [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/plugin-usage.md)
 - [Developers Guide](https://github.com/vmware/purser/blob/master/docs/developers-guide.md)
+- [Purser Deployment Guide](https://github.com/vmware/purser/blob/master/docs/purser-deployment.md)
 
 ## Community, Discussion, Contribution and Support
 
