@@ -39,4 +39,10 @@ var routes = Routes{
 		"/",
 		GetHomePage,
 	},
+	Route{
+		"GetPodInteractions",
+		"GET",
+		"/interactions/pod",
+		GetPodInteractions,
+	},
 }
