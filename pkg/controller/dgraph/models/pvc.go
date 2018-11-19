@@ -36,8 +36,8 @@ type PersistentVolumeClaim struct {
 	dgraph.ID
 	IsPersistentVolumeClaim bool              `json:"isPersistentVolumeClaim,omitempty"`
 	Name                    string            `json:"name,omitempty"`
-	StartTime               time.Time         `json:"startTime,omitempty"`
-	EndTime                 time.Time         `json:"endTime,omitempty"`
+	StartTime               string            `json:"startTime,omitempty"`
+	EndTime                 string            `json:"endTime,omitempty"`
 	Namespace               *Namespace        `json:"namespace,omitempty"`
 	Type                    string            `json:"type,omitempty"`
 	StorageCapacity         float64           `json:"storageCapacity,omitempty"`
@@ -50,7 +50,7 @@ func createPvcObject(pvc api_v1.PersistentVolumeClaim) PersistentVolumeClaim {
 		IsPersistentVolumeClaim: true,
 		Type:                    "pvc",
 		ID:                      dgraph.ID{Xid: pvc.Namespace + ":" + pvc.Name},
-		StartTime:               pvc.GetCreationTimestamp().Time,
+		StartTime:               pvc.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	capacity := pvc.Status.Capacity["storage"]
 	newPvc.StorageCapacity = utils.ConvertToFloat64GB(&capacity)
@@ -67,7 +67,7 @@ func createPvcObject(pvc api_v1.PersistentVolumeClaim) PersistentVolumeClaim {
 	}
 	deletionTimestamp := pvc.GetDeletionTimestamp()
 	if !deletionTimestamp.IsZero() {
-		newPvc.EndTime = deletionTimestamp.Time
+		newPvc.EndTime = deletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return newPvc
 }

@@ -39,8 +39,8 @@ type Pod struct {
 	dgraph.ID
 	IsPod         bool         `json:"isPod,omitempty"`
 	Name          string       `json:"name,omitempty"`
-	StartTime     time.Time    `json:"startTime,omitempty"`
-	EndTime       time.Time    `json:"endTime,omitempty"`
+	StartTime     string       `json:"startTime,omitempty"`
+	EndTime       string       `json:"endTime,omitempty"`
 	Containers    []*Container `json:"containers,omitempty"`
 	Pods          []*Pod       `json:"pod,omitempty"`
 	Count         float64      `json:"pod|count,omitempty"`
@@ -73,7 +73,7 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 		IsPod:     true,
 		Type:      "pod",
 		ID:        dgraph.ID{Xid: k8sPod.Namespace + ":" + k8sPod.Name},
-		StartTime: k8sPod.GetCreationTimestamp().Time,
+		StartTime: k8sPod.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	nodeUID, err := createOrGetNodeByID(k8sPod.Spec.NodeName)
 	if err == nil {
@@ -107,7 +107,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 	if !podDeletedTimestamp.IsZero() {
 		pod = Pod{
 			ID:      dgraph.ID{Xid: xid, UID: uid},
-			EndTime: podDeletedTimestamp.Time,
+			EndTime: podDeletedTimestamp.Time.Format(time.RFC3339),
 		}
 		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
 	} else {

@@ -34,12 +34,12 @@ const (
 // PersistentVolume schema in dgraph
 type PersistentVolume struct {
 	dgraph.ID
-	IsPersistentVolume bool      `json:"isPersistentVolume,omitempty"`
-	Name               string    `json:"name,omitempty"`
-	StartTime          time.Time `json:"startTime,omitempty"`
-	EndTime            time.Time `json:"endTime,omitempty"`
-	Type               string    `json:"type,omitempty"`
-	StorageCapacity    float64   `json:"storageCapacity,omitempty"`
+	IsPersistentVolume bool    `json:"isPersistentVolume,omitempty"`
+	Name               string  `json:"name,omitempty"`
+	StartTime          string  `json:"startTime,omitempty"`
+	EndTime            string  `json:"endTime,omitempty"`
+	Type               string  `json:"type,omitempty"`
+	StorageCapacity    float64 `json:"storageCapacity,omitempty"`
 }
 
 func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
@@ -48,14 +48,14 @@ func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
 		IsPersistentVolume: true,
 		Type:               "pv",
 		ID:                 dgraph.ID{Xid: pv.Name},
-		StartTime:          pv.GetCreationTimestamp().Time,
+		StartTime:          pv.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	capacity := pv.Spec.Capacity["storage"]
 	newPv.StorageCapacity = utils.ConvertToFloat64GB(&capacity)
 
 	deletionTimestamp := pv.GetDeletionTimestamp()
 	if !deletionTimestamp.IsZero() {
-		newPv.EndTime = deletionTimestamp.Time
+		newPv.EndTime = deletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return newPv
 }
