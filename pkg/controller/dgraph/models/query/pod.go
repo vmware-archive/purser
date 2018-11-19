@@ -79,7 +79,7 @@ func RetrievePodHierarchy(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for pod, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query :=  `query {
+	query := `query {
 		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
 			type
