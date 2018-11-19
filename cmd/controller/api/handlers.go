@@ -83,6 +83,19 @@ func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetDeploymentHierarchy listens on /hierarchy/deployment endpoint and returns all children of deployment
+func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveDeploymentHierarchy(name[0])
+	}
+	encodeAndWrite(w, jsonData)
+}
+
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")
