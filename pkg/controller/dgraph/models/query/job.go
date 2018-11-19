@@ -19,17 +19,17 @@ package query
 
 import "github.com/Sirupsen/logrus"
 
-// RetrieveDaemonsetHierarchy returns hierarchy for a given daemonset
-func RetrieveDaemonsetHierarchy(name string) JSONDataWrapper {
+// RetrieveJobHierarchy returns hierarchy for a given daemonset
+func RetrieveJobHierarchy(name string) JSONDataWrapper {
 	if name == All {
-		logrus.Errorf("wrong type of query for daemonset, empty name is given")
+		logrus.Errorf("wrong type of query for job, empty name is given")
 		return JSONDataWrapper{}
 	}
 	query := `query {
-		parent(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isJob)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			children: ~daemonset @filter(has(isPod)) {
+			children: ~job @filter(has(isPod)) {
 				name
 				type
 			}

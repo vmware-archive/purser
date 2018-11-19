@@ -26,6 +26,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
+	batch_v1 "k8s.io/api/batch/v1"
 	api_v1 "k8s.io/api/core/v1"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
 )
@@ -169,6 +170,16 @@ func PersistPayloads(payloads []*interface{}) {
 			_, err = models.StoreDaemonset(daemonset)
 			if err != nil {
 				log.Errorf("Error while persisting daemonset %v", err)
+			}
+		} else if payload.ResourceType == "Job" {
+			job := batch_v1.Job{}
+			err := json.Unmarshal([]byte(payload.Data), &job)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreJob(job)
+			if err != nil {
+				log.Errorf("Error while persisting job %v", err)
 			}
 		}
 	}
