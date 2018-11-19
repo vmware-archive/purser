@@ -129,4 +129,10 @@ var routes = Routes{
 		"/metrics",
 		GetClusterMetrics,
 	},
+	Route{
+		"GetNamespaceMetrics",
+		"GET",
+		"/metrics/namespace",
+		GetNamespaceMetrics,
+	},
 }
