@@ -51,4 +51,10 @@ var routes = Routes{
 		"/hierarchy",
 		GetClusterHierarchy,
 	},
+	Route{
+		"GetNamespaceHierarchy",
+		"GET",
+		"/hierarchy/namespace",
+		GetNamespaceHierarchy,
+	},
 }

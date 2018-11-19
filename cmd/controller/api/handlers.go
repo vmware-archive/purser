@@ -45,9 +45,9 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 		jsonResp = query.RetrievePodsInteractions(name[0], false)
 	} else {
 		if orphanVal, isOrphan := queryParams[query.Orphan]; isOrphan && orphanVal[0] == query.False {
-			jsonResp = query.RetrievePodsInteractions(query.AllPods, false)
+			jsonResp = query.RetrievePodsInteractions(query.All, false)
 		} else {
-			jsonResp = query.RetrievePodsInteractions(query.AllPods, true)
+			jsonResp = query.RetrievePodsInteractions(query.All, true)
 		}
 	}
 	writeBytes(w, jsonResp)
@@ -64,6 +64,21 @@ func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
 		jsonData = query.RetrieveClusterHierarchy(query.Physical)
 	} else {
 		jsonData = query.RetrieveClusterHierarchy(query.Logical)
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all children of namespace
+func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveNamespaceHierarchy(name[0])
+	} else {
+		jsonData = query.RetrieveNamespaceHierarchy(query.All)
 	}
 	encodeAndWrite(w, jsonData)
 }
