@@ -35,11 +35,11 @@ const (
 // Namespace schema in dgraph
 type Namespace struct {
 	dgraph.ID
-	IsNamespace bool      `json:"isNamespace,omitempty"`
-	Name        string    `json:"name,omitempty"`
-	StartTime   time.Time `json:"startTime,omitempty"`
-	EndTime     time.Time `json:"endTime,omitempty"`
-	Type        string    `json:"type,omitempty"`
+	IsNamespace bool   `json:"isNamespace,omitempty"`
+	Name        string `json:"name,omitempty"`
+	StartTime   string `json:"startTime,omitempty"`
+	EndTime     string `json:"endTime,omitempty"`
+	Type        string `json:"type,omitempty"`
 }
 
 func newNamespace(namespace api_v1.Namespace) Namespace {
@@ -48,11 +48,11 @@ func newNamespace(namespace api_v1.Namespace) Namespace {
 		Name:        namespace.Name,
 		IsNamespace: true,
 		Type:        "namespace",
-		StartTime:   namespace.GetCreationTimestamp().Time,
+		StartTime:   namespace.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	nsDeletionTimestamp := namespace.GetDeletionTimestamp()
 	if !nsDeletionTimestamp.IsZero() {
-		ns.EndTime = nsDeletionTimestamp.Time
+		ns.EndTime = nsDeletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return ns
 }

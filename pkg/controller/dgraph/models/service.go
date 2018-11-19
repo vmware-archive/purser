@@ -37,8 +37,8 @@ type Service struct {
 	dgraph.ID
 	IsService bool       `json:"isService,omitempty"`
 	Name      string     `json:"name,omitempty"`
-	StartTime time.Time  `json:"startTime,omitempty"`
-	EndTime   time.Time  `json:"endTime,omitempty"`
+	StartTime string     `json:"startTime,omitempty"`
+	EndTime   string     `json:"endTime,omitempty"`
 	Pod       []*Pod     `json:"pod,omitempty"`
 	Interacts []*Service `json:"interacts,omitempty"`
 	Namespace *Namespace `json:"namespace,omitempty"`
@@ -51,7 +51,7 @@ func newService(svc api_v1.Service) (*api.Assigned, error) {
 		IsService: true,
 		Type:      "service",
 		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
-		StartTime: svc.GetCreationTimestamp().Time,
+		StartTime: svc.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 	namespaceUID := CreateOrGetNamespaceByID(svc.Namespace)
 	if namespaceUID != "" {
@@ -78,7 +78,7 @@ func StoreService(service api_v1.Service) error {
 	if !svcDeletionTimestamp.IsZero() {
 		updatedService := Service{
 			ID:      dgraph.ID{Xid: xid, UID: uid},
-			EndTime: svcDeletionTimestamp.Time,
+			EndTime: svcDeletionTimestamp.Time.Format(time.RFC3339),
 		}
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		return err
