@@ -37,3 +37,50 @@ func RetrieveDeploymentHierarchy(name string) JSONDataWrapper {
 	}`
 	return getJSONDataFromQuery(query)
 }
+
+// RetrieveDeploymentMetrics returns hierarchy for a given deployment
+func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
+	if name == All {
+		logrus.Errorf("wrong type of query for deployment, empty name is given")
+		return JSONDataWrapper{}
+	}
+	query := `query {
+		dep as var(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
+			~deployment @filter(has(isReplicaset)) {
+				~replicaset @filter(has(isPod)) {
+					replicasetPodCpu as cpuRequest
+					replicasetPodMemory as memoryRequest
+					replicasetPvcStorage as storageRequest
+				}
+				deploymentReplicasetCpu as sum(val(replicasetPodCpu))
+				deploymentReplicasetMemory as sum(val(replicasetPodMemory))
+				deploymentReplicasetStorage as sum(val(replicasetPvcStorage))
+			}
+			deploymentCpu as sum(val(deploymentReplicasetCpu))
+			deploymentMemory as sum(val(deploymentReplicasetMemory))
+			deploymentStorage as sum(val(deploymentReplicasetStorage))
+		}
+
+		parent(func: uid(dep)) {
+			name
+			type
+			children: ~deployment @filter(has(isReplicaset)) {
+				name
+				type
+				cpu: val(deploymentReplicasetCpu)
+				memory: val(deploymentReplicasetMemory)
+				storage: val(deploymentReplicasetStorage)
+				cpuCost: math(deploymentReplicasetCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(deploymentReplicasetMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(deploymentReplicasetStorage * ` + defaultStorageCostPerGBPerHour + `)
+			}
+			cpu: val(deploymentCpu)
+			memory: val(deploymentMemory)
+			storage: val(deploymentStorage)
+			cpuCost: math(deploymentCpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(deploymentMemory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(deploymentStorage * ` + defaultStorageCostPerGBPerHour + `)
+		}
+	}`
+	return getJSONDataFromQuery(query)
+}

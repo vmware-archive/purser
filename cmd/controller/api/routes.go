@@ -135,4 +135,10 @@ var routes = Routes{
 		"/metrics/namespace",
 		GetNamespaceMetrics,
 	},
+	Route{
+		"GetDeploymentMetrics",
+		"GET",
+		"/metrics/deployment",
+		GetDeploymentMetrics,
+	},
 }
