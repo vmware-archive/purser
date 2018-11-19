@@ -183,4 +183,16 @@ var routes = Routes{
 		"/metrics/container",
 		GetContainerMetrics,
 	},
+	Route{
+		"GetPVMetrics",
+		"GET",
+		"/metrics/pv",
+		GetPVMetrics,
+	},
+	Route{
+		"GetPVCMetrics",
+		"GET",
+		"/metrics/pvc",
+		GetPVCMetrics,
+	},
 }

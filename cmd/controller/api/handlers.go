@@ -378,6 +378,36 @@ func GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetPVMetrics listens on /metrics/pv
+func GetPVMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePVMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for PV, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPVCMetrics listens on /metrics/pv
+func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePVCMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for PVC, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")

@@ -19,43 +19,17 @@ package query
 
 import "github.com/Sirupsen/logrus"
 
-// RetrievePVHierarchy returns hierarchy for a given pv
-func RetrievePVHierarchy(name string) JSONDataWrapper {
+// RetrievePVCMetrics returns metrics for a given pvc
+func RetrievePVCMetrics(name string) JSONDataWrapper {
 	if name == All {
-		logrus.Errorf("wrong type of query for PV, empty name is given")
+		logrus.Errorf("wrong type of query for PVC, empty name is given")
 		return JSONDataWrapper{}
 	}
 
 	query := `query {
-		parent(func: has(isPersistentVolume)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isPersistentVolumeClaim)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			children: ~pv @filter(has(isPersistentVolumeClaim)) {
-				name
-				type
-			}
-        }
-    }`
-	return getJSONDataFromQuery(query)
-}
-
-// RetrievePVMetrics returns metrics for a given pv
-func RetrievePVMetrics(name string) JSONDataWrapper {
-	if name == All {
-		logrus.Errorf("wrong type of query for PV, empty name is given")
-		return JSONDataWrapper{}
-	}
-
-	query := `query {
-		parent(func: has(isPersistentVolume)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~pv @filter(has(isPersistentVolumeClaim)) {
-				name
-				type
-				storage: pvcStorage as storageCapacity
-				storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
-			}
 			storage: storage as storageCapacity
 			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
         }
