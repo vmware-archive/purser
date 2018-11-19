@@ -2,11 +2,11 @@
 
 The following diagram represents the architecture of Purser.
 
-![Architecture](/docs/img/architecture01.png)
+![Architecture](/docs/img/architecture.png)
 
 The following are the main componenets installed in Kubernetes for Purser.
 
-1. **Kubernetes API Server Extension**
+1. **Kubernetes API Server**
 
     All the Purser `kubectl` commands hit the API server extension. These APIs understand the input command, compute and return the required output.
 
