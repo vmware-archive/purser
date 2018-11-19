@@ -165,4 +165,22 @@ var routes = Routes{
 		"/metrics/replicaset",
 		GetReplicasetMetrics,
 	},
+	Route{
+		"GetNodeMetrics",
+		"GET",
+		"/metrics/node",
+		GetNodeMetrics,
+	},
+	Route{
+		"GetPodMetrics",
+		"GET",
+		"/metrics/pod",
+		GetPodMetrics,
+	},
+	Route{
+		"GetContainerMetrics",
+		"GET",
+		"/metrics/container",
+		GetContainerMetrics,
+	},
 }

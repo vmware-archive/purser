@@ -333,6 +333,51 @@ func GetReplicasetMetrics(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetNodeMetrics listens on /metrics/node
+func GetNodeMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveNodeMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for node, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPodMetrics listens on /metrics/pod
+func GetPodMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePodMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for pod, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetContainerMetrics listens on /metrics/container
+func GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveContainerMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for container, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")
