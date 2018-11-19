@@ -19,16 +19,16 @@ package query
 
 import "github.com/Sirupsen/logrus"
 
-func RetrieveDeploymentHierarchy(name string) JSONDataWrapper {
+func RetrieveReplicasetHierarchy(name string) JSONDataWrapper {
 	if name == All {
-		logrus.Errorf("wrong type of query for deployment, empty name is given")
+		logrus.Errorf("wrong type of query for replicaset, empty name is given")
 		return JSONDataWrapper{}
 	}
 	query := `query {
-		parent(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
+		parent(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
 			name
 			type
-			children: ~deployment @filter(has(isReplicaset)) {
+			children: ~replicaset @filter(has(isPod)) {
 				name
 				type
 			}

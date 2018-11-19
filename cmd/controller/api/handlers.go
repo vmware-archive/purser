@@ -92,6 +92,23 @@ func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
 	var jsonData query.JSONDataWrapper
 	if name, isName := queryParams[query.Name]; isName {
 		jsonData = query.RetrieveDeploymentHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for deployment, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetReplicasetHierarchy listens on /hierarchy/replicasett endpoint and returns all children of replicaset
+func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveReplicasetHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for replicaset, no name is given")
 	}
 	encodeAndWrite(w, jsonData)
 }
