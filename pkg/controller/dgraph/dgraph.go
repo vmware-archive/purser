@@ -104,6 +104,8 @@ func CreateSchema() error {
 		service: uid @reverse .
 		node: uid @reverse .
 		pv: uid @reverse .
+		daemonset: uid @reverse .
+		job: uid @reverse .
 	`
 	ctx := context.Background()
 	err := client.Alter(ctx, op)
