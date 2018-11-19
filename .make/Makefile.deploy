@@ -1,4 +1,4 @@
-DEPLOY_DOCKERFILE?=Dockerfile.deploy
+DEPLOY_DOCKERFILE?=Dockerfile.deploy.purser
 
 CLUSTER_DIR?=${PWD}/cluster
 
