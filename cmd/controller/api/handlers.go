@@ -138,7 +138,7 @@ func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
 	if name, isName := queryParams[query.Name]; isName {
 		jsonData = query.RetrievePodHierarchy(name[0])
 	} else {
-		logrus.Errorf("wrong type of query for statefulset, no name is given")
+		logrus.Errorf("wrong type of query for pod, no name is given")
 	}
 	encodeAndWrite(w, jsonData)
 }
@@ -153,13 +153,13 @@ func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
 	if name, isName := queryParams[query.Name]; isName {
 		jsonData = query.RetrieveContainerHierarchy(name[0])
 	} else {
-		logrus.Errorf("wrong type of query for statefulset, no name is given")
+		logrus.Errorf("wrong type of query for container, no name is given")
 	}
 	encodeAndWrite(w, jsonData)
 }
 
-// GetProcessHierarchy listens on /hierarchy/process endpoint and returns empty data
-func GetProcessHierarchy(w http.ResponseWriter, r *http.Request) {
+// GetEmptyHierarchy listens on /hierarchy/process and /hierarchy/pvc endpoint and returns empty data
+func GetEmptyHierarchy(w http.ResponseWriter, r *http.Request) {
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -168,6 +168,35 @@ func GetProcessHierarchy(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetNodeHierarchy listens on /hierarchy/node endpoint and returns all children of node
+func GetNodeHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveNodeHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for node, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPVHierarchy listens on /hierarchy/pv endpoint and returns all children of PV
+func GetPVHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePVHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for PV, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")

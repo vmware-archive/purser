@@ -91,6 +91,24 @@ var routes = Routes{
 		"GetProcessHierarchy",
 		"GET",
 		"/hierarchy/process",
-		GetProcessHierarchy,
+		GetEmptyHierarchy,
+	},
+	Route{
+		"GetNodeHierarchy",
+		"GET",
+		"/hierarchy/node",
+		GetNodeHierarchy,
+	},
+	Route{
+		"GetPVHierarchy",
+		"GET",
+		"/hierarchy/pv",
+		GetPVHierarchy,
+	},
+	Route{
+		"GetPVCHierarchy",
+		"GET",
+		"/hierarchy/pvc",
+		GetEmptyHierarchy,
 	},
 }
