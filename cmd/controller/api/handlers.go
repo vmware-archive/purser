@@ -59,7 +59,7 @@ func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
 
-	var jsonData query.JsonDataWrapper
+	var jsonData query.JSONDataWrapper
 	if view, isView := queryParams[query.View]; isView && view[0] == query.Physical {
 		jsonData = query.RetrieveClusterHierarchy(query.Physical)
 	} else {

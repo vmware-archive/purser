@@ -41,7 +41,7 @@ type Parent struct {
 	Children []Children `json:"children,omitempty"`
 }
 
-// JsonDataWrapper structure
-type JsonDataWrapper struct {
+// JSONDataWrapper structure
+type JSONDataWrapper struct {
 	Data Parent `json:"data,omitempty"`
 }

@@ -23,7 +23,7 @@ import (
 )
 
 // RetrieveClusterHierarchy returns all namespaces if view is logical and returns all nodes with disks if view is physical
-func RetrieveClusterHierarchy(view string) JsonDataWrapper {
+func RetrieveClusterHierarchy(view string) JSONDataWrapper {
 	var query string
 	if view == Physical {
 		query = `query {
@@ -45,9 +45,9 @@ func RetrieveClusterHierarchy(view string) JsonDataWrapper {
 	err := dgraph.ExecuteQuery(query, &parentRoot)
 	if err != nil {
 		logrus.Errorf("Unable to execute query for retrieving cluster hierarchy: (%v)", err)
-		return JsonDataWrapper{}
+		return JSONDataWrapper{}
 	}
-	root := JsonDataWrapper{
+	root := JSONDataWrapper{
 		Data: Parent{
 			Name:     "cluster",
 			Type:     "cluster",
