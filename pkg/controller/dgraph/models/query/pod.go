@@ -25,7 +25,7 @@ import (
 // RetrievePodsInteractions returns inbound and outbound interactions of a pod
 func RetrievePodsInteractions(name string, isOrphan bool) []byte {
 	var query string
-	if name == "" {
+	if name == AllPods {
 		if isOrphan {
 			query = `query {
 				pods(func: has(isPod)) {

@@ -18,6 +18,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
@@ -40,16 +41,31 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("Query params: (%v)", queryParams)
 
 	var jsonResp []byte
-	if name, isName := queryParams["name"]; isName {
+	if name, isName := queryParams[query.Name]; isName {
 		jsonResp = query.RetrievePodsInteractions(name[0], false)
 	} else {
-		if orphanVal, isOrphan := queryParams["orphan"]; isOrphan && orphanVal[0] == "false" {
-			jsonResp = query.RetrievePodsInteractions("", false)
+		if orphanVal, isOrphan := queryParams[query.Orphan]; isOrphan && orphanVal[0] == query.False {
+			jsonResp = query.RetrievePodsInteractions(query.AllPods, false)
 		} else {
-			jsonResp = query.RetrievePodsInteractions("", true)
+			jsonResp = query.RetrievePodsInteractions(query.AllPods, true)
 		}
 	}
 	writeBytes(w, jsonResp)
+}
+
+// GetClusterHierarchy listens on /hierarchy endpoint and returns all namespaces(or nodes and PV) in the cluster
+func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if view, isView := queryParams[query.View]; isView && view[0] == query.Physical {
+		jsonData = query.RetrieveClusterHierarchy(query.Physical)
+	} else {
+		jsonData = query.RetrieveClusterHierarchy(query.Logical)
+	}
+	encodeAndWrite(w, jsonData)
 }
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
@@ -61,6 +77,13 @@ func addHeaders(w *http.ResponseWriter, r *http.Request) {
 
 func writeBytes(w io.Writer, data []byte) {
 	_, err := w.Write(data)
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+func encodeAndWrite(w io.Writer, obj interface{}) {
+	err := json.NewEncoder(w).Encode(obj)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
