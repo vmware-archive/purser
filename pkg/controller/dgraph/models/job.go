@@ -30,7 +30,7 @@ const (
 	IsJob = "isJob"
 )
 
-// Daemonset schema in dgraph
+// Job schema in dgraph
 type Job struct {
 	dgraph.ID
 	IsJob     bool       `json:"isJob,omitempty"`
