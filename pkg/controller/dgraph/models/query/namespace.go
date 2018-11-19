@@ -22,38 +22,39 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
-// RetrieveClusterHierarchy returns all namespaces if view is logical and returns all nodes with disks if view is physical
-func RetrieveClusterHierarchy(view string) JSONDataWrapper {
-	var query string
-	if view == Physical {
-		query = `query {
-			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
-				name
-				type
-			}
-		}`
-	} else {
-		query = `query {
-			children(func: has(isNamespace)) {
-				name
-				type
-			}
-		}`
+// RetrieveNamespaceHierarchy returns hierarchy for a given namespace
+func RetrieveNamespaceHierarchy(name string) JSONDataWrapper {
+	if name == All {
+		return RetrieveClusterHierarchy(Logical)
 	}
 
+	query := `query {
+		parent(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			children: ~namespace @filter(has(isDeployment) OR has(isStatefulset) OR has(isJob) OR has(isDaemonset) OR (has(isReplicaset) AND (NOT has(deployment)))) {
+				name
+				type
+			}
+        }
+    }`
+	return getJSONDataFromQuery(query)
+}
+
+// getJSONDataFromQuery executes query and wraps the data in a desired structure(JSONDataWrapper)
+func getJSONDataFromQuery(query string) JSONDataWrapper {
 	parentRoot := ParentWrapper{}
 	err := dgraph.ExecuteQuery(query, &parentRoot)
-	if err != nil {
-		logrus.Errorf("Unable to execute query for retrieving cluster hierarchy: (%v)", err)
+	if err != nil || len(parentRoot.Parent) == 0 {
+		logrus.Errorf("Unable to execute query, err: (%v), length of output: (%d)", err, len(parentRoot.Parent))
 		return JSONDataWrapper{}
 	}
 	root := JSONDataWrapper{
 		Data: ParentWrapper{
-			Name:     "cluster",
-			Type:     "cluster",
-			Children: parentRoot.Children,
+			Name:     parentRoot.Parent[0].Name,
+			Type:     parentRoot.Parent[0].Type,
+			Children: parentRoot.Parent[0].Children,
 		},
 	}
-	logrus.Debugf("data: (%v)", root.Data)
 	return root
 }

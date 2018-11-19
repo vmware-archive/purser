@@ -45,9 +45,9 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 		jsonResp = query.RetrievePodsInteractions(name[0], false)
 	} else {
 		if orphanVal, isOrphan := queryParams[query.Orphan]; isOrphan && orphanVal[0] == query.False {
-			jsonResp = query.RetrievePodsInteractions(query.AllPods, false)
+			jsonResp = query.RetrievePodsInteractions(query.All, false)
 		} else {
-			jsonResp = query.RetrievePodsInteractions(query.AllPods, true)
+			jsonResp = query.RetrievePodsInteractions(query.All, true)
 		}
 	}
 	writeBytes(w, jsonResp)
@@ -64,6 +64,136 @@ func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
 		jsonData = query.RetrieveClusterHierarchy(query.Physical)
 	} else {
 		jsonData = query.RetrieveClusterHierarchy(query.Logical)
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all children of namespace
+func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveNamespaceHierarchy(name[0])
+	} else {
+		jsonData = query.RetrieveNamespaceHierarchy(query.All)
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetDeploymentHierarchy listens on /hierarchy/deployment endpoint and returns all children of deployment
+func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveDeploymentHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for deployment, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetReplicasetHierarchy listens on /hierarchy/replicaset endpoint and returns all children of replicaset
+func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveReplicasetHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for replicaset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetStatefulsetHierarchy listens on /hierarchy/statefulset endpoint and returns all children of statefulset
+func GetStatefulsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveStatefulsetHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for statefulset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPodHierarchy listens on /hierarchy/pod endpoint and returns all children of pod
+func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePodHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for pod, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetContainerHierarchy listens on /hierarchy/container endpoint and returns all children of container
+func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveContainerHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for container, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetEmptyHierarchy listens on /hierarchy/process and /hierarchy/pvc endpoint and returns empty data
+func GetEmptyHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	encodeAndWrite(w, jsonData)
+}
+
+// GetNodeHierarchy listens on /hierarchy/node endpoint and returns all children of node
+func GetNodeHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveNodeHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for node, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPVHierarchy listens on /hierarchy/pv endpoint and returns all children of PV
+func GetPVHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePVHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for PV, no name is given")
 	}
 	encodeAndWrite(w, jsonData)
 }
