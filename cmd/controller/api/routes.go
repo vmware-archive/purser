@@ -81,4 +81,16 @@ var routes = Routes{
 		"/hierarchy/pod",
 		GetPodHierarchy,
 	},
+	Route{
+		"GetContainerHierarchy",
+		"GET",
+		"/hierarchy/container",
+		GetContainerHierarchy,
+	},
+	Route{
+		"GetProcessHierarchy",
+		"GET",
+		"/hierarchy/process",
+		GetProcessHierarchy,
+	},
 }

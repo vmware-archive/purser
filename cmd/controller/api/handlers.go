@@ -143,6 +143,32 @@ func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetContainerHierarchy listens on /hierarchy/container endpoint and returns all children of container
+func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveContainerHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for statefulset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetProcessHierarchy listens on /hierarchy/process endpoint and returns empty data
+func GetProcessHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	encodeAndWrite(w, jsonData)
+}
+
+
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")
