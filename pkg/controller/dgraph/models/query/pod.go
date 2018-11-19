@@ -72,3 +72,22 @@ func RetrievePodsInteractions(name string, isOrphan bool) []byte {
 	}
 	return result
 }
+
+// RetrievePodHierarchy returns hierarchy for a given pod
+func RetrievePodHierarchy(name string) JSONDataWrapper {
+	if name == All {
+		logrus.Errorf("wrong type of query for pod, empty name is given")
+		return JSONDataWrapper{}
+	}
+	query :=  `query {
+		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			children: ~pod @filter(has(isContainer)) {
+				name
+				type
+			}
+		}
+	}`
+	return getJSONDataFromQuery(query)
+}

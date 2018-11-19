@@ -19,6 +19,7 @@ package query
 
 import "github.com/Sirupsen/logrus"
 
+// RetrieveReplicasetHierarchy returns hierarchy for a given replicaset
 func RetrieveReplicasetHierarchy(name string) JSONDataWrapper {
 	if name == All {
 		logrus.Errorf("wrong type of query for replicaset, empty name is given")

@@ -19,6 +19,7 @@ package query
 
 import "github.com/Sirupsen/logrus"
 
+// RetrieveDeploymentHierarchy returns hierarchy for a given deployment
 func RetrieveDeploymentHierarchy(name string) JSONDataWrapper {
 	if name == All {
 		logrus.Errorf("wrong type of query for deployment, empty name is given")

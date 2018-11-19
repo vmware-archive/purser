@@ -19,6 +19,7 @@ package query
 
 import "github.com/Sirupsen/logrus"
 
+// RetrieveStatefulsetHierarchy returns hierarchy for a given statefulset
 func RetrieveStatefulsetHierarchy(name string) JSONDataWrapper {
 	if name == All {
 		logrus.Errorf("wrong type of query for statefulset, empty name is given")
