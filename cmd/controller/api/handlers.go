@@ -198,6 +198,36 @@ func GetPVHierarchy(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetDaemonsetHierarchy listens on /hierarchy/daemonset endpoint and returns all children of Daemonset
+func GetDaemonsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveDaemonsetHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for Daemonset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetJobHierarchy listens on /hierarchy/job endpoint and returns all children of Job
+func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveJobHierarchy(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for Job, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")

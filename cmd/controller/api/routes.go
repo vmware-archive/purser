@@ -111,4 +111,16 @@ var routes = Routes{
 		"/hierarchy/pvc",
 		GetEmptyHierarchy,
 	},
+	Route{
+		"GetDaemonsetHierarchy",
+		"GET",
+		"/hierarchy/daemonset",
+		GetDaemonsetHierarchy,
+	},
+	Route{
+		"GetPJobHierarchy",
+		"GET",
+		"/hierarchy/job",
+		GetJobHierarchy,
+	},
 }
