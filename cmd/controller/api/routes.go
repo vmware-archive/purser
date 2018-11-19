@@ -153,4 +153,16 @@ var routes = Routes{
 		"/metrics/job",
 		GetJobMetrics,
 	},
+	Route{
+		"GetStatefulsetMetrics",
+		"GET",
+		"/metrics/statefulset",
+		GetStatefulsetMetrics,
+	},
+	Route{
+		"GetReplicasetMetrics",
+		"GET",
+		"/metrics/replicaset",
+		GetReplicasetMetrics,
+	},
 }

@@ -273,7 +273,7 @@ func GetDeploymentMetrics(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
-// GetDaemonsetMetrics listens on /metrics/deployment
+// GetDaemonsetMetrics listens on /metrics/daemonset
 func GetDaemonsetMetrics(w http.ResponseWriter, r *http.Request) {
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
@@ -288,7 +288,7 @@ func GetDaemonsetMetrics(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
-// GetJobMetrics listens on /metrics/deployment
+// GetJobMetrics listens on /metrics/job
 func GetJobMetrics(w http.ResponseWriter, r *http.Request) {
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
@@ -299,6 +299,36 @@ func GetJobMetrics(w http.ResponseWriter, r *http.Request) {
 		jsonData = query.RetrieveJobMetrics(name[0])
 	} else {
 		logrus.Errorf("wrong type of query for job, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetStatefulsetMetrics listens on /metrics/statefulset
+func GetStatefulsetMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveStatefulsetMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for statefulset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetReplicasetMetrics listens on /metrics/replicaset
+func GetReplicasetMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveReplicasetMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for statefulset, no name is given")
 	}
 	encodeAndWrite(w, jsonData)
 }
