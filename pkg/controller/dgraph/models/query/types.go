@@ -15,40 +15,33 @@
  * limitations under the License.
  */
 
-package api
+package query
 
-import (
-	"net/http"
+// Constants used in query parameters
+const (
+	AllPods  = ""
+	Name     = "name"
+	Orphan   = "orphan"
+	View     = "view"
+	Physical = "physical"
+	Logical  = "logical"
+	False    = "false"
 )
 
-// Route structure
-type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
+// Children structure
+type Children struct {
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"`
 }
 
-// Routes list
-type Routes []Route
+// Parent structure
+type Parent struct {
+	Name     string     `json:"name,omitempty"`
+	Type     string     `json:"type,omitempty"`
+	Children []Children `json:"children,omitempty"`
+}
 
-var routes = Routes{
-	Route{
-		"GetHomePage",
-		"GET",
-		"/",
-		GetHomePage,
-	},
-	Route{
-		"GetPodInteractions",
-		"GET",
-		"/interactions/pod",
-		GetPodInteractions,
-	},
-	Route{
-		"GetClusterHierarchy",
-		"GET",
-		"/hierarchy",
-		GetClusterHierarchy,
-	},
+// JSONDataWrapper structure
+type JSONDataWrapper struct {
+	Data Parent `json:"data,omitempty"`
 }
