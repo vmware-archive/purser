@@ -19,7 +19,7 @@ package query
 
 // Constants used in query parameters
 const (
-	AllPods  = ""
+	All      = ""
 	Name     = "name"
 	Orphan   = "orphan"
 	View     = "view"
@@ -41,7 +41,15 @@ type Parent struct {
 	Children []Children `json:"children,omitempty"`
 }
 
+// ParentWrapper structure
+type ParentWrapper struct {
+	Name     string     `json:"name,omitempty"`
+	Type     string     `json:"type,omitempty"`
+	Children []Children `json:"children,omitempty"`
+	Parent   []Parent   `json:"parent,omitempty"`
+}
+
 // JSONDataWrapper structure
 type JSONDataWrapper struct {
-	Data Parent `json:"data,omitempty"`
+	Data ParentWrapper `json:"data,omitempty"`
 }

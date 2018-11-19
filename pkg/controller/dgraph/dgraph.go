@@ -96,6 +96,14 @@ func CreateSchema() error {
 		isContainer: bool .
 		isProc: bool .
 		pod: uid @reverse .
+		namespace: uid @reverse .
+		deployment: uid @reverse .
+		replicaset: uid @reverse .
+		statefulset: uid @reverse .
+		container: uid @reverse .
+		service: uid @reverse .
+		node: uid @reverse .
+		pv: uid @reverse .
 	`
 	ctx := context.Background()
 	err := client.Alter(ctx, op)
