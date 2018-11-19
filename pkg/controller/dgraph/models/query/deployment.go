@@ -38,7 +38,7 @@ func RetrieveDeploymentHierarchy(name string) JSONDataWrapper {
 	return getJSONDataFromQuery(query)
 }
 
-// RetrieveDeploymentMetrics returns hierarchy for a given deployment
+// RetrieveDeploymentMetrics returns metrics for a given deployment
 func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
 	if name == All {
 		logrus.Errorf("wrong type of query for deployment, empty name is given")

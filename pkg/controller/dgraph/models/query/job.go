@@ -37,3 +37,34 @@ func RetrieveJobHierarchy(name string) JSONDataWrapper {
 	}`
 	return getJSONDataFromQuery(query)
 }
+
+// RetrieveJobMetrics returns metrics for a given daemonset
+func RetrieveJobMetrics(name string) JSONDataWrapper {
+	if name == All {
+		logrus.Errorf("wrong type of query for job, empty name is given")
+		return JSONDataWrapper{}
+	}
+	query := `query {
+		parent(func: has(isJob)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			children: ~job @filter(has(isPod)) {
+				name
+				type
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+				storage: pvcStorage as storageRequest
+				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
+			}
+			cpu: cpu as sum(val(podCpu))
+			memory: memory as sum(val(podMemory))
+			storage: storage as sum(val(pvcStorage))
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+		}
+	}`
+	return getJSONDataFromQuery(query)
+}

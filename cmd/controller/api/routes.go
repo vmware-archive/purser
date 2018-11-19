@@ -141,4 +141,16 @@ var routes = Routes{
 		"/metrics/deployment",
 		GetDeploymentMetrics,
 	},
+	Route{
+		"GetDaemonsetMetrics",
+		"GET",
+		"/metrics/daemon",
+		GetDaemonsetMetrics,
+	},
+	Route{
+		"GetJobMetrics",
+		"GET",
+		"/metrics/job",
+		GetJobMetrics,
+	},
 }
