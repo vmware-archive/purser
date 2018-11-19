@@ -228,6 +228,21 @@ func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetClusterMetrics listens on /metrics endpoint with option for view(physical or logical)
+func GetClusterMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if view, isView := queryParams[query.View]; isView && view[0] == query.Physical {
+		jsonData = query.RetrieveClusterMetrics(query.Physical)
+	} else {
+		jsonData = query.RetrieveClusterMetrics(query.Logical)
+	}
+	encodeAndWrite(w, jsonData)
+}
+
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")

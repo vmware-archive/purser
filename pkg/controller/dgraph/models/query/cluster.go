@@ -57,3 +57,81 @@ func RetrieveClusterHierarchy(view string) JSONDataWrapper {
 	logrus.Debugf("data: (%v)", root.Data)
 	return root
 }
+
+// RetrieveClusterMetrics returns all namespaces with metrics if view is logical and
+// returns all nodes and disks with metrics if view is physical
+func RetrieveClusterMetrics(view string) JSONDataWrapper {
+	var query string
+	if view == Physical {
+		query = `query {
+			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
+				name
+				type
+				cpu: cpu as cpuCapacity
+				memory: memory as memoryCapacity
+				storage: storage as storageCapacity
+				cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+			}
+		}`
+	} else {
+		query = `query {
+			ns as var(func: has(isNamespace)) {
+				~namespace @filter(has(isPod)){
+					namespacePodCpu as cpuRequest
+					namespacePodMem as memoryRequest
+					namespacePvcStorage as storageRequest
+				}
+				namespaceCpu as sum(val(namespacePodCpu))
+				namespaceMem as sum(val(namespacePodMem))
+				namespaceStorage as sum(val(namespacePvcStorage))
+			}
+	
+			children(func: uid(ns)) {
+				name
+				type
+				cpu: val(namespaceCpu)
+				memory: val(namespaceMem)
+				storage: val(namespaceStorage)
+				cpuCost: math(namespaceCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(namespaceMem * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(namespaceStorage * ` + defaultStorageCostPerGBPerHour + `)
+			}
+		}`
+	}
+
+	parentRoot := ParentWrapper{}
+	err := dgraph.ExecuteQuery(query, &parentRoot)
+	calculateAggregateMetrics(&parentRoot)
+	if err != nil {
+		logrus.Errorf("Unable to execute query for retrieving cluster metrics: (%v)", err)
+		return JSONDataWrapper{}
+	}
+	root := JSONDataWrapper{
+		Data: ParentWrapper{
+			Name:        "cluster",
+			Type:        "cluster",
+			Children:    parentRoot.Children,
+			CPU:         parentRoot.CPU,
+			Memory:      parentRoot.Memory,
+			Storage:     parentRoot.Storage,
+			CPUCost:     parentRoot.CPUCost,
+			MemoryCost:  parentRoot.MemoryCost,
+			StorageCost: parentRoot.StorageCost,
+		},
+	}
+	logrus.Debugf("data: (%v)", root.Data)
+	return root
+}
+
+func calculateAggregateMetrics(objRoot *ParentWrapper) {
+	for _, obj := range objRoot.Children {
+		objRoot.CPU += obj.CPU
+		objRoot.Memory += obj.Memory
+		objRoot.Storage += obj.Storage
+		objRoot.CPUCost += obj.CPUCost
+		objRoot.MemoryCost += obj.MemoryCost
+		objRoot.StorageCost += obj.StorageCost
+	}
+}

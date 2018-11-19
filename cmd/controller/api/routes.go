@@ -118,9 +118,15 @@ var routes = Routes{
 		GetDaemonsetHierarchy,
 	},
 	Route{
-		"GetPJobHierarchy",
+		"GetJobHierarchy",
 		"GET",
 		"/hierarchy/job",
 		GetJobHierarchy,
+	},
+	Route{
+		"GetClusterMetrics",
+		"GET",
+		"/metrics",
+		GetClusterMetrics,
 	},
 }

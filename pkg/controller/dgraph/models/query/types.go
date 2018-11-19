@@ -28,25 +28,50 @@ const (
 	False    = "false"
 )
 
+// Cost constants
+const (
+	defaultCPUCostPerCPUPerHour    = "0.024"
+	defaultMemCostPerGBPerHour     = "0.01"
+	defaultStorageCostPerGBPerHour = "0.00013888888"
+)
+
 // Children structure
 type Children struct {
-	Name string `json:"name,omitempty"`
-	Type string `json:"type,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Type        string  `json:"type,omitempty"`
+	CPU         float64 `json:"cpu,omitempty"`
+	Memory      float64 `json:"memory,omitempty"`
+	Storage     float64 `json:"storage,omitempty"`
+	CPUCost     float64 `json:"cpuCost,omitempty"`
+	MemoryCost  float64 `json:"memoryCost,omitempty"`
+	StorageCost float64 `json:"storageCost,omitempty"`
 }
 
 // Parent structure
 type Parent struct {
-	Name     string     `json:"name,omitempty"`
-	Type     string     `json:"type,omitempty"`
-	Children []Children `json:"children,omitempty"`
+	Name        string     `json:"name,omitempty"`
+	Type        string     `json:"type,omitempty"`
+	Children    []Children `json:"children,omitempty"`
+	CPU         float64    `json:"cpu,omitempty"`
+	Memory      float64    `json:"memory,omitempty"`
+	Storage     float64    `json:"storage,omitempty"`
+	CPUCost     float64    `json:"cpuCost,omitempty"`
+	MemoryCost  float64    `json:"memoryCost,omitempty"`
+	StorageCost float64    `json:"storageCost,omitempty"`
 }
 
 // ParentWrapper structure
 type ParentWrapper struct {
-	Name     string     `json:"name,omitempty"`
-	Type     string     `json:"type,omitempty"`
-	Children []Children `json:"children,omitempty"`
-	Parent   []Parent   `json:"parent,omitempty"`
+	Name        string     `json:"name,omitempty"`
+	Type        string     `json:"type,omitempty"`
+	Children    []Children `json:"children,omitempty"`
+	Parent      []Parent   `json:"parent,omitempty"`
+	CPU         float64    `json:"cpu,omitempty"`
+	Memory      float64    `json:"memory,omitempty"`
+	Storage     float64    `json:"storage,omitempty"`
+	CPUCost     float64    `json:"cpuCost,omitempty"`
+	MemoryCost  float64    `json:"memoryCost,omitempty"`
+	StorageCost float64    `json:"storageCost,omitempty"`
 }
 
 // JSONDataWrapper structure
