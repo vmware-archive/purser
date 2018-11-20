@@ -44,7 +44,7 @@ type PersistentVolume struct {
 
 func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
 	newPv := PersistentVolume{
-		Name:               pv.Name,
+		Name:               "pv-" + pv.Name,
 		IsPersistentVolume: true,
 		Type:               "pv",
 		ID:                 dgraph.ID{Xid: pv.Name},

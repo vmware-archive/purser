@@ -20,6 +20,7 @@ package query
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
 // RetrievePodsInteractions returns inbound and outbound interactions of a pod
@@ -119,4 +120,30 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 		}
 	}`
 	return getJSONDataFromQuery(query)
+}
+
+// RetrievePodsInteractionsForAllLivePodsWithCount returns all pods in the dgraph
+func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
+	q := `query {
+		pods(func: has(isPod)) @filter((NOT has(endTime))) {
+			name
+			pod {
+				name
+				count
+			}
+			cid: ~pod @filter(has(isService)) {
+				name
+			}
+		}
+	}`
+
+	type root struct {
+		Pods []models.Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+	return newRoot.Pods, nil
 }

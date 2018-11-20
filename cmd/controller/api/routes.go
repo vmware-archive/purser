@@ -195,4 +195,10 @@ var routes = Routes{
 		"/metrics/pvc",
 		GetPVCMetrics,
 	},
+	Route{
+		"GetPodDiscoveryNodes",
+		"GET",
+		"/nodes",
+		GetPodDiscoveryNodes,
+	},
 }

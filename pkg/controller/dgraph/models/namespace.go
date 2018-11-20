@@ -45,7 +45,7 @@ type Namespace struct {
 func newNamespace(namespace api_v1.Namespace) Namespace {
 	ns := Namespace{
 		ID:          dgraph.ID{Xid: namespace.Name},
-		Name:        namespace.Name,
+		Name:        "namespace-" + namespace.Name,
 		IsNamespace: true,
 		Type:        "namespace",
 		StartTime:   namespace.GetCreationTimestamp().Time.Format(time.RFC3339),
