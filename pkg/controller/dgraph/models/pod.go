@@ -37,25 +37,27 @@ const (
 // Pod schema in dgraph
 type Pod struct {
 	dgraph.ID
-	IsPod         bool         `json:"isPod,omitempty"`
-	Name          string       `json:"name,omitempty"`
-	StartTime     string       `json:"startTime,omitempty"`
-	EndTime       string       `json:"endTime,omitempty"`
-	Containers    []*Container `json:"containers,omitempty"`
-	Pods          []*Pod       `json:"pod,omitempty"`
-	Count         float64      `json:"pod|count,omitempty"`
-	Node          *Node        `json:"node,omitempty"`
-	Namespace     *Namespace   `json:"namespace,omitempty"`
-	Deployment    *Deployment  `json:"deployment,omitempty"`
-	Replicaset    *Replicaset  `json:"replicaset,omitempty"`
-	Statefulset   *Statefulset `json:"statefulset,omitempty"`
-	Daemonset     *Daemonset   `json:"daemonset,omitempty"`
-	Job           *Job         `json:"job,omitempty"`
-	CPURequest    float64      `json:"cpuRequest,omitempty"`
-	CPULimit      float64      `json:"cpuLimit,omitempty"`
-	MemoryRequest float64      `json:"memoryRequest,omitempty"`
-	MemoryLimit   float64      `json:"memoryLimit,omitempty"`
-	Type          string       `json:"type,omitempty"`
+	IsPod          bool                     `json:"isPod,omitempty"`
+	Name           string                   `json:"name,omitempty"`
+	StartTime      string                   `json:"startTime,omitempty"`
+	EndTime        string                   `json:"endTime,omitempty"`
+	Containers     []*Container             `json:"containers,omitempty"`
+	Pods           []*Pod                   `json:"pod,omitempty"`
+	Count          float64                  `json:"pod|count,omitempty"`
+	Node           *Node                    `json:"node,omitempty"`
+	Namespace      *Namespace               `json:"namespace,omitempty"`
+	Deployment     *Deployment              `json:"deployment,omitempty"`
+	Replicaset     *Replicaset              `json:"replicaset,omitempty"`
+	Statefulset    *Statefulset             `json:"statefulset,omitempty"`
+	Daemonset      *Daemonset               `json:"daemonset,omitempty"`
+	Job            *Job                     `json:"job,omitempty"`
+	Pvcs           []*PersistentVolumeClaim `json:"pvc,omitempty"`
+	CPURequest     float64                  `json:"cpuRequest,omitempty"`
+	CPULimit       float64                  `json:"cpuLimit,omitempty"`
+	MemoryRequest  float64                  `json:"memoryRequest,omitempty"`
+	MemoryLimit    float64                  `json:"memoryLimit,omitempty"`
+	StorageRequest float64                  `json:"storageRequest,omitempty"`
+	Type           string                   `json:"type,omitempty"`
 }
 
 // Metrics ...
@@ -83,6 +85,7 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	if namespaceUID != "" {
 		pod.Namespace = &Namespace{ID: dgraph.ID{UID: namespaceUID, Xid: k8sPod.Namespace}}
 	}
+	pod.Pvcs, pod.StorageRequest = getPodVolumes(k8sPod)
 	setPodOwners(&pod, k8sPod)
 	return dgraph.MutateNode(pod, dgraph.CREATE)
 }
@@ -219,4 +222,26 @@ func setPodOwners(pod *Pod, k8sPod api_v1.Pod) {
 			log.Error("Unknown owner type " + owner.Kind + " for pod.")
 		}
 	}
+}
+
+func getPodVolumes(k8sPod api_v1.Pod) ([]*PersistentVolumeClaim, float64) {
+	podVolumes := []*PersistentVolumeClaim{}
+	storage := 0.0
+	for j := 0; j < len(k8sPod.Spec.Volumes); j++ {
+		vol := k8sPod.Spec.Volumes[j]
+		if vol.PersistentVolumeClaim != nil {
+			pvcXID := k8sPod.Namespace + ":" + vol.PersistentVolumeClaim.ClaimName
+			pvcUID := CreateOrGetPersistentVolumeClaimByID(pvcXID)
+			if pvcUID != "" {
+				podVolumes = append(podVolumes, &PersistentVolumeClaim{ID: dgraph.ID{UID: pvcUID, Xid: pvcXID}})
+				pvc, err := getPVCFromUID(pvcUID)
+				if err == nil {
+					storage += pvc.StorageCapacity
+				} else {
+					log.Errorf("error while getting pvc from uid: (%v), error: (%v)", pvcUID, err)
+				}
+			}
+		}
+	}
+	return podVolumes, storage
 }

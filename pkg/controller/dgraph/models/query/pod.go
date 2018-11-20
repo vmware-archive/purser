@@ -91,3 +91,32 @@ func RetrievePodHierarchy(name string) JSONDataWrapper {
 	}`
 	return getJSONDataFromQuery(query)
 }
+
+// RetrievePodMetrics returns metrics for a given pod
+func RetrievePodMetrics(name string) JSONDataWrapper {
+	if name == All {
+		logrus.Errorf("wrong type of query for pod, empty name is given")
+		return JSONDataWrapper{}
+	}
+	query := `query {
+		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			children: ~pod @filter(has(isContainer)) {
+				name
+				type
+				cpu: cpu as cpuRequest
+				memory: memory as memoryRequest
+				cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			}
+			cpu: podCpu as cpuRequest
+			memory: podMemory as memoryRequest
+			storage: pvcStorage as storageRequest
+			cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
+		}
+	}`
+	return getJSONDataFromQuery(query)
+}

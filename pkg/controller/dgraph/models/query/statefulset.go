@@ -37,3 +37,34 @@ func RetrieveStatefulsetHierarchy(name string) JSONDataWrapper {
 	}`
 	return getJSONDataFromQuery(query)
 }
+
+// RetrieveStatefulsetMetrics returns metrics for a given statefulset
+func RetrieveStatefulsetMetrics(name string) JSONDataWrapper {
+	if name == All {
+		logrus.Errorf("wrong type of query for statefulset, empty name is given")
+		return JSONDataWrapper{}
+	}
+	query := `query {
+		parent(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			children: ~statefulset @filter(has(isPod)) {
+				name
+				type
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+				storage: pvcStorage as storageRequest
+				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
+			}
+			cpu: cpu as sum(val(podCpu))
+			memory: memory as sum(val(podMemory))
+			storage: storage as sum(val(pvcStorage))
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+		}
+	}`
+	return getJSONDataFromQuery(query)
+}

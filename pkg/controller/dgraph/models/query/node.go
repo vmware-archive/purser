@@ -38,3 +38,35 @@ func RetrieveNodeHierarchy(name string) JSONDataWrapper {
     }`
 	return getJSONDataFromQuery(query)
 }
+
+// RetrieveNodeMetrics returns metrics for a given node
+func RetrieveNodeMetrics(name string) JSONDataWrapper {
+	if name == All {
+		logrus.Errorf("wrong type of query for node, empty name is given")
+		return JSONDataWrapper{}
+	}
+
+	query := `query {
+		parent(func: has(isNode)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			children: ~node @filter(has(isPod)) {
+				name
+				type
+				cpu: podCpu as cpuRequest
+				memory: podMemory as memoryRequest
+				storage: podStorage as storageRequest
+				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(podStorage * ` + defaultStorageCostPerGBPerHour + `)
+			}
+			cpu: cpu as cpuCapacity
+			memory: memory as memoryCapacity
+			storage: storage as sum(val(podStorage))
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+		}
+	}`
+	return getJSONDataFromQuery(query)
+}
