@@ -65,7 +65,10 @@ func getPIDList(conf controller.Config, pod corev1.Pod, containerName string) ([
 		}
 	}
 	// ignore first line i.e, PID CMD headers
-	return pidList[1:], cmdList[1:]
+	if len(pidList) >= 1 {
+		return pidList[1:], cmdList[1:]
+	}
+	return pidList, cmdList
 }
 
 func getProcessDump(conf controller.Config, pod corev1.Pod, containerName string, process linker.Process, interactions *linker.InteractionsWrapper) {

@@ -60,6 +60,7 @@ func PopulatePodIPTable(pods *corev1.PodList) {
 
 // GenerateAndStorePodInteractions generates source to destination Pod mapping and stores it in Dgraph.
 func GenerateAndStorePodInteractions() {
+	log.Info("Storing Pod Interactions ....")
 	for srcPodName, communication := range podToPodTable {
 		dstPods := []string{}
 		counts := []float64{}
@@ -72,6 +73,7 @@ func GenerateAndStorePodInteractions() {
 			log.Errorf("failed to store pod interaction in Dgraph %v", err)
 		}
 	}
+	log.Info("Finished storing pod interactions.")
 }
 
 // PopulateMappingTables updates PodToPodTable
@@ -91,6 +93,7 @@ func PopulateMappingTables(tcpDump []string, pod corev1.Pod, process Process, co
 
 func updatePodInteractions(srcName, dstName string, interactions *InteractionsWrapper) {
 	if dstName != "" && srcName != "" {
+		log.Debugf("pod interactions srcName: (%s), dstName: (%s)", srcName, dstName)
 		if _, ok := interactions.PodInteractions[srcName]; !ok {
 			interactions.PodInteractions[srcName] = make(map[string]float64)
 		}

@@ -20,9 +20,9 @@ package models
 import (
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
-	"log"
 )
 
 // Dgraph Model Constants
@@ -44,7 +44,7 @@ type Statefulset struct {
 
 func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
 	newStatefulset := Statefulset{
-		Name:          statefulset.Name,
+		Name:          "statefulset-" + statefulset.Name,
 		IsStatefulset: true,
 		Type:          "statefulset",
 		ID:            dgraph.ID{Xid: statefulset.Namespace + ":" + statefulset.Name},

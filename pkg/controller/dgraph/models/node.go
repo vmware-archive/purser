@@ -48,7 +48,7 @@ type Node struct {
 
 func createNodeObject(node api_v1.Node) Node {
 	newNode := Node{
-		Name:           node.Name,
+		Name:           "node-" + node.Name,
 		IsNode:         true,
 		Type:           "node",
 		ID:             dgraph.ID{Xid: node.Name},

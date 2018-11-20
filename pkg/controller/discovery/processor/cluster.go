@@ -27,7 +27,7 @@ import (
 
 // RetrievePodList returns list of pods in the given namespace.
 func RetrievePodList(client *kubernetes.Clientset, options metav1.ListOptions) *corev1.PodList {
-	pods, err := client.CoreV1().Pods("").List(options)
+	pods, err := client.CoreV1().Pods(metav1.NamespaceAll).List(options)
 	if err != nil {
 		log.Errorf("failed to retrieve pods: %v", err)
 	}
@@ -36,7 +36,7 @@ func RetrievePodList(client *kubernetes.Clientset, options metav1.ListOptions) *
 
 // RetrieveServiceList returns list of services in the given namespace.
 func RetrieveServiceList(client *kubernetes.Clientset, options metav1.ListOptions) *corev1.ServiceList {
-	services, err := client.CoreV1().Services("").List(options)
+	services, err := client.CoreV1().Services(metav1.NamespaceAll).List(options)
 	if err != nil {
 		log.Errorf("failed to retrieve services: %v", err)
 	}
