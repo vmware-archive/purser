@@ -50,7 +50,7 @@ func processPodDetails(conf controller.Config, pods *corev1.PodList) {
 	wg.Add(podsCount)
 	{
 		for index, pod := range pods.Items {
-			log.Debugf("Processing Pod (%d/%d) ... ", index+1, podsCount)
+			log.Debugf("Processing Pod: (%s), (%d/%d) ... ", pod.Name, index+1, podsCount)
 
 			go func(pod corev1.Pod, index int) {
 				defer wg.Done()
@@ -60,7 +60,7 @@ func processPodDetails(conf controller.Config, pods *corev1.PodList) {
 				linker.UpdatePodToPodTable(interactions.PodInteractions)
 				linker.StoreProcessInteractions(interactions.ContainerProcessInteraction, interactions.ProcessToPodInteraction,
 					pod.GetCreationTimestamp().Time)
-				log.Debugf("Finished processing Pod (%d/%d)", index+1, podsCount)
+				log.Debugf("Finished processing Pod: (%s), (%d/%d)", pod.Name, index+1, podsCount)
 			}(pod, index)
 		}
 	}

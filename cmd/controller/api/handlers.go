@@ -21,7 +21,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
+	"github.com/vmware/purser/pkg/controller/discovery/generator"
 	"io"
 	"net/http"
 )
@@ -406,6 +408,37 @@ func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
 		logrus.Errorf("wrong type of query for PVC, no name is given")
 	}
 	encodeAndWrite(w, jsonData)
+}
+
+// GetPodDiscoveryNodes listens on /discovery/pod/nodes endpoint
+func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
+	var pods []models.Pod
+	var err error
+
+	addHeaders(&w, r)
+	pods, err = query.RetrievePodsInteractionsForAllLivePodsWithCount()
+	generator.GeneratePodNodesAndEdges(pods)
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+	err = json.NewEncoder(w).Encode(generator.GetGraphNodes())
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetPodDiscoveryEdges listens on /discovery/pod/edges endpoint
+func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
+	var err error
+	addHeaders(&w, r)
+	if err != nil {
+		logrus.Errorf("Unable to get response: (%v)", err)
+	}
+
+	err = json.NewEncoder(w).Encode(generator.GetGraphEdges())
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
 }
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {

@@ -58,6 +58,7 @@ type Pod struct {
 	MemoryLimit    float64                  `json:"memoryLimit,omitempty"`
 	StorageRequest float64                  `json:"storageRequest,omitempty"`
 	Type           string                   `json:"type,omitempty"`
+	Cid            []Service                `json:"cid,omitempty"`
 }
 
 // Metrics ...
@@ -71,7 +72,7 @@ type Metrics struct {
 // newPod creates a new node for the pod in the Dgraph
 func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	pod := Pod{
-		Name:      k8sPod.Name,
+		Name:      "pod-" + k8sPod.Name,
 		IsPod:     true,
 		Type:      "pod",
 		ID:        dgraph.ID{Xid: k8sPod.Namespace + ":" + k8sPod.Name},

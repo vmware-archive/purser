@@ -47,7 +47,7 @@ type Service struct {
 
 func newService(svc api_v1.Service) (*api.Assigned, error) {
 	newService := Service{
-		Name:      svc.Name,
+		Name:      "service-" + svc.Name,
 		IsService: true,
 		Type:      "service",
 		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
@@ -121,7 +121,7 @@ func StorePodServiceEdges(svcXID string, podsXIDsInService []string) error {
 // RetrieveAllServices returns all pods in the dgraph
 func RetrieveAllServices() ([]Service, error) {
 	const q = `query {
-		services(func: has(isService)) {
+		service(func: has(isService)) {
 			name
 			interacts @facets {
 				name
@@ -133,7 +133,7 @@ func RetrieveAllServices() ([]Service, error) {
 	}`
 
 	type root struct {
-		Services []Service `json:"services"`
+		Services []Service `json:"service"`
 	}
 	newRoot := root{}
 	err := dgraph.ExecuteQuery(q, &newRoot)

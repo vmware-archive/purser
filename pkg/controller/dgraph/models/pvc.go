@@ -46,7 +46,7 @@ type PersistentVolumeClaim struct {
 
 func createPvcObject(pvc api_v1.PersistentVolumeClaim) PersistentVolumeClaim {
 	newPvc := PersistentVolumeClaim{
-		Name:                    pvc.Name,
+		Name:                    "pvc-" + pvc.Name,
 		IsPersistentVolumeClaim: true,
 		Type:                    "pvc",
 		ID:                      dgraph.ID{Xid: pvc.Namespace + ":" + pvc.Name},
