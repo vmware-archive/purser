@@ -49,7 +49,7 @@ type Edge struct {
 }
 
 var (
-	uniqueID = 0
+	uniqueID int
 	nodes    *[]Node
 	edges    *[]Edge
 )
@@ -134,7 +134,7 @@ func createPodNode(podName string, podID int, podConnections int, cid []string) 
 		Label: podName,
 		Title: "pods",
 		Value: podConnections,
-		Group: 1,
+		Group: 1, // needed for UI, colors different group differently(not needed for our use case)
 		Cid:   cid,
 	}
 }

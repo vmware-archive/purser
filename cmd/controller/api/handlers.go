@@ -412,12 +412,12 @@ func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetPodDiscoveryNodes listens on /discovery/pod/nodes endpoint
 func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
-	var pod []models.Pod
+	var pods []models.Pod
 	var err error
 
 	addHeaders(&w, r)
-	pod, err = query.RetrievePodsInteractionsForAllLivePodsWithCount()
-	generator.GeneratePodNodesAndEdges(pod)
+	pods, err = query.RetrievePodsInteractionsForAllLivePodsWithCount()
+	generator.GeneratePodNodesAndEdges(pods)
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
