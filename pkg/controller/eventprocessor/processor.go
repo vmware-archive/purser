@@ -25,6 +25,8 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	log "github.com/Sirupsen/logrus"
+	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
+	subcriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
 	api_v1 "k8s.io/api/core/v1"
@@ -180,6 +182,26 @@ func PersistPayloads(payloads []*interface{}) {
 			_, err = models.StoreJob(job)
 			if err != nil {
 				log.Errorf("Error while persisting job %v", err)
+			}
+		} else if payload.ResourceType == "Group" {
+			groupCRD := groups_v1.Group{}
+			err := json.Unmarshal([]byte(payload.Data), &groupCRD)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreGroupCRD(groupCRD)
+			if err != nil {
+				log.Errorf("Error while persisting group CRD %v", err)
+			}
+		} else if payload.ResourceType == "Subscriber" {
+			subscriberCRD := subcriber_v1.Subscriber{}
+			err := json.Unmarshal([]byte(payload.Data), &subscriberCRD)
+			if err != nil {
+				log.Errorf("Error un marshalling payload " + payload.Data)
+			}
+			_, err = models.StoreSubscriberCRD(subscriberCRD)
+			if err != nil {
+				log.Errorf("Error while persisting subscriber CRD %v", err)
 			}
 		}
 	}

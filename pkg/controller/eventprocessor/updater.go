@@ -36,7 +36,7 @@ func updateCustomGroups(payloads []*interface{}, groups []*groups_v1.Group, crdc
 
 	// update all the groups
 	for _, group := range groups {
-		_, err := crdclient.UpdateGroup(group)
+		_, err := crdclient.Update(group)
 
 		if err != nil {
 			log.Errorf("There is an error while updating the crd for group = "+group.Name, err)
@@ -147,7 +147,7 @@ func isPodBelongsToGroup(group *groups_v1.Group, pod *api_v1.Pod) bool {
 }
 
 func getAllGroups(crdclient *groups_client_v1.GroupClient) []*groups_v1.Group {
-	items, err := crdclient.ListGroups(meta_v1.ListOptions{})
+	items, err := crdclient.List(meta_v1.ListOptions{})
 	if err != nil {
 		log.Error("Error while fetching groups ", err)
 		return nil

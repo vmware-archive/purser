@@ -27,6 +27,9 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
+	subscriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
+
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
 	api_v1 "k8s.io/api/core/v1"
@@ -313,6 +316,50 @@ func Start(conf *Config) {
 
 		c := newResourceController(Kubeclient, informer, "Namespace")
 		c.conf = conf
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Group {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return conf.Groupcrdclient.List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return conf.Groupcrdclient.Watch(options)
+				},
+			},
+			&groups_v1.Group{},
+			0,
+			cache.Indexers{},
+		)
+
+		c := newResourceController(Kubeclient, informer, "Group")
+		stopCh := make(chan struct{})
+		defer close(stopCh)
+
+		go c.Run(stopCh)
+	}
+
+	if conf.Resource.Subscriber {
+		informer := cache.NewSharedIndexInformer(
+			&cache.ListWatch{
+				ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+					return conf.Subscriberclient.List(options)
+				},
+				WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+					return conf.Subscriberclient.Watch(options)
+				},
+			},
+			&subscriber_v1.Subscriber{},
+			0,
+			cache.Indexers{},
+		)
+
+		c := newResourceController(Kubeclient, informer, "Subscriber")
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 

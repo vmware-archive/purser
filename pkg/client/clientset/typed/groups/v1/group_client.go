@@ -51,7 +51,17 @@ func NewGroupClient(clientset apiextcs.Interface, config *rest.Config) *GroupCli
 	}
 
 	// Create a CRD client interface
-	return NewGroup(gcrdcs, gscheme, "default")
+	return Group(gcrdcs, gscheme, "default")
+}
+
+// Group returns a new instance of the Group CRD
+func Group(client *rest.RESTClient, scheme *runtime.Scheme, namespace string) *GroupClient {
+	return &GroupClient{
+		client: client,
+		ns:     namespace,
+		plural: groups_v1.CRDPlural,
+		codec:  runtime.NewParameterCodec(scheme),
+	}
 }
 
 func createGroupCRD(clientset apiextcs.Interface) error {

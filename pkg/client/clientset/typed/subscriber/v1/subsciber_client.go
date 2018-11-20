@@ -51,7 +51,17 @@ func NewSubscriberClient(clientset apiextcs.Interface, config *rest.Config) *Sub
 	}
 
 	// Create a CRD client interface
-	return NewSubscriber(crdcs, scheme, "default")
+	return Subscriber(crdcs, scheme, "default")
+}
+
+// Subscriber returns an instance of the subscriber client
+func Subscriber(client *rest.RESTClient, scheme *runtime.Scheme, namespace string) *SubscriberClient {
+	return &SubscriberClient{
+		client: client,
+		ns:     namespace,
+		plural: subscriber_v1.SubscriberPlural,
+		codec:  runtime.NewParameterCodec(scheme),
+	}
 }
 
 func createSubscriberCRD(clientset apiextcs.Interface) error {

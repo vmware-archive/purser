@@ -87,7 +87,7 @@ func (subscriber *subscriber) setAuthHeaders(r *http.Request) {
 
 func getSubscribers(conf *controller.Config) []*subscriber {
 	subscribers := []*subscriber{}
-	list, err := conf.Subscriberclient.ListSubscriber(meta_v1.ListOptions{})
+	list, err := conf.Subscriberclient.List(meta_v1.ListOptions{})
 	if err != nil {
 		log.Error("Error while fetching subscribers list ", err)
 		return nil

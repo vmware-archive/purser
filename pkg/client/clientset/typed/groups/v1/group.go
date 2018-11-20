@@ -21,20 +21,19 @@ import (
 	"github.com/vmware/purser/pkg/apis/groups/v1"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 )
 
 // GroupInterface has client methods we need to access Group object
 type GroupInterface interface {
-	CreateGroup(obj *v1.Group) (*v1.Group, error)
-	UpdateGroup(obj *v1.Group) (*v1.Group, error)
-	DeleteGroup(name string, options *meta_v1.DeleteOptions) error
-	GetGroup(name string) (*v1.Group, error)
-	ListGroups(opts meta_v1.ListOptions) (*v1.GroupList, error)
-	NewListWatchGroup() *cache.ListWatch
+	Create(obj *v1.Group) (*v1.Group, error)
+	Update(obj *v1.Group) (*v1.Group, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.Group, error)
+	List(opts meta_v1.ListOptions) (*v1.GroupList, error)
+	Watch(opts meta_v1.ListOptions) (watch.Interface, error)
 }
 
 // GroupClient defines the CRD Group structure
@@ -45,18 +44,8 @@ type GroupClient struct {
 	codec  runtime.ParameterCodec
 }
 
-// NewGroup creates a new intance of the group CRD client.
-func NewGroup(client *rest.RESTClient, scheme *runtime.Scheme, namespace string) *GroupClient {
-	return &GroupClient{
-		client: client,
-		ns:     namespace,
-		plural: v1.CRDPlural,
-		codec:  runtime.NewParameterCodec(scheme),
-	}
-}
-
-// CreateGroup creates a new group.
-func (c *GroupClient) CreateGroup(obj *v1.Group) (*v1.Group, error) {
+// Create creates a new group.
+func (c *GroupClient) Create(obj *v1.Group) (*v1.Group, error) {
 	result := v1.Group{}
 	err := c.client.Post().
 		Namespace(c.ns).
@@ -67,8 +56,8 @@ func (c *GroupClient) CreateGroup(obj *v1.Group) (*v1.Group, error) {
 	return &result, err
 }
 
-// UpdateGroup modifies the group specification.
-func (c *GroupClient) UpdateGroup(obj *v1.Group) (*v1.Group, error) {
+// Update modifies the group specification.
+func (c *GroupClient) Update(obj *v1.Group) (*v1.Group, error) {
 	result := v1.Group{}
 	err := c.client.Put().
 		Name((obj.Name)).
@@ -80,8 +69,8 @@ func (c *GroupClient) UpdateGroup(obj *v1.Group) (*v1.Group, error) {
 	return &result, err
 }
 
-// DeleteGroup removes the group.
-func (c *GroupClient) DeleteGroup(name string, options *meta_v1.DeleteOptions) error {
+// Delete removes the group.
+func (c *GroupClient) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource(c.plural).
@@ -91,8 +80,8 @@ func (c *GroupClient) DeleteGroup(name string, options *meta_v1.DeleteOptions) e
 		Error()
 }
 
-// GetGroup fetches the group
-func (c *GroupClient) GetGroup(name string) (*v1.Group, error) {
+// Get fetches the group
+func (c *GroupClient) Get(name string) (*v1.Group, error) {
 	result := v1.Group{}
 	err := c.client.Get().
 		Namespace(c.ns).
@@ -103,8 +92,8 @@ func (c *GroupClient) GetGroup(name string) (*v1.Group, error) {
 	return &result, err
 }
 
-// ListGroups fetches the list of groups.
-func (c *GroupClient) ListGroups(opts meta_v1.ListOptions) (*v1.GroupList, error) {
+// List fetches the list of groups.
+func (c *GroupClient) List(opts meta_v1.ListOptions) (*v1.GroupList, error) {
 	result := v1.GroupList{}
 	err := c.client.Get().
 		Namespace(c.ns).
@@ -115,7 +104,13 @@ func (c *GroupClient) ListGroups(opts meta_v1.ListOptions) (*v1.GroupList, error
 	return &result, err
 }
 
-// NewListWatchGroup creates a new List watch for our TPR
-func (c *GroupClient) NewListWatchGroup() *cache.ListWatch {
-	return cache.NewListWatchFromClient(c.client, c.plural, c.ns, fields.Everything())
+// Watch watches for the groups.
+func (c *GroupClient) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
+	opts.Watch = true
+	return c.client.
+		Get().
+		Namespace(c.ns).
+		Resource(c.plural).
+		VersionedParams(&opts, c.codec).
+		Watch()
 }
