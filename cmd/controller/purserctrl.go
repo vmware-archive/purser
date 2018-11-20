@@ -18,8 +18,9 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/robfig/cron"
 	"github.com/vmware/purser/cmd/controller/api"

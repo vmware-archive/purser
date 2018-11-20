@@ -20,9 +20,10 @@ package models
 import (
 	"time"
 
+	"log"
+
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
-	"log"
 )
 
 // Dgraph Model Constants

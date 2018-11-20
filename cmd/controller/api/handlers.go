@@ -20,12 +20,13 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/vmware/purser/pkg/controller/discovery/generator"
-	"io"
-	"net/http"
 )
 
 // GetHomePage is the default api home page

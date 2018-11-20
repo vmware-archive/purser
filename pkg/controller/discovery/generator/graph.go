@@ -18,8 +18,9 @@
 package generator
 
 import (
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"strconv"
+
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
 // Node represents each node in the graph
