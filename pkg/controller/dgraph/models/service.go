@@ -47,7 +47,7 @@ type Service struct {
 
 func newService(svc api_v1.Service) (*api.Assigned, error) {
 	newService := Service{
-		Name:      "sevice-" + svc.Name,
+		Name:      "service-" + svc.Name,
 		IsService: true,
 		Type:      "service",
 		ID:        dgraph.ID{Xid: svc.Namespace + ":" + svc.Name},
