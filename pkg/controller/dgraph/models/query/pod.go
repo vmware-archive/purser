@@ -122,7 +122,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 	return getJSONDataFromQuery(query)
 }
 
-// RetrievePodsInteractionsForAllPodsOrphanedTrue returns all pods in the dgraph
+// RetrievePodsInteractionsForAllLivePodsWithCount returns all pods in the dgraph
 func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 	q := `query {
 		pods(func: has(isPod)) @filter((NOT has(endTime))) {

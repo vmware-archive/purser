@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser-dev/pkg/controller/discovery/graph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/vmware/purser/pkg/controller/discovery/generator"
