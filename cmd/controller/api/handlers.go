@@ -228,6 +228,186 @@ func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
+// GetClusterMetrics listens on /metrics endpoint with option for view(physical or logical)
+func GetClusterMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if view, isView := queryParams[query.View]; isView && view[0] == query.Physical {
+		jsonData = query.RetrieveClusterMetrics(query.Physical)
+	} else {
+		jsonData = query.RetrieveClusterMetrics(query.Logical)
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetNamespaceMetrics listens on /metrics/namespace
+func GetNamespaceMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveNamespaceMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for namespace, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetDeploymentMetrics listens on /metrics/deployment
+func GetDeploymentMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveDeploymentMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for deployment, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetDaemonsetMetrics listens on /metrics/daemonset
+func GetDaemonsetMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveDaemonsetMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for daemonset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetJobMetrics listens on /metrics/job
+func GetJobMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveJobMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for job, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetStatefulsetMetrics listens on /metrics/statefulset
+func GetStatefulsetMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveStatefulsetMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for statefulset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetReplicasetMetrics listens on /metrics/replicaset
+func GetReplicasetMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveReplicasetMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for statefulset, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetNodeMetrics listens on /metrics/node
+func GetNodeMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveNodeMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for node, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPodMetrics listens on /metrics/pod
+func GetPodMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePodMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for pod, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetContainerMetrics listens on /metrics/container
+func GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrieveContainerMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for container, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPVMetrics listens on /metrics/pv
+func GetPVMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePVMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for PV, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
+// GetPVCMetrics listens on /metrics/pv
+func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+	queryParams := r.URL.Query()
+	logrus.Debugf("Query params: (%v)", queryParams)
+
+	var jsonData query.JSONDataWrapper
+	if name, isName := queryParams[query.Name]; isName {
+		jsonData = query.RetrievePVCMetrics(name[0])
+	} else {
+		logrus.Errorf("wrong type of query for PVC, no name is given")
+	}
+	encodeAndWrite(w, jsonData)
+}
+
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")

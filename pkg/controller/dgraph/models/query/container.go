@@ -37,3 +37,22 @@ func RetrieveContainerHierarchy(name string) JSONDataWrapper {
 	}`
 	return getJSONDataFromQuery(query)
 }
+
+// RetrieveContainerMetrics returns hierarchy for a given pod
+func RetrieveContainerMetrics(name string) JSONDataWrapper {
+	if name == All {
+		logrus.Errorf("wrong type of query for container, empty name is given")
+		return JSONDataWrapper{}
+	}
+	query := `query {
+		parent(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			cpu: cpu as cpuRequest
+			memory: memory as memoryRequest
+			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+		}
+	}`
+	return getJSONDataFromQuery(query)
+}
