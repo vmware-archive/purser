@@ -18,9 +18,10 @@
 package api
 
 import (
-	"github.com/Sirupsen/logrus"
 	"net/http"
 	"time"
+
+	"github.com/Sirupsen/logrus"
 )
 
 // Logger implements web logging logic
