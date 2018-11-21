@@ -15,11 +15,11 @@ const (
 // GroupCRD schema in dgraph
 type GroupCRD struct {
 	dgraph.ID
-	IsPurserGroup bool      `json:"isPurserGroup,omitempty"`
-	Name          string    `json:"name,omitempty"`
-	StartTime     time.Time `json:"startTime,omitempty"`
-	EndTime       time.Time `json:"endTime,omitempty"`
-	Type          string    `json:"type,omitempty"`
+	IsPurserGroup bool   `json:"isPurserGroup,omitempty"`
+	Name          string `json:"name,omitempty"`
+	StartTime     string `json:"startTime,omitempty"`
+	EndTime       string `json:"endTime,omitempty"`
+	Type          string `json:"type,omitempty"`
 }
 
 func createGroupCRDObject(group groups_v1.Group) GroupCRD {
@@ -28,12 +28,12 @@ func createGroupCRDObject(group groups_v1.Group) GroupCRD {
 		IsPurserGroup: true,
 		Type:          "purser",
 		ID:            dgraph.ID{Xid: group.Name},
-		StartTime:     group.GetCreationTimestamp().Time,
+		StartTime:     group.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 
 	deletionTimestamp := group.GetDeletionTimestamp()
 	if !deletionTimestamp.IsZero() {
-		newGroup.EndTime = deletionTimestamp.Time
+		newGroup.EndTime = deletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return newGroup
 }

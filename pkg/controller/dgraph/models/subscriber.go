@@ -15,11 +15,11 @@ const (
 // SubscriberCRD schema in dgraph
 type SubscriberCRD struct {
 	dgraph.ID
-	IsSubscriberCRD bool      `json:"isSubscriberCRD,omitempty"`
-	Name            string    `json:"name,omitempty"`
-	StartTime       time.Time `json:"startTime,omitempty"`
-	EndTime         time.Time `json:"endTime,omitempty"`
-	Type            string    `json:"type,omitempty"`
+	IsSubscriberCRD bool   `json:"isSubscriberCRD,omitempty"`
+	Name            string `json:"name,omitempty"`
+	StartTime       string `json:"startTime,omitempty"`
+	EndTime         string `json:"endTime,omitempty"`
+	Type            string `json:"type,omitempty"`
 }
 
 func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberCRD {
@@ -28,12 +28,12 @@ func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberC
 		IsSubscriberCRD: true,
 		Type:            "subscriber",
 		ID:              dgraph.ID{Xid: subscriber.Name},
-		StartTime:       subscriber.GetCreationTimestamp().Time,
+		StartTime:       subscriber.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 
 	deletionTimestamp := subscriber.GetDeletionTimestamp()
 	if !deletionTimestamp.IsZero() {
-		newSubscriber.EndTime = deletionTimestamp.Time
+		newSubscriber.EndTime = deletionTimestamp.Time.Format(time.RFC3339)
 	}
 	return newSubscriber
 }
