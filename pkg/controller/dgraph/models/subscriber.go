@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2018 VMware Inc. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package models
 
 import (
@@ -9,26 +26,26 @@ import (
 
 // Dgraph Model Constants
 const (
-	IsSubscriberCRD = "isSubscriberCRD"
+	IsSubscriber = "isSubscriber"
 )
 
 // SubscriberCRD schema in dgraph
 type SubscriberCRD struct {
 	dgraph.ID
-	IsSubscriberCRD bool   `json:"isSubscriberCRD,omitempty"`
-	Name            string `json:"name,omitempty"`
-	StartTime       string `json:"startTime,omitempty"`
-	EndTime         string `json:"endTime,omitempty"`
-	Type            string `json:"type,omitempty"`
+	IsSubscriber bool   `json:"isSubscriber,omitempty"`
+	Name         string `json:"name,omitempty"`
+	StartTime    string `json:"startTime,omitempty"`
+	EndTime      string `json:"endTime,omitempty"`
+	Type         string `json:"type,omitempty"`
 }
 
 func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberCRD {
 	newSubscriber := SubscriberCRD{
-		Name:            subscriber.Name,
-		IsSubscriberCRD: true,
-		Type:            "subscriber",
-		ID:              dgraph.ID{Xid: subscriber.Name},
-		StartTime:       subscriber.GetCreationTimestamp().Time.Format(time.RFC3339),
+		Name:         subscriber.Name,
+		IsSubscriber: true,
+		Type:         "subscriber",
+		ID:           dgraph.ID{Xid: subscriber.Name},
+		StartTime:    subscriber.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
 
 	deletionTimestamp := subscriber.GetDeletionTimestamp()
@@ -38,10 +55,10 @@ func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberC
 	return newSubscriber
 }
 
-// StoreSubscriberCRD create a new persistent volume in the Dgraph and updates if already present.
+// StoreSubscriberCRD create a new subscriber CRD in the Dgraph and updates if already present.
 func StoreSubscriberCRD(subscriber subscribers_v1.Subscriber) (string, error) {
 	xid := subscriber.Name
-	uid := dgraph.GetUID(xid, IsSubscriberCRD)
+	uid := dgraph.GetUID(xid, IsSubscriber)
 
 	newSubscriber := createSubscriberCRDObject(subscriber)
 	if uid != "" {
