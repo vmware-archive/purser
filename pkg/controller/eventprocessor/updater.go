@@ -21,32 +21,15 @@ import (
 	"encoding/json"
 
 	log "github.com/Sirupsen/logrus"
+
 	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
-	groups_client_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
 	"github.com/vmware/purser/pkg/controller"
 	"github.com/vmware/purser/pkg/controller/metrics"
 
 	api_v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func updateCustomGroups(payloads []*interface{}, groups []*groups_v1.Group, crdclient *groups_client_v1.GroupClient) {
-
-	processPayload(groups, payloads)
-
-	// update all the groups
-	for _, group := range groups {
-		_, err := crdclient.Update(group)
-
-		if err != nil {
-			log.Errorf("There is an error while updating the crd for group = "+group.Name, err)
-		} else {
-			log.Debug("Updating the crd for group = " + group.Name + " is successful")
-		}
-	}
-}
-
-func processPayload(groups []*groups_v1.Group, payloads []*interface{}) {
+func updateCustomGroups(payloads []*interface{}, groups *groups_v1.GroupList) {
 	for _, event := range payloads {
 		payload := (*event).(*controller.Payload)
 		if payload.ResourceType != "Pod" {
@@ -55,18 +38,18 @@ func processPayload(groups []*groups_v1.Group, payloads []*interface{}) {
 		pod := api_v1.Pod{}
 		err := json.Unmarshal([]byte(payload.Data), &pod)
 		if err != nil {
-			log.Errorf("Error unmarshalling payload " + payload.Data)
+			log.Errorf("error unmarshalling payload %s, %v", payload.Data, err)
 		}
 
-		log.Info("Started updating User Created Groups for pod "+pod.Name+" update.", pod.Name)
+		log.Infof("Started updating user created groups for pod %s update.", pod.Name)
 
-		for _, group := range groups {
+		for _, group := range groups.Items {
 			if isPodBelongsToGroup(group, &pod) {
-				log.Info("Updating the user group " + group.Spec.Name + " with pod " + pod.Name + " details")
+				log.Infof("Updating the user group %s with pod %s details.", group.Spec.Name, pod.Name)
 				updatePodDetails(group, pod, *payload)
 			}
 		}
-		log.Debug("Completed updating User Created Groups for pod " + pod.Name + " update.")
+		log.Debugf("Completed updating user created groups for pod %s update.", pod.Name)
 	}
 }
 
@@ -144,13 +127,4 @@ func isPodBelongsToGroup(group *groups_v1.Group, pod *api_v1.Pod) bool {
 		}
 	}
 	return false
-}
-
-func getAllGroups(crdclient *groups_client_v1.GroupClient) []*groups_v1.Group {
-	items, err := crdclient.List(meta_v1.ListOptions{})
-	if err != nil {
-		log.Error("Error while fetching groups ", err)
-		return nil
-	}
-	return items.Items
 }
