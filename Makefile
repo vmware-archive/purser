@@ -38,12 +38,8 @@ VERSION := 1.0.0
 ###
 
 ALL_ARCH := amd64 arm arm64 ppc64le
-
-# Set default base image dynamically for each arch
 BASEIMAGE?=photon
-
 BUILD_IMAGE?= golang:1.11
-
 DOCKER_MOUNT_MODE=delegated
 
 # Set dep management tool parameters
