@@ -26,7 +26,7 @@ func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberC
 	newSubscriber := SubscriberCRD{
 		Name:            subscriber.Name,
 		IsSubscriberCRD: true,
-		Type:            "kuber.input",
+		Type:            "subscriber",
 		ID:              dgraph.ID{Xid: subscriber.Name},
 		StartTime:       subscriber.GetCreationTimestamp().Time,
 	}

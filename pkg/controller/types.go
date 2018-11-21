@@ -45,8 +45,8 @@ type Resource struct {
 	Job                   bool `json:"job"`
 	DaemonSet             bool `json:"daemonset"`
 	Namespace             bool `json:"namespace"`
-	Group                 bool `json:"vmware.kuber"`
-	Subscriber            bool `json:"kuber.input"`
+	Group                 bool `json:"purser"`
+	Subscriber            bool `json:"subscriber"`
 }
 
 // Config contains config objects

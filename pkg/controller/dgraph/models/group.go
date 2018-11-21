@@ -9,26 +9,26 @@ import (
 
 // Dgraph Model Constants
 const (
-	IsGroupCRD = "isGroupCRD"
+	IsPurserGroup = "isPurserGroup"
 )
 
 // GroupCRD schema in dgraph
 type GroupCRD struct {
 	dgraph.ID
-	IsGroupCRD bool      `json:"isGroupCRD,omitempty"`
-	Name       string    `json:"name,omitempty"`
-	StartTime  time.Time `json:"startTime,omitempty"`
-	EndTime    time.Time `json:"endTime,omitempty"`
-	Type       string    `json:"type,omitempty"`
+	IsPurserGroup bool      `json:"isPurserGroup,omitempty"`
+	Name          string    `json:"name,omitempty"`
+	StartTime     time.Time `json:"startTime,omitempty"`
+	EndTime       time.Time `json:"endTime,omitempty"`
+	Type          string    `json:"type,omitempty"`
 }
 
 func createGroupCRDObject(group groups_v1.Group) GroupCRD {
 	newGroup := GroupCRD{
-		Name:       group.Name,
-		IsGroupCRD: true,
-		Type:       "vmware.kuber",
-		ID:         dgraph.ID{Xid: group.Name},
-		StartTime:  group.GetCreationTimestamp().Time,
+		Name:          group.Name,
+		IsPurserGroup: true,
+		Type:          "purser",
+		ID:            dgraph.ID{Xid: group.Name},
+		StartTime:     group.GetCreationTimestamp().Time,
 	}
 
 	deletionTimestamp := group.GetDeletionTimestamp()
@@ -41,7 +41,7 @@ func createGroupCRDObject(group groups_v1.Group) GroupCRD {
 // StoreGroupCRD create a new persistent volume in the Dgraph and updates if already present.
 func StoreGroupCRD(group groups_v1.Group) (string, error) {
 	xid := group.Name
-	uid := dgraph.GetUID(xid, IsGroupCRD)
+	uid := dgraph.GetUID(xid, IsPurserGroup)
 
 	newGroup := createGroupCRDObject(group)
 	if uid != "" {

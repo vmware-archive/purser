@@ -26,7 +26,7 @@ import (
 // CRD Group attributes
 const (
 	CRDPlural   string = "groups"
-	CRDGroup    string = "vmware.kuber"
+	CRDGroup    string = "purser"
 	CRDVersion  string = "v1"
 	FullCRDName string = CRDPlural + "." + CRDGroup
 )
