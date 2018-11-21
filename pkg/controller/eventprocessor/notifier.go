@@ -23,6 +23,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
+
 	subscriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller"
 )
@@ -39,37 +40,43 @@ type notifier struct {
 }
 
 func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.SubscriberList) {
-	if notifiers := getNotifiers(subscribers); notifiers != nil {
-		for _, notifier := range notifiers {
-			notifier.sendData(payload)
-		}
+	notifiers := getNotifiers(subscribers)
+
+	for _, notifier := range notifiers {
+		notifier.sendData(payload)
 	}
 }
 
 func (n notifier) sendData(payload []*interface{}) {
-	payloadWrapper := controller.PayloadWrapper{Data: payload, OrgID: n.orgID, Cluster: n.cluster}
+	payloadWrapper := controller.PayloadWrapper{
+		Data:    payload,
+		OrgID:   n.orgID,
+		Cluster: n.cluster,
+	}
+
 	jsonStr, err := json.Marshal(payloadWrapper)
 	if err != nil {
-		log.Error("Error while unmarshalling payload ", err)
+		log.Errorf("Error unmarshalling payload %v", err)
 	}
 
 	req, err := http.NewRequest("POST", n.url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		log.Error("Error while creating the http request ", err)
-		return
+		log.Errorf("Error creating HTTP request %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	n.setAuthHeaders(req)
-	client := &http.Client{}
 
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Error("Error while sending data to subscriber %v"+n.url, err)
-	} else if resp != nil {
+		log.Errorf("Error sending data to subscriber %s: %v", n.url, err)
+	}
+
+	if resp != nil {
 		if resp.StatusCode == 200 {
-			log.Info("Data is posted successfully for subscriber " + n.url)
+			log.Infof("Payload data posted successfully for subscriber %s", n.url)
 		} else {
-			log.Info("Data posting failed for subscriber " + n.url + " " + resp.Status)
+			log.Infof("Payload data posting failed for subscriber %s, %s ", n.url, resp.Status)
 		}
 	}
 }
@@ -97,7 +104,7 @@ func getNotifiers(subscribers *subscriber_v1.SubscriberList) []*notifier {
 			notifiers = append(notifiers, notifier)
 		}
 	} else {
-		log.Debug("There are no notifiers for subscribers")
+		log.Debug("No notifiers available for subscribers.")
 	}
 	return notifiers
 }
