@@ -338,6 +338,7 @@ func Start(conf *Config) {
 		)
 
 		c := newResourceController(Kubeclient, informer, "Group")
+		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 
@@ -360,6 +361,7 @@ func Start(conf *Config) {
 		)
 
 		c := newResourceController(Kubeclient, informer, "Subscriber")
+		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 

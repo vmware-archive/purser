@@ -43,7 +43,7 @@ func createGroupCRDObject(group groups_v1.Group) GroupCRD {
 	newGroup := GroupCRD{
 		Name:          group.Name,
 		IsPurserGroup: true,
-		Type:          "purser",
+		Type:          "vmware.purser",
 		ID:            dgraph.ID{Xid: group.Name},
 		StartTime:     group.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
