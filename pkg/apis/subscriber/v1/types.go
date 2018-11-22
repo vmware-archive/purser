@@ -22,7 +22,7 @@ import meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 // CRD Subscriber attributes
 const (
 	SubscriberPlural   string = "subscribers"
-	SubscriberGroup    string = "purser.subscriber"
+	SubscriberGroup    string = "vmware.purser.com"
 	SubscriberVersion  string = "v1"
 	SubscriberFullName string = SubscriberPlural + "." + SubscriberGroup
 )

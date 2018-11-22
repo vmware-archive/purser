@@ -43,7 +43,7 @@ func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberC
 	newSubscriber := SubscriberCRD{
 		Name:         subscriber.Name,
 		IsSubscriber: true,
-		Type:         "purser.subscriber",
+		Type:         subscribers_v1.SubscriberGroup,
 		ID:           dgraph.ID{Xid: subscriber.Name},
 		StartTime:    subscriber.GetCreationTimestamp().Time.Format(time.RFC3339),
 	}
