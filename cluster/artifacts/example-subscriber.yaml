@@ -1,4 +1,4 @@
-apiVersion: purser.subscriber/v1
+apiVersion: vmware.purser.com/v1
 kind: Subscriber
 metadata:
   name: example-subscriber
