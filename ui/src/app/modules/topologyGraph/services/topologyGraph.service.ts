@@ -14,7 +14,7 @@ export class TopologyGraphService {
             _url = _url + '?service=' + serviceName;
         }
 
-        return this.http.get(_devUrl, {
+        return this.http.get(_url, {
             observe: 'body',
             responseType: 'json'
         });
@@ -27,7 +27,7 @@ export class TopologyGraphService {
             _url = _url + '?service=' + serviceName;
         }
 
-        return this.http.get(_devUrl, {
+        return this.http.get(_url, {
             observe: 'body',
             responseType: 'json'
         });
@@ -37,7 +37,7 @@ export class TopologyGraphService {
         let _devUrl: string = './json/serviceList.json';
         let _url: string = 'http://localhost:3030/services';
 
-        return this.http.get(_devUrl, {
+        return this.http.get(_url, {
             observe: 'body',
             responseType: 'json'
         });
