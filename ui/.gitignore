@@ -1,0 +1,17 @@
+.idea
+.vscode
+.go/
+bin/
+vendor/
+*.txt
+*.log
+*.temp
+collector.o
+
+# compiled output
+/dist
+/tmp
+/out-tsc
+
+# dependencies
+/node_modules
