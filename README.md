@@ -19,10 +19,6 @@ The controller component deployed inside the cluster watches for K8s resources a
 
 The plugin component is a CLI tool interfacing with the `kubectl` that helps query costs, savings defined at a level of control of the application level components such as the _Memory and CPU consumptions and utilizations_ rather than at the infrastructure level.
 
-### Demo
-
-![demo](/docs/img/example.gif)
-
 ## Features
 
 - Visibility in terms of
