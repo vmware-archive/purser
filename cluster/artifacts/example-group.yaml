@@ -1,0 +1,8 @@
+apiVersion: vmware.purser.com/v1
+kind: Group
+metadata:
+ name: example-group
+spec:
+ name: example-group
+ labels:
+   app: sample-app
