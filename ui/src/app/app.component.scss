@@ -1,0 +1,100 @@
+.main-container{
+    .appHeader{
+        font-size: 20px;
+        align-items: center;
+    }
+}
+.content-container {
+    position: relative;
+    height: 100%;
+    display: flex;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    flex-direction: column;
+    -webkit-box-direction: normal;
+    -webkit-box-orient: vertical;
+    .header {
+        -webkit-box-flex: 0;
+        box-flex: 0;
+        flex: 0 0 60px;
+        display: flex;
+    }
+    .webpageSpinner {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 100;
+        background: white;
+        .spinner {
+            position: absolute;
+            margin: auto;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+        }
+    }
+    .main-body {
+        display: flex;
+        display: -webkit-flex;
+        display: -moz-flex;
+        display: -ms-flex;
+        overflow-x: hidden;
+        -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        .navigation-area {
+            /* -webkit-box-flex: 0;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            -webkit-box-ordinal-group: 0;
+            order: -1;
+            overflow: hidden;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            flex-direction: column;*/
+            background-color: #eee;
+        }
+        .content-area {
+            background-color: #FAFAFA;
+            display: flex;
+            display: -webkit-flex;
+            display: -moz-flex;
+            display: -ms-flex;
+            -webkit-box-flex: 1;
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding: 20px 24px 80px 24px;
+            .bread-crumb {
+                border-style: solid;
+                border-width: 0px;
+                border-color: grey;
+                max-height: 40px;
+                font-size: 12px;
+                z-index: 10;
+                .synctime-div {
+                    float: right;
+                    font-size: 12px;
+                }
+            }
+            .page-area {
+                flex: auto;
+                position: relative;
+            }
+            .app-loader {
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+        }
+    }
+}

@@ -1,0 +1,38 @@
+<clr-vertical-nav class="left-nav-content" [clrVerticalNavCollapsible]="isCollapsible" [(clrVerticalNavCollapsed)]="collapsed">
+    <ng-container *ngFor="let item of navItems">
+        <clr-tooltip *ngIf="checkVisibility(item)">
+            <ng-container *ngIf="!item.childItems">
+                <a clrVerticalNavLink routerLinkActive="active" routerLink="{{item.routerLink}}" clrTooltipTrigger [routerLinkActiveOptions]="{exact: true}"
+                    [ngClass]="isActive(item)">
+                    <clr-icon [attr.shape]="item.iconShape" clrVerticalNavIcon *ngIf="item.iconShape"></clr-icon>
+                    {{item.displayText}}
+                    <!-- <span class="beta-badge" *ngIf="item.isBeta">{{messages.common.betaText}}</span>
+                    <clr-icon shape="lock" clrVerticalNavIcon class="is-solid lock-icon" *ngIf="isLocked(item)"></clr-icon> -->
+                </a>
+            </ng-container>
+            <ng-container *ngIf="item.childItems">
+                <clr-vertical-nav-group routerLinkActive="active" clrTooltipTrigger [ngClass]="isRootActive(item)">
+                    <clr-icon [attr.shape]="item.iconShape" clrVerticalNavIcon></clr-icon>
+                    {{item.displayText}}
+                    <clr-vertical-nav-group-children>
+                        <ng-container *ngFor="let child of item.childItems">
+                            <a clrVerticalNavLink routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" routerLink="{{child.routerLink}}"
+                                *ngIf="checkVisibility(child)" [queryParams]="child.queryParams" [ngClass]="isActive(child)">
+                                <clr-icon [attr.shape]="child.iconShape" clrVerticalNavIcon *ngIf="child.iconShape"></clr-icon>
+                                {{child.displayText}}
+                                <!-- <span class="beta-badge" *ngIf="child.isBeta">{{messages.common.betaText}}</span>
+                                <clr-icon shape="lock" clrVerticalNavIcon class="is-solid lock-icon" *ngIf="isLocked(child)"></clr-icon> -->
+                            </a>
+                        </ng-container>
+                    </clr-vertical-nav-group-children>
+                </clr-vertical-nav-group>
+            </ng-container>
+            <ng-container *ngIf="collapsed">
+                <clr-tooltip-content clrPosition="right" clrSize="sm" *clrIfOpen style="width:6rem">
+                    <span>{{item.displayText}}</span>
+                    <clr-icon shape="lock" class="is-solid" *ngIf="isLocked(item)"></clr-icon>
+                </clr-tooltip-content>
+            </ng-container>
+        </clr-tooltip>
+    </ng-container>
+</clr-vertical-nav>

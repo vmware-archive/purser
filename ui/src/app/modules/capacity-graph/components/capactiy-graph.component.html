@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-xs-12">
+        <div class="card">
+            <div class="card-block graphCardBlock">
+                <div class="headerBlock">
+                    <div class="card-title">
+                        <span class="headerText">Capacity</span>
+                    </div>
+                    <div class="toggleDiv">
+                        <div class="form-group">
+                            <label class="viewSwitchLeftLabel" for="formGroupExampleInput">Logical View</label>
+                            <div class="toggle-switch right-label">
+                                <input type="checkbox" id="viewSwitch" [(ngModel)]="physicalView" (ngModelChange)="viewChange()">
+                                <label for="viewSwitch">Physical View</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="resetBtn">
+                        <button class="btn btn-outline btn-sm" (click)="reset()">Reset</button>
+                    </div>
+                </div>
+                <div *ngIf="CAPA_STATUS === 'READY'">
+                    <div class="metricDiv">
+                        <div class="selectDiv">
+                            <clr-radio-container clrInline class="selectOptions">
+                                <div>
+                                    <label>Select Metric</label>
+                                </div>
+                                <clr-radio-wrapper *ngFor="let item of metricOptions" class="radioWrapper">
+                                    <input type="radio" clrRadio name="options" required value="{{item.value}}" [(ngModel)]="selectedMetric" (ngModelChange)="metricChange($event)"
+                                    />
+                                    <label class="radioLabel">{{item.displayValue}}</label>
+                                </clr-radio-wrapper>
+                            </clr-radio-container>
+                        </div>
+                        <div class="rootDataDiv">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="left">Name</th>
+                                        <th class="left">Type</th>
+                                        <th class="right" *ngFor="let item of metricOptions">{{item.displayValue + (item.units ? '('+item.units+')' : '')}}</th>
+                                        <th class="right" *ngFor="let item of metricOptions">{{item.displayValue + ' Cost ($)'}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="left">{{rootItem.name || '-'}}</td>
+                                        <td class="left">{{rootItem.type || '-'}}</td>
+                                        <td class="right" *ngFor="let item of metricOptions">{{rootItem[item.value] || 0}}</td>
+                                        <td class="right" *ngFor="let item of metricOptions">{{rootItem[item.value+'Cost'] || 0}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="googleChartDiv">
+                        <google-chart class="googleChart" [type]="'TreeMap'" [data]="graphData" [columnNames]="colNames" [options]="chartOptions"
+                            (select)="onSelect($event)"></google-chart>
+                    </div>
+                </div>
+                <div class="card-text" *ngIf="CAPA_STATUS !== 'READY'">
+                    <span class="spinner"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

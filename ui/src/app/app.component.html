@@ -1,0 +1,25 @@
+<div class="main-container">
+    <header class="header header-6">
+        <div class="branding appHeader">
+            <clr-icon shape="vm-bug"></clr-icon>
+            <span>{{messages && messages.common.appHeader}}</span>
+        </div>
+    </header>
+    <div class="content-container">
+        <div class="main-body">
+            <div class="navigation-area">
+                <left-navigation #leftNav></left-navigation>
+            </div>
+            <div class="content-area" *ngIf="routeLoading">
+                <div class="app-loader">
+                    <span class="spinner"> Loading... </span>
+                </div>
+            </div>
+            <div class="content-area" *ngIf="!routeLoading">
+                <div class="page-area">
+                    <router-outlet></router-outlet>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

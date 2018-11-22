@@ -1,0 +1,22 @@
+.mainDiv{
+    height: 500px;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+.serviceSelect{
+    width: 30%;
+}
+.serviceSelectLabel{
+    padding-right: 15px;
+}
+.actionDiv{
+    display: flex;
+}
+.buttonDiv{
+    width: 100%;
+    text-align: right;
+}
+.spinnerDiv{
+    width: 100%;
+    text-align: center;
+}
