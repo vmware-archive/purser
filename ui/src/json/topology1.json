@@ -1,0 +1,555 @@
+{
+    "data": {
+        "name": "default",
+        "type": "namespace",
+        "children": [
+            {
+                "name": "cicostengine12iltbq8mo7ye",
+                "type": "job"
+            },
+            {
+                "name": "cibillingusagepublication1jddkt5f95sir",
+                "type": "job"
+            },
+            {
+                "name": "cibillingusagepublication1syzd21bp2f18",
+                "type": "job"
+            },
+            {
+                "name": "cibillingusagepublication1ifdqmzsra5sl",
+                "type": "job"
+            },
+            {
+                "name": "fiaascotestengine660o7tet31lk",
+                "type": "job",
+                "cpu": 0.2,
+                "memory": 1.953125
+            },
+            {
+                "name": "fiaascotestengineuy7mb85snudw",
+                "type": "job",
+                "cpu": 0.6,
+                "memory": 5.859375
+            },
+            {
+                "name": "cibillingusagepublication9js6vahh2f1a",
+                "type": "job"
+            },
+            {
+                "name": "fiaascotestenginew7qbxakf1ich",
+                "type": "job",
+                "cpu": 1.8,
+                "memory": 17.578125
+            },
+            {
+                "name": "fiaascotestengine19gf0mqt6o4cx",
+                "type": "job",
+                "cpu": 1.8,
+                "memory": 17.578125
+            },
+            {
+                "name": "fiaascotestengine17805z46047ge",
+                "type": "job",
+                "cpu": 0.6,
+                "memory": 5.859375
+            },
+            {
+                "name": "cicostengine1swcbn0mfo9bx",
+                "type": "job"
+            },
+            {
+                "name": "fiaascotestenginebb84lfhmw505",
+                "type": "job",
+                "cpu": 1.8,
+                "memory": 17.578125
+            },
+            {
+                "name": "cicostenginehafvtzegcypq",
+                "type": "job"
+            },
+            {
+                "name": "fiaascotestengineeqgjj2yeor4m",
+                "type": "job",
+                "cpu": 1.8,
+                "memory": 17.578125
+            },
+            {
+                "name": "ops-data-xenon-76",
+                "type": "statefulset",
+                "cpu": 6.75,
+                "memory": 13.945312
+            },
+            {
+                "name": "ops-zk",
+                "type": "statefulset",
+                "cpu": 4.5,
+                "memory": 12.054777
+            },
+            {
+                "name": "consumer-service-579",
+                "type": "statefulset",
+                "cpu": 4.95,
+                "memory": 19.939453
+            },
+            {
+                "name": "vrbc-adapter-statefulset-1-1-707",
+                "type": "statefulset",
+                "cpu": 4.05,
+                "memory": 22.59375
+            },
+            {
+                "name": "ops-mgmt-solr-867",
+                "type": "statefulset",
+                "cpu": 1.75,
+                "memory": 8.988281
+            },
+            {
+                "name": "dps-zk",
+                "type": "statefulset",
+                "cpu": 3,
+                "memory": 3.672874
+            },
+            {
+                "name": "lemans-resources-605",
+                "type": "statefulset",
+                "cpu": 4.05,
+                "memory": 12.585938
+            },
+            {
+                "name": "relocation-service-b12f47e",
+                "type": "statefulset",
+                "cpu": 3.45,
+                "memory": 11.085938
+            },
+            {
+                "name": "fiaasco-lambda-api-1-1-142",
+                "type": "statefulset",
+                "cpu": 1.1,
+                "memory": 4.003906
+            },
+            {
+                "name": "stanweb",
+                "type": "statefulset",
+                "cpu": 0.1
+            },
+            {
+                "name": "cerebro-122",
+                "type": "statefulset",
+                "cpu": 0.4,
+                "memory": 4.097656
+            },
+            {
+                "name": "cmf-ignite",
+                "type": "statefulset",
+                "cpu": 8.2,
+                "memory": 20
+            },
+            {
+                "name": "ccs-command-channel-server-statefulset-1-2-290",
+                "type": "statefulset",
+                "cpu": 7.95,
+                "memory": 28.453125
+            },
+            {
+                "name": "symphony-bourne-service-29",
+                "type": "statefulset",
+                "cpu": 3.45,
+                "memory": 5.308594
+            },
+            {
+                "name": "alerts-service-366",
+                "type": "statefulset",
+                "cpu": 3.75,
+                "memory": 13.945312
+            },
+            {
+                "name": "automation-service-statefulset-173",
+                "type": "statefulset",
+                "cpu": 6.45,
+                "memory": 19.792969
+            },
+            {
+                "name": "fiaasco-mongodb",
+                "type": "statefulset",
+                "cpu": 0.1,
+                "memory": 8
+            },
+            {
+                "name": "symphony-2896",
+                "type": "statefulset",
+                "cpu": 6.45,
+                "memory": 25.523438
+            },
+            {
+                "name": "notification-service-394",
+                "type": "statefulset",
+                "cpu": 2.85,
+                "memory": 13.945312
+            },
+            {
+                "name": "ops-app-svc-799",
+                "type": "statefulset",
+                "cpu": 1.65,
+                "memory": 19.804688
+            },
+            {
+                "name": "data-persistence-service",
+                "type": "statefulset",
+                "cpu": 2.1,
+                "memory": 5.172874
+            },
+            {
+                "name": "sym-inventory-service-310",
+                "type": "statefulset",
+                "cpu": 7.95,
+                "memory": 50.378906
+            },
+            {
+                "name": "web",
+                "type": "statefulset",
+                "cpu": 0.1
+            },
+            {
+                "name": "csp",
+                "type": "statefulset",
+                "cpu": 0.1
+            },
+            {
+                "name": "heimdall-data",
+                "type": "statefulset",
+                "cpu": 1.05,
+                "memory": 1.171875
+            },
+            {
+                "name": "ops-kafka",
+                "type": "statefulset",
+                "cpu": 7.5,
+                "memory": 12.054777
+            },
+            {
+                "name": "provisioning-service-80780f4",
+                "type": "statefulset",
+                "cpu": 11.25,
+                "memory": 26.232422
+            },
+            {
+                "name": "heimdall",
+                "type": "deployment",
+                "cpu": 1.65,
+                "memory": 3.585938
+            },
+            {
+                "name": "neon",
+                "type": "deployment",
+                "cpu": 1.5,
+                "memory": 1.5
+            },
+            {
+                "name": "cmf-fqs",
+                "type": "deployment",
+                "cpu": 1.1,
+                "memory": 2.292969
+            },
+            {
+                "name": "insipid-boxer-grafana",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "kafka-manager",
+                "type": "deployment",
+                "cpu": 0.5,
+                "memory": 4
+            },
+            {
+                "name": "ops-kafka-cmd",
+                "type": "deployment",
+                "cpu": 0.5,
+                "memory": 1
+            },
+            {
+                "name": "terraform-service-55",
+                "type": "deployment",
+                "cpu": 0.75,
+                "memory": 1.869965
+            },
+            {
+                "name": "tango-vro-gateway-254edd7",
+                "type": "deployment",
+                "cpu": 3.3,
+                "memory": 6.173873
+            },
+            {
+                "name": "relocation-ui",
+                "type": "deployment",
+                "cpu": 0.3,
+                "memory": 0.585938
+            },
+            {
+                "name": "deployment-ui",
+                "type": "deployment",
+                "cpu": 0.4,
+                "memory": 0.78125
+            },
+            {
+                "name": "whimsical-mongoose-grafana",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "ci-purser-transformer-deployment",
+                "type": "deployment",
+                "cpu": 2.1,
+                "memory": 15.234375
+            },
+            {
+                "name": "cmf-ans",
+                "type": "deployment",
+                "cpu": 0.65,
+                "memory": 4.371775
+            },
+            {
+                "name": "project-service-80b3212",
+                "type": "deployment",
+                "cpu": 3.3,
+                "memory": 6.173873
+            },
+            {
+                "name": "ops-data-archiver",
+                "type": "deployment",
+                "cpu": 2.65,
+                "memory": 8.695312
+            },
+            {
+                "name": "ops-data-solr-deployment1",
+                "type": "deployment",
+                "cpu": 6.1,
+                "memory": 20.695312
+            },
+            {
+                "name": "mycontainer",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "postgres",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "provisioning-ui",
+                "type": "deployment",
+                "cpu": 0.1,
+                "memory": 0.292969
+            },
+            {
+                "name": "spring-starter-with-auth",
+                "type": "deployment",
+                "cpu": 3.2,
+                "memory": 8.585938
+            },
+            {
+                "name": "event-broker-1258",
+                "type": "deployment",
+                "cpu": 3.3,
+                "memory": 6.173873
+            },
+            {
+                "name": "private-heimdall",
+                "type": "deployment",
+                "cpu": 1.1,
+                "memory": 2.390625
+            },
+            {
+                "name": "symphony-ui",
+                "type": "deployment",
+                "cpu": 0.4,
+                "memory": 0.78125
+            },
+            {
+                "name": "automation-ui",
+                "type": "deployment",
+                "cpu": 0.4,
+                "memory": 0.78125
+            },
+            {
+                "name": "cgs-service-ui",
+                "type": "deployment",
+                "cpu": 0.1,
+                "memory": 0.195312
+            },
+            {
+                "name": "newbie-scorpion-grafana",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "pipeline-ui",
+                "type": "deployment",
+                "cpu": 0.4,
+                "memory": 0.78125
+            },
+            {
+                "name": "purser-controller",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "extensibility-ui",
+                "type": "deployment",
+                "cpu": 0.3,
+                "memory": 0.878906
+            },
+            {
+                "name": "fiaasco-6.0.0.55",
+                "type": "deployment",
+                "cpu": 2.1,
+                "memory": 5.957031
+            },
+            {
+                "name": "legato-service",
+                "type": "deployment",
+                "cpu": 1.8,
+                "memory": 7.464844
+            },
+            {
+                "name": "cgs-service",
+                "type": "deployment",
+                "cpu": 3.3,
+                "memory": 8.674872
+            },
+            {
+                "name": "ops-insight-ui",
+                "type": "deployment",
+                "cpu": 0.2,
+                "memory": 0.390625
+            },
+            {
+                "name": "falcon-management-service",
+                "type": "deployment",
+                "cpu": 1.35,
+                "memory": 3.662109
+            },
+            {
+                "name": "lemans-gateway",
+                "type": "deployment",
+                "cpu": 6.3,
+                "memory": 24.585938
+            },
+            {
+                "name": "tango-backend-receiver-49bf143b4862bd70ebf12a790cde62b5ac50c02b",
+                "type": "deployment",
+                "cpu": 3.75,
+                "memory": 7.527389
+            },
+            {
+                "name": "falcon-tasks-service",
+                "type": "deployment",
+                "cpu": 0.75,
+                "memory": 2.929688
+            },
+            {
+                "name": "legato-ui",
+                "type": "deployment",
+                "cpu": 0.4,
+                "memory": 0.78125
+            },
+            {
+                "name": "mddebug",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "ops-ingest",
+                "type": "deployment",
+                "cpu": 0.85,
+                "memory": 4.648438
+            },
+            {
+                "name": "purser-collector",
+                "type": "deployment",
+                "cpu": 0.1
+            },
+            {
+                "name": "tapestry-service-775",
+                "type": "deployment",
+                "cpu": 9.45,
+                "memory": 31.939453
+            },
+            {
+                "name": "vrbc-cost-analysis-deployment-1-1-1175",
+                "type": "deployment",
+                "cpu": 7.5,
+                "memory": 47.460938
+            },
+            {
+                "name": "abx-service-a13aeac",
+                "type": "deployment",
+                "cpu": 3.3,
+                "memory": 6.173873
+            },
+            {
+                "name": "catalog-service",
+                "type": "deployment",
+                "cpu": 4.8,
+                "memory": 18.439453
+            },
+            {
+                "name": "blueprint-ui",
+                "type": "deployment",
+                "cpu": 0.4,
+                "memory": 0.78125
+            },
+            {
+                "name": "falcon-ingestion-service",
+                "type": "deployment",
+                "cpu": 1.35,
+                "memory": 3.662109
+            },
+            {
+                "name": "form-service-14c9340",
+                "type": "deployment",
+                "cpu": 3.3,
+                "memory": 6.173873
+            },
+            {
+                "name": "pipeline-service-deployment-818",
+                "type": "deployment",
+                "cpu": 4.95,
+                "memory": 13.792969
+            },
+            {
+                "name": "fiaascotestenginepr13dwv39im5",
+                "type": "job",
+                "cpu": 0.6,
+                "memory": 5.859375
+            },
+            {
+                "name": "fiaascotestenginew450zqwo2bnj",
+                "type": "job",
+                "cpu": 0.6,
+                "memory": 5.859375
+            },
+            {
+                "name": "fiaascotestenginem3envwk1x8i3",
+                "type": "job",
+                "cpu": 0.6,
+                "memory": 5.859375
+            },
+            {
+                "name": "fiaascotestenginedz8zqjt3t9yn",
+                "type": "job",
+                "cpu": 0.2,
+                "memory": 1.953125
+            },
+            {
+                "name": "fiaascotestenginekbmxbgm1bngp",
+                "type": "job",
+                "cpu": 0.2,
+                "memory": 1.953125
+            }
+        ],
+        "cpu": 206.55,
+        "memory": 761.088979
+    }
+}

@@ -1,0 +1,23 @@
+.left-nav-content {
+    height: 100%;
+    clr-tooltip {
+        width: 100%;
+        cursor: pointer;
+    }
+    .activeMenu {
+        background-color: #FFF !important;
+    }
+    .lock-icon {
+        order: 3;
+        fill: #666
+    }
+}
+
+.beta-badge {
+    color: white;
+    padding: 2px;
+    background: #E62700;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-left: 5px;
+}

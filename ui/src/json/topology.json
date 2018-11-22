@@ -1,0 +1,144 @@
+{
+    "data": {
+        "name": "cluster",
+        "type": "cluster",
+        "children": [
+            {
+                "name": "jaeger",
+                "type": "namespace"
+            },
+            {
+                "name": "kube-system",
+                "type": "namespace",
+                "cpu": 19.24,
+                "memory": 27.1875
+            },
+            {
+                "name": "wf-monitoring",
+                "type": "namespace",
+                "cpu": 12.692,
+                "memory": 33.535156
+            },
+            {
+                "name": "issue-detector",
+                "type": "namespace"
+            },
+            {
+                "name": "default",
+                "type": "namespace",
+                "cpu": 206.75,
+                "memory": 761.088979
+            },
+            {
+                "name": "sirao-test",
+                "type": "namespace",
+                "cpu": 11.2,
+                "memory": 61.3125
+            },
+            {
+                "name": "jenkins-chancellor-test",
+                "type": "namespace",
+                "cpu": 2.8,
+                "memory": 6.261719
+            },
+            {
+                "name": "demo",
+                "type": "namespace"
+            },
+            {
+                "name": "wf-proxy-ci",
+                "type": "namespace",
+                "cpu": 0.9,
+                "memory": 3
+            },
+            {
+                "name": "fiaasco",
+                "type": "namespace",
+                "cpu": 0.9,
+                "memory": 3
+            },
+            {
+                "name": "redacted",
+                "type": "namespace"
+            },
+            {
+                "name": "watchmen",
+                "type": "namespace",
+                "cpu": 4.2,
+                "memory": 2.246094
+            },
+            {
+                "name": "codestream-255956",
+                "type": "namespace"
+            },
+            {
+                "name": "chancellor",
+                "type": "namespace"
+            },
+            {
+                "name": "jenkins-chancellor-deploy-22-c8r",
+                "type": "namespace"
+            },
+            {
+                "name": "bluegreen",
+                "type": "namespace"
+            },
+            {
+                "name": "codestream-481540",
+                "type": "namespace"
+            },
+            {
+                "name": "hawkeye",
+                "type": "namespace",
+                "cpu": 2.7,
+                "memory": 4.6875
+            },
+            {
+                "name": "codestream-350461",
+                "type": "namespace"
+            },
+            {
+                "name": "codestream-655252",
+                "type": "namespace"
+            },
+            {
+                "name": "monitoring",
+                "type": "namespace"
+            },
+            {
+                "name": "codestream-126106",
+                "type": "namespace"
+            },
+            {
+                "name": "cluster-overprovisioning",
+                "type": "namespace"
+            },
+            {
+                "name": "codestream",
+                "type": "namespace"
+            },
+            {
+                "name": "salamander",
+                "type": "namespace"
+            },
+            {
+                "name": "kube-public",
+                "type": "namespace"
+            },
+            {
+                "name": "diploma",
+                "type": "namespace"
+            },
+            {
+                "name": "codestream-11245",
+                "type": "namespace"
+            },
+            {
+                "name": "codestream-285575",
+                "type": "namespace"
+            }
+        ],
+        "cpu": 261.382,
+        "memory": 902.319448
+    }
+}

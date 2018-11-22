@@ -1,0 +1,38 @@
+<div class="row">
+    <div class="col-xs-12">
+        <div class="card">
+            <div class="card-block graphCardBlock">
+                <div class="headerBlock">
+                    <div class="card-title">
+                        <span class="headerText">Hierarchy</span>
+                    </div>
+                    <div class="toggleDiv">
+                        <div class="form-group">
+                            <label class="viewSwitchLeftLabel" for="formGroupExampleInput">Logical View</label>
+                            <div class="toggle-switch right-label">
+                                <input type="checkbox" id="viewSwitch" [(ngModel)]="physicalView" (ngModelChange)="viewChange()">
+                                <label for="viewSwitch">Physical View</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="resetBtn">
+                        <button class="btn btn-outline btn-sm" (click)="reset()">Reset</button>
+                    </div>
+                </div>
+                <div class="card-text" *ngIf="TOPO_STATUS === 'READY'">
+                    <div class="legendDiv">
+                        <div class="legend" *ngFor="let item of legendArr">
+                            <div class="fakeLegend" [ngStyle]="{'background-color':item.color}"></div>
+                            <div class="fakeLegendText">{{item.displayText}}</div>
+                        </div>
+                    </div>
+                    <google-chart class="googleChart" [type]="'OrgChart'" [data]="graphData" [columnNames]="colNames" [options]="chartOptions"
+                        (select)="onSelect($event)"></google-chart>
+                </div>
+                <p class="card-text" *ngIf="TOPO_STATUS !== 'READY'">
+                    <span class="spinner"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

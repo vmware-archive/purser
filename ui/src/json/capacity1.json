@@ -1,0 +1,61 @@
+{
+    "data": {
+        "children": [
+            {
+                "name": "deployment:postgres",
+                "type": "deployment",
+                "uid": "0x8",
+                "cpu": 3,
+                "memory": 0.3,
+                "storage": 30.3,
+                "network": 0,
+                "cpuCost": 3,
+                "memoryCost": 3,
+                "storageCost": 3.03,
+                "networkCost": 0
+            },
+            {
+                "name": "deployment:webapp",
+                "type": "deployment",
+                "uid": "0xa",
+                "cpu": 0.5,
+                "memory": 0.05,
+                "storage": 5.05,
+                "network": 0,
+                "cpuCost": 0.5,
+                "memoryCost": 0.05,
+                "storageCost": 0.505,
+                "networkCost": 0
+            },
+            {
+                "name": "replicaset:postgres-54f9679f4b",
+                "type": "replicaset",
+                "uid": "0x9",
+                "cpu": 2,
+                "memory": 0.2,
+                "storage": 20.2,
+                "network": 0,
+                "cpuCost": 2,
+                "memoryCost": 2,
+                "storageCost": 2.02,
+                "networkCost": 0
+            },
+            {
+                "name": "replicaset:webapp-958cf5567",
+                "type": "replicaset",
+                "uid": "0xb",
+                "cpu": 0.5,
+                "memory": 0.05,
+                "storage": 5.05,
+                "network": 0,
+                "cpuCost": 0.5,
+                "memoryCost": 0.05,
+                "storageCost": 0.505,
+                "networkCost": 0
+            }
+        ],
+        "name": "namespace:namespace-1",
+        "uid": "0x2b",
+        "type": "namespace"
+    }
+}

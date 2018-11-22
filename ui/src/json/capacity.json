@@ -1,0 +1,27 @@
+{
+    "data": {
+        "name": "cluster",
+        "type": "cluster",
+        "children": [
+            {
+                "name": "kube-system",
+                "type": "namespace",
+                "cpu": 1.815,
+                "memory": 0.15625
+            },
+            {
+                "name": "default",
+                "type": "namespace"
+            },
+            {
+                "name": "kube-public",
+                "type": "namespace"
+            }
+        ],
+        "cpu": 0.815,
+        "memory": 0.15625,
+        "cpuCost": 0.5,
+        "memoryCost": 0.05,
+        "storageCost": 0.505
+    }
+}

@@ -1,0 +1,31 @@
+.graphCardBlock{
+    ::ng-deep .googleChart{
+        width: 100%;
+    }
+    .headerBlock{
+        display: flex;
+        .headerText{
+            font-size: 18px;
+        }
+        .card-title{
+            flex: 1;
+        }
+        .toggleDiv{
+            .viewSwitchLeftLabel{
+                padding-right: 5px;
+            }
+        }
+    }
+    .card-text{
+        text-align: center;
+    }
+    .radioWrapper{
+        padding: 5px;
+        .radioLabel{
+            padding-left: 5px;
+        }
+    }
+    .googleChartDiv{
+        padding-top: 10px;
+    }
+}

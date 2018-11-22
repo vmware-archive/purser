@@ -1,0 +1,83 @@
+.graphCardBlock{
+    ::ng-deep .googleChart{
+        display: block;
+        margin: 0 auto;
+    }
+    ::ng-deep .customNode{
+        border: 1px solid #2B7CE9;
+        border-radius: 5%;
+        background-color: whitesmoke;
+        font-size: 14px;
+        font-weight: 800;
+    }
+    .headerBlock{
+        display: flex;
+        .headerText{
+            font-size: 18px;
+        }
+        .card-title{
+            flex: 1;
+        }
+        .toggleDiv{
+            .viewSwitchLeftLabel{
+                padding-right: 5px;
+            }
+        }
+    }
+    .card-text{
+        text-align: center;
+        overflow-x: auto;
+        .legendDiv{
+            display: flex;
+            .legend{
+                display: flex;
+                align-items: center;
+                padding: 5px;
+                .fakeLegend{
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                }
+                .fakeLegendText{
+                    padding-left: 5px;
+                }
+            }
+        }
+    }
+    ::ng-deep .namespace{
+        color: red;
+    }
+    ::ng-deep .service{
+        color: blue;
+    }
+    ::ng-deep .pod{
+        color: green;
+    }
+    ::ng-deep .container{
+        color: yellow;
+    }
+    ::ng-deep .process{
+        color: orange;
+    }
+    ::ng-deep .cluster{
+        color: orangered;
+    }
+    ::ng-deep .deployment{
+        color: purple;
+    }
+    ::ng-deep .replicaset{
+        color: palevioletred;
+    }
+    ::ng-deep .node{
+        color: aqua;
+    }
+    ::ng-deep .daemonset{
+        color: brown;
+    }
+    ::ng-deep .job{
+        color: black;
+    }
+    ::ng-deep .statefulset{
+        color: wheat;
+    }
+}

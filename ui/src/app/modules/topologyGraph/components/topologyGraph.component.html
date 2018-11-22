@@ -1,0 +1,23 @@
+<div class="actionDiv">
+    <clr-select-container *ngIf="enableClustering">
+        <label class="serviceSelectLabel">Select service</label>
+        <select clrSelect name="options" [(ngModel)]="serviceName" (change)="initNetwork()" class="serviceSelect">
+            <option value="ALL">ALL</option>
+            <option value="{{item}}" *ngFor="let item of serviceList">{{item}}</option>
+        </select>
+    </clr-select-container>
+    <div class="buttonDiv">
+        <button type="button" (click)="reset()" class="btn btn-sm" *ngIf="enableClustering">Pod View</button>
+        <button type="button" (click)="clusterByCid()" class="btn btn-sm" *ngIf="!enableClustering">Cluster Pods by Services</button>
+    </div>
+</div>
+<div class="descDiv" *ngIf="enableClustering">
+    <span>Scroll in to cluster. Press on the cluster to open up.</span>
+</div>
+<div class="spinnerDiv" *ngIf="NODE_STATUS === 'WAIT' || EDGE_STATUS === 'WAIT'">
+    <div class="spinner">
+    </div>
+</div>
+<div class="mainDiv" id="mynetwork" #networkContainer [hidden]="NODE_STATUS !== 'READY' && EDGE_STATUS !== 'READY'">
+
+</div>
