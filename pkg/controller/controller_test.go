@@ -25,6 +25,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/client"
+
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	subscriber_v1 "github.com/vmware/purser/pkg/client/clientset/typed/subscriber/v1"
@@ -44,7 +45,7 @@ func TestCrdFlow(t *testing.T) {
 
 // ListSubscriberCrdInstances fetches list of subscriber CRD instances.
 func ListSubscriberCrdInstances(crdclient *subscriber_v1.SubscriberClient) {
-	items, err := crdclient.ListSubscriber(meta_v1.ListOptions{})
+	items, err := crdclient.List(meta_v1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}

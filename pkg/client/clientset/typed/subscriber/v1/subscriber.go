@@ -21,20 +21,19 @@ import (
 	"github.com/vmware/purser/pkg/apis/subscriber/v1"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 )
 
 // SubscriberInterface has client methods we need to access Subscriber object
 type SubscriberInterface interface {
-	CreateSubscriber(obj *v1.Subscriber) (*v1.Subscriber, error)
-	UpdateSubscriber(obj *v1.Subscriber) (*v1.Subscriber, error)
-	DeleteSubscriber(name string, options *meta_v1.DeleteOptions) error
-	GetSubscriber(name string) (*v1.Subscriber, error)
-	ListSubscriber(opts meta_v1.ListOptions) (*v1.SubscriberList, error)
-	NewListWatchSubscriber() *cache.ListWatch
+	Create(obj *v1.Subscriber) (*v1.Subscriber, error)
+	Update(obj *v1.Subscriber) (*v1.Subscriber, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.Subscriber, error)
+	List(opts meta_v1.ListOptions) (*v1.SubscriberList, error)
+	Watch(opts meta_v1.ListOptions) (watch.Interface, error)
 }
 
 // SubscriberClient structure
@@ -45,18 +44,8 @@ type SubscriberClient struct {
 	codec  runtime.ParameterCodec
 }
 
-// NewSubscriber creates a new intance of the group CRD client.
-func NewSubscriber(client *rest.RESTClient, scheme *runtime.Scheme, namespace string) *SubscriberClient {
-	return &SubscriberClient{
-		client: client,
-		ns:     namespace,
-		plural: v1.SubscriberPlural,
-		codec:  runtime.NewParameterCodec(scheme),
-	}
-}
-
-// CreateSubscriber creates a CRD subscriber.
-func (c *SubscriberClient) CreateSubscriber(obj *v1.Subscriber) (*v1.Subscriber, error) {
+// Create creates a CRD subscriber.
+func (c *SubscriberClient) Create(obj *v1.Subscriber) (*v1.Subscriber, error) {
 	result := v1.Subscriber{}
 	err := c.client.Post().
 		Namespace(c.ns).
@@ -67,8 +56,8 @@ func (c *SubscriberClient) CreateSubscriber(obj *v1.Subscriber) (*v1.Subscriber,
 	return &result, err
 }
 
-// UpdateSubscriber modifies the subscriber.
-func (c *SubscriberClient) UpdateSubscriber(obj *v1.Subscriber) (*v1.Subscriber, error) {
+// Update modifies the subscriber.
+func (c *SubscriberClient) Update(obj *v1.Subscriber) (*v1.Subscriber, error) {
 	result := v1.Subscriber{}
 	err := c.client.Put().
 		Name((obj.Name)).
@@ -80,8 +69,8 @@ func (c *SubscriberClient) UpdateSubscriber(obj *v1.Subscriber) (*v1.Subscriber,
 	return &result, err
 }
 
-// DeleteSubscriber removes the subscriber.
-func (c *SubscriberClient) DeleteSubscriber(name string, options *meta_v1.DeleteOptions) error {
+// Delete removes the subscriber.
+func (c *SubscriberClient) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource(c.plural).
@@ -91,8 +80,8 @@ func (c *SubscriberClient) DeleteSubscriber(name string, options *meta_v1.Delete
 		Error()
 }
 
-// GetSubscriber returns the subscriber
-func (c *SubscriberClient) GetSubscriber(name string) (*v1.Subscriber, error) {
+// Get returns the subscriber
+func (c *SubscriberClient) Get(name string) (*v1.Subscriber, error) {
 	result := v1.Subscriber{}
 	err := c.client.Get().
 		Namespace(c.ns).
@@ -103,8 +92,8 @@ func (c *SubscriberClient) GetSubscriber(name string) (*v1.Subscriber, error) {
 	return &result, err
 }
 
-// ListSubscriber fetches the list of subscriber CRD clients.
-func (c *SubscriberClient) ListSubscriber(opts meta_v1.ListOptions) (*v1.SubscriberList, error) {
+// List fetches the list of subscriber CRD clients.
+func (c *SubscriberClient) List(opts meta_v1.ListOptions) (*v1.SubscriberList, error) {
 	result := v1.SubscriberList{}
 	err := c.client.Get().
 		Namespace(c.ns).
@@ -115,7 +104,13 @@ func (c *SubscriberClient) ListSubscriber(opts meta_v1.ListOptions) (*v1.Subscri
 	return &result, err
 }
 
-// NewListWatchSubscriber creates a new List watch for our TPR
-func (c *SubscriberClient) NewListWatchSubscriber() *cache.ListWatch {
-	return cache.NewListWatchFromClient(c.client, c.plural, c.ns, fields.Everything())
+// Watch watches for the subcriber CRD
+func (c *SubscriberClient) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
+	opts.Watch = true
+	return c.client.
+		Get().
+		Namespace(c.ns).
+		Resource(c.plural).
+		VersionedParams(&opts, c.codec).
+		Watch()
 }

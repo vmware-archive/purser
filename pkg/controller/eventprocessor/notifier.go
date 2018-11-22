@@ -23,14 +23,15 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
+
+	subscriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ReadSize defines the default payload read size
 const ReadSize uint32 = 50
 
-type subscriber struct {
+type notifier struct {
 	url      string
 	authType string
 	authCode string
@@ -38,75 +39,72 @@ type subscriber struct {
 	orgID    string
 }
 
-func notifySubscribers(payload []*interface{}, subscribers []*subscriber) {
-	if subscribers == nil {
-		return
-	}
+func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.SubscriberList) {
+	notifiers := getNotifiers(subscribers)
 
-	for _, subscriber := range subscribers {
-		subscriber.sendData(payload)
+	for _, notifier := range notifiers {
+		notifier.sendData(payload)
 	}
 }
 
-func (subscriber *subscriber) sendData(payload []*interface{}) {
-	payloadWrapper := controller.PayloadWrapper{Data: payload, OrgID: subscriber.orgID, Cluster: subscriber.cluster}
+func (n notifier) sendData(payload []*interface{}) {
+	payloadWrapper := controller.PayloadWrapper{
+		Data:    payload,
+		OrgID:   n.orgID,
+		Cluster: n.cluster,
+	}
+
 	jsonStr, err := json.Marshal(payloadWrapper)
 	if err != nil {
-		log.Error("Error while unmarshalling payload ", err)
+		log.Errorf("Error unmarshalling payload %v", err)
 	}
 
-	req, err := http.NewRequest("POST", subscriber.url, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", n.url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		log.Error("Error while creating the http request ", err)
-		return
+		log.Errorf("Error creating HTTP request %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	subscriber.setAuthHeaders(req)
-	client := &http.Client{}
+	n.setAuthHeaders(req)
 
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Error("Error while sending data to subscriber "+subscriber.url, err)
-	} else if resp != nil {
+		log.Errorf("Error sending data to subscriber %s: %v", n.url, err)
+	}
+
+	if resp != nil {
 		if resp.StatusCode == 200 {
-			log.Info("Data is posted successfully for subscriber " + subscriber.url)
+			log.Infof("Payload data posted successfully for subscriber %s", n.url)
 		} else {
-			log.Info("Data posting failed for subscriber " + subscriber.url + " " + resp.Status)
+			log.Infof("Payload data posting failed for subscriber %s, %s ", n.url, resp.Status)
 		}
 	}
 }
 
-func (subscriber *subscriber) setAuthHeaders(r *http.Request) {
+func (n *notifier) setAuthHeaders(r *http.Request) {
 	//TODO: add support for other auth types.
-	if subscriber.authType != "" {
-		if subscriber.authType == "access-token" {
-			r.Header.Set("Authorization", "Bearer "+subscriber.authCode)
+	if n.authType != "" {
+		if n.authType == "access-token" {
+			r.Header.Set("Authorization", "Bearer "+n.authCode)
 		}
 	}
 }
 
-func getSubscribers(conf *controller.Config) []*subscriber {
-	subscribers := []*subscriber{}
-	list, err := conf.Subscriberclient.ListSubscriber(meta_v1.ListOptions{})
-	if err != nil {
-		log.Error("Error while fetching subscribers list ", err)
-		return nil
-	}
-
-	if list != nil && len(list.Items) > 0 {
-		for _, sub := range list.Items {
-			subscriber := &subscriber{
+func getNotifiers(subscribers *subscriber_v1.SubscriberList) []*notifier {
+	notifiers := []*notifier{}
+	if len(subscribers.Items) > 0 {
+		for _, sub := range subscribers.Items {
+			notifier := &notifier{
 				url:      sub.Spec.URL,
 				authType: sub.Spec.AuthType,
 				authCode: sub.Spec.AuthToken,
 				cluster:  sub.Spec.ClusterName,
 				orgID:    sub.Spec.OrgID,
 			}
-			subscribers = append(subscribers, subscriber)
+			notifiers = append(notifiers, notifier)
 		}
 	} else {
-		log.Debug("There are no subscribers")
-		return nil
+		log.Debug("No notifiers available for subscribers.")
 	}
-	return subscribers
+	return notifiers
 }

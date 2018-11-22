@@ -20,26 +20,23 @@ package plugin
 import (
 	"fmt"
 
+	log "github.com/Sirupsen/logrus"
+
 	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
-	groups_client_v1 "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
+	groups "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
 	"github.com/vmware/purser/pkg/plugin/metrics"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GetGroupByName return group CRD by name.
-func GetGroupByName(crdclient *groups_client_v1.GroupClient, groupName string) *groups_v1.Group {
-	group, err := crdclient.GetGroup(groupName)
-
-	if err == nil {
-		return group
-	} else if apierrors.IsNotFound(err) {
-		return nil
-	} else {
-		panic(err)
+func GetGroupByName(groupClient *groups.GroupClient, groupName string) *groups_v1.Group {
+	group, err := groupClient.Get(groupName)
+	if err != nil {
+		log.Errorf("failed to get custom group by name %s, %v", groupName, err)
 	}
+	return group
 }
 
 // GetGroupDetails returns aggregated metrics (cpu, memory, storage) and cost (total, cpu, memory and storage) of a Group

@@ -1,0 +1,11 @@
+apiVersion: vmware.purser.com/v1
+kind: Subscriber
+metadata:
+  name: example-subscriber
+spec:
+  name: example-subscriber
+  cspOrgId: <optional>
+  cluster: <your-cluster-name>
+  authType: access-token
+  authToken: <your-token>
+  url: <your-webhook-url>
