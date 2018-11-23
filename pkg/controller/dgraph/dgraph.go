@@ -191,12 +191,12 @@ func unmarshalDgraphResponse(resp *api.Response, id string) string {
 	var r Root
 	err := json.Unmarshal(resp.Json, &r)
 	if err != nil {
-		log.Printf("failed to marshal Dgraph response %v", err)
+		log.Debugf("failed to marshal Dgraph response %v", err)
 		return ""
 	}
 
 	if len(r.IDs) == 0 {
-		log.Printf("id %s is not in dgraph", id)
+		log.Debugf("id %s is not in dgraph", id)
 		return ""
 	}
 

@@ -114,5 +114,5 @@ func next(cur uint32, size uint32) uint32 {
 
 // PrintDetails diplays details for debugging purpose.
 func (r *RingBuffer) PrintDetails() {
-	log.Printf("Start Position = %d, End Position = %d, Buffer Size = %d", r.start, r.end, r.Size)
+	log.Debugf("Start Position = %d, End Position = %d, Buffer Size = %d", r.start, r.end, r.Size)
 }
