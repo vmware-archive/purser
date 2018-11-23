@@ -34,4 +34,4 @@ In order to deploy the Purser UI and DGraph database service, follow the below l
 
     Eg. `http://<minishiftIP>:<NodePort>/home`
 
-5. In order to drop the Dgraph enteries from the database, delete the `Persistent Volume` corresponding to the `dgraph datadir`.
+5. In order to drop the Dgraph entries from the database, delete the `Persistent Volume` corresponding to the `dgraph datadir`.

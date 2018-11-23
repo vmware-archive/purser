@@ -5,28 +5,43 @@
 - [What is Purser?](#purser)
 - [Features](#features)
 - [Setup and Installation](#setup-and-installation)
-- [Uninstallation](#uninstallation)
+- [Uninstalling](#uninstalling)
 - [Additional Documentation](#additional-documentation)
 - [Community, Discussion, Contribution and Support](#community-discussion-contribution-and-support)
 
 ## Purser
 
-Purser is an extension to Kubernetes tasked at providing an insight into *cluster topology*, *costing*, *logical grouping of resources* and *resource interactions* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
+Purser is an extension to Kubernetes tasked at providing an insight into *cluster topology*, *costing*, and *resource interactions* along with the provision of *logical grouping of resources* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
 
-It comprises of two components: a controller and a plugin.  
+It comprises of three components: a controller, a plugin and a UI dashboard.  
 
-The controller component deployed inside the cluster watches for K8s resources associated with the application, thereby, periodically building not just an inventory but also performing application discovery by generating and storing the interactions among the resources such as containers, pods and services.
+The controller component deployed inside the cluster watches for K8s native and custom resources associated with the application, thereby, periodically building not just an inventory but also performing discovery by generating and storing the interactions among the resources such as containers, pods and services.
 
-The plugin component is a CLI tool interfacing with the `kubectl` that helps query costs, savings defined at a level of control of the application level components such as the _Memory and CPU consumptions and utilizations_ rather than at the infrastructure level.
+The plugin component is a CLI tool interfacing with the `kubectl` that helps query costs, savings defined at a level of control of the application level components such as the _Memory and CPU consumptions and utilization_ rather than at the infrastructure level.
+
+The UI dashboard is a robust application that renders the Purser UI for providing visual representation to the complete cluster metrics in a single pane of glass. 
+
+### Demo
+
+![demo](/docs/img/purser-cli.gif)
 
 ## Features
 
-- Visibility in terms of
-  - workload cost
-  - savings opportunities
-  - cluster heirarchy
-  - resource (pod, service) interactions
-  - logical grouping of resources
+Purser with it's robust CLI and UI capabilities provides a set of features including, but not limited to the list below.
+ 
+ - Capability to provide visibility into the following aspects of the K8s cluster
+    - workload cost associated with the native/custom resources
+    - savings opportunities associated with storage and compute requirements
+    - single pane view of the complete cluster hierarchy
+    - interactions among associated resources such as pods and services
+ 
+ - Capability of user defined logical grouping of resources based on `K8s CRD` implementation for enhanced filtering.
+ 
+ - A plugin extension to `kubectl` along with the UI for developer centric usage.
+
+### Purser UI demo
+
+ ![demo](/docs/img/purser-ui.gif)
 
 ## Setup and Installation
 
@@ -60,7 +75,7 @@ For installation on Windows follow the steps in the [manual installation guide](
 
 For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs).
 
-## Uninstallation
+## Uninstalling
 
 ### Linux/macOS
 
@@ -87,6 +102,7 @@ Additional documentation can be found below:
 - [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/plugin-usage.md)
 - [Developers Guide](https://github.com/vmware/purser/blob/master/docs/developers-guide.md)
 - [Purser Deployment Guide](https://github.com/vmware/purser/blob/master/docs/purser-deployment.md)
+- [Purser UI Development Guide](https://github.com/vmware/purser/blob/master/ui/README.md)
 
 ## Community, Discussion, Contribution and Support
 
