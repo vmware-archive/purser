@@ -29,6 +29,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const maxGoRoutines = 20
+
 var wg sync.WaitGroup
 
 // ProcessPodInteractions fetches details of all the running processes in each container of
@@ -47,11 +49,24 @@ func processPodDetails(conf controller.Config, pods *corev1.PodList) {
 	podsCount := len(pods.Items)
 	log.Infof("Processing total of (%d) Pods.", podsCount)
 
+	freeRoutines := maxGoRoutines
+	numChannelsReceived := 0
+	ch := make(chan int, 1)
+
 	wg.Add(podsCount)
 	{
 		for index, pod := range pods.Items {
 			log.Debugf("Processing Pod: (%s), (%d/%d) ... ", pod.Name, index+1, podsCount)
 
+			// wait for a free goroutine
+			if freeRoutines < 1 {
+				// wait for a go routine to send to channel i.e, it will wait until a go routine finishes.
+				<-ch
+				numChannelsReceived++
+			}
+
+			// decrease 1 from freeRoutines before starting a new go routine
+			freeRoutines--
 			go func(pod corev1.Pod, index int) {
 				defer wg.Done()
 
@@ -61,8 +76,18 @@ func processPodDetails(conf controller.Config, pods *corev1.PodList) {
 				linker.StoreProcessInteractions(interactions.ContainerProcessInteraction, interactions.ProcessToPodInteraction,
 					pod.GetCreationTimestamp().Time)
 				log.Debugf("Finished processing Pod: (%s), (%d/%d)", pod.Name, index+1, podsCount)
+
+				// increase 1 from freeRoutines after processing a pod.
+				freeRoutines++
+				// send 1 to channel
+				ch <- 1
 			}(pod, index)
 		}
 	}
+	// receive channel from remaining go routines
+	for i := 0; i < podsCount-numChannelsReceived; i++ {
+		<-ch
+	}
 	wg.Wait()
+	close(ch)
 }
