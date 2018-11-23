@@ -48,11 +48,11 @@ func main() {
 
 // starts first discovery after 10 min of controller starting. Next runs will occur in every 30 min
 func startCronJobs() {
-	time.Sleep(time.Minute * 10)
+	time.Sleep(time.Minute * 5)
 	runDiscovery()
 
 	c := cron.New()
-	err := c.AddFunc("@every 0h30m", runDiscovery)
+	err := c.AddFunc("@every 0h59m", runDiscovery)
 	if err != nil {
 		log.Fatal(err)
 	}
