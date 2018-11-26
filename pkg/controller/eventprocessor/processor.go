@@ -56,7 +56,7 @@ func ProcessEvents(conf *controller.Config) {
 			notifySubscribers(data, subscribers)
 
 			groups := processor.RetrieveGroupList(conf.Groupcrdclient, meta_v1.ListOptions{})
-			updateCustomGroups(data, groups)
+			updateCustomGroups(data, groups, conf)
 
 			conf.RingBuffer.RemoveN(size)
 			conf.RingBuffer.PrintDetails()
