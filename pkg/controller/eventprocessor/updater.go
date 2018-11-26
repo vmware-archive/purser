@@ -32,24 +32,25 @@ import (
 func updateCustomGroups(payloads []*interface{}, groups *groups_v1.GroupList) {
 	for _, event := range payloads {
 		payload := (*event).(*controller.Payload)
-		if payload.ResourceType != "Pod" {
-			continue
-		}
-		pod := api_v1.Pod{}
-		err := json.Unmarshal([]byte(payload.Data), &pod)
-		if err != nil {
-			log.Errorf("error unmarshalling payload %s, %v", payload.Data, err)
-		}
-
-		log.Infof("Started updating user created groups for pod %s update.", pod.Name)
-
-		for _, group := range groups.Items {
-			if isPodBelongsToGroup(group, &pod) {
-				log.Infof("Updating the user group %s with pod %s details.", group.Spec.Name, pod.Name)
-				updatePodDetails(group, pod, *payload)
+		if payload.ResourceType == "Pod" {
+			pod := api_v1.Pod{}
+			err := json.Unmarshal([]byte(payload.Data), &pod)
+			if err != nil {
+				log.Errorf("error unmarshalling payload %s, %v", payload.Data, err)
 			}
+
+			log.Infof("Started updating user created groups for pod %s update.", pod.Name)
+
+			for _, group := range groups.Items {
+				if isPodBelongsToGroup(group, &pod) {
+					log.Infof("Updating the user group %s with pod %s details.", group.Spec.Name, pod.Name)
+					updatePodDetails(group, pod, *payload)
+				}
+			}
+			log.Debugf("Completed updating user created groups for pod %s update.", pod.Name)
+		} else if payload.ResourceType == "Group" {
+
 		}
-		log.Debugf("Completed updating user created groups for pod %s update.", pod.Name)
 	}
 }
 
@@ -71,12 +72,12 @@ func updatePodDetails(group *groups_v1.Group, pod api_v1.Pod, payload controller
 		} else if payload.EventType == controller.Delete {
 			existingPodDetails.EndTime = *pod.GetDeletionTimestamp()
 			controller.PvcHandlePodDeletion(existingPodDetails)
-		}
-	} else if payload.EventType == controller.Update {
-		// TODO: handle all pod updates
+		} else if payload.EventType == controller.Update {
+			// TODO: handle all pod updates
 
-		// handle pod pvc updates
-		*existingPodDetails = controller.UpdatePodVolumeClaims(pod, *existingPodDetails, payload.CaptureTime)
+			// handle pod pvc updates
+			*existingPodDetails = controller.UpdatePodVolumeClaims(pod, *existingPodDetails, payload.CaptureTime)
+		}
 	} else {
 		if payload.EventType == controller.Create {
 			newPodDetails := groups_v1.PodDetails{Name: pod.Name, StartTime: pod.GetCreationTimestamp()}
