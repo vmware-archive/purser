@@ -40,9 +40,10 @@ func updateCustomGroups(payloads []*interface{}, groups *groups_v1.GroupList, co
 			err := json.Unmarshal([]byte(payload.Data), &pod)
 			if err != nil {
 				log.Errorf("error un marshalling payload %s, %v", payload.Data, err)
+				return
 			}
 
-			log.Infof("Started updating user created groups for pod %s update.", pod.Name)
+			log.Debugf("Started updating user created groups for pod %s update.", pod.Name)
 
 			for _, group := range groups.Items {
 				if isPodBelongsToGroup(group, &pod) {
@@ -50,42 +51,10 @@ func updateCustomGroups(payloads []*interface{}, groups *groups_v1.GroupList, co
 					updatePodDetails(group, pod, *payload)
 				}
 			}
-			log.Debugf("Completed updating user created groups for pod %s update.", pod.Name)
+			log.Infof("Completed updating user created groups for pod %s update.", pod.Name)
 		} else if payload.ResourceType == "Group" {
-			// convert the payload into Group object
-			groupCRD := groups_v1.Group{}
-			err := json.Unmarshal([]byte(payload.Data), &groupCRD)
-			if err != nil {
-				log.Errorf("error un marshalling payload " + payload.Data)
-			}
-
-			group, err := conf.Groupcrdclient.Get(groupCRD.Name)
-			if err != nil {
-				log.Errorf("cannot update group details. Reason: Unable to retrieve group from client: (%v)", err)
-				return
-			}
-
-			podDetails := group.Spec.PodsDetails
-			if podDetails == nil {
-				podDetails = map[string]*groups_v1.PodDetails{}
-			}
-
-			// get all live pods with matching labels of group
-			podList := processor.RetrievePodList(conf.Kubeclient, metav1.ListOptions{LabelSelector: labels.SelectorFromSet(group.Spec.Labels).String()})
-			// add pod details in group spec
-			for _, pod := range podList.Items {
-				podKey := pod.GetObjectMeta().GetNamespace() + ":" + pod.GetObjectMeta().GetName()
-				newPodDetails := groups_v1.PodDetails{Name: pod.Name, StartTime: pod.GetCreationTimestamp()}
-				containers := []*groups_v1.Container{}
-				for _, cont := range pod.Spec.Containers {
-					container := getContainerWithMetrics(cont)
-					containers = append(containers, container)
-				}
-				newPodDetails.Containers = containers
-				newPodDetails = controller.UpdatePodVolumeClaims(pod, newPodDetails, pod.GetCreationTimestamp())
-				podDetails[podKey] = &newPodDetails
-			}
-			group.Spec.PodsDetails = podDetails
+			group := getGroupFromPayload(payload, conf)
+			syncNewGroup(group, conf)
 		}
 	}
 }
@@ -164,4 +133,45 @@ func isPodBelongsToGroup(group *groups_v1.Group, pod *api_v1.Pod) bool {
 		}
 	}
 	return false
+}
+
+func getGroupFromPayload(payload *controller.Payload, conf *controller.Config) *groups_v1.Group {
+	// convert the payload into Group object
+	groupCRD := groups_v1.Group{}
+	err := json.Unmarshal([]byte(payload.Data), &groupCRD)
+	if err != nil {
+		log.Errorf("error un marshalling payload " + payload.Data)
+		return nil
+	}
+
+	group, err := conf.Groupcrdclient.Get(groupCRD.Name)
+	if err != nil {
+		log.Errorf("cannot update group details. Reason: Unable to retrieve group from client: (%v)", err)
+		return nil
+	}
+	return group
+}
+
+func syncNewGroup(group *groups_v1.Group, conf *controller.Config) {
+	podDetails := group.Spec.PodsDetails
+	if podDetails == nil {
+		podDetails = map[string]*groups_v1.PodDetails{}
+	}
+
+	// get all live pods with matching labels of group
+	podList := processor.RetrievePodList(conf.Kubeclient, metav1.ListOptions{LabelSelector: labels.SelectorFromSet(group.Spec.Labels).String()})
+	// add pod details in group spec
+	for _, pod := range podList.Items {
+		podKey := pod.GetObjectMeta().GetNamespace() + ":" + pod.GetObjectMeta().GetName()
+		newPodDetails := groups_v1.PodDetails{Name: pod.Name, StartTime: pod.GetCreationTimestamp()}
+		containers := []*groups_v1.Container{}
+		for _, cont := range pod.Spec.Containers {
+			container := getContainerWithMetrics(cont)
+			containers = append(containers, container)
+		}
+		newPodDetails.Containers = containers
+		newPodDetails = controller.UpdatePodVolumeClaims(pod, newPodDetails, pod.GetCreationTimestamp())
+		podDetails[podKey] = &newPodDetails
+	}
+	group.Spec.PodsDetails = podDetails
 }
