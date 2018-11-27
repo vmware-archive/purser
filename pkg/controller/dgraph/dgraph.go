@@ -50,7 +50,7 @@ type ID struct {
 }
 
 func init() {
-	err := Open("127.0.0.1:9080")
+	err := Open("purser-db:9080")
 	if err != nil {
 		fmt.Println("Error while opening connection to Dgraph ", err)
 	}

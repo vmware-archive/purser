@@ -4,6 +4,7 @@ metadata:
   name: purser-ui
   labels:
     run: purser-ui
+    app: purser
 spec:
   type: NodePort
   ports:
@@ -11,6 +12,7 @@ spec:
     protocol: TCP
   selector:
     run: purser-ui
+    app: purser
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,11 +22,13 @@ spec:
   selector:
     matchLabels:
       run: purser-ui
+      app: purser
   replicas: 1
   template:
     metadata:
       labels:
         run: purser-ui
+        app: purser
     spec:
       containers:
       - name: purser-ui

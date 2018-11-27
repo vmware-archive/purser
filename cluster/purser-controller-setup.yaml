@@ -1,3 +1,39 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: purser-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: purser-permissions
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "watch", "list", "update", "create", "delete"]
+  - apiGroups: ["vmware.purser.com"]
+    resources: ["groups", "subscribers"]
+    verbs: ["get", "watch", "list", "update", "create", "delete"]
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["*"]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: purser-cluster-role
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: purser-permissions
+subjects:
+  - kind: ServiceAccount
+    name: purser-service-account
+    namespace: default
+---
 # This is the service that should be used by the clients of Dgraph to talk to the server.
 apiVersion: v1
 kind: Service
@@ -5,7 +41,6 @@ metadata:
   name: purser-db
   labels:
     app: purser
-    service-app: cmf
 spec:
   type: LoadBalancer
   ports:
@@ -29,34 +64,34 @@ spec:
     name: purser
   selector:
     app: purser
-    service-app: cmf
-    service-app: cmf
 ---
 # This StatefulSet runs 1 pod with one Zero, one Server & one Ratel containers.
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dgraph
+  name: purser-dgraph
 spec:
   serviceName: "dgraph"
   replicas: 1
   selector:
       matchLabels:
         app: purser
-        service-app: cmf
-        mode: appT
   template:
     metadata:
       labels:
         app: purser
-        service-app: cmf
-        mode: appT
     spec:
-      serviceAccountName: purser-service-account
       containers:
       - name: ratel
         image: dgraph/dgraph:v1.0.9
         imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: 10Mi
+            cpu: 100m
+          requests:
+            memory: 10Mi
+            cpu: 100m
         ports:
         - containerPort: 8000
           name: ratel-http
@@ -65,6 +100,13 @@ spec:
       - name: zero
         image: dgraph/dgraph:v1.0.9
         imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: 1000Mi
+            cpu: 300m
+          requests:
+            memory: 1000Mi
+            cpu: 300m
         ports:
         - containerPort: 5080
           name: zero-grpc
@@ -82,6 +124,13 @@ spec:
       - name: server
         image: dgraph/dgraph:v1.0.9
         imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: 1000Mi
+            cpu: 300m
+          requests:
+            memory: 1000Mi
+            cpu: 300m
         ports:
         - containerPort: 8080
           name: server-http
@@ -95,17 +144,12 @@ spec:
           - "-c"
           - |
             set -ex
-            dgraph server --my=$(hostname -f):7080 --lru_mb 2048 --zero dgraph-0.dgraph.default.svc.cluster.local:5080
-      - name: purser-controller
-        image: vmwareh/controller-amd64:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3030
+            dgraph server --my=$(hostname -f):7080 --lru_mb 2048 --zero purser-dgraph-0.dgraph.default.svc.cluster.local:5080
       terminationGracePeriodSeconds: 60
       volumes:
       - name: datadir
         persistentVolumeClaim:
-          claimName: datadir     
+          claimName: datadir
   updateStrategy:
     type: RollingUpdate
   volumeClaimTemplates:
@@ -118,4 +162,34 @@ spec:
         - "ReadWriteOnce"
       resources:
         requests:
-          storage: 1Gi
+          storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: purser-controller
+spec:
+  selector:
+    matchLabels:
+        app: purser
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: purser
+    spec:
+      serviceAccountName: purser-service-account
+      containers:
+      - name: purser-controller
+        image: kreddyj/controller-amd64:1.0.0
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 1000Mi
+            cpu: 300m
+          requests:
+            memory: 1000Mi
+            cpu: 300m
+        ports:
+        - containerPort: 3030
+          name: purser

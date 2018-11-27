@@ -73,14 +73,14 @@ docker login
 make push
 ```
 
-### Install Custom Controller
+### Install Purser Plugin
 
-- Update the image name in [`custom_controller.yaml`](./custom_controller.yaml) to the docker image name that you pushed.
+- Update the image name in [`purser-controller-setup.yaml`](../cluster/purser-controller-setup.yaml) to the docker image name that you pushed.
 
 - Install the controller in the cluster using `kubectl`.
 
   ``` bash
-  kubectl create -f custom_controller.yaml`
+  kubectl create -f purser-controller-setup.yaml`
   ```
 
   _Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
@@ -93,4 +93,4 @@ make push
   go build -o $GOPATH/bin/purser_plugin github.com/vmware/purser/cmd/plugin
   ```
 
-- Install the Purser plugin by copying the [`plugin.yaml`](./plugin.yaml) into one of the paths specified under the Kubernetes documentation section [installing kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/).
+- Install the Purser plugin by copying the [`plugin.yaml`](../plugin.yaml) into one of the paths specified under the Kubernetes documentation section [installing kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/).
