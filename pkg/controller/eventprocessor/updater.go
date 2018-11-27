@@ -136,6 +136,10 @@ func isPodBelongsToGroup(group *groups_v1.Group, pod *api_v1.Pod) bool {
 }
 
 func getGroupFromPayload(payload *controller.Payload, conf *controller.Config) *groups_v1.Group {
+	if payload == nil || conf == nil {
+		log.Errorf("nil variable, isPayloadNil: %v, isConfNil: %v", (payload == nil), (conf == nil))
+		return nil
+	}
 	// convert the payload into Group object
 	groupCRD := groups_v1.Group{}
 	err := json.Unmarshal([]byte(payload.Data), &groupCRD)
@@ -153,6 +157,9 @@ func getGroupFromPayload(payload *controller.Payload, conf *controller.Config) *
 }
 
 func syncNewGroup(group *groups_v1.Group, conf *controller.Config) {
+	if group == nil {
+		return
+	}
 	podDetails := group.Spec.PodsDetails
 	if podDetails == nil {
 		podDetails = map[string]*groups_v1.PodDetails{}
