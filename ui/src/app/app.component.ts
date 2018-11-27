@@ -1,6 +1,5 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
-import { DataSet, Network } from 'vis';
 import { MCommon } from './common/messages/common.messages';
 
 @Component({

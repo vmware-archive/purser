@@ -39,7 +39,7 @@ VERSION := 1.0.0
 
 ALL_ARCH := amd64 arm arm64 ppc64le
 BASEIMAGE?=photon
-BUILD_IMAGE?= golang:1.11
+BUILD_IMAGE?=golang:1.11
 DOCKER_MOUNT_MODE=delegated
 
 # Set dep management tool parameters

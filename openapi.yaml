@@ -1,0 +1,710 @@
+---
+openapi: 3.0.1
+info:
+  title: Purser
+  description: Purser runs on server port `:3030` and exposes API endpoints to generate an insight into your Kubernetes applications by providing details of communicating services and pods.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3030
+paths:
+  /hierarchy:
+    get:
+      description: Gets the top level cluster hierachy
+      parameters:
+        - name: view
+          in: query
+          description: physical or logical depending on selection of physical entities such as nodes, persistent volumes or logical entities such as namespaces, pods etc. Default is logical.
+          required: false
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: physical
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/namespace:
+    get:
+      description: Gets the K8s Namespace hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Namespace name prefixed with `namespace-`
+          required: false
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: namespace-kube-public
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/pvc:
+    get:
+      description: Gets the K8s PVC hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s PVC name prefixed with `pvc-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: pvc-datadir-dgraph-0
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/job:
+    get:
+      description: Gets the K8s Job hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Job name prefixed with `job-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: job-kube-proxy
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/container:
+    get:
+      description: Gets the K8s container hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s container name prefixed with `container-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: container-etcd
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/replicaset:
+    get:
+      description: Gets the K8s Replicaset hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Replicaset name prefixed with `replicaset-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: replicaset-kube-dns-86f4d74b45
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/pod:
+    get:
+      description: Gets the K8s Pod hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Pod name prefixed with `pod-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: pod-etcd-minikube
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/node:
+    get:
+      description: Gets the K8s Node hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Node name prefixed with `node-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: node-minikube
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/daemonset:
+    get:
+      description: Gets the K8s Daemonset hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Daemonset name prefixed with `daemonset-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: daemonset-kube-proxy
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/deployment:
+    get:
+      description: Gets the K8s Deployment hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Deployment name prefixed with `deployment-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: deployment-kube-dns
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/pv:
+    get:
+      description: Gets the K8s PV hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s PV name prefixed with `pv-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: pv-pvc-5ffeaa3f-ed5e-11e8-b395-080027a0bfc5
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/statefulset:
+    get:
+      description: Gets the K8s Statefulset hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Statefulset name prefixed with `statefulset-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: statefulset-kube-dns-86f4d74b45
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /hierarchy/process:
+    get:
+      description: Gets the K8s container process hierachy
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s container process name prefixed with `process-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: process-etcd
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Hierarchy'
+  /metrics:
+    get:
+      description: Gets the complete K8s cluster metrics
+      parameters:
+        - name: view
+          in: query
+          description: physical or logical depending on selection of physical entities such as nodes, persistent volumes or logical entities such as namespaces, pods etc. Default is logical.
+          required: false
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: logical
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/namespace:
+    get:
+      description: Gets the K8s Namespace metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Namespace name prefixed with `namespace-`
+          required: false
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: namespace-kube-public
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/pvc:
+    get:
+      description: Gets the K8s PVC metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s PVC name prefixed with `pvc-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: pvc-datadir-dgraph-0
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/job:
+    get:
+      description: Gets the K8s Job metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Job name prefixed with `job-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: job-kube-proxy
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/container:
+    get:
+      description: Gets the K8s container metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s container name prefixed with `container-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: container-etcd
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/replicaset:
+    get:
+      description: Gets the K8s Replicaset metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Replicaset name prefixed with `replicaset-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: replicaset-kube-dns-86f4d74b45
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/pod:
+    get:
+      description: Gets the K8s Pod metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Pod name prefixed with `pod-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: pod-etcd-minikube
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/node:
+    get:
+      description: Gets the K8s Node metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Node name prefixed with `node-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: node-minikube
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/daemonset:
+    get:
+      description: Gets the K8s Daemonset metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Daemonset name prefixed with `daemonset-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: daemonset-kube-proxy
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/deployment:
+    get:
+      description: Gets the K8s Deployment metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Deployment name prefixed with `deployment-`
+          required: false
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: deployment-kube-dns
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/pv:
+    get:
+      description: Gets the K8s PV metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s PV name prefixed with `pv-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: pv-pvc-5ffeaa3f-ed5e-11e8-b395-080027a0bfc5
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /metrics/statefulset:
+    get:
+      description: Gets the K8s Statefulset metrics
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Statefulset name prefixed with `statefulset-`
+          required: true
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: statefulset-kube-dns-86f4d74b45
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+  /interactions/pod:
+    get:
+      description: Gets K8s Pods interactions
+      parameters:
+        - name: name
+          in: query
+          description: a valid K8s Pod name prefixed with `pod-`
+          required: false
+          style: FORM
+          explode: true
+          schema:
+            type: string
+          example: pod-kube-dns-86f4d74b45-4v66p
+        - name: orphan
+          in: query
+          description: filters out orphan pods if set to false. Default is true
+          required: false
+          style: FORM
+          explode: true
+          schema:
+            type: boolean
+          example: "false"
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                $ref: '#/components/schemas/Interactions'
+  /edges:
+    get:
+      description: Gets edges between Dgraph Components
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Edges'
+  /nodes:
+    get:
+      description: Gets Dgraph node Components
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Nodes'
+components:
+  schemas:
+    Hierarchy:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Hierarchy_data'
+    Metrics:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Metrics_data'
+    Interactions:
+      type: object
+      properties:
+        pods:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interactions_pods'
+    Nodes:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        label:
+          type: string
+          example: postgres-54f9679f4b-nj8vv
+        title:
+          type: string
+          example: pods
+        value:
+          type: integer
+          format: int32
+          example: 1
+        group:
+          type: integer
+          format: int32
+          example: 1
+        cid:
+          type: array
+          items:
+            type: string
+            example: postgres
+    Edges:
+      type: object
+      properties:
+        from:
+          type: integer
+          format: int32
+          example: 4
+        to:
+          type: integer
+          format: int32
+          example: 3
+        title:
+          type: string
+          example: 7 times communicated
+    Hierarchy_data_children:
+      type: object
+      properties:
+        name:
+          type: string
+          example: namespace-default
+        type:
+          type: string
+          example: namespace
+    Hierarchy_data:
+      type: object
+      properties:
+        name:
+          type: string
+          example: cluster
+        type:
+          type: string
+          example: cluster
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hierarchy_data_children'
+    Metrics_data_children:
+      type: object
+      properties:
+        name:
+          type: string
+          example: namespace-default
+        type:
+          type: string
+          example: namespace
+        cpu:
+          type: number
+          example: 0.915
+        memory:
+          type: number
+          example: 0.224609
+        cpuCost:
+          type: number
+          example: 0.02196
+        memoryCost:
+          type: number
+          example: 0.002246
+    Metrics_data:
+      type: object
+      properties:
+        name:
+          type: string
+          example: cluster
+        type:
+          type: string
+          example: cluster
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metrics_data_children'
+        cpu:
+          type: number
+          example: 0.915
+        memory:
+          type: number
+          example: 0.224609
+        cpuCost:
+          type: number
+          example: 0.02196
+        memoryCost:
+          type: number
+          example: 0.002246
+    Interactions_inbound:
+      type: object
+      properties:
+        name:
+          type: string
+          example: pod-webapp-958cf5567-xb758
+    Interactions_pods:
+      type: object
+      properties:
+        name:
+          type: string
+          example: pod-postgres-54f9679f4b-vsdhl
+        inbound:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interactions_inbound'
+        outbound:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interactions_inbound'
+  extensions: {}
