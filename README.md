@@ -54,15 +54,35 @@ Follow the instructions below to set up Purser in your environment.
 
 ### Installation
 
-The preferred and the quickest way to install purser is through Binary installation.
+Purser has three components to install.
 
-#### OS-specific installation methods
+- [Purser Controller Setup](./README.md#Purser-Controller-Setup)
+- [Purser UI Setup](./README.md#Purser-UI-Setup)
+- [Purser Plugin Setup](./README.md#Purser-Plugin-Setup)
+
+#### Purser Controller Setup
+Download the controller setup yaml file from [here](./cluster/purser-controller-setup.yaml).
+``` bash
+# Controller installation
+kubectl create -f purser-controller-setup.yaml
+```
+
+#### Purser UI Setup
+Download the UI setup yaml file from [here](./cluster/purser-ui-setup.yaml).
+``` bash
+# UI installation
+kubectl create -f purser-ui-setup.yaml
+```
+
+_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable).
+
+#### Purser Plugin Setup
 
 #### Linux and macOS
 
 ``` bash
 # Binary installation
-wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-install.sh && sh purser-install.sh
+wget -q https://github.com/vmware/purser/blob/master/build/purser-binary-install.sh && sh purser-binary-install.sh
 ```
 
 Enter your cluster's configuration path when prompted. The plugin binary needs to be in your `PATH` environment variable, so once the download of the binary is finished the script tries to move it to `/usr/local/bin`. This may need your sudo permission.
@@ -77,32 +97,38 @@ For other installation methods such as **manual installation** or **installation
 
 ## Uninstalling
 
+### Uninstalling Purser Controller
+``` bash
+kubectl delete -f purser-controller-setup.yaml
+kubectl delete pvc datadir-dgraph-0
+```
+
+### Uninstalling Purser UI
+``` bash
+kubectl delete -f purser-ui-setup.yaml
+```
+
+_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable).
+
+### Uninstalling Purser Binary
+
 ### Linux/macOS
 
 ``` bash
-wget -q https://github.com/vmware/purser/releases/download/v0.1-alpha.2/purser-uninstall.sh && sh purser-uninstall.sh
+wget -q https://github.com/vmware/purser/blob/master/build/purser-binary-uninstall.sh && sh purser-binary-uninstall.sh
 ```
-
-### Others
-
-``` bash
-kubectl delete -f custom_controller.yaml
-kubectl delete -f crd.yaml
-```
-
-_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
 ## Additional Documentation
 
 Additional documentation can be found below:
 
-- [Manual Installation Guide](https://github.com/vmware/purser/blob/master/docs/manual-installation.md)
-- [Source Code Installation Guide](https://github.com/vmware/purser/blob/master/docs/sourcecode-installation.md)
-- [Purser Architecture and Workflow](https://github.com/vmware/purser/blob/master/docs/architecture.md)
-- [Purser Plugin Usage](https://github.com/vmware/purser/blob/master/docs/plugin-usage.md)
-- [Developers Guide](https://github.com/vmware/purser/blob/master/docs/developers-guide.md)
-- [Purser Deployment Guide](https://github.com/vmware/purser/blob/master/docs/purser-deployment.md)
-- [Purser UI Development Guide](https://github.com/vmware/purser/blob/master/ui/README.md)
+- [Manual Installation Guide](./docs/manual-installation.md)
+- [Source Code Installation Guide](./docs/sourcecode-installation.md)
+- [Purser Architecture and Workflow](./docs/architecture.md)
+- [Purser Plugin Usage](./docs/plugin-usage.md)
+- [Developers Guide](./docs/developers-guide.md)
+- [Purser Deployment Guide](./docs/purser-deployment.md)
+- [Purser UI Development Guide](./ui/README.md)
 
 ## Community, Discussion, Contribution and Support
 
