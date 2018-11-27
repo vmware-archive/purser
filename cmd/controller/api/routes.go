@@ -144,7 +144,7 @@ var routes = Routes{
 	Route{
 		"GetDaemonsetMetrics",
 		"GET",
-		"/metrics/daemon",
+		"/metrics/daemonset",
 		GetDaemonsetMetrics,
 	},
 	Route{

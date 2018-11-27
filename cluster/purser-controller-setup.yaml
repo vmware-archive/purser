@@ -69,7 +69,7 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dgraph
+  name: purser-dgraph
 spec:
   serviceName: "dgraph"
   replicas: 1
@@ -81,7 +81,6 @@ spec:
       labels:
         app: purser
     spec:
-      serviceAccountName: purser-service-account
       containers:
       - name: ratel
         image: dgraph/dgraph:v1.0.9
@@ -145,20 +144,7 @@ spec:
           - "-c"
           - |
             set -ex
-            dgraph server --my=$(hostname -f):7080 --lru_mb 2048 --zero dgraph-0.dgraph.default.svc.cluster.local:5080
-      - name: purser-full
-        image: kreddyj/controller-amd64:1.0.0
-        imagePullPolicy: Always
-        resources:
-          limits:
-            memory: 1000Mi
-            cpu: 300m
-          requests:
-            memory: 1000Mi
-            cpu: 300m
-        ports:
-        - containerPort: 3030
-          name: purser
+            dgraph server --my=$(hostname -f):7080 --lru_mb 2048 --zero purser-dgraph-0.dgraph.default.svc.cluster.local:5080
       terminationGracePeriodSeconds: 60
       volumes:
       - name: datadir
@@ -177,3 +163,33 @@ spec:
       resources:
         requests:
           storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: purser-controller
+spec:
+  selector:
+    matchLabels:
+        app: purser
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: purser
+    spec:
+      serviceAccountName: purser-service-account
+      containers:
+      - name: purser-controller
+        image: kreddyj/controller-amd64:1.0.0
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 1000Mi
+            cpu: 300m
+          requests:
+            memory: 1000Mi
+            cpu: 300m
+        ports:
+        - containerPort: 3030
+          name: purser
