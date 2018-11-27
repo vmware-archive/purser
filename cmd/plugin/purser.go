@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	pluginVersion = "version v0.1-alpha.2"
+	pluginVersion = "version v1.0.0"
 )
 
 var (

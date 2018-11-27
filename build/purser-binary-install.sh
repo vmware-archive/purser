@@ -15,48 +15,7 @@
 
 
 # Realease Version
-releaseVersion=v0.1-alpha.2
-
-# purser directory
-mkdir -p $HOME/opt/purser-env
-cd $HOME/opt/purser-env
-
-# === Purser Controller ===
-
-# Get Cluster config file location
-read -p "Enter your cluster's configuration path. ($HOME/.kube/config): " readConfig
-if [ -z readConfig ]
-then
-    kubeConfig="$HOME/.kube/config"
-else
-    kubeConfig=$readConfig
-fi
-
-echo ""
-
-echo "====================================================="
-echo "Starting installation for Purser controller"
-echo "====================================================="
-
-# Download purser controller yaml
-echo "Downloading files for controller..."
-controllerUrl=https://github.com/vmware/purser/releases/download/$releaseVersion/custom_controller.yaml
-wget -q --show-progress -O custom_controller.yaml $controllerUrl
-
-# Need crd.yaml if uninstallation is needed
-crdUrl=https://github.com/vmware/purser/releases/download/$releaseVersion/crd.yaml
-wget -q -O crd.yaml $crdUrl
-
-# Installing purser controller
-echo "Installing purser controller"
-kubectl --kubeconfig=$kubeConfig create -f custom_controller.yaml
-
-echo "Purser controller installation completed"
-echo ""
-
-echo "====================================================="
-echo "Starting installation for Purser plugin"
-echo "====================================================="
+releaseVersion=v1.0.0
 
 # === Purser Plugin ===
 
