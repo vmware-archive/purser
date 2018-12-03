@@ -139,16 +139,16 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
                     replicasetSimplePodCpu as cpuRequest
                     replicasetSimplePodMemory as memoryRequest
 					replicasetSimplePvcStorage as replicasetRequest
-					replicasetPodST as startTime
-					replicasetPodSTSeconds as math(since(replicasetPodST))
-					replicasetPodSecondsSinceStart as math(cond(replicasetPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, replicasetPodSTSeconds))
-					replicasetPodET as endTime
-					replicasetPodIsTerminated as count(endTime)
-					replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
-					replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 60)
-					replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-					replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
-					replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
+					replicasetSimplePodST as startTime
+					replicasetSimplePodSTSeconds as math(since(replicasetSimplePodST))
+					replicasetSimplePodSecondsSinceStart as math(cond(replicasetSimplePodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, replicasetSimplePodSTSeconds))
+					replicasetSimplePodET as endTime
+					replicasetSimplePodIsTerminated as count(endTime)
+					replicasetSimplePodSecondsSinceEnd as math(cond(replicasetSimplePodIsTerminated == 0, 0.0, since(replicasetSimplePodET)))
+					replicasetSimplePodDurationInHours as math((replicasetSimplePodSecondsSinceStart - replicasetSimplePodSecondsSinceEnd) / 60)
+					replicasetSimplePodCpuCost as math(replicasetSimplePodCpu * replicasetSimplePodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+					replicasetSimplePodMemoryCost as math(replicasetSimplePodMemory * replicasetSimplePodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
+					replicasetSimplePvcStorageCost as math(replicasetSimplePvcStorage * replicasetSimplePodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
                 }
 				sumReplicasetSimplePodCpu as sum(val(replicasetSimplePodCpu))
 				sumDaemonsetPodCpu as sum(val(daemonsetPodCpu))
