@@ -60,7 +60,7 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 				type
 				cpu: podCpu as cpuRequest
 				memory: podMemory as memoryRequest
-				storage: podStorage as storageRequest
+				storage: pvcStorage as storageRequest
 				stChild as startTime
 				stSecondsChild as math(since(stChild))
 				secondsSinceStartChild as math(cond(stSecondsChild > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSecondsChild))
@@ -68,10 +68,9 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 				isTerminatedChild as count(endTime)
 				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
 				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 60)
-				cpu: cpu as cpuRequest
-				memory: memory as memoryRequest
-				cpuCost: math(cpu * durationInHoursChild * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(memory * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
+				cpuCost: math(podCpu * durationInHoursChild * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(podMemory * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(pvcStorage * durationInHoursChild * ` + defaultStorageCostPerGBPerHour + `)
 			}
 			cpu: cpu as cpuCapacity
 			memory: memory as memoryCapacity

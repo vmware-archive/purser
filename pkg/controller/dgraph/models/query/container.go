@@ -62,8 +62,8 @@ func RetrieveContainerMetrics(name string) JSONDataWrapper {
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 60)
-			cpuCost: math(podCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(podMemory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+			cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
 		}
 	}`
 	return getJSONDataFromQuery(query)
