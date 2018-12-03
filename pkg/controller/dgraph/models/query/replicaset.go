@@ -17,7 +17,11 @@
 
 package query
 
-import "github.com/Sirupsen/logrus"
+import (
+	"fmt"
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/utils"
+)
 
 // RetrieveReplicasetHierarchy returns hierarchy for a given replicaset
 func RetrieveReplicasetHierarchy(name string) JSONDataWrapper {
@@ -44,6 +48,7 @@ func RetrieveReplicasetMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for replicaset, empty name is given")
 		return JSONDataWrapper{}
 	}
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		parent(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
 			name
@@ -54,16 +59,23 @@ func RetrieveReplicasetMetrics(name string) JSONDataWrapper {
 				cpu: podCpu as cpuRequest
 				memory: podMemory as memoryRequest
 				storage: pvcStorage as storageRequest
-				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
+				st as startTime
+				stSeconds as math(since(st))
+				secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+				et as endTime
+				isTerminated as count(endTime)
+				secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+				durationInHours as math((secondsSinceStart - secondsSinceEnd) / 60)
+				cpuCost: podCpuCost as math(podCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: podMemCost as math(podMemory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: pvcStorageCost as math(pvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
 			}
-			cpu: cpu as sum(val(podCpu))
-			memory: memory as sum(val(podMemory))
-			storage: storage as sum(val(pvcStorage))
-			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+			cpu: sum(val(podCpu))
+			memory: sum(val(podMemory))
+			storage: sum(val(pvcStorage))
+			cpuCost: sum(val(podCpuCost))
+			memoryCost: sum(val(podMemCost))
+			storageCost: sum(val(pvcStorageCost))
 		}
 	}`
 	return getJSONDataFromQuery(query)

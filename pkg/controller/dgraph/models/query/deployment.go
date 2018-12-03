@@ -17,7 +17,11 @@
 
 package query
 
-import "github.com/Sirupsen/logrus"
+import (
+	"fmt"
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/utils"
+)
 
 // RetrieveDeploymentHierarchy returns hierarchy for a given deployment
 func RetrieveDeploymentHierarchy(name string) JSONDataWrapper {
@@ -44,6 +48,7 @@ func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for deployment, empty name is given")
 		return JSONDataWrapper{}
 	}
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		dep as var(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
 			~deployment @filter(has(isReplicaset)) {
@@ -51,14 +56,30 @@ func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
 					replicasetPodCpu as cpuRequest
 					replicasetPodMemory as memoryRequest
 					replicasetPvcStorage as storageRequest
+					replicasetPodST as startTime
+					replicasetPodSTSeconds as math(since(replicasetPodST))
+					replicasetPodSecondsSinceStart as math(cond(replicasetPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, replicasetPodSTSeconds))
+					replicasetPodET as endTime
+					replicasetPodIsTerminated as count(endTime)
+					replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
+					replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 60)
+					replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+					replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
+					replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
 				}
 				deploymentReplicasetCpu as sum(val(replicasetPodCpu))
 				deploymentReplicasetMemory as sum(val(replicasetPodMemory))
 				deploymentReplicasetStorage as sum(val(replicasetPvcStorage))
+				deploymentReplicasetCpuCost as sum(val(replicasetPodCpuCost))
+				deploymentReplicasetMemoryCost as sum(val(replicasetPodMemoryCost))
+				deploymentReplicasetStorageCost as sum(val(replicasetPvcStorageCost))
 			}
 			deploymentCpu as sum(val(deploymentReplicasetCpu))
 			deploymentMemory as sum(val(deploymentReplicasetMemory))
 			deploymentStorage as sum(val(deploymentReplicasetStorage))
+			deploymentCpuCost as sum(val(deploymentReplicasetCpuCost))
+			deploymentMemoryCost as sum(val(deploymentReplicasetMemoryCost))
+			deploymentStorageCost as sum(val(deploymentReplicasetStorageCost))
 		}
 
 		parent(func: uid(dep)) {
@@ -70,16 +91,16 @@ func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
 				cpu: val(deploymentReplicasetCpu)
 				memory: val(deploymentReplicasetMemory)
 				storage: val(deploymentReplicasetStorage)
-				cpuCost: math(deploymentReplicasetCpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(deploymentReplicasetMemory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(deploymentReplicasetStorage * ` + defaultStorageCostPerGBPerHour + `)
+				cpuCost: val(deploymentReplicasetCpuCost)
+				memoryCost: val(deploymentReplicasetMemoryCost)
+				storageCost: val(deploymentReplicasetStorageCost)
 			}
 			cpu: val(deploymentCpu)
 			memory: val(deploymentMemory)
 			storage: val(deploymentStorage)
-			cpuCost: math(deploymentCpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(deploymentMemory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(deploymentStorage * ` + defaultStorageCostPerGBPerHour + `)
+			cpuCost: val(deploymentCpuCost)
+			memoryCost: val(deploymentMemoryCost)
+			storageCost: val(deploymentStorageCost)
 		}
 	}`
 	return getJSONDataFromQuery(query)

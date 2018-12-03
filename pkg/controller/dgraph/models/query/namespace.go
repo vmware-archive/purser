@@ -18,8 +18,10 @@
 package query
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
+	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrieveNamespaceHierarchy returns hierarchy for a given namespace
@@ -47,6 +49,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 		return RetrieveClusterHierarchy(Logical)
 	}
 
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		ns as var(func: has(isNamespace)) @filter(eq(name, "` + name + `")) {
 			childs as ~namespace @filter(has(isDeployment) OR has(isStatefulset) OR has(isJob) OR has(isDaemonset) OR (has(isReplicaset) AND (NOT has(deployment)))) {
@@ -61,10 +64,23 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 				        replicasetPodCpu as cpuRequest
 				        replicasetPodMemory as memoryRequest
 						replicasetPvcStorage as storageRequest
+						replicasetPodST as startTime
+						replicasetPodSTSeconds as math(since(replicasetPodST))
+						replicasetPodSecondsSinceStart as math(cond(replicasetPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, replicasetPodSTSeconds))
+						replicasetPodET as endTime
+						replicasetPodIsTerminated as count(endTime)
+						replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
+						replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 60)
+						replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+						replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
+						replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
 			        }
 					deploymentReplicasetCpu as sum(val(replicasetPodCpu))
 			        deploymentReplicasetMemory as sum(val(replicasetPodMemory))
 					deploymentReplicasetStorage as sum(val(replicasetPvcStorage))
+					deploymentReplicasetCpuCost as sum(val(replicasetPodCpuCost))
+			        deploymentReplicasetMemoryCost as sum(val(replicasetPodMemoryCost))
+					deploymentReplicasetStorageCost as sum(val(replicasetPvcStorageCost))
                 }
 				~statefulset @filter(has(isPod)) {
                     name
@@ -72,6 +88,16 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
                     statefulsetPodCpu as cpuRequest
                     statefulsetPodMemory as memoryRequest
 					statefulsetPvcStorage as storageRequest
+					statefulsetPodST as startTime
+					statefulsetPodSTSeconds as math(since(statefulsetPodST))
+					statefulsetPodSecondsSinceStart as math(cond(statefulsetPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, statefulsetPodSTSeconds))
+					statefulsetPodET as endTime
+					statefulsetPodIsTerminated as count(endTime)
+					statefulsetPodSecondsSinceEnd as math(cond(statefulsetPodIsTerminated == 0, 0.0, since(statefulsetPodET)))
+					statefulsetPodDurationInHours as math((statefulsetPodSecondsSinceStart - statefulsetPodSecondsSinceEnd) / 60)
+					statefulsetPodCpuCost as math(statefulsetPodCpu * statefulsetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+					statefulsetPodMemoryCost as math(statefulsetPodMemory * statefulsetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
+					statefulsetPvcStorageCost as math(statefulsetPvcStorage * statefulsetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
                 }
 				~job @filter(has(isPod)) {
                     name
@@ -79,6 +105,16 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
                     jobPodCpu as cpuRequest
                     jobPodMemory as memoryRequest
 					jobPvcStorage as jobRequest
+					jobPodST as startTime
+					jobPodSTSeconds as math(since(jobPodST))
+					jobPodSecondsSinceStart as math(cond(jobPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, jobPodSTSeconds))
+					jobPodET as endTime
+					jobPodIsTerminated as count(endTime)
+					jobPodSecondsSinceEnd as math(cond(jobPodIsTerminated == 0, 0.0, since(jobPodET)))
+					jobPodDurationInHours as math((jobPodSecondsSinceStart - jobPodSecondsSinceEnd) / 60)
+					jobPodCpuCost as math(jobPodCpu * jobPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+					jobPodMemoryCost as math(jobPodMemory * jobPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
+					jobPvcStorageCost as math(jobPvcStorage * jobPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
                 }
 				~daemonset @filter(has(isPod)) {
                     name
@@ -86,6 +122,16 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
                     daemonsetPodCpu as cpuRequest
                     daemonsetPodMemory as memoryRequest
 					daemonsetPvcStorage as daemonsetRequest
+					daemonsetPodST as startTime
+					daemonsetPodSTSeconds as math(since(daemonsetPodST))
+					daemonsetPodSecondsSinceStart as math(cond(daemonsetPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, daemonsetPodSTSeconds))
+					daemonsetPodET as endTime
+					daemonsetPodIsTerminated as count(endTime)
+					daemonsetPodSecondsSinceEnd as math(cond(daemonsetPodIsTerminated == 0, 0.0, since(daemonsetPodET)))
+					daemonsetPodDurationInHours as math((daemonsetPodSecondsSinceStart - daemonsetPodSecondsSinceEnd) / 60)
+					daemonsetPodCpuCost as math(daemonsetPodCpu * daemonsetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+					daemonsetPodMemoryCost as math(daemonsetPodMemory * daemonsetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
+					daemonsetPvcStorageCost as math(daemonsetPvcStorage * daemonsetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
                 }
 				~replicaset @filter(has(isPod)) {
                     name
@@ -93,6 +139,16 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
                     replicasetSimplePodCpu as cpuRequest
                     replicasetSimplePodMemory as memoryRequest
 					replicasetSimplePvcStorage as replicasetRequest
+					replicasetPodST as startTime
+					replicasetPodSTSeconds as math(since(replicasetPodST))
+					replicasetPodSecondsSinceStart as math(cond(replicasetPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, replicasetPodSTSeconds))
+					replicasetPodET as endTime
+					replicasetPodIsTerminated as count(endTime)
+					replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
+					replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 60)
+					replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+					replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
+					replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
                 }
 				sumReplicasetSimplePodCpu as sum(val(replicasetSimplePodCpu))
 				sumDaemonsetPodCpu as sum(val(daemonsetPodCpu))
@@ -114,10 +170,34 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 				sumStatefulsetPvcStorage as sum(val(statefulsetPvcStorage))
 				sumDeploymentPvcStorage as sum(val(deploymentReplicasetStorage))
 				namespaceChildStorage as math(sumReplicasetSimplePvcStorage + sumDaemonsetPvcStorage + sumJobPvcStorage + sumStatefulsetPvcStorage + sumDeploymentPvcStorage)
+			
+				sumReplicasetSimplePodCpuCost as sum(val(replicasetSimplePodCpuCost))
+				sumDaemonsetPodCpuCost as sum(val(daemonsetPodCpuCost))
+				sumJobPodCpuCost as sum(val(jobPodCpuCost))
+				sumStatefulsetPodCpuCost as sum(val(statefulsetPodCpuCost))
+				sumDeploymentPodCpuCost as sum(val(deploymentReplicasetCpuCost))
+				namespaceChildCpuCost as math(sumReplicasetSimplePodCpuCost + sumDaemonsetPodCpuCost + sumJobPodCpuCost + sumStatefulsetPodCpuCost + sumDeploymentPodCpuCost)
+
+				sumReplicasetSimplePodMemoryCost as sum(val(replicasetSimplePodMemoryCost))
+				sumDaemonsetPodMemoryCost as sum(val(daemonsetPodMemoryCost))
+				sumJobPodMemoryCost as sum(val(jobPodMemoryCost))
+				sumStatefulsetPodMemoryCost as sum(val(statefulsetPodMemoryCost))
+				sumDeploymentPodMemoryCost as sum(val(deploymentReplicasetMemoryCost))
+				namespaceChildMemoryCost as math(sumReplicasetSimplePodMemoryCost + sumDaemonsetPodMemoryCost + sumJobPodMemoryCost + sumStatefulsetPodMemoryCost + sumDeploymentPodMemoryCost)
+
+				sumReplicasetSimplePvcStorageCost as sum(val(replicasetSimplePvcStorageCost))
+				sumDaemonsetPvcStorageCost as sum(val(daemonsetPvcStorageCost))
+				sumJobPvcStorageCost as sum(val(jobPvcStorageCost))
+				sumStatefulsetPvcStorageCost as sum(val(statefulsetPvcStorageCost))
+				sumDeploymentPvcStorageCost as sum(val(deploymentReplicasetStorageCost))
+				namespaceChildStorageCost as math(sumReplicasetSimplePvcStorageCost + sumDaemonsetPvcStorageCost + sumJobPvcStorageCost + sumStatefulsetPvcStorageCost + sumDeploymentPvcStorageCost)
 			}
 			namespaceCpu as sum(val(namespaceChildCpu))
 			namespaceMemory as sum(val(namespaceChildMemory))
 			namespaceStorage as sum(val(namespaceChildStorage))
+			namespaceCpuCost as sum(val(namespaceChildCpuCost))
+			namespaceMemoryCost as sum(val(namespaceChildMemoryCost))
+			namespaceStorageCost as sum(val(namespaceChildStorageCost))
 		}
 
 		parent(func: uid(ns)) {
@@ -129,16 +209,16 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 				cpu: val(namespaceChildCpu)
 				memory: val(namespaceChildMemory)
 				storage: val(namespaceChildStorage)
-				cpuCost: math(namespaceChildCpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(namespaceChildMemory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(namespaceChildStorage * ` + defaultStorageCostPerGBPerHour + `)
+				cpuCost: val(namespaceChildCpuCost)
+				memoryCost: val(namespaceChildMemoryCost)
+				storageCost: val(namespaceChildStorageCost)
 			}
 			cpu: val(namespaceCpu)
 			memory: val(namespaceMemory)
 			storage: val(namespaceStorage)
-			cpuCost: math(namespaceCpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(namespaceMemory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(namespaceStorage * ` + defaultStorageCostPerGBPerHour + `)
+			cpuCost: val(namespaceCpuCost)
+			memoryCost: val(namespaceMemoryCost)
+			storageCost: val(namespaceStorageCost)
         }
     }`
 	return getJSONDataFromQuery(query)

@@ -18,9 +18,11 @@
 package query
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
+	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrievePodsInteractions returns inbound and outbound interactions of a pod
@@ -99,7 +101,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for pod, empty name is given")
 		return JSONDataWrapper{}
 	}
-	secondsSinceMonthStart := "99.0"
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name

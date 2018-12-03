@@ -17,7 +17,11 @@
 
 package query
 
-import "github.com/Sirupsen/logrus"
+import (
+	"fmt"
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/utils"
+)
 
 // RetrievePVHierarchy returns hierarchy for a given pv
 func RetrievePVHierarchy(name string) JSONDataWrapper {
@@ -46,6 +50,7 @@ func RetrievePVMetrics(name string) JSONDataWrapper {
 		return JSONDataWrapper{}
 	}
 
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		parent(func: has(isPersistentVolume)) @filter(eq(name, "` + name + `")) {
 			name
@@ -54,10 +59,24 @@ func RetrievePVMetrics(name string) JSONDataWrapper {
 				name
 				type
 				storage: pvcStorage as storageCapacity
-				storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
+				stChild as startTime
+				stSecondsChild as math(since(stChild))
+				secondsSinceStartChild as math(cond(stSecondsChild > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSecondsChild))
+				etChild as endTime
+				isTerminatedChild as count(endTime)
+				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
+				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 60)
+				storageCost: math(pvcStorage * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
 			}
 			storage: storage as storageCapacity
-			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+			st as startTime
+			stSeconds as math(since(st))
+			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+			et as endTime
+			isTerminated as count(endTime)
+			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 60)
+			storageCost: math(storage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
         }
     }`
 	return getJSONDataFromQuery(query)

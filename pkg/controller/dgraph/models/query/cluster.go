@@ -18,8 +18,10 @@
 package query
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
+	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrieveClusterHierarchy returns all namespaces if view is logical and returns all nodes with disks if view is physical
@@ -62,6 +64,7 @@ func RetrieveClusterHierarchy(view string) JSONDataWrapper {
 // returns all nodes and disks with metrics if view is physical
 func RetrieveClusterMetrics(view string) JSONDataWrapper {
 	var query string
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	if view == Physical {
 		query = `query {
 			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
@@ -70,9 +73,16 @@ func RetrieveClusterMetrics(view string) JSONDataWrapper {
 				cpu: cpu as cpuCapacity
 				memory: memory as memoryCapacity
 				storage: storage as storageCapacity
-				cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+				st as startTime
+				stSeconds as math(since(st))
+				secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+				et as endTime
+				isTerminated as count(endTime)
+				secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+				durationInHours as math((secondsSinceStart - secondsSinceEnd) / 60)
+				cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(storage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
 			}
 		}`
 	} else {
@@ -82,10 +92,23 @@ func RetrieveClusterMetrics(view string) JSONDataWrapper {
 					namespacePodCpu as cpuRequest
 					namespacePodMem as memoryRequest
 					namespacePvcStorage as storageRequest
+					st as startTime
+					stSeconds as math(since(st))
+					secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+					et as endTime
+					isTerminated as count(endTime)
+					secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+					durationInHours as math((secondsSinceStart - secondsSinceEnd) / 60)
+					namespacePodCpuCost as math(namespacePodCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+					namespacePodMemoryCost as math(namespacePodMem * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+					namespacePodStorageCost as math(namespacePvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
 				}
 				namespaceCpu as sum(val(namespacePodCpu))
 				namespaceMem as sum(val(namespacePodMem))
 				namespaceStorage as sum(val(namespacePvcStorage))
+				namespaceCpuCost as sum(val(namespacePodCpuCost))
+				namespaceMemCost as sum(val(namespacePodMemoryCost))
+				namespaceStorageCost as sum(val(namespacePodStorageCost))
 			}
 	
 			children(func: uid(ns)) {
@@ -94,9 +117,9 @@ func RetrieveClusterMetrics(view string) JSONDataWrapper {
 				cpu: val(namespaceCpu)
 				memory: val(namespaceMem)
 				storage: val(namespaceStorage)
-				cpuCost: math(namespaceCpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(namespaceMem * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(namespaceStorage * ` + defaultStorageCostPerGBPerHour + `)
+				cpuCost: val(namespaceCpuCost)
+				memoryCost: val(namespaceMemCost)
+				storageCost: val(namespaceStorageCost)
 			}
 		}`
 	}
