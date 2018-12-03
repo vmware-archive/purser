@@ -19,7 +19,6 @@ package dgraph
 
 import (
 	"github.com/vmware/purser/pkg/controller/utils"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 )
