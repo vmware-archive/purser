@@ -17,7 +17,11 @@
 
 package query
 
-import "github.com/Sirupsen/logrus"
+import (
+	"fmt"
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/utils"
+)
 
 // RetrieveNodeHierarchy returns hierarchy for a given node
 func RetrieveNodeHierarchy(name string) JSONDataWrapper {
@@ -46,6 +50,7 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 		return JSONDataWrapper{}
 	}
 
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		parent(func: has(isNode)) @filter(eq(name, "` + name + `")) {
 			name
@@ -55,17 +60,31 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 				type
 				cpu: podCpu as cpuRequest
 				memory: podMemory as memoryRequest
-				storage: podStorage as storageRequest
-				cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(podStorage * ` + defaultStorageCostPerGBPerHour + `)
+				storage: pvcStorage as storageRequest
+				stChild as startTime
+				stSecondsChild as math(since(stChild))
+				secondsSinceStartChild as math(cond(stSecondsChild > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSecondsChild))
+				etChild as endTime
+				isTerminatedChild as count(endTime)
+				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
+				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
+				cpuCost: math(podCpu * durationInHoursChild * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(podMemory * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(pvcStorage * durationInHoursChild * ` + defaultStorageCostPerGBPerHour + `)
 			}
 			cpu: cpu as cpuCapacity
 			memory: memory as memoryCapacity
-			storage: storage as sum(val(podStorage))
-			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(storage * ` + defaultStorageCostPerGBPerHour + `)
+			storage: storage as sum(val(pvcStorage))
+			st as startTime
+			stSeconds as math(since(st))
+			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+			et as endTime
+			isTerminated as count(endTime)
+			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
+			cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(storage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	return getJSONDataFromQuery(query)

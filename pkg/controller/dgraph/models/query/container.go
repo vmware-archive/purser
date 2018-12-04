@@ -17,7 +17,11 @@
 
 package query
 
-import "github.com/Sirupsen/logrus"
+import (
+	"fmt"
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/utils"
+)
 
 // RetrieveContainerHierarchy returns hierarchy for a given pod
 func RetrieveContainerHierarchy(name string) JSONDataWrapper {
@@ -44,14 +48,22 @@ func RetrieveContainerMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for container, empty name is given")
 		return JSONDataWrapper{}
 	}
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		parent(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
 			name
 			type
 			cpu: cpu as cpuRequest
 			memory: memory as memoryRequest
-			cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+			st as startTime
+			stSeconds as math(since(st))
+			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+			et as endTime
+			isTerminated as count(endTime)
+			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
+			cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
 		}
 	}`
 	return getJSONDataFromQuery(query)

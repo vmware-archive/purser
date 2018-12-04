@@ -137,6 +137,7 @@ func GetUID(id string, nodeType string) string {
 
 // ExecuteQueryRaw given a query and it fetches and writes result into interface
 func ExecuteQueryRaw(query string) ([]byte, error) {
+	log.Debugf("query: (%v)", query)
 	ctx := context.Background()
 
 	resp, err := client.NewTxn().Query(ctx, query)

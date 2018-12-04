@@ -18,7 +18,7 @@
 package dgraph
 
 import (
-	"time"
+	"github.com/vmware/purser/pkg/controller/utils"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -52,7 +52,7 @@ func removeOldDeletedResources() error {
 
 func retrieveResourcesWithEndTimeBeforeCurrentMonthStart() ([]resource, error) {
 	q := `query {
-		resources(func: le(endTime, "` + getCurrentMonthStartTime() + `")) {
+		resources(func: le(endTime, "` + utils.ConverTimeToRFC3339(utils.GetCurrentMonthStartTime()) + `")) {
 			uid
 		}
 	}`
@@ -66,11 +66,4 @@ func retrieveResourcesWithEndTimeBeforeCurrentMonthStart() ([]resource, error) {
 		return nil, err
 	}
 	return newRoot.Resources, nil
-}
-
-// getCurrentMonthStartTime returns month start time as k8s apimachinery Time object
-func getCurrentMonthStartTime() string {
-	now := time.Now()
-	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
-	return monthStart.Format(time.RFC3339)
 }

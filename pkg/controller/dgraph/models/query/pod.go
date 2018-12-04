@@ -18,9 +18,11 @@
 package query
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
+	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrievePodsInteractions returns inbound and outbound interactions of a pod
@@ -99,6 +101,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for pod, empty name is given")
 		return JSONDataWrapper{}
 	}
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
 		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
@@ -106,17 +109,31 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 			children: ~pod @filter(has(isContainer)) {
 				name
 				type
+				stChild as startTime
+				stSecondsChild as math(since(stChild))
+				secondsSinceStartChild as math(cond(stSecondsChild > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSecondsChild))
+				etChild as endTime
+				isTerminatedChild as count(endTime)
+				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
+				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
 				cpu: cpu as cpuRequest
 				memory: memory as memoryRequest
-				cpuCost: math(cpu * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(memory * ` + defaultMemCostPerGBPerHour + `)
+				cpuCost: math(cpu * durationInHoursChild * ` + defaultCPUCostPerCPUPerHour + `)
+				memoryCost: math(memory * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
 			}
 			cpu: podCpu as cpuRequest
 			memory: podMemory as memoryRequest
 			storage: pvcStorage as storageRequest
-			cpuCost: math(podCpu * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(podMemory * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(pvcStorage * ` + defaultStorageCostPerGBPerHour + `)
+			st as startTime
+			stSeconds as math(since(st))
+			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+			et as endTime
+			isTerminated as count(endTime)
+			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
+			cpuCost: math(podCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(podMemory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(pvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	return getJSONDataFromQuery(query)
