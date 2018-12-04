@@ -32,6 +32,6 @@ spec:
     spec:
       containers:
       - name: purser-ui
-        image: vmwareh/purser-ui:latest
+        image: vmwareh/purser-ui:1.0.2
         ports:
         - containerPort: 4200

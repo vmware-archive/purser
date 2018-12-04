@@ -40,10 +40,12 @@ Purser with it's robust CLI and UI capabilities provides a set of features inclu
  - Capability of user defined logical grouping of resources based on `K8s CRD` implementation for enhanced filtering.
  
  - A plugin extension to `kubectl` along with the UI for developer centric usage.
+ 
+ - Capability to notify inventory changes via web-hook implementation. 
 
 ### Purser UI demo
 
- ![demo](/docs/img/purser-ui.gif)
+ ![demo](https://user-images.githubusercontent.com/42761785/49430222-74d25600-f7d0-11e8-97ad-ba1388fb6d8f.gif)
 
 ## Setup and Installation
 
@@ -76,7 +78,7 @@ Download the UI setup yaml file from [here](./cluster/purser-ui-setup.yaml).
 kubectl create -f purser-ui-setup.yaml
 ```
 
-_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable).
+_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
 #### Purser Plugin Setup
 
@@ -110,7 +112,7 @@ kubectl delete pvc datadir-dgraph-0
 kubectl delete -f purser-ui-setup.yaml
 ```
 
-_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable).
+_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
 ### Uninstalling Purser Binary
 
