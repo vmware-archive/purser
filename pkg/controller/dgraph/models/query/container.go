@@ -61,7 +61,7 @@ func RetrieveContainerMetrics(name string) JSONDataWrapper {
 			et as endTime
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 60)
+			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
 			cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
 			memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
 		}

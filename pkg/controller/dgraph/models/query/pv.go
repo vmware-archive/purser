@@ -65,7 +65,7 @@ func RetrievePVMetrics(name string) JSONDataWrapper {
 				etChild as endTime
 				isTerminatedChild as count(endTime)
 				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
-				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 60)
+				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
 				storageCost: math(pvcStorage * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
 			}
 			storage: storage as storageCapacity
@@ -75,7 +75,7 @@ func RetrievePVMetrics(name string) JSONDataWrapper {
 			et as endTime
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 60)
+			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
 			storageCost: math(storage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
         }
     }`

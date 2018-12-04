@@ -70,7 +70,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 						replicasetPodET as endTime
 						replicasetPodIsTerminated as count(endTime)
 						replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
-						replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 60)
+						replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600)
 						replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
 						replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
 						replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
@@ -94,7 +94,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					statefulsetPodET as endTime
 					statefulsetPodIsTerminated as count(endTime)
 					statefulsetPodSecondsSinceEnd as math(cond(statefulsetPodIsTerminated == 0, 0.0, since(statefulsetPodET)))
-					statefulsetPodDurationInHours as math((statefulsetPodSecondsSinceStart - statefulsetPodSecondsSinceEnd) / 60)
+					statefulsetPodDurationInHours as math((statefulsetPodSecondsSinceStart - statefulsetPodSecondsSinceEnd) / 3600)
 					statefulsetPodCpuCost as math(statefulsetPodCpu * statefulsetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
 					statefulsetPodMemoryCost as math(statefulsetPodMemory * statefulsetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
 					statefulsetPvcStorageCost as math(statefulsetPvcStorage * statefulsetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
@@ -111,7 +111,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					jobPodET as endTime
 					jobPodIsTerminated as count(endTime)
 					jobPodSecondsSinceEnd as math(cond(jobPodIsTerminated == 0, 0.0, since(jobPodET)))
-					jobPodDurationInHours as math((jobPodSecondsSinceStart - jobPodSecondsSinceEnd) / 60)
+					jobPodDurationInHours as math((jobPodSecondsSinceStart - jobPodSecondsSinceEnd) / 3600)
 					jobPodCpuCost as math(jobPodCpu * jobPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
 					jobPodMemoryCost as math(jobPodMemory * jobPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
 					jobPvcStorageCost as math(jobPvcStorage * jobPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
@@ -128,7 +128,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					daemonsetPodET as endTime
 					daemonsetPodIsTerminated as count(endTime)
 					daemonsetPodSecondsSinceEnd as math(cond(daemonsetPodIsTerminated == 0, 0.0, since(daemonsetPodET)))
-					daemonsetPodDurationInHours as math((daemonsetPodSecondsSinceStart - daemonsetPodSecondsSinceEnd) / 60)
+					daemonsetPodDurationInHours as math((daemonsetPodSecondsSinceStart - daemonsetPodSecondsSinceEnd) / 3600)
 					daemonsetPodCpuCost as math(daemonsetPodCpu * daemonsetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
 					daemonsetPodMemoryCost as math(daemonsetPodMemory * daemonsetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
 					daemonsetPvcStorageCost as math(daemonsetPvcStorage * daemonsetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
@@ -145,7 +145,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					replicasetSimplePodET as endTime
 					replicasetSimplePodIsTerminated as count(endTime)
 					replicasetSimplePodSecondsSinceEnd as math(cond(replicasetSimplePodIsTerminated == 0, 0.0, since(replicasetSimplePodET)))
-					replicasetSimplePodDurationInHours as math((replicasetSimplePodSecondsSinceStart - replicasetSimplePodSecondsSinceEnd) / 60)
+					replicasetSimplePodDurationInHours as math((replicasetSimplePodSecondsSinceStart - replicasetSimplePodSecondsSinceEnd) / 3600)
 					replicasetSimplePodCpuCost as math(replicasetSimplePodCpu * replicasetSimplePodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
 					replicasetSimplePodMemoryCost as math(replicasetSimplePodMemory * replicasetSimplePodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
 					replicasetSimplePvcStorageCost as math(replicasetSimplePvcStorage * replicasetSimplePodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)

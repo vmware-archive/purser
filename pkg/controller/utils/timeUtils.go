@@ -33,5 +33,5 @@ func ConverTimeToRFC3339(queryTime time.Time) string {
 
 // GetSecondsSince returns number of seconds since query time
 func GetSecondsSince(queryTime time.Time) float64 {
-	return time.Now().Sub(queryTime).Seconds()
+	return time.Since(queryTime).Seconds()
 }
