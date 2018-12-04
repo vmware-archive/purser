@@ -74,7 +74,7 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 			}
 			cpu: cpu as cpuCapacity
 			memory: memory as memoryCapacity
-			storage: storage as sum(val(podStorage))
+			storage: storage as sum(val(pvcStorage))
 			st as startTime
 			stSeconds as math(since(st))
 			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
