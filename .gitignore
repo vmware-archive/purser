@@ -3,10 +3,7 @@
 .go/
 bin/
 vendor/
-*.txt
 *.log
-*.temp
-collector.o
 
 # compiled output
 /dist
@@ -14,4 +11,4 @@ collector.o
 /out-tsc
 
 # dependencies
-/node_modules
+node_modules/

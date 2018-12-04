@@ -48,13 +48,13 @@
         color: red;
     }
     ::ng-deep .service{
-        color: blue;
+        color: yellow;
     }
     ::ng-deep .pod{
         color: green;
     }
     ::ng-deep .container{
-        color: yellow;
+        color: blue
     }
     ::ng-deep .process{
         color: orange;
@@ -69,7 +69,7 @@
         color: palevioletred;
     }
     ::ng-deep .node{
-        color: aqua;
+        color: royalblue;
     }
     ::ng-deep .daemonset{
         color: brown;
@@ -78,6 +78,6 @@
         color: black;
     }
     ::ng-deep .statefulset{
-        color: wheat;
+        color: goldenrod;
     }
 }

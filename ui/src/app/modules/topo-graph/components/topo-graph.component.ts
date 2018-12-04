@@ -29,7 +29,7 @@ export class TopoGraphComponent implements OnInit {
         },
         {
             displayText: 'service',
-            color: 'blue'
+            color: 'yellow'
         },
         {
             displayText: 'pod',
@@ -37,7 +37,7 @@ export class TopoGraphComponent implements OnInit {
         },
         {
             displayText: 'container',
-            color: 'yellow'
+            color: 'blue'
         },
         {
             displayText: 'process',
@@ -57,7 +57,7 @@ export class TopoGraphComponent implements OnInit {
         },
         {
             displayText: 'node',
-            color: 'aqua'
+            color: 'royalblue'
         },
         {
             displayText: 'daemonset',
@@ -69,7 +69,7 @@ export class TopoGraphComponent implements OnInit {
         },
         {
             displayText: 'statefulset',
-            color: 'wheat'
+            color: 'goldenrod'
         }
     ];
 

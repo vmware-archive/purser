@@ -42,7 +42,7 @@ type PersistentVolumeClaim struct {
 	Namespace               *Namespace        `json:"namespace,omitempty"`
 	Type                    string            `json:"type,omitempty"`
 	StorageCapacity         float64           `json:"storageCapacity,omitempty"`
-	PersistentVolume        *PersistentVolume `json:"persistentvolume,omitempty"`
+	PersistentVolume        *PersistentVolume `json:"pv,omitempty"`
 }
 
 func createPvcObject(pvc api_v1.PersistentVolumeClaim) PersistentVolumeClaim {
