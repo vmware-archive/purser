@@ -105,16 +105,16 @@ func updatePodDetails(group *groups_v1.Group, pod api_v1.Pod, payload controller
 
 func getContainerWithMetrics(cont api_v1.Container) *groups_v1.Container {
 	container := groups_v1.Container{Name: cont.Name}
-	metrics := metrics.Metrics{}
+	containerMetrics := metrics.Metrics{}
 	if cont.Resources.Requests != nil {
-		metrics.CPURequest = cont.Resources.Requests.Cpu()
-		metrics.MemoryRequest = cont.Resources.Requests.Memory()
+		containerMetrics.CPURequest = cont.Resources.Requests.Cpu()
+		containerMetrics.MemoryRequest = cont.Resources.Requests.Memory()
 	}
 	if cont.Resources.Limits != nil {
-		metrics.CPULimit = cont.Resources.Limits.Cpu()
-		metrics.MemoryLimit = cont.Resources.Limits.Memory()
+		containerMetrics.CPULimit = cont.Resources.Limits.Cpu()
+		containerMetrics.MemoryLimit = cont.Resources.Limits.Memory()
 	}
-	container.Metrics = &metrics
+	container.Metrics = &containerMetrics
 	return &container
 }
 
