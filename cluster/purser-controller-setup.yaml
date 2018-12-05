@@ -17,9 +17,10 @@ rules:
   - apiGroups: ["*"]
     resources: ["*"]
     verbs: ["get", "watch", "list"]
-  - apiGroups: ["*"]
-    resources: ["pods/exec"]
-    verbs: ["create"]
+# Uncomment next three lines to enable interactions feature.
+#  - apiGroups: ["*"]
+#    resources: ["pods/exec"]
+#    verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -181,7 +182,7 @@ spec:
       serviceAccountName: purser-service-account
       containers:
       - name: purser-controller
-        image: kreddyj/controller-amd64:1.0.0
+        image: kreddyj/controller-amd64:1.0.1
         imagePullPolicy: Always
         resources:
           limits:
@@ -193,3 +194,6 @@ spec:
         ports:
         - containerPort: 3030
           name: purser
+        command: ["/controller"]
+        args: ["--log=info", "--interactions=disable", "--dgraphURL=purser-db", "--dgraphPort=9080"]
+

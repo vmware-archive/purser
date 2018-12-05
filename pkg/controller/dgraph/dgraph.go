@@ -49,15 +49,16 @@ type ID struct {
 	UID string `json:"uid,omitempty"`
 }
 
-func init() {
-	err := Open("purser-db:9080")
+// Start opens and creates schema in dgraph
+func Start(url string, port string) {
+	err := Open(url + ":" + port)
 	if err != nil {
-		fmt.Println("Error while opening connection to Dgraph ", err)
+		log.Errorf("error while opening connection to Dgraph: %v", err)
 	}
 
 	err = CreateSchema()
 	if err != nil {
-		fmt.Println("Error while creating schema ", err)
+		log.Errorf("error while creating schema: %v", err)
 	}
 }
 

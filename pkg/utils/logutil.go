@@ -27,10 +27,15 @@ import (
 const logFile = "purser.log"
 
 // InitializeLogger sets and configures logger options.
-func InitializeLogger() {
+func InitializeLogger(logLevel string) {
 	logFile := OpenFile(logFile)
 
 	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 	log.SetFormatter(&log.TextFormatter{ForceColors: true})
-	log.SetLevel(log.InfoLevel)
+
+	if logLevel == "debug" {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
 }

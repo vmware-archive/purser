@@ -18,6 +18,7 @@
 package main
 
 import (
+	"flag"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -34,20 +35,37 @@ import (
 
 var conf controller.Config
 
+// InClusterConfigPath should be empty to get client and config for InCluster environment.
+const InClusterConfigPath = ""
+
+var interactions *string
+
 func init() {
-	utils.InitializeLogger()
-	config.Setup(&conf)
+	logLevel := flag.String("log", "info", "set log level as info or debug")
+	dgraphURL := flag.String("dgraphURL", "purser-db", "dgraph zero url")
+	dgraphPort := flag.String("dgraphPort", "9080", "dgraph zero port")
+	interactions = flag.String("interactions", "disable", "enable discovery of interactions")
+	kubeconfig := flag.String("kubeconfig", InClusterConfigPath, "path to the kubeconfig file")
+	flag.Parse()
+
+	utils.InitializeLogger(*logLevel)
+	config.Setup(&conf, *kubeconfig)
+	dgraph.Start(*dgraphURL, *dgraphPort)
 }
 
 func main() {
 	go api.StartServer()
 	go eventprocessor.ProcessEvents(&conf)
-	go startCronJobs()
+
+	if *interactions == "enable" {
+		go startInteractionsDiscovery()
+	}
+
 	controller.Start(&conf)
 }
 
 // starts first discovery after 5 min of controller starting. Next runs will occur in every 59 min
-func startCronJobs() {
+func startInteractionsDiscovery() {
 	time.Sleep(time.Minute * 5)
 	runDiscovery()
 

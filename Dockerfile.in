@@ -4,5 +4,3 @@ LABEL maintainer = "VMware <hkatyal@vmware.com>"
 LABEL author = "Hemani Katyal <hkatyal@vmware.com>"
 
 ADD bin/ARG_ARCH/ARG_BIN /ARG_BIN
-
-ENTRYPOINT ["/ARG_BIN"]
