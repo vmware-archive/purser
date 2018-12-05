@@ -66,18 +66,16 @@ Purser has three components to install.
 
 #### Purser Controller Setup
 Download the controller setup yaml file from [here](./cluster/purser-controller-setup.yaml).
-
-**To enable/disable Purser features**
-
-Edit [purser-controller-setup.yaml](./cluster/purser-controller-setup.yaml)
-* Choose **log level** by editing `args` of purser-controller deployment (default: info)
-* Enable/Disable discovery of **interactions** feature by editing `args` of purser-controller deployment 
-and uncommenting `pods/exec` rule from purser-permissions (default: disabled)
-* Change **dgraph's** url and port number by editing `args` of purser-controller deployment (default: purser-db, 9080)
 ``` bash
 # Controller installation
 kubectl create -f purser-controller-setup.yaml
 ```
+
+**To enable/disable Purser features edit [purser-controller-setup.yaml](./cluster/purser-controller-setup.yaml) before installing**
+* Choose **log level** by editing `args` of purser-controller deployment (default: info)
+* Enable/Disable discovery of **interactions** feature by editing `args` of purser-controller deployment 
+and uncommenting `pods/exec` rule from purser-permissions (default: disabled)
+* Change **dgraph's** url and port number by editing `args` of purser-controller deployment (default: purser-db, 9080)
 
 #### Purser UI Setup
 Download the UI setup yaml file from [here](./cluster/purser-ui-setup.yaml).
