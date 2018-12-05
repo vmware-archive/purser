@@ -181,7 +181,7 @@ spec:
       serviceAccountName: purser-service-account
       containers:
       - name: purser-controller
-        image: kreddyj/controller-amd64:1.0.0
+        image: kreddyj/controller-amd64:1.0.0-test
         imagePullPolicy: Always
         resources:
           limits:
@@ -193,3 +193,5 @@ spec:
         ports:
         - containerPort: 3030
           name: purser
+        args: ["--log", "debug", "--interactions", "true", "--dgraphURL", "purser-db", "--dgraphPort", "9080"]
+
