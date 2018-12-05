@@ -181,7 +181,7 @@ spec:
       serviceAccountName: purser-service-account
       containers:
       - name: purser-controller
-        image: kreddyj/controller-amd64:1.0.0-test
+        image: kreddyj/controller-amd64:1.0.1
         imagePullPolicy: Always
         resources:
           limits:
