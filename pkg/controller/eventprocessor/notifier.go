@@ -20,13 +20,11 @@ package eventprocessor
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"gopkg.in/matryer/try.v1"
-
 	subscriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller"
 )
@@ -43,25 +41,18 @@ type notifier struct {
 }
 
 func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.SubscriberList) {
-	var notifiers []*notifier
-	err := try.Do(func(attempt int) (bool, error) {
-		var err error
-		notifiers, err = getNotifiers(subscribers)
-		if err != nil {
-			time.Sleep(1 * time.Minute) // wait a minute
-		}
-		return attempt < 3, err
-	})
-	if err != nil {
-		log.Debugf("Retry unsuccessful. %v", err)
-	}
+	notifiers := getNotifiers(subscribers)
 
-	for _, notifier := range notifiers {
-		notifier.sendData(payload)
+	for _, n := range notifiers {
+		go func(n *notifier) {
+			if err := n.sendData(payload); err != nil {
+				log.Errorf("failed to notify subscribers after repeated retries %v", err)
+			}
+		}(n)
 	}
 }
 
-func (n notifier) sendData(payload []*interface{}) {
+func (n notifier) sendData(payload []*interface{}) error {
 	payloadWrapper := controller.PayloadWrapper{
 		Data:    payload,
 		OrgID:   n.orgID,
@@ -81,18 +72,21 @@ func (n notifier) sendData(payload []*interface{}) {
 	n.setAuthHeaders(req)
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Errorf("Error sending data to subscriber %s: %v", n.url, err)
-	}
 
-	if resp != nil {
-		if resp.StatusCode == 200 {
-			log.Infof("Payload data posted successfully for subscriber %s", n.url)
-		} else {
-			log.Infof("Payload data posting failed for subscriber %s, %s ", n.url, resp.Status)
+	return retry(3, time.Minute, func() error {
+		resp, err := client.Do(req)
+		if err != nil {
+			return fmt.Errorf("error sending data to subscriber %s: %v", n.url, err)
 		}
-	}
+
+		if resp != nil {
+			if resp.StatusCode != 200 {
+				return fmt.Errorf("payload data posting failed for subscriber %s, %s", n.url, resp.Status)
+			}
+			log.Infof("Payload data posted successfully for subscriber %s", n.url)
+		}
+		return nil
+	})
 }
 
 func (n *notifier) setAuthHeaders(r *http.Request) {
@@ -104,7 +98,7 @@ func (n *notifier) setAuthHeaders(r *http.Request) {
 	}
 }
 
-func getNotifiers(subscribers *subscriber_v1.SubscriberList) ([]*notifier, error) {
+func getNotifiers(subscribers *subscriber_v1.SubscriberList) []*notifier {
 	var notifiers []*notifier
 	if len(subscribers.Items) > 0 {
 		for _, sub := range subscribers.Items {
@@ -117,7 +111,19 @@ func getNotifiers(subscribers *subscriber_v1.SubscriberList) ([]*notifier, error
 			}
 			notifiers = append(notifiers, notifier)
 		}
-		return notifiers, nil
+	} else {
+		log.Debug("No subscribers available.")
 	}
-	return notifiers, errors.New("no notifiers available for subscribers")
+	return notifiers
+}
+
+func retry(attempts int, sleep time.Duration, fn func() error) error {
+	if err := fn(); err != nil {
+		if attempts--; attempts > 0 {
+			time.Sleep(sleep)
+			return retry(attempts, 2*sleep, fn)
+		}
+		return err
+	}
+	return nil
 }

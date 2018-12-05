@@ -19,6 +19,7 @@ package query
 
 import (
 	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
