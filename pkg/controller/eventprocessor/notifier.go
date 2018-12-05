@@ -45,14 +45,22 @@ func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.Subscr
 
 	for _, n := range notifiers {
 		go func(n *notifier) {
-			if err := n.sendData(payload); err != nil {
-				log.Errorf("failed to notify subscribers after repeated retries %v", err)
+			req, err := n.createNewRequest(payload)
+			if err != nil {
+				log.Errorf("Failed to unmarshal payload and create new request %v", err)
+			} else {
+				err := retry(3, time.Minute, func() error {
+					return sendData(req)
+				})
+				if err != nil {
+					log.Errorf("Notification to subscriber %v failed after 3 retries %v", n.url, err)
+				}
 			}
 		}(n)
 	}
 }
 
-func (n notifier) sendData(payload []*interface{}) error {
+func (n notifier) createNewRequest(payload []*interface{}) (*http.Request,error){
 	payloadWrapper := controller.PayloadWrapper{
 		Data:    payload,
 		OrgID:   n.orgID,
@@ -61,32 +69,32 @@ func (n notifier) sendData(payload []*interface{}) error {
 
 	jsonStr, err := json.Marshal(payloadWrapper)
 	if err != nil {
-		log.Errorf("Error unmarshalling payload %v", err)
+		return nil, fmt.Errorf("error unmarshalling payload %v", err)
 	}
 
 	req, err := http.NewRequest("POST", n.url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		log.Errorf("Error creating HTTP request %v", err)
+		return nil, fmt.Errorf("error creating HTTP request %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	n.setAuthHeaders(req)
+	return req, nil
+}
 
+func sendData(req *http.Request) error {
 	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending data to %s: %v", req.RequestURI, err)
+	}
 
-	return retry(3, time.Minute, func() error {
-		resp, err := client.Do(req)
-		if err != nil {
-			return fmt.Errorf("error sending data to subscriber %s: %v", n.url, err)
+	if resp != nil {
+		if resp.StatusCode != 200 {
+			return fmt.Errorf("payload data posting failed for %s, %s", req.RequestURI, resp.Status)
 		}
-
-		if resp != nil {
-			if resp.StatusCode != 200 {
-				return fmt.Errorf("payload data posting failed for subscriber %s, %s", n.url, resp.Status)
-			}
-			log.Infof("Payload data posted successfully for subscriber %s", n.url)
-		}
-		return nil
-	})
+		log.Infof("Payload data posted successfully for %s", req.RequestURI)
+	}
+	return nil
 }
 
 func (n *notifier) setAuthHeaders(r *http.Request) {
