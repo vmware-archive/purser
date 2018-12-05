@@ -60,7 +60,7 @@ func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.Subscr
 	}
 }
 
-func (n notifier) createNewRequest(payload []*interface{}) (*http.Request,error){
+func (n notifier) createNewRequest(payload []*interface{}) (*http.Request, error) {
 	payloadWrapper := controller.PayloadWrapper{
 		Data:    payload,
 		OrgID:   n.orgID,
