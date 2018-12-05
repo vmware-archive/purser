@@ -85,14 +85,14 @@ func sendData(req *http.Request) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error sending data to %s: %v", req.RequestURI, err)
+		return fmt.Errorf("error sending data to %v: %v", req.URL, err)
 	}
 
 	if resp != nil {
 		if resp.StatusCode != 200 {
-			return fmt.Errorf("payload data posting failed for %s, %s", req.RequestURI, resp.Status)
+			return fmt.Errorf("payload data posting failed for %v, %s", req.URL, resp.Status)
 		}
-		log.Infof("Payload data posted successfully for %s", req.RequestURI)
+		log.Debugf("Payload data posted successfully for %v", req.URL)
 	}
 	return nil
 }
