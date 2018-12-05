@@ -20,9 +20,12 @@ package eventprocessor
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"gopkg.in/matryer/try.v1"
 
 	subscriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller"
@@ -40,7 +43,18 @@ type notifier struct {
 }
 
 func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.SubscriberList) {
-	notifiers := getNotifiers(subscribers)
+	var notifiers []*notifier
+	err := try.Do(func(attempt int) (bool, error) {
+		var err error
+		notifiers, err = getNotifiers(subscribers)
+		if err != nil {
+			time.Sleep(1 * time.Minute) // wait a minute
+		}
+		return attempt < 3, err
+	})
+	if err != nil {
+		log.Debugf("Retry unsuccessful. %v", err)
+	}
 
 	for _, notifier := range notifiers {
 		notifier.sendData(payload)
@@ -82,7 +96,7 @@ func (n notifier) sendData(payload []*interface{}) {
 }
 
 func (n *notifier) setAuthHeaders(r *http.Request) {
-	//TODO: add support for other auth types.
+	// TODO: add support for other auth types.
 	if n.authType != "" {
 		if n.authType == "access-token" {
 			r.Header.Set("Authorization", "Bearer "+n.authCode)
@@ -90,8 +104,8 @@ func (n *notifier) setAuthHeaders(r *http.Request) {
 	}
 }
 
-func getNotifiers(subscribers *subscriber_v1.SubscriberList) []*notifier {
-	notifiers := []*notifier{}
+func getNotifiers(subscribers *subscriber_v1.SubscriberList) ([]*notifier, error) {
+	var notifiers []*notifier
 	if len(subscribers.Items) > 0 {
 		for _, sub := range subscribers.Items {
 			notifier := &notifier{
@@ -103,8 +117,7 @@ func getNotifiers(subscribers *subscriber_v1.SubscriberList) []*notifier {
 			}
 			notifiers = append(notifiers, notifier)
 		}
-	} else {
-		log.Debug("No notifiers available for subscribers.")
+		return notifiers, nil
 	}
-	return notifiers
+	return notifiers, errors.New("no notifiers available for subscribers")
 }
