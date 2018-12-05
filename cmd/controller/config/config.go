@@ -18,7 +18,6 @@
 package config
 
 import (
-	"flag"
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
