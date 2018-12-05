@@ -35,14 +35,21 @@ import (
 
 var conf controller.Config
 
+// InClusterConfigPath should be empty to get client and config for InCluster environment.
+const InClusterConfigPath = ""
+
+var interactions *string
+
 func init() {
 	logLevel := flag.String("log", "info", "set log level as info or debug")
-	utils.InitializeLogger(*logLevel)
-
-	config.Setup(&conf)
-
 	dgraphURL := flag.String("dgraphURL", "purser-db", "dgraph zero url")
 	dgraphPort := flag.String("dgraphPort", "9080", "dgraph zero port")
+	interactions = flag.String("interactions", "false", "enable discovery of interactions")
+	kubeconfig := flag.String("kubeconfig", InClusterConfigPath, "path to the kubeconfig file")
+	flag.Parse()
+
+	utils.InitializeLogger(*logLevel)
+	config.Setup(&conf, *kubeconfig)
 	dgraph.Start(*dgraphURL, *dgraphPort)
 }
 
@@ -50,7 +57,6 @@ func main() {
 	go api.StartServer()
 	go eventprocessor.ProcessEvents(&conf)
 
-	interactions := flag.String("interactions", "false", "enable discovery of interactions")
 	if *interactions == "true" {
 		go startInteractionsDiscovery()
 	}

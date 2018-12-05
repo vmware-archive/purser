@@ -31,16 +31,11 @@ import (
 	"github.com/vmware/purser/pkg/utils"
 )
 
-// InClusterConfigPath should be empty to get client and config for InCluster environment.
-const InClusterConfigPath = ""
-
 // Setup initialzes the controller configuration
-func Setup(conf *controller.Config) {
-	kubeconfig := flag.String("kubeconfig", InClusterConfigPath, "path to the kubeconfig file")
-	flag.Parse()
+func Setup(conf *controller.Config, kubeconfig string) {
 	var err error
 	*conf = controller.Config{}
-	conf.KubeConfig, err = utils.GetKubeconfig(*kubeconfig)
+	conf.KubeConfig, err = utils.GetKubeconfig(kubeconfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +56,7 @@ func Setup(conf *controller.Config) {
 		Subscriber:            true,
 	}
 	conf.RingBuffer = &buffering.RingBuffer{Size: buffering.BufferSize, Mutex: &sync.Mutex{}}
-	clientset, clusterConfig := client.GetAPIExtensionClient(*kubeconfig)
+	clientset, clusterConfig := client.GetAPIExtensionClient(kubeconfig)
 	conf.Groupcrdclient = group_client.NewGroupClient(clientset, clusterConfig)
 	conf.Subscriberclient = subscriber_client.NewSubscriberClient(clientset, clusterConfig)
 }
