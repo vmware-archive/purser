@@ -194,5 +194,5 @@ spec:
         - containerPort: 3030
           name: purser
         command: ["/controller"]
-        args: ["--log", "info", "--interactions", "false", "--dgraphURL", "purser-db", "--dgraphPort", "9080"]
+        args: ["--log=info", "--interactions=disable", "--dgraphURL=purser-db", "--dgraphPort=9080"]
 
