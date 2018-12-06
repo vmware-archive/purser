@@ -20,12 +20,12 @@ package query
 // createLabelFilter will return a filter logic like
 // (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1"))
 func createLabelFilter(labels map[string]string) string {
-	seperator := " OR "
+	separator := " OR "
 	var filter string
 	isFirst := true
 	for key, value := range labels {
 		if !isFirst {
-			filter += seperator
+			filter += separator
 		} else {
 			isFirst = false
 		}
