@@ -250,11 +250,10 @@ func getPodVolumes(k8sPod api_v1.Pod) ([]*PersistentVolumeClaim, float64) {
 }
 
 func populatePodLabels(pod *Pod, podLabels map[string]string) {
-	log.Debugf("k8s pod labels: (%v)", podLabels)
+	log.Debugf("k8s pod: (%v), labels: (%v)", pod.Name, podLabels)
 	var labels []*Label
 	for key, value := range podLabels {
 		labels = append(labels, GetLabel(key, value))
 	}
-	log.Debugf("pod: (%v), labels: (%v)", pod.Name, labels)
 	pod.Labels = labels
 }
