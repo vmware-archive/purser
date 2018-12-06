@@ -108,6 +108,8 @@ func CreateSchema() error {
 		daemonset: uid @reverse .
 		job: uid @reverse .
 		label: uid @reverse .
+		key: string @index(term) .
+		value: string @index(term) .
 	`
 	ctx := context.Background()
 	err := client.Alter(ctx, op)
