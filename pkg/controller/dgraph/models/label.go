@@ -72,5 +72,6 @@ func createLabelObject(key, value string) string {
 		logrus.Fatal(err)
 		return ""
 	}
+	logrus.Debugf("created label in dgraph key: (%v), value: (%v)", newLabel.Key, newLabel.Value)
 	return assigned.Uids["blank-0"]
 }

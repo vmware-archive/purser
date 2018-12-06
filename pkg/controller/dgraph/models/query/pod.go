@@ -165,3 +165,43 @@ func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 	}
 	return newRoot.Pods, nil
 }
+
+// RetrievePodsByLabelsFilter returns pods satisfying the filter conditions for labels (OR logic only)
+func RetrievePodsByLabelsFilter(labels map[string]string) ([]models.Pod, error) {
+	labelFilter := createFilterFromListOfLabels(labels)
+	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
+	q := `query {
+		var(func: has(isLabel)) @filter(` + labelFilter + `) {
+            podUIDs as ~label @filter(has(isPod)) {
+				name
+			}
+		}
+		pods(func: uid(podUIDs)) {
+			uid
+			name
+			type
+			cpu: podCpu as cpuRequest
+			memory: podMemory as memoryRequest
+			storage: pvcStorage as storageRequest
+			st as startTime
+			stSeconds as math(since(st))
+			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
+			et as endTime
+			isTerminated as count(endTime)
+			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
+			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
+			cpuCost: math(podCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(podMemory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+			storageCost: math(pvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
+		}
+	}`
+	type root struct {
+		Pods []models.Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+	return newRoot.Pods, nil
+}
