@@ -205,25 +205,3 @@ func RetrievePodsByLabelsFilter(labels map[string]string) ([]models.Pod, error) 
 	}
 	return newRoot.Pods, nil
 }
-
-// createLabelFilter will return a filter logic like
-// (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1"))
-func createLabelFilter(labels map[string]string) string {
-	seperator := " OR "
-	var filter string
-	isFirst := true
-	for key, value := range labels {
-		if !isFirst {
-			filter += seperator
-		} else {
-			isFirst = false
-		}
-		filter += createSingleLabelFilter(key, value)
-	}
-	return filter
-}
-
-// createSingleLabelFilter takes key: k1, value: v1 and returns (eq(key, "k1") AND eq(value, "v1"))
-func createSingleLabelFilter(key, value string) string {
-	return `(eq(key, "` + key + `") AND eq(value, "` + value + `"))"`
-}
