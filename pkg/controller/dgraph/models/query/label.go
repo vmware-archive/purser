@@ -17,9 +17,9 @@
 
 package query
 
-// createLabelFilter will return a filter logic like
+// createFilterFromListOfLabels will return a filter logic like
 // (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1"))
-func createLabelFilter(labels map[string]string) string {
+func createFilterFromListOfLabels(labels map[string]string) string {
 	separator := " OR "
 	var filter string
 	isFirst := true
@@ -29,12 +29,12 @@ func createLabelFilter(labels map[string]string) string {
 		} else {
 			isFirst = false
 		}
-		filter += createSingleLabelFilter(key, value)
+		filter += createFilterFromLabel(key, value)
 	}
 	return filter
 }
 
-// createSingleLabelFilter takes key: k1, value: v1 and returns (eq(key, "k1") AND eq(value, "v1"))
-func createSingleLabelFilter(key, value string) string {
+// createFilterFromLabel takes key: k1, value: v1 and returns (eq(key, "k1") AND eq(value, "v1"))
+func createFilterFromLabel(key, value string) string {
 	return `(eq(key, "` + key + `") AND eq(value, "` + value + `"))`
 }

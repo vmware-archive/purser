@@ -168,7 +168,7 @@ func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 
 // RetrievePodsByLabelsFilter returns pods satisfying the filter conditions for labels (OR logic only)
 func RetrievePodsByLabelsFilter(labels map[string]string) ([]models.Pod, error) {
-	labelFilter := createLabelFilter(labels)
+	labelFilter := createFilterFromListOfLabels(labels)
 	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	q := `query {
 		var(func: has(isLabel)) @filter(` + labelFilter + `) {
