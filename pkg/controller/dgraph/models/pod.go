@@ -59,6 +59,7 @@ type Pod struct {
 	StorageRequest float64                  `json:"storageRequest,omitempty"`
 	Type           string                   `json:"type,omitempty"`
 	Cid            []Service                `json:"cid,omitempty"`
+	Labels         []*Label                 `json:"label,omitempty"`
 }
 
 // Metrics ...
@@ -125,6 +126,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 			MemoryRequest: metrics.MemoryRequest,
 			MemoryLimit:   metrics.MemoryLimit,
 		}
+		populatePodLabels(&pod, k8sPod.Labels)
 	}
 
 	_, err := dgraph.MutateNode(pod, dgraph.UPDATE)
@@ -245,4 +247,12 @@ func getPodVolumes(k8sPod api_v1.Pod) ([]*PersistentVolumeClaim, float64) {
 		}
 	}
 	return podVolumes, storage
+}
+
+func populatePodLabels(pod *Pod, podLabels map[string]string) {
+	var labels []*Label
+	for key, value := range podLabels {
+		labels = append(labels, GetLabel(key, value))
+	}
+	pod.Labels = labels
 }
