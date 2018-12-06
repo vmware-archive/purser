@@ -32,7 +32,7 @@ type Label struct {
 	dgraph.ID
 	IsLabel bool   `json:"isLabel,omitempty"`
 	Key     string `json:"key,omitempty"`
-	Value   string `json:"key,omitempty"`
+	Value   string `json:"value,omitempty"`
 }
 
 // GetLabel if label is not in dgraph it creates and returns Label object
