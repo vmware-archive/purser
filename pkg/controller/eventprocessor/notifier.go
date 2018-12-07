@@ -33,39 +33,30 @@ import (
 const ReadSize uint32 = 50
 
 type notifier struct {
-	url      string
-	authType string
-	authCode string
-	cluster  string
-	orgID    string
+	url     string
+	headers map[string]string
 }
 
 func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.SubscriberList) {
 	notifiers := getNotifiers(subscribers)
 
 	for _, n := range notifiers {
-		go func(n *notifier) {
-			req, err := n.createNewRequest(payload)
+		req, err := n.createNewRequest(payload)
+		if err != nil {
+			log.Errorf("Failed to unmarshal payload and create new request %v", err)
+		} else {
+			err := retry(3, time.Second, func() error {
+				return sendData(req)
+			})
 			if err != nil {
-				log.Errorf("Failed to unmarshal payload and create new request %v", err)
-			} else {
-				err := retry(3, time.Minute, func() error {
-					return sendData(req)
-				})
-				if err != nil {
-					log.Errorf("Notification to subscriber %v failed after 3 retries %v", n.url, err)
-				}
+				log.Errorf("Notification to subscriber %v failed after 3 retries %v", n.url, err)
 			}
-		}(n)
+		}
 	}
 }
 
 func (n notifier) createNewRequest(payload []*interface{}) (*http.Request, error) {
-	payloadWrapper := controller.PayloadWrapper{
-		Data:    payload,
-		OrgID:   n.orgID,
-		Cluster: n.cluster,
-	}
+	payloadWrapper := controller.PayloadWrapper{Data: payload}
 
 	jsonStr, err := json.Marshal(payloadWrapper)
 	if err != nil {
@@ -76,8 +67,7 @@ func (n notifier) createNewRequest(payload []*interface{}) (*http.Request, error
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request %v", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	n.setAuthHeaders(req)
+	n.setReqHeaders(req)
 	return req, nil
 }
 
@@ -97,12 +87,10 @@ func sendData(req *http.Request) error {
 	return nil
 }
 
-func (n *notifier) setAuthHeaders(r *http.Request) {
-	// TODO: add support for other auth types.
-	if n.authType != "" {
-		if n.authType == "access-token" {
-			r.Header.Set("Authorization", "Bearer "+n.authCode)
-		}
+func (n *notifier) setReqHeaders(r *http.Request) {
+	r.Header.Set("Content-Type", "application/json")
+	for key, value := range n.headers {
+		r.Header.Set(key, value)
 	}
 }
 
@@ -111,11 +99,8 @@ func getNotifiers(subscribers *subscriber_v1.SubscriberList) []*notifier {
 	if len(subscribers.Items) > 0 {
 		for _, sub := range subscribers.Items {
 			notifier := &notifier{
-				url:      sub.Spec.URL,
-				authType: sub.Spec.AuthType,
-				authCode: sub.Spec.AuthToken,
-				cluster:  sub.Spec.ClusterName,
-				orgID:    sub.Spec.OrgID,
+				url:     sub.Spec.URL,
+				headers: sub.Spec.Headers,
 			}
 			notifiers = append(notifiers, notifier)
 		}

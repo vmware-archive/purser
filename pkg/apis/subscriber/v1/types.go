@@ -37,12 +37,9 @@ type Subscriber struct {
 
 // SubscriberSpec definition details
 type SubscriberSpec struct {
-	Name        string `json:"name"`
-	ClusterName string `json:"cluster"`
-	OrgID       string `json:"orgId"`
-	URL         string `json:"url"`
-	AuthType    string `json:"authType,omitempty"`
-	AuthToken   string `json:"authToken,omitempty"`
+	Name    string            `json:"name"`
+	Headers map[string]string `json:"headers"`
+	URL     string            `json:"url"`
 }
 
 // SubscriberStatus definition

@@ -21,8 +21,6 @@ import meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // PayloadWrapper holds additional information about payload
 type PayloadWrapper struct {
-	OrgID   string         `json:"orgId"`
-	Cluster string         `json:"cluster"`
 	Data    []*interface{} `json:"data"`
 }
 

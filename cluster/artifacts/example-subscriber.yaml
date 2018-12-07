@@ -4,8 +4,7 @@ metadata:
   name: example-subscriber
 spec:
   name: example-subscriber
-  cspOrgId: <optional>
-  cluster: <your-cluster-name>
-  authType: access-token
-  authToken: <your-token>
+  headers:
+    authorization: "Bearer <your-token>"
+    cluster: "<your-cluster-name>"
   url: <your-webhook-url>
