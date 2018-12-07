@@ -38,6 +38,7 @@ func UpdateGroups(groupCRDClient *groupsClient_v1.GroupClient) {
 	}
 }
 
+// UpdateGroup given a group it updates its spec with metrics
 func UpdateGroup(group *groups_v1.Group) {
 	if group == nil {
 		return
@@ -54,10 +55,10 @@ func UpdateGroup(group *groups_v1.Group) {
 		StorageClaim:  groupMetrics.PITStorage,
 	}
 	group.Spec.MTDCost = &groups_v1.Cost{
-		CPUCost:     groupMetrics.CostCpu,
+		CPUCost:     groupMetrics.CostCPU,
 		MemoryCost:  groupMetrics.CostMemory,
 		StorageCost: groupMetrics.CostStorage,
-		TotalCost:   groupMetrics.CostCpu + groupMetrics.CostMemory + groupMetrics.CostStorage,
+		TotalCost:   groupMetrics.CostCPU + groupMetrics.CostMemory + groupMetrics.CostStorage,
 	}
 }
 

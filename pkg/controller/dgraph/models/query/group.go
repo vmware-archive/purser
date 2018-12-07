@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/purser/pkg/controller/utils"
 )
 
+// GroupMetrics structure
 type GroupMetrics struct {
 	PITCpu      float64
 	PITMemory   float64
@@ -30,15 +31,17 @@ type GroupMetrics struct {
 	MTDCpu      float64
 	MTDMemory   float64
 	MTDStorage  float64
-	CostCpu     float64
+	CostCPU     float64
 	CostMemory  float64
 	CostStorage float64
 }
 
+// Metrics wrapper
 type Metrics struct {
 	Data map[string]float64
 }
 
+// RetrieveGroupMetricsFromPodUIDs ...
 func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
@@ -92,28 +95,32 @@ func convertToGroupMetrics(jsonMetrics []Metrics) GroupMetrics {
 	var groupMetrics GroupMetrics
 	for _, data := range jsonMetrics {
 		for key, value := range data.Data {
-			switch key {
-			case "pitCPU":
-				groupMetrics.PITCpu = value
-			case "pitMemory":
-				groupMetrics.PITMemory = value
-			case "pitStorage":
-				groupMetrics.PITStorage = value
-			case "mtdCPU":
-				groupMetrics.MTDCpu = value
-			case "mtdMemory":
-				groupMetrics.MTDMemory = value
-			case "mtdStorage":
-				groupMetrics.MTDStorage = value
-			case "cpuCost":
-				groupMetrics.CostCpu = value
-			case "memoryCost":
-				groupMetrics.CostMemory = value
-			case "storageCost":
-				groupMetrics.CostStorage = value
-			}
+			populateMetric(&groupMetrics, key, value)
 			break
 		}
 	}
 	return groupMetrics
+}
+
+func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
+	switch key {
+	case "pitCPU":
+		groupMetrics.PITCpu = value
+	case "pitMemory":
+		groupMetrics.PITMemory = value
+	case "pitStorage":
+		groupMetrics.PITStorage = value
+	case "mtdCPU":
+		groupMetrics.MTDCpu = value
+	case "mtdMemory":
+		groupMetrics.MTDMemory = value
+	case "mtdStorage":
+		groupMetrics.MTDStorage = value
+	case "cpuCost":
+		groupMetrics.CostCPU = value
+	case "memoryCost":
+		groupMetrics.CostMemory = value
+	case "storageCost":
+		groupMetrics.CostStorage = value
+	}
 }
