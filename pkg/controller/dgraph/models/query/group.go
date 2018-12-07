@@ -19,6 +19,7 @@ package query
 
 import (
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
 )
@@ -99,6 +100,7 @@ func convertToGroupMetrics(jsonMetrics []Metrics) GroupMetrics {
 			break
 		}
 	}
+	logrus.Debugf("JSON metrics: (%v), Group metrics: (%v)", jsonMetrics, groupMetrics)
 	return groupMetrics
 }
 
@@ -122,5 +124,7 @@ func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
 		groupMetrics.CostMemory = value
 	case "storageCost":
 		groupMetrics.CostStorage = value
+	default:
+		logrus.Errorf("Unkown metric key: (%v)", key)
 	}
 }

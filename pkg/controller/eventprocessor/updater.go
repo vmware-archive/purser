@@ -30,20 +30,26 @@ import (
 
 // UpdateGroups retrieve all groups and updates them
 func UpdateGroups(groupCRDClient *groupsClient_v1.GroupClient) {
+	log.Infof("Started updating groups")
 	groups := processor.RetrieveGroupList(groupCRDClient, meta_v1.ListOptions{})
-	if groups != nil {
-		for _, group := range groups.Items {
-			UpdateGroup(group)
-		}
+	if groups == nil {
+		log.Debugf("GroupList is nil")
+		return
+	}
+	log.Debugf("Retrieved groups of length: %d", len(groups.Items))
+	for _, group := range groups.Items {
+		UpdateGroup(group)
 	}
 }
 
 // UpdateGroup given a group it updates its spec with metrics
 func UpdateGroup(group *groups_v1.Group) {
 	if group == nil {
+		log.Warn("Received empty group to update")
 		return
 	}
 	groupMetrics := getGroupMetrics(group)
+	log.Debugf("GroupMetrics computed from dgraph data: (%v)", groupMetrics)
 	group.Spec.MTDMetrics = &groups_v1.GroupMetrics{
 		CPURequest:    groupMetrics.MTDCpu,
 		MemoryRequest: groupMetrics.MTDMemory,
@@ -60,20 +66,27 @@ func UpdateGroup(group *groups_v1.Group) {
 		StorageCost: groupMetrics.CostStorage,
 		TotalCost:   groupMetrics.CostCPU + groupMetrics.CostMemory + groupMetrics.CostStorage,
 	}
+	log.Debugf("Updated group spec: (%v)", group.Spec)
+	log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
 }
 
 func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
+	log.Debugf("Group: (%v), expressions: (%v)", group.Name, group.Spec.Expressions)
+
 	// for each label-expression retrieve UIDs of pods that satisfy the label-expression
 	podUIDsFromExpressions := getPodUIDsFromAllExpressions(group.Spec.Expressions)
+	log.Debugf("Group: (%v), pod uids: (%v)", group.Name, podUIDsFromExpressions)
 
 	// Across all the podUIDs computed from label-expressions, map pod's UID with number of occurrences of it
 	podUIDsCounter := mapPodUIDsToNumberOfOccurences(podUIDsFromExpressions)
+	log.Debugf("Group: (%v), pod uids counter: (%v)", group.Name, podUIDsCounter)
 
 	// if number of occurrences of UID == number of expressions that means the pod satisfies all the expressions(i.e, AND)
 	// get uid-query to retrieve such pods i.e, "uid1, uid2, uid2..."
 	uidQueryForPods := getUIDQueryForPods(podUIDsCounter, len(group.Spec.Expressions))
+	log.Debugf("Group: (%v), uidQuery: (%v)", group.Name, uidQueryForPods)
 
-	// given group metrics
+	// get group metrics
 	groupMetrics, err := query.RetrieveGroupMetricsFromPodUIDs(uidQueryForPods)
 	if err != nil {
 		log.Errorf("Unable to retrieve group metrics. UIDs: (%v)", uidQueryForPods)
@@ -88,9 +101,9 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 func getPodUIDsFromAllExpressions(expressions map[string]groups_v1.Selector) [][]string {
 	var podsUIDsFromExpressions [][]string
 	for _, selector := range expressions {
-		podsFromSelector, err := query.RetrievePodsUIDsByLabelsFilter(selector.Labels)
+		podsUIDsFromSelector, err := query.RetrievePodsUIDsByLabelsFilter(selector.Labels)
 		if err == nil {
-			podsUIDsFromExpressions = append(podsUIDsFromExpressions, podsFromSelector)
+			podsUIDsFromExpressions = append(podsUIDsFromExpressions, podsUIDsFromSelector)
 		}
 	}
 	return podsUIDsFromExpressions
