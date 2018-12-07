@@ -105,6 +105,7 @@ func convertToGroupMetrics(jsonMetrics []Metrics) GroupMetrics {
 }
 
 func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
+	logrus.Debugf("key: %s", key)
 	switch key {
 	case "pitCPU":
 		groupMetrics.PITCpu = value
@@ -124,7 +125,5 @@ func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
 		groupMetrics.CostMemory = value
 	case "storageCost":
 		groupMetrics.CostStorage = value
-	default:
-		logrus.Errorf("Unkown metric key: (%v)", key)
 	}
 }
