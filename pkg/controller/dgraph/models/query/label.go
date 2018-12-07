@@ -19,17 +19,19 @@ package query
 
 // createFilterFromListOfLabels will return a filter logic like
 // (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1"))
-func createFilterFromListOfLabels(labels map[string]string) string {
+func createFilterFromListOfLabels(labels map[string][]string) string {
 	separator := " OR "
 	var filter string
 	isFirst := true
-	for key, value := range labels {
-		if !isFirst {
-			filter += separator
-		} else {
-			isFirst = false
+	for key, values := range labels {
+		for _, value := range values {
+			if !isFirst {
+				filter += separator
+			} else {
+				isFirst = false
+			}
+			filter += createFilterFromLabel(key, value)
 		}
-		filter += createFilterFromLabel(key, value)
 	}
 	return filter
 }

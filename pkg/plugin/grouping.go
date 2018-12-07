@@ -141,8 +141,8 @@ func getPodStorageMetrics(podDetails *groups_v1.PodDetails) (float64, float64) {
 
 	podVolumeClaims := podDetails.PodVolumeClaims
 	for _, pvc := range podVolumeClaims {
-		for i := 0; i < len(pvc.CapacityAllotedInGB); i++ {
-			allocation := pvc.CapacityAllotedInGB[i]
+		for i := 0; i < len(pvc.CapacityAllocatedInGB); i++ {
+			allocation := pvc.CapacityAllocatedInGB[i]
 			boundTime := pvc.BoundTimes[i]
 			unboundTime := getUnboundTime(pvc, i)
 			activeTime := currentMonthActiveTimeInHoursMulti(boundTime, unboundTime, currentTime, monthStart)

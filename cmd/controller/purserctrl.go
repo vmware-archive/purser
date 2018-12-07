@@ -60,7 +60,7 @@ func main() {
 	if *interactions == "enable" {
 		go startInteractionsDiscovery()
 	}
-
+	go startCronJobForUpdatingCustomGroups()
 	controller.Start(&conf)
 }
 
@@ -72,7 +72,7 @@ func startInteractionsDiscovery() {
 	c := cron.New()
 	err := c.AddFunc("@every 0h59m", runDiscovery)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	err = c.AddFunc("@daily", dgraph.RemoveResourcesInactiveInCurrentMonth)
 	if err != nil {
@@ -84,4 +84,20 @@ func startInteractionsDiscovery() {
 func runDiscovery() {
 	processor.ProcessPodInteractions(conf)
 	processor.ProcessServiceInteractions(conf)
+}
+
+func startCronJobForUpdatingCustomGroups() {
+	time.Sleep(time.Minute)
+	runGroupUpdate()
+
+	c := cron.New()
+	err := c.AddFunc("@every 0h5m", runGroupUpdate)
+	if err != nil {
+		log.Error(err)
+	}
+	c.Start()
+}
+
+func runGroupUpdate() {
+	eventprocessor.UpdateGroups(conf.Groupcrdclient)
 }

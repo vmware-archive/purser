@@ -50,13 +50,10 @@ func ProcessEvents(conf *controller.Config) {
 				break
 			}
 
-			PersistPayloads(data)
+			ProcessPayloads(data, conf)
 
 			subscribers := processor.RetrieveSubscriberList(conf.Subscriberclient, meta_v1.ListOptions{})
 			notifySubscribers(data, subscribers)
-
-			groups := processor.RetrieveGroupList(conf.Groupcrdclient, meta_v1.ListOptions{})
-			updateCustomGroups(data, groups)
 
 			conf.RingBuffer.RemoveN(size)
 			conf.RingBuffer.PrintDetails()
@@ -65,9 +62,9 @@ func ProcessEvents(conf *controller.Config) {
 	}
 }
 
-// PersistPayloads store payload info in dgraph
+// ProcessPayloads store payload info in dgraph. If payload is of type group then it updates its group spec
 // nolint: gocyclo
-func PersistPayloads(payloads []*interface{}) {
+func ProcessPayloads(payloads []*interface{}, conf *controller.Config) {
 	for _, event := range payloads {
 		payload := (*event).(*controller.Payload)
 		if payload.ResourceType == "Pod" {
@@ -185,10 +182,12 @@ func PersistPayloads(payloads []*interface{}) {
 			err := json.Unmarshal([]byte(payload.Data), &groupCRD)
 			if err != nil {
 				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreGroupCRD(groupCRD)
-			if err != nil {
-				log.Errorf("Error while persisting group CRD %v", err)
+			} else {
+				group, err := conf.Groupcrdclient.Get(groupCRD.Name)
+				if err != nil {
+					log.Errorf("Unable to get group from client: (%v)", err)
+				}
+				UpdateGroup(group)
 			}
 		} else if payload.ResourceType == "Subscriber" {
 			subscriberCRD := subcriber_v1.Subscriber{}

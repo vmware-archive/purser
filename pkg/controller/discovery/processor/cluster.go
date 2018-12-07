@@ -62,6 +62,7 @@ func RetrieveGroupList(groupClient *groups.GroupClient, options metav1.ListOptio
 	groups, err := groupClient.List(options)
 	if err != nil {
 		log.Errorf("failed to retrieve group list: %v ", err)
+		return nil
 	}
 	return groups
 }
