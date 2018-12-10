@@ -73,6 +73,6 @@ func PrintGroup(group *groups_v1.Group) {
 	}
 
 	fmt.Println()
-	fmt.Printf("Last updated %s minutes ago", time.Since(group.Spec.LastUpdated).Minutes())
+	fmt.Printf("Last updated %f minutes ago", time.Since(group.Spec.LastUpdated).Minutes())
 	fmt.Println()
 }

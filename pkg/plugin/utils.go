@@ -24,12 +24,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func addResourceAToResourceB(resA, resB *resource.Quantity) {
-	if resA != nil {
-		resB.Add(*resA)
-	}
-}
-
 // getCurrentTime returns the current time as k8s apimachinery Time object
 func getCurrentTime() metav1.Time {
 	return metav1.Now()
