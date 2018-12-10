@@ -37,11 +37,6 @@ type GroupMetrics struct {
 	CostStorage float64
 }
 
-// Metrics wrapper
-type Metrics struct {
-	Data map[string]float64
-}
-
 // RetrieveGroupMetricsFromPodUIDs ...
 func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
@@ -82,7 +77,7 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 	}`
 
 	type root struct {
-		JSONMetrics []Metrics `json:"group"`
+		JSONMetrics []map[string]float64 `json:"group"`
 	}
 	newRoot := root{}
 	err := dgraph.ExecuteQuery(query, &newRoot)
@@ -92,10 +87,10 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 	return convertToGroupMetrics(newRoot.JSONMetrics), nil
 }
 
-func convertToGroupMetrics(jsonMetrics []Metrics) GroupMetrics {
+func convertToGroupMetrics(jsonMetrics []map[string]float64) GroupMetrics {
 	var groupMetrics GroupMetrics
 	for _, data := range jsonMetrics {
-		for key, value := range data.Data {
+		for key, value := range data {
 			populateMetric(&groupMetrics, key, value)
 			break
 		}
