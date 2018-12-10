@@ -48,7 +48,7 @@ type GroupSpec struct {
 	PITMetrics         *GroupMetrics                  `json:"pitMetrics,omitempty"`
 	MTDMetrics         *GroupMetrics                  `json:"mtdMetrics,omitempty"`
 	MTDCost            *Cost                          `json:"mtdCost,omitempty"`
-	PodsDetails        map[string]*PodDetails         `json:"podDetails,omitempty"`
+	LastUpdated        string                         `json:"lastUpdated,omitempty"`
 }
 
 // GroupMetrics ...

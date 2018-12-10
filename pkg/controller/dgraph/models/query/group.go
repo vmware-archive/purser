@@ -45,6 +45,8 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			podCpu as cpuRequest
 			podMemory as memoryRequest
 			pvcStorage as storageRequest
+			podCpuLimit as cpuLimit
+			podMemoryLimit as memoryLimit
 			st as startTime
 			stSeconds as math(since(st))
 			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
@@ -55,9 +57,13 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			pitPodCPU as math(cond(isTerminated == 0, podCpu, 0.0))
 			pitPodMemory as math(cond(isTerminated == 0, podMemory, 0.0))
 			pitPvcStorage as math(cond(isTerminated == 0, pvcStorage, 0.0))
+			pitPodCPULimit as math(cond(isTerminated == 0, podCpuLimit, 0.0))
+			pitPodMemoryLimit as math(cond(isTerminated == 0, podMemoryLimit, 0.0))
 			mtdPodCPU as math(podCpu * durationInHours)
 			mtdPodMemory as math(podMemory * durationInHours)
 			mtdPvcStorage as math(pvcStorage * durationInHours)
+			mtdPodCPULimit as math(podCpuLimit * durationInHours)
+			mtdPodMemoryLimit as math(podMemoryLimit * durationInHours)
 			podCpuCost as math(mtdPodCPU * ` + defaultCPUCostPerCPUPerHour + `)
 			podMemoryCost as math(mtdPodMemory * ` + defaultMemCostPerGBPerHour + `)
 			podStorageCost as math(mtdPvcStorage * ` + defaultStorageCostPerGBPerHour + `)

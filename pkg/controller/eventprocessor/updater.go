@@ -20,6 +20,7 @@ package eventprocessor
 import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/vmware/purser/pkg/controller/discovery/processor"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -66,6 +67,7 @@ func UpdateGroup(group *groups_v1.Group) {
 		StorageCost: groupMetrics.CostStorage,
 		TotalCost:   groupMetrics.CostCPU + groupMetrics.CostMemory + groupMetrics.CostStorage,
 	}
+	group.Spec.LastUpdated = time.Now().Format(time.RFC3339)
 	log.Debugf("Updated group spec: (%v)", group.Spec)
 	log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
 }
