@@ -22,16 +22,29 @@
                 <div *ngIf="CAPA_STATUS === 'READY'">
                     <div class="metricDiv">
                         <div class="selectDiv">
-                            <clr-radio-container clrInline class="selectOptions">
-                                <div>
-                                    <label>Select Metric</label>
-                                </div>
-                                <clr-radio-wrapper *ngFor="let item of metricOptions" class="radioWrapper">
-                                    <input type="radio" clrRadio name="options" required value="{{item.value}}" [(ngModel)]="selectedMetric" (ngModelChange)="metricChange($event)"
-                                    />
-                                    <label class="radioLabel">{{item.displayValue}}</label>
-                                </clr-radio-wrapper>
-                            </clr-radio-container>
+                            <div class="selectMetricDiv">
+                                <clr-radio-container clrInline class="selectOptions">
+                                    <div>
+                                        <label>Select Metric</label>
+                                    </div>
+                                    <clr-radio-wrapper *ngFor="let item of metricOptions" class="radioWrapper">
+                                        <input type="radio" clrRadio name="options" required value="{{item.value}}" [(ngModel)]="selectedMetric" (ngModelChange)="metricChange($event)"
+                                        />
+                                        <label class="radioLabel">{{item.displayValue}}</label>
+                                    </clr-radio-wrapper>
+                                </clr-radio-container>
+                            </div>
+                            <div class="selectDropdownDiv">
+                                <clr-select-container>
+                                    <div>
+                                        <label>Filter</label>
+                                    </div>
+                                    <select clrSelect name="filerItems" [(ngModel)]="selectedFilterItem" (ngModelChange)="filterItemChange($event)">
+                                        <option value="select">--Select--</option>
+                                        <option *ngFor="let item of filterItems">{{item}}</option>
+                                    </select>
+                                </clr-select-container>
+                            </div>
                         </div>
                         <div class="rootDataDiv">
                             <table class="table">
