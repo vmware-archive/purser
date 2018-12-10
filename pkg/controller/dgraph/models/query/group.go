@@ -63,9 +63,9 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			mtdPodCPU as math(podCpu * durationInHours)
 			mtdPodMemory as math(podMemory * durationInHours)
 			mtdPvcStorage as math(pvcStorage * durationInHours)
-			podCpuCost as math(mtdCPU * ` + defaultCPUCostPerCPUPerHour + `)
-			podMemoryCost as math(mtdMemory * ` + defaultMemCostPerGBPerHour + `)
-			podStorageCost as math(mtdStorage * ` + defaultStorageCostPerGBPerHour + `)
+			podCpuCost as math(mtdPodCPU * ` + defaultCPUCostPerCPUPerHour + `)
+			podMemoryCost as math(mtdPodMemory * ` + defaultMemCostPerGBPerHour + `)
+			podStorageCost as math(mtdPvcStorage * ` + defaultStorageCostPerGBPerHour + `)
 		}
 		
 		group() {
