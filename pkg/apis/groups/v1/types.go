@@ -19,6 +19,7 @@ package v1
 
 import (
 	"github.com/vmware/purser/pkg/controller/metrics"
+	"time"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -48,7 +49,7 @@ type GroupSpec struct {
 	PITMetrics         *GroupMetrics                  `json:"pitMetrics,omitempty"`
 	MTDMetrics         *GroupMetrics                  `json:"mtdMetrics,omitempty"`
 	MTDCost            *Cost                          `json:"mtdCost,omitempty"`
-	LastUpdated        string                         `json:"lastUpdated,omitempty"`
+	LastUpdated        time.Time                      `json:"lastUpdated,omitempty"`
 }
 
 // GroupMetrics ...

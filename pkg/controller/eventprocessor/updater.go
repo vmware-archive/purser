@@ -67,11 +67,11 @@ func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupCl
 		StorageCost: groupMetrics.CostStorage,
 		TotalCost:   groupMetrics.CostCPU + groupMetrics.CostMemory + groupMetrics.CostStorage,
 	}
-	group.Spec.LastUpdated = time.Now().Format(time.RFC3339)
+	group.Spec.LastUpdated = time.Now()
 	_, err := groupCRDClient.Update(group)
 	if err != nil {
 		log.Errorf("unable to update group: (%s), error: (%v)", group.Name, err)
-	}else {
+	} else {
 		log.Debugf("Updated group spec: (%v)", group.Spec)
 		log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
 	}

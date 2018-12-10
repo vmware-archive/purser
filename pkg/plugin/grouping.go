@@ -19,6 +19,7 @@ package plugin
 
 import (
 	"fmt"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -72,5 +73,6 @@ func PrintGroup(group *groups_v1.Group) {
 	}
 
 	fmt.Println()
-	fmt.Printf("Last updated timestamp(format RFC3339): %s", group.Spec.LastUpdated)
+	fmt.Printf("Last updated %s minutes ago", time.Since(group.Spec.LastUpdated).Minutes())
+	fmt.Println()
 }
