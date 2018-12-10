@@ -26,22 +26,26 @@ import (
 
 // GroupMetrics structure
 type GroupMetrics struct {
-	PITCpu      float64
-	PITMemory   float64
-	PITStorage  float64
-	MTDCpu      float64
-	MTDMemory   float64
-	MTDStorage  float64
-	CostCPU     float64
-	CostMemory  float64
-	CostStorage float64
+	PITCpu         float64
+	PITMemory      float64
+	PITStorage     float64
+	PITCpuLimit    float64
+	PITMemoryLimit float64
+	MTDCpu         float64
+	MTDMemory      float64
+	MTDStorage     float64
+	MTDCpuLimit    float64
+	MTDMemoryLimit float64
+	CostCPU        float64
+	CostMemory     float64
+	CostStorage    float64
 }
 
 // RetrieveGroupMetricsFromPodUIDs ...
 func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
-		var(func: uid(` + podsUIDs +`)) {
+		var(func: uid(` + podsUIDs + `)) {
 			podCpu as cpuRequest
 			podMemory as memoryRequest
 			pvcStorage as storageRequest
@@ -73,9 +77,13 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			pitCPU: sum(val(pitPodCPU))
 			pitMemory: sum(val(pitPodMemory))
 			pitStorage: sum(val(pitPvcStorage))
+			pitCPULimit: sum(val(pitPodCPULimit))
+			pitMemoryLimit: sum(val(pitPodMemoryLimit))
 			mtdCPU: sum(val(mtdPodCPU))
 			mtdMemory: sum(val(mtdPodMemory))
 			mtdStorage: sum(val(mtdPvcStorage))
+			mtdCPULimit: sum(val(mtdPodCPULimit))
+			mtdMemoryLimit: sum(val(mtdPodMemoryLimit))
 			cpuCost: sum(val(podCpuCost))
 			memoryCost: sum(val(podMemoryCost))
 			storageCost: sum(val(podStorageCost))
@@ -105,6 +113,7 @@ func convertToGroupMetrics(jsonMetrics []map[string]float64) GroupMetrics {
 	return groupMetrics
 }
 
+// nolint: gocyclo
 func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
 	logrus.Debugf("key: %s", key)
 	switch key {
@@ -114,12 +123,20 @@ func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
 		groupMetrics.PITMemory = value
 	case "pitStorage":
 		groupMetrics.PITStorage = value
+	case "pitCPULimit":
+		groupMetrics.PITCpuLimit = value
+	case "pitMemoryLimit":
+		groupMetrics.PITMemoryLimit = value
 	case "mtdCPU":
 		groupMetrics.MTDCpu = value
 	case "mtdMemory":
 		groupMetrics.MTDMemory = value
 	case "mtdStorage":
 		groupMetrics.MTDStorage = value
+	case "mtdCPULimit":
+		groupMetrics.MTDCpuLimit = value
+	case "mtdMemoryLimit":
+		groupMetrics.MTDMemoryLimit = value
 	case "cpuCost":
 		groupMetrics.CostCPU = value
 	case "memoryCost":
