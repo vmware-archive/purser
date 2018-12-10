@@ -46,7 +46,7 @@ type Metrics struct {
 func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	query := `query {
-		var(func: uid(podsUIDs)) {
+		var(func: uid(` + podsUIDs +`)) {
 			podCpu as cpuRequest
 			podMemory as memoryRequest
 			pvcStorage as storageRequest
