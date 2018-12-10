@@ -41,19 +41,14 @@ type Group struct {
 
 // GroupSpec is the spec for the Group resource
 type GroupSpec struct {
-	Name               string                 `json:"name"`
-	Type               string                 `json:"type,omitempty"`
-	Expressions        map[string]Selector    `json:"labels,omitempty"`
-	AllocatedResources *GroupMetrics          `json:"metrics,omitempty"`
-	PITMetrics         *GroupMetrics          `json:"pitMetrics,omitempty"`
-	MTDMetrics         *GroupMetrics          `json:"mtdMetrics,omitempty"`
-	MTDCost            *Cost                  `json:"mtdCost,omitempty"`
-	PodsDetails        map[string]*PodDetails `json:"podDetails,omitempty"`
-}
-
-// Selector is map[string]string
-type Selector struct {
-	Labels map[string][]string
+	Name               string                         `json:"name"`
+	Type               string                         `json:"type,omitempty"`
+	Expressions        map[string]map[string][]string `json:"labels,omitempty"`
+	AllocatedResources *GroupMetrics                  `json:"metrics,omitempty"`
+	PITMetrics         *GroupMetrics                  `json:"pitMetrics,omitempty"`
+	MTDMetrics         *GroupMetrics                  `json:"mtdMetrics,omitempty"`
+	MTDCost            *Cost                          `json:"mtdCost,omitempty"`
+	PodsDetails        map[string]*PodDetails         `json:"podDetails,omitempty"`
 }
 
 // GroupMetrics ...

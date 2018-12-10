@@ -120,6 +120,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 		containers, metrics := StoreAndRetrieveContainersAndMetrics(k8sPod, uid, namespaceUID)
 		pod = Pod{
 			ID:            dgraph.ID{Xid: xid, UID: uid},
+			Name:          "pod-" + k8sPod.Name,
 			Containers:    containers,
 			CPURequest:    metrics.CPURequest,
 			CPULimit:      metrics.CPULimit,

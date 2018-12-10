@@ -98,10 +98,10 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 // for each label-expression retrieve UIDs of pods that satisfy the label-expression
 // appends results from each expression and returns the array of such results i.e,
 // [[pod1-from-exp1, pod2-from-exp1], [pod1-from-exp2], [pod1-from-exp3, pod2-from-exp3, pod3-from-exp3]]
-func getPodUIDsFromAllExpressions(expressions map[string]groups_v1.Selector) [][]string {
+func getPodUIDsFromAllExpressions(expressions map[string]map[string][]string) [][]string {
 	var podsUIDsFromExpressions [][]string
 	for _, selector := range expressions {
-		podsUIDsFromSelector, err := query.RetrievePodsUIDsByLabelsFilter(selector.Labels)
+		podsUIDsFromSelector, err := query.RetrievePodsUIDsByLabelsFilter(selector)
 		if err == nil {
 			podsUIDsFromExpressions = append(podsUIDsFromExpressions, podsUIDsFromSelector)
 		}
