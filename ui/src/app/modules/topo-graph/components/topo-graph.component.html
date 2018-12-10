@@ -6,6 +6,15 @@
                     <div class="card-title">
                         <span class="headerText">Hierarchy</span>
                     </div>
+                    <div class="filterDiv">
+                        <clr-select-container>
+                            <label>Filter</label>
+                            <select clrSelect name="filerItems" [(ngModel)]="selectedFilterItem" (ngModelChange)="filterItemChange($event)">
+                                <option value="select">--Select--</option>
+                                <option *ngFor="let item of filterItems">{{item}}</option>
+                            </select>
+                        </clr-select-container>
+                    </div>
                     <div class="toggleDiv">
                         <div class="form-group">
                             <label class="viewSwitchLeftLabel" for="formGroupExampleInput">Logical View</label>

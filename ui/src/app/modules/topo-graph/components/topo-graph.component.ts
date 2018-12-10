@@ -72,6 +72,8 @@ export class TopoGraphComponent implements OnInit {
             color: 'goldenrod'
         }
     ];
+    public filterItems: any = [];
+    public selectedFilterItem: string = 'select';
 
     //PRIVATE
     private orgTopoData: any = {};
@@ -139,11 +141,17 @@ export class TopoGraphComponent implements OnInit {
         }
     }*/
 
+    private collectFilterItems(item) {
+        this.filterItems.push(item.name);
+    }
+
     private constructData(topoData) {
         let data = JSON.parse(JSON.stringify(topoData));
         for (let key in data) {
             if (this.keysToConsider.indexOf(key) > -1) {
+                this.filterItems = [];
                 for (let item of data[key]) {
+                    this.collectFilterItems(item);
                     this.pushToGraphData(item, data);
                     /*for (let subKey in item) {
                         if (this.keysToConsider.indexOf(subKey) > -1) {
@@ -179,6 +187,7 @@ export class TopoGraphComponent implements OnInit {
     }
 
     private getAdditionalData(item) {
+        this.selectedFilterItem = 'select';
         if (item && item[0] && item[0].v && item[0].t) {
             let name = item[0].v;
             let type = item[0].t;
@@ -197,6 +206,18 @@ export class TopoGraphComponent implements OnInit {
             return;
         }
 
+    }
+
+    public filterItemChange(evt) {
+        for (let item of this.graphData) {
+            for (let subItem of item) {
+                if (subItem && subItem.v && subItem.v === this.selectedFilterItem) {
+                    this.uniqNames = [];
+                    this.graphData = [];
+                    this.getAdditionalData(item);
+                }
+            }
+        }
     }
 
     public reset() {

@@ -42,6 +42,8 @@ export class CapactiyGraphComponent implements OnInit {
     ];
     public physicalView: boolean = false;
     public rootItem: any = {};
+    public filterItems: any = [];
+    public selectedFilterItem: string = 'select';
 
     //PRIVATE
     private orgCapaData: any = {};
@@ -98,14 +100,21 @@ export class CapactiyGraphComponent implements OnInit {
         }
     }
 
+    private collectFilterItems(item) {
+        this.filterItems.push(item.name);
+    }
+
     private constructData(capaData) {
+        this.selectedFilterItem = 'select';
         this.graphData = [];
         this.uniqNames = [];
         this.constructRoot(capaData);
         let data = JSON.parse(JSON.stringify(capaData));
         for (let key in data) {
             if (this.keysToConsider.indexOf(key) > -1) {
+                this.filterItems = [];
                 for (let item of data[key]) {
+                    this.collectFilterItems(item);
                     this.pushToGraphData(item, data);
                 }
             }
@@ -144,6 +153,16 @@ export class CapactiyGraphComponent implements OnInit {
             });
         } else {
             return;
+        }
+    }
+
+    public filterItemChange(evt) {
+        for (let item of this.graphData) {
+            for (let subItem of item) {
+                if (subItem && subItem.v && subItem.v === this.selectedFilterItem) {
+                    this.getAdditionalData(item);
+                }
+            }
         }
     }
 
