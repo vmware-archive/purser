@@ -60,9 +60,9 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			pitPodCPU as math(cond(isTerminated == 0, 0.0, podCpu))
 			pitPodMemory as math(cond(isTerminated == 0, 0.0, podMemory))
 			pitPvcStorage as math(cond(isTerminated == 0, 0.0, pvcStorage))
-			mtdPodCPU as podCpu * durationInHours
-			mtdPodMemory as podMemory * durationInHours
-			mtdPvcStorage as pvcStorage * durationInHours
+			mtdPodCPU as math(podCpu * durationInHours)
+			mtdPodMemory as math(podMemory * durationInHours)
+			mtdPvcStorage as math(pvcStorage * durationInHours)
 			podCpuCost as math(mtdCPU * ` + defaultCPUCostPerCPUPerHour + `)
 			podMemoryCost as math(mtdMemory * ` + defaultMemCostPerGBPerHour + `)
 			podStorageCost as math(mtdStorage * ` + defaultStorageCostPerGBPerHour + `)

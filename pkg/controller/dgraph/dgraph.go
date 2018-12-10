@@ -147,8 +147,9 @@ func ExecuteQueryRaw(query string) ([]byte, error) {
 	resp, err := client.NewTxn().Query(ctx, query)
 	if err != nil {
 		log.Error(err)
+		return nil, err
 	}
-	return resp.Json, err
+	return resp.Json, nil
 }
 
 // ExecuteQuery given a query and it fetches and writes result into interface
