@@ -39,12 +39,12 @@ func UpdateGroups(groupCRDClient *groupsClient_v1.GroupClient) {
 	}
 	log.Debugf("Retrieved groups of length: %d", len(groups.Items))
 	for _, group := range groups.Items {
-		UpdateGroup(group)
+		UpdateGroup(group, groupCRDClient)
 	}
 }
 
 // UpdateGroup given a group it updates its spec with metrics
-func UpdateGroup(group *groups_v1.Group) {
+func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupClient) {
 	if group == nil {
 		log.Warn("Received empty group to update")
 		return
@@ -68,8 +68,13 @@ func UpdateGroup(group *groups_v1.Group) {
 		TotalCost:   groupMetrics.CostCPU + groupMetrics.CostMemory + groupMetrics.CostStorage,
 	}
 	group.Spec.LastUpdated = time.Now().Format(time.RFC3339)
-	log.Debugf("Updated group spec: (%v)", group.Spec)
-	log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
+	_, err := groupCRDClient.Update(group)
+	if err != nil {
+		log.Errorf("unable to update group: (%s), error: (%v)", group.Name, err)
+	}else {
+		log.Debugf("Updated group spec: (%v)", group.Spec)
+		log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
+	}
 }
 
 func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {

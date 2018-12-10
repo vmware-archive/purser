@@ -187,7 +187,7 @@ func ProcessPayloads(payloads []*interface{}, conf *controller.Config) {
 				if err != nil {
 					log.Errorf("Unable to get group from client: (%v)", err)
 				}
-				UpdateGroup(group)
+				UpdateGroup(group, conf.Groupcrdclient)
 			}
 		} else if payload.ResourceType == "Subscriber" {
 			subscriberCRD := subcriber_v1.Subscriber{}

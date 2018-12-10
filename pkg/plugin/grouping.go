@@ -31,6 +31,7 @@ func GetGroupByName(groupClient *groups.GroupClient, groupName string) *groups_v
 	group, err := groupClient.Get(groupName)
 	if err != nil {
 		log.Errorf("failed to get custom group by name %s, %v", groupName, err)
+		return nil
 	}
 	return group
 }
@@ -43,25 +44,32 @@ func PrintGroup(group *groups_v1.Group) {
 
 	fmt.Printf("%-30s             %s\n", "Group Name:", group.Name)
 	fmt.Println()
-	fmt.Println("Point in Time Resource Stats:")
-	fmt.Printf("             %-30s%.2f\n", "CPU Limit(vCPU):", pitGroupMetrics.CPULimit)
-	fmt.Printf("             %-30s%.2f\n", "Memory Limit(GB):", pitGroupMetrics.MemoryLimit)
-	fmt.Printf("             %-30s%.2f\n", "CPU Request(vCPU):", pitGroupMetrics.CPURequest)
-	fmt.Printf("             %-30s%.2f\n", "Memory Request(GB):", pitGroupMetrics.MemoryRequest)
-	fmt.Printf("             %-30s%.2f\n", "Storage Claimed(GB):", pitGroupMetrics.StorageClaim)
 
-	fmt.Println()
-	fmt.Printf("%-30s\n", "Month to Date Active Resource Stats:")
-	fmt.Printf("             %-30s%.2f\n", "CPU Request(vCPU-hours):", mtdGroupMetrics.CPURequest)
-	fmt.Printf("             %-30s%.2f\n", "Memory Request(GB-hours):", mtdGroupMetrics.MemoryRequest)
-	fmt.Printf("             %-30s%.2f\n", "Storage Claimed(GB-hours):", mtdGroupMetrics.StorageClaim)
+	if pitGroupMetrics != nil {
+		fmt.Println("Point in Time Resource Stats:")
+		fmt.Printf("             %-30s%.2f\n", "CPU Limit(vCPU):", pitGroupMetrics.CPULimit)
+		fmt.Printf("             %-30s%.2f\n", "Memory Limit(GB):", pitGroupMetrics.MemoryLimit)
+		fmt.Printf("             %-30s%.2f\n", "CPU Request(vCPU):", pitGroupMetrics.CPURequest)
+		fmt.Printf("             %-30s%.2f\n", "Memory Request(GB):", pitGroupMetrics.MemoryRequest)
+		fmt.Printf("             %-30s%.2f\n", "Storage Claimed(GB):", pitGroupMetrics.StorageClaim)
+	}
 
-	fmt.Println()
-	fmt.Printf("%-30s\n", "Month to Date Cost Stats:")
-	fmt.Printf("             %-30s%.2f\n", "CPU Cost($):", cost.CPUCost)
-	fmt.Printf("             %-30s%.2f\n", "Memory Cost($):", cost.MemoryCost)
-	fmt.Printf("             %-30s%.2f\n", "Storage Cost($):", cost.StorageCost)
-	fmt.Printf("             %-30s%.2f\n", "Total Cost($):", cost.TotalCost)
+	if mtdGroupMetrics != nil {
+		fmt.Println()
+		fmt.Printf("%-30s\n", "Month to Date Active Resource Stats:")
+		fmt.Printf("             %-30s%.2f\n", "CPU Request(vCPU-hours):", mtdGroupMetrics.CPURequest)
+		fmt.Printf("             %-30s%.2f\n", "Memory Request(GB-hours):", mtdGroupMetrics.MemoryRequest)
+		fmt.Printf("             %-30s%.2f\n", "Storage Claimed(GB-hours):", mtdGroupMetrics.StorageClaim)
+	}
+
+	if cost != nil {
+		fmt.Println()
+		fmt.Printf("%-30s\n", "Month to Date Cost Stats:")
+		fmt.Printf("             %-30s%.2f\n", "CPU Cost($):", cost.CPUCost)
+		fmt.Printf("             %-30s%.2f\n", "Memory Cost($):", cost.MemoryCost)
+		fmt.Printf("             %-30s%.2f\n", "Storage Cost($):", cost.StorageCost)
+		fmt.Printf("             %-30s%.2f\n", "Total Cost($):", cost.TotalCost)
+	}
 
 	fmt.Println()
 	fmt.Printf("Last updated timestamp(format RFC3339): %s", group.Spec.LastUpdated)
