@@ -51,6 +51,11 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			pvcStorage as storageRequest
 			podCpuLimit as cpuLimit
 			podMemoryLimit as memoryLimit
+			cpuRequestCount as count(cpuRequest)
+			memoryRequestCount as count(memoryRequest)
+			storageRequestCount as count(storageRequest)
+			cpuLimitCount as count(cpuLimit)
+			memoryLimitCount as count(memoryLimit)
 			st as startTime
 			stSeconds as math(since(st))
 			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
@@ -58,11 +63,11 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			pitPodCPU as math(cond(isTerminated == 0, podCpu, 0.0))
-			pitPodMemory as math(cond(isTerminated == 0, podMemory, 0.0))
-			pitPvcStorage as math(cond(isTerminated == 0, pvcStorage, 0.0))
-			pitPodCPULimit as math(cond(isTerminated == 0, podCpuLimit, 0.0))
-			pitPodMemoryLimit as math(cond(isTerminated == 0, podMemoryLimit, 0.0))
+			pitPodCPU as math(cond(isTerminated == 0, cond(cpuRequestCount > 0, podCpu, 0.0), 0.0))
+			pitPodMemory as math(cond(isTerminated == 0, cond(memoryRequestCount > 0, podMemory, 0.0), 0.0))
+			pitPvcStorage as math(cond(isTerminated == 0, cond(storageRequestCount > 0, pvcStorage, 0.0), 0.0))
+			pitPodCPULimit as math(cond(isTerminated == 0, cond(cpuLimitCount > 0, podCpuLimit, 0.0), 0.0))
+			pitPodMemoryLimit as math(cond(isTerminated == 0, cond(memoryLimitCount > 0, podMemoryLimit, 0.0), 0.0))
 			mtdPodCPU as math(podCpu * durationInHours)
 			mtdPodMemory as math(podMemory * durationInHours)
 			mtdPvcStorage as math(pvcStorage * durationInHours)
