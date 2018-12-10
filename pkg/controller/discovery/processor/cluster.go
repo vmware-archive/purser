@@ -48,15 +48,6 @@ func RetrieveServiceList(client *kubernetes.Clientset, options metav1.ListOption
 	return services
 }
 
-// RetrieveSubscriberList returns list of subscribers in the given namespace.
-func RetrieveSubscriberList(subscriberClient *subscriber.SubscriberClient, options metav1.ListOptions) *subscriberv1.SubscriberList {
-	subscribers, err := subscriberClient.List(options)
-	if err != nil {
-		log.Errorf("failed to retrieve subscriber list: %v ", err)
-	}
-	return subscribers
-}
-
 // RetrieveGroupList returns list of group CRDs in the given namespace.
 func RetrieveGroupList(groupClient *groups.GroupClient, options metav1.ListOptions) *groupsv1.GroupList {
 	groups, err := groupClient.List(options)

@@ -19,6 +19,7 @@ package eventprocessor
 
 import (
 	"encoding/json"
+	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -52,8 +53,12 @@ func ProcessEvents(conf *controller.Config) {
 
 			PersistPayloads(data)
 
-			subscribers := processor.RetrieveSubscriberList(conf.Subscriberclient, meta_v1.ListOptions{})
-			notifySubscribers(data, subscribers)
+			subscribers, err := query.RetrieveSubscribers()
+			if err == nil {
+				notifySubscribers(data, subscribers)
+			} else {
+				log.Errorf("unable to retrieve subscribers from dgraph: %v", err)
+			}
 
 			groups := processor.RetrieveGroupList(conf.Groupcrdclient, meta_v1.ListOptions{})
 			updateCustomGroups(data, groups)

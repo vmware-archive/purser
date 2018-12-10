@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"net/http"
 	"time"
 
@@ -37,7 +38,7 @@ type notifier struct {
 	headers map[string]string
 }
 
-func notifySubscribers(payload []*interface{}, subscribers *subscriber_v1.SubscriberList) {
+func notifySubscribers(payload []*interface{}, subscribers []models.SubscriberCRD) {
 	notifiers := getNotifiers(subscribers)
 
 	for _, n := range notifiers {
@@ -94,10 +95,10 @@ func (n *notifier) setReqHeaders(r *http.Request) {
 	}
 }
 
-func getNotifiers(subscribers *subscriber_v1.SubscriberList) []*notifier {
+func getNotifiers(subscribers []models.SubscriberCRD) []*notifier {
 	var notifiers []*notifier
-	if len(subscribers.Items) > 0 {
-		for _, sub := range subscribers.Items {
+	if len(subscribers) > 0 {
+		for _, sub := range subscribers {
 			notifier := &notifier{
 				url:     sub.Spec.URL,
 				headers: sub.Spec.Headers,
