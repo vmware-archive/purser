@@ -21,9 +21,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	groupsv1 "github.com/vmware/purser/pkg/apis/groups/v1"
-	subscriberv1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	groups "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
-	subscriber "github.com/vmware/purser/pkg/client/clientset/typed/subscriber/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

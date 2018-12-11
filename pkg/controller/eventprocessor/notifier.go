@@ -26,7 +26,6 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	subscriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller"
 )
 

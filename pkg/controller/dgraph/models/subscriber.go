@@ -56,9 +56,9 @@ func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberC
 		ID:           dgraph.ID{Xid: "subscriber-" + subscriber.Name},
 		StartTime:    subscriber.GetCreationTimestamp().Time.Format(time.RFC3339),
 		Spec: SubscriberSpec{
-			Name: subscriber.Spec.Name,
+			Name:    subscriber.Spec.Name,
 			Headers: subscriber.Spec.Headers,
-			URL: subscriber.Spec.URL,
+			URL:     subscriber.Spec.URL,
 		},
 	}
 
