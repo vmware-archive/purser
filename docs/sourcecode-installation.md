@@ -1,8 +1,8 @@
 # Installation Through Source Code
 
 - [Prerequisites](#prerequisites)
-- [Server Side Installation (Controller Installation)](#server_side_installation)
-- [Client Side Installation (Plugin Installation)](#client_side_installation)
+- [Server Side Installation (Controller Installation)](#server-side-installation-controller-installation)
+- [Client Side Installation (Plugin Installation)](#client-side-installation-plugin-installation)
 
 ## Prerequisites
 
