@@ -80,7 +80,7 @@ make push
 - Install the controller in the cluster using `kubectl`.
 
   ``` bash
-  kubectl create -f purser-controller-setup.yaml`
+  kubectl create -f purser-controller-setup.yaml
   ```
 
   _Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._

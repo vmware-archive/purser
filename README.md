@@ -155,4 +155,4 @@ Additional documentation can be found below:
 
 **Issues:** Have an issue with Purser, please [log it](https://github.com/vmware/purser/issues).
 
-**Contributing:** Would you like to contribute to our project, refer [How to contribute](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md) docs.
+**Contributing:** Would you like to contribute to our project, refer [How to contribute](./CONTRIBUTING.md), [Developers Guide](./docs/developers-guide.md) and [Code of Conduct](./CODE_OF_CONDUCT.md) docs.

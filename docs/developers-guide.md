@@ -149,3 +149,7 @@ To create purser plugin binary `purser_plugin` at path `$GOPATH/bin` run the fol
    ``` bash
    kubectl --kubeconfig=<absolute path to kubeconfig file> plugin purser help
    ```
+
+## Useful commands and links
+- To contribute to purser refer [CONTRIBUTING](../CONTRIBUTING.md) and [CODE_OF_CONDUCT](../CODE_OF_CONDUCT.md)
+- To drop complete dgraph database: `curl -X POST localhost:8080/alter -d '{"drop_all": true}'`
