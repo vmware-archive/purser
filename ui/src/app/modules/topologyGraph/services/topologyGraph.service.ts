@@ -7,9 +7,11 @@ export class TopologyGraphService {
 
     }
 
-    public getNodes(serviceName) {
+    public getNodes(serviceName, nodeType) {
+        console.log(nodeType)
         let _devUrl: string = './json/nodes.json';
-        let _url: string = 'http://localhost:3030/nodes';
+        let _url: string = 'http://localhost:3030/nodes/' + nodeType;
+
         if (serviceName && serviceName !== 'ALL') {
             _url = _url + '?service=' + serviceName;
         }
@@ -20,9 +22,11 @@ export class TopologyGraphService {
         });
     }
 
-    public getEdges(serviceName) {
+    public getEdges(serviceName, nodeType) {
+        console.log(nodeType)
         let _devUrl: string = './json/edges.json';
-        let _url: string = 'http://localhost:3030/edges';
+        let _url: string = 'http://localhost:3030/edges/' + nodeType;
+
         if (serviceName && serviceName !== 'ALL') {
             _url = _url + '?service=' + serviceName;
         }

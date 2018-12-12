@@ -8,7 +8,7 @@
     </clr-select-container>
     <div class="buttonDiv">
         <button type="button" (click)="reset()" class="btn btn-sm" *ngIf="enableClustering">Pod View</button>
-        <button type="button" (click)="clusterByCid()" class="btn btn-sm" *ngIf="!enableClustering">Cluster Pods by Services</button>
+        <button type="button" (click)="service()" class="btn btn-sm" *ngIf="!enableClustering">Cluster Pods by Services</button>
     </div>
 </div>
 <div class="descDiv" *ngIf="enableClustering">

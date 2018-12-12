@@ -76,9 +76,9 @@ export class TopologyGraphComponent implements OnInit {
         });
     }
 
-    private getNodes() {
+    private getNodes(nodeType) {
         this.serviceList = [];
-        let observableEntity: Observable<any> = this.topologyService.getNodes(this.serviceName);
+        let observableEntity: Observable<any> = this.topologyService.getNodes(this.serviceName, nodeType);
         this.NODE_STATUS = STATUS_WAIT;
         observableEntity.subscribe((response) => {
             if (!response) {
@@ -102,8 +102,8 @@ export class TopologyGraphComponent implements OnInit {
         });
     }
 
-    private getEdges() {
-        let observableEntity: Observable<any> = this.topologyService.getEdges(this.serviceName);
+    private getEdges(nodeType) {
+        let observableEntity: Observable<any> = this.topologyService.getEdges(this.serviceName, nodeType);
         this.EDGE_STATUS = STATUS_WAIT;
         observableEntity.subscribe((response) => {
             if (!response) {
@@ -178,10 +178,16 @@ export class TopologyGraphComponent implements OnInit {
     public reset() {
         this.serviceName = 'ALL';
         this.enableClustering = false;
-        this.reload();
+        this.reload('pod');
     }
 
-    public reload() {
+    public service() {
+        this.serviceName = 'ALL';
+        this.enableClustering = false;
+        this.reload('service');
+    }
+
+    public reload(nodeType) {
         this.clusterIndex = 0;
         this.clusters = [];
         this.lastClusterZoomLevel = 0;
@@ -217,17 +223,17 @@ export class TopologyGraphComponent implements OnInit {
             }
         };
         this.network = {};
-        this.loadApp();
+        this.loadApp(nodeType);
     }
 
-    private loadApp() {
-        this.getNodes();
-        this.getEdges();
+    private loadApp(nodeType) {
+        this.getNodes(nodeType);
+        this.getEdges(nodeType);
     }
 
     ngOnInit() {
         //this.getServiceList();
-        this.loadApp();
+        this.loadApp('pod');
     }
 
     public clusterByCid() {

@@ -198,13 +198,25 @@ var routes = Routes{
 	Route{
 		"GetPodDiscoveryNodes",
 		"GET",
-		"/nodes",
+		"/nodes/pod",
 		GetPodDiscoveryNodes,
 	},
 	Route{
 		"GetPodDiscoveryEdges",
 		"GET",
-		"/edges",
+		"/edges/pod",
+		GetPodDiscoveryEdges,
+	},
+	Route{
+		"GetPodDiscoveryNodes",
+		"GET",
+		"/nodes/service",
+		GetPodDiscoveryNodes,
+	},
+	Route{
+		"GetPodDiscoveryEdges",
+		"GET",
+		"/edges/service",
 		GetPodDiscoveryEdges,
 	},
 }
