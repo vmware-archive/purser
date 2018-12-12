@@ -18,8 +18,6 @@
 package generator
 
 import (
-	"strconv"
-
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
