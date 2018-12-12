@@ -8,7 +8,7 @@ export class TopologyGraphService {
     }
 
     public getNodes(serviceName, nodeType) {
-        console.log(nodeType)
+        // console.log(nodeType)
         let _devUrl: string = './json/nodes.json';
         let _url: string = 'http://localhost:3030/nodes/' + nodeType;
 
@@ -23,7 +23,7 @@ export class TopologyGraphService {
     }
 
     public getEdges(serviceName, nodeType) {
-        console.log(nodeType)
+        // console.log(nodeType)
         let _devUrl: string = './json/edges.json';
         let _url: string = 'http://localhost:3030/edges/' + nodeType;
 

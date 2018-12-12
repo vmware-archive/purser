@@ -50,29 +50,29 @@ type Edge struct {
 }
 
 var (
-	uniqueID int
-	nodes    *[]Node
-	edges    *[]Edge
+	podUniqueID int
+	podNodes    *[]Node
+	podEdges    *[]Edge
 )
 
-// GetGraphNodes returns graph-nodes for pod interactions
-func GetGraphNodes() []Node {
-	return *nodes
+// GetGraphPodNodes returns graph-nodes for pod interactions
+func GetGraphPodNodes() []Node {
+	return *podNodes
 }
 
-// GetGraphEdges returns graph-edges for pod interactions
-func GetGraphEdges() []Edge {
-	return *edges
+// GetGraphPodEdges returns graph-edges for pod interactions
+func GetGraphPodEdges() []Edge {
+	return *podEdges
 }
 
 // GeneratePodNodesAndEdges ...
 func GeneratePodNodesAndEdges(pods []models.Pod) {
-	uniqueID = 0
+	podUniqueID = 0
 	uniqueIDs, numConnections, inboundAndOutboundConnections := getPodUniqueIDsAndNumConnections(pods)
 	podNodes := createPodNodes(pods, uniqueIDs, numConnections, inboundAndOutboundConnections)
 	podEdges := createPodEdges(pods, uniqueIDs)
-	setGraphNodes(podNodes)
-	setGraphEdges(podEdges)
+	setPodGraphNodes(podNodes)
+	setPodGraphEdges(podEdges)
 }
 
 func getPodUniqueIDsAndNumConnections(pods []models.Pod) (map[string]int, map[string]int, map[string]int) {
@@ -87,8 +87,8 @@ func getPodUniqueIDsAndNumConnections(pods []models.Pod) (map[string]int, map[st
 
 func setPodUniqueIDsAndNumConnections(pod models.Pod, uniqueIDs, numConnections, inboundAndOutboundConnections map[string]int) {
 	if _, isPresent := uniqueIDs[pod.Name]; !isPresent {
-		uniqueID++
-		uniqueIDs[pod.Name] = uniqueID
+		podUniqueID++
+		uniqueIDs[pod.Name] = podUniqueID
 		numConnections[pod.Name] = 0
 		for _, dstPod := range pod.Pods {
 			numConnections[pod.Name] += int(dstPod.Count)
@@ -109,7 +109,7 @@ func createPodNodes(pods []models.Pod, uniqueIDs, numConnections, inboundAndOutb
 				for _, svc := range pod.Cid {
 					svcCid = append(svcCid, svc.Name)
 				}
-				newPodNode := createPodNode(pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name], svcCid)
+				newPodNode := createNode("pods", pod.Name, uniqueIDs[pod.Name], numConnections[pod.Name], svcCid)
 				nodes = append(nodes, newPodNode)
 			}
 		}
@@ -123,24 +123,24 @@ func createPodEdges(pods []models.Pod, uniqueIDs map[string]int) []Edge {
 		srcID := uniqueIDs[pod.Name]
 		for _, dstPod := range pod.Pods {
 			destID := uniqueIDs[dstPod.Name]
-			edges = append(edges, createPodEdge(srcID, destID, int(dstPod.Count)))
+			edges = append(edges, createEdge(srcID, destID, int(dstPod.Count)))
 		}
 	}
 	return edges
 }
 
-func createPodNode(podName string, podID int, podConnections int, cid []string) Node {
+func createNode(resourceType string, name string, id int, connections int, cid []string) Node {
 	return Node{
-		ID:    podID,
-		Label: podName,
-		Title: "pods",
-		Value: podConnections,
+		ID:    id,
+		Label: name,
+		Title: resourceType,
+		Value: connections,
 		Group: 1, // needed for UI, colors different group differently(not needed for our use case)
 		Cid:   cid,
 	}
 }
 
-func createPodEdge(fromID int, toID int, count int) Edge {
+func createEdge(fromID int, toID int, count int) Edge {
 	return Edge{
 		From:  fromID,
 		To:    toID,
@@ -148,10 +148,10 @@ func createPodEdge(fromID int, toID int, count int) Edge {
 	}
 }
 
-func setGraphNodes(podNodes []Node) {
-	nodes = &podNodes
+func setPodGraphNodes(nodes []Node) {
+	podNodes = &nodes
 }
 
-func setGraphEdges(podEdges []Edge) {
-	edges = &podEdges
+func setPodGraphEdges(edges []Edge) {
+	podEdges = &edges
 }

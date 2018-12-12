@@ -176,7 +176,7 @@ func Start(conf *Config) {
 			cache.Indexers{},
 		)
 
-		c := newResourceController(Kubeclient, informer, "Service")
+		c := newResourceController(Kubeclient, informer, "Services")
 		c.conf = conf
 		stopCh := make(chan struct{})
 		defer close(stopCh)

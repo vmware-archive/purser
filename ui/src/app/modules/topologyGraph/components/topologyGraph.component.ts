@@ -86,11 +86,13 @@ export class TopologyGraphComponent implements OnInit {
                 return;
             }
             this.nodes = response;
-            for (let item of this.nodes) {
-                if (item.cid && this.serviceList.indexOf(item.cid) === -1) {
-                    for (let cid of item.cid) {
-                        if (this.serviceList.indexOf(cid) === -1) {
-                            this.serviceList.push(cid);
+            if (nodeType == 'pod') {
+                for (let item of this.nodes) {
+                    if (item.cid && this.serviceList.indexOf(item.cid) === -1) {
+                        for (let cid of item.cid) {
+                            if (this.serviceList.indexOf(cid) === -1) {
+                                this.serviceList.push(cid);
+                            }
                         }
                     }
                 }
@@ -169,9 +171,6 @@ export class TopologyGraphComponent implements OnInit {
                     self.network.openCluster(params.nodes[0]);
                 }
             });
-            if (this.serviceName && this.enableClustering) {
-                this.clusterByCid();
-            }
         }
     }
 
@@ -183,7 +182,7 @@ export class TopologyGraphComponent implements OnInit {
 
     public service() {
         this.serviceName = 'ALL';
-        this.enableClustering = false;
+        this.enableClustering = true;
         this.reload('service');
     }
 

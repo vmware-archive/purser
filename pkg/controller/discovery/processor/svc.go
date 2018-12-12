@@ -41,7 +41,7 @@ func ProcessServiceInteractions(conf controller.Config) {
 	processServiceDetails(conf.Kubeclient, services)
 	linker.GenerateAndStoreSvcInteractions()
 
-	log.Infof("Successfully generated Service To Service mapping.")
+	log.Infof("Successfully generated Services To Services mapping.")
 }
 
 func processServiceDetails(client *kubernetes.Clientset, services *corev1.ServiceList) {
@@ -51,7 +51,7 @@ func processServiceDetails(client *kubernetes.Clientset, services *corev1.Servic
 	svcwg.Add(svcCount)
 	{
 		for index, svc := range services.Items {
-			log.Debugf("Processing Service (%d/%d): %s ", index+1, svcCount, svc.GetName())
+			log.Debugf("Processing Services (%d/%d): %s ", index+1, svcCount, svc.GetName())
 
 			go func(svc corev1.Service, index int) {
 				defer svcwg.Done()
@@ -65,7 +65,7 @@ func processServiceDetails(client *kubernetes.Clientset, services *corev1.Servic
 					linker.PopulatePodToServiceTable(svc, pods)
 				}
 
-				log.Debugf("Finished processing Service (%d/%d)", index+1, svcCount)
+				log.Debugf("Finished processing Services (%d/%d)", index+1, svcCount)
 			}(svc, index)
 		}
 	}

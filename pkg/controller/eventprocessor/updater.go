@@ -41,7 +41,7 @@ func updateCustomGroups(payloads []*interface{}, groups *groups_v1.GroupList) {
 			log.Errorf("error unmarshalling payload %s, %v", payload.Data, err)
 		}
 
-		log.Infof("Started updating user created groups for pod %s update.", pod.Name)
+		log.Debugf("Started updating user created groups for pod %s update.", pod.Name)
 
 		for _, group := range groups.Items {
 			if isPodBelongsToGroup(group, &pod) {

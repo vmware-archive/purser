@@ -411,32 +411,57 @@ func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
 	encodeAndWrite(w, jsonData)
 }
 
-// GetPodDiscoveryNodes listens on /discovery/pod/nodes endpoint
+// GetPodDiscoveryNodes listens on /nodes/pod endpoint
 func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
 	var pods []models.Pod
 	var err error
 
 	addHeaders(&w, r)
 	pods, err = query.RetrievePodsInteractionsForAllLivePodsWithCount()
-	generator.GeneratePodNodesAndEdges(pods)
 	if err != nil {
-		logrus.Errorf("Unable to get response: (%v)", err)
+		logrus.Errorf("Unable to get pods: (%v)", err)
 	}
-	err = json.NewEncoder(w).Encode(generator.GetGraphNodes())
+	generator.GeneratePodNodesAndEdges(pods)
+	err = json.NewEncoder(w).Encode(generator.GetGraphPodNodes())
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
 }
 
-// GetPodDiscoveryEdges listens on /discovery/pod/edges endpoint
+// GetPodDiscoveryEdges listens on /edges/pod endpoint
 func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
 	var err error
 	addHeaders(&w, r)
-	if err != nil {
-		logrus.Errorf("Unable to get response: (%v)", err)
-	}
 
-	err = json.NewEncoder(w).Encode(generator.GetGraphEdges())
+	err = json.NewEncoder(w).Encode(generator.GetGraphPodEdges())
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetServiceDiscoveryNodes listens on /nodes/service endpoint
+func GetServiceDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
+	var svcs []models.Service
+	var err error
+
+	addHeaders(&w, r)
+	svcs, err = query.RetrieveServicesInteractionsForAllLiveServices()
+	if err != nil {
+		logrus.Errorf("Unable to get services: (%v)", err)
+	}
+	generator.GenerateServiceNodesAndEdges(svcs)
+	err = json.NewEncoder(w).Encode(generator.GetGraphServiceNodes())
+	if err != nil {
+		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetServiceDiscoveryEdges listens on /edges/service endpoint
+func GetServiceDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
+	var err error
+	addHeaders(&w, r)
+
+	err = json.NewEncoder(w).Encode(generator.GetGraphServiceEdges())
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}

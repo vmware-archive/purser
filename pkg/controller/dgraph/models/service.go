@@ -32,7 +32,7 @@ const (
 	IsService = "isService"
 )
 
-// Service model structure in Dgraph
+// Services model structure in Dgraph
 type Service struct {
 	dgraph.ID
 	IsService bool       `json:"isService,omitempty"`
@@ -40,7 +40,7 @@ type Service struct {
 	StartTime string     `json:"startTime,omitempty"`
 	EndTime   string     `json:"endTime,omitempty"`
 	Pod       []*Pod     `json:"pod,omitempty"`
-	Interacts []*Service `json:"interacts,omitempty"`
+	Services  []*Service `json:"service,omitempty"`
 	Namespace *Namespace `json:"namespace,omitempty"`
 	Type      string     `json:"type,omitempty"`
 }
@@ -70,7 +70,7 @@ func StoreService(service api_v1.Service) error {
 		if err != nil {
 			return err
 		}
-		log.Infof("Service with xid: (%s) persisted in dgraph", xid)
+		log.Infof("Services with xid: (%s) persisted in dgraph", xid)
 		uid = assigned.Uids["blank-0"]
 	}
 
@@ -90,14 +90,14 @@ func StoreService(service api_v1.Service) error {
 func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs []string) error {
 	uid := dgraph.GetUID(sourceServiceXID, IsService)
 	if uid == "" {
-		log.Println("Source Service " + sourceServiceXID + " is not persisted yet.")
+		log.Println("Source Services " + sourceServiceXID + " is not persisted yet.")
 		return fmt.Errorf("source service: %s is not persisted yet", sourceServiceXID)
 	}
 
 	services := retrieveServicesFromServicesXIDs(destinationServicesXIDs)
 	source := Service{
-		ID:        dgraph.ID{UID: uid, Xid: sourceServiceXID},
-		Interacts: services,
+		ID:       dgraph.ID{UID: uid, Xid: sourceServiceXID},
+		Services: services,
 	}
 	_, err := dgraph.MutateNode(source, dgraph.UPDATE)
 	return err
@@ -115,7 +115,7 @@ func StorePodServiceEdges(svcXID string, podsXIDsInService []string) error {
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		return err
 	}
-	return fmt.Errorf("Service with xid: (%s) not in dgraph", svcXID)
+	return fmt.Errorf("Services with xid: (%s) not in dgraph", svcXID)
 }
 
 // RetrieveAllServices returns all pods in the dgraph

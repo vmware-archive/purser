@@ -80,7 +80,7 @@ func PersistPayloads(payloads []*interface{}) {
 			if err != nil {
 				log.Errorf("Error while persisting pod %v", err)
 			}
-		} else if payload.ResourceType == "Service" {
+		} else if payload.ResourceType == "Services" {
 			service := api_v1.Service{}
 			err := json.Unmarshal([]byte(payload.Data), &service)
 			if err != nil {
