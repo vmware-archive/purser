@@ -35,6 +35,7 @@ func RetrievePodList(client *kubernetes.Clientset, options metav1.ListOptions) *
 	pods, err := client.CoreV1().Pods(metav1.NamespaceAll).List(options)
 	if err != nil {
 		log.Errorf("failed to retrieve pods: %v", err)
+		return nil
 	}
 	return pods
 }
@@ -44,6 +45,7 @@ func RetrieveServiceList(client *kubernetes.Clientset, options metav1.ListOption
 	services, err := client.CoreV1().Services(metav1.NamespaceAll).List(options)
 	if err != nil {
 		log.Errorf("failed to retrieve services: %v", err)
+		return nil
 	}
 	return services
 }

@@ -19,6 +19,8 @@ package main
 
 import (
 	"flag"
+	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
+	"github.com/vmware/purser/pkg/controller/discovery/generator"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -84,4 +86,18 @@ func startInteractionsDiscovery() {
 func runDiscovery() {
 	processor.ProcessPodInteractions(conf)
 	processor.ProcessServiceInteractions(conf)
+
+	pods, err := query.RetrievePodsInteractionsForAllLivePodsWithCount()
+	if err == nil {
+		generator.GeneratePodNodesAndEdges(pods)
+	} else {
+		log.Errorf("Unable to retrieve pods: %v", err)
+	}
+
+	services, err := query.RetrieveServicesInteractionsForAllLiveServices()
+	if err == nil {
+		generator.GenerateServiceNodesAndEdges(services)
+	} else {
+		log.Errorf("Unable to retrieve svcs: %v", err)
+	}
 }

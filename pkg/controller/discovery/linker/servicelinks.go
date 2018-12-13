@@ -18,6 +18,7 @@
 package linker
 
 import (
+	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
@@ -52,9 +53,10 @@ func PopulatePodToServiceTable(svc corev1.Service, pods *corev1.PodList) {
 
 // GenerateAndStoreSvcInteractions parses through pod interactions and generates a source to // destination service interaction.
 func GenerateAndStoreSvcInteractions() {
-	services, err := models.RetrieveAllServicesWithDstPods()
+	services, err := query.RetrieveAllServicesWithDstPods()
 	if err != nil {
 		log.Errorf("failed to fetch services: %s\n", err)
+		return
 	}
 
 	for _, service := range services {

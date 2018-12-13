@@ -22,6 +22,32 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
+// RetrieveAllServicesWithDstPods returns all pods in the dgraph
+func RetrieveAllServicesWithDstPods() ([]models.Service, error) {
+	const q = `query {
+		services(func: has(isService)) {
+			name
+			pod {
+				name
+				pod {
+					name
+				}
+			}
+		}
+	}`
+
+	type root struct {
+		Services []models.Service `json:"services"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	return newRoot.Services, nil
+}
+
 // RetrieveServicesInteractionsForAllLiveServices returns all services in the dgraph
 func RetrieveServicesInteractionsForAllLiveServices() ([]models.Service, error) {
 	q := `query {

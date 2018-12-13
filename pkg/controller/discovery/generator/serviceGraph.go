@@ -30,11 +30,17 @@ var (
 
 // GetGraphServiceNodes returns graph-nodes for service interactions
 func GetGraphServiceNodes() []Node {
+	if svcNodes == nil {
+		return []Node{}
+	}
 	return *svcNodes
 }
 
 // GetGraphServiceEdges returns graph-edges for service interactions
 func GetGraphServiceEdges() []Edge {
+	if svcEdges == nil {
+		return []Edge{}
+	}
 	return *svcEdges
 }
 

@@ -155,7 +155,7 @@ func retrievePodsFromPodsXIDs(podsXIDs []string) []*Pod {
 	for _, podXID := range podsXIDs {
 		podUID := dgraph.GetUID(podXID, IsPod)
 		if podUID == "" {
-			log.Debugf("Pod uid is empty for pod xid: %s", podXID)
+			log.Debugf("Pod with xid: %s not persisted yet", podXID)
 			continue
 		}
 		pod := &Pod{

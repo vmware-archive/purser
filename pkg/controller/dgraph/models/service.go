@@ -90,7 +90,7 @@ func StoreService(service api_v1.Service) error {
 func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs []string) error {
 	uid := dgraph.GetUID(sourceServiceXID, IsService)
 	if uid == "" {
-		log.Println("Source Services " + sourceServiceXID + " is not persisted yet.")
+		log.Debugf("Source Service " + sourceServiceXID + " is not persisted yet.")
 		return fmt.Errorf("source service: %s is not persisted yet", sourceServiceXID)
 	}
 
@@ -118,84 +118,12 @@ func StorePodServiceEdges(svcXID string, podsXIDsInService []string) error {
 	return fmt.Errorf("Services with xid: (%s) not in dgraph", svcXID)
 }
 
-// RetrieveAllServices returns all pods in the dgraph
-func RetrieveAllServices() ([]Service, error) {
-	const q = `query {
-		service(func: has(isService)) {
-			name
-			interacts @facets {
-				name
-			}
-			pod {
-				name
-			}
-		}
-	}`
-
-	type root struct {
-		Services []Service `json:"service"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
-	if err != nil {
-		return nil, err
-	}
-
-	return newRoot.Services, nil
-}
-
-// RetrieveAllServicesWithDstPods returns all pods in the dgraph
-func RetrieveAllServicesWithDstPods() ([]Service, error) {
-	const q = `query {
-		services(func: has(isService)) {
-			xid
-			name
-			pod {
-				name
-				interacts @facets {
-					name
-				}
-			}
-		}
-	}`
-
-	type root struct {
-		Services []Service `json:"services"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
-	if err != nil {
-		return nil, err
-	}
-
-	return newRoot.Services, nil
-}
-
-// RetrieveServiceList ...
-func RetrieveServiceList() ([]Service, error) {
-	const q = `query {
-		serviceList(func: has(isService)) {
-			name
-		}
-	}`
-
-	type root struct {
-		ServiceList []Service `json:"serviceList"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
-	if err != nil {
-		return nil, err
-	}
-
-	return newRoot.ServiceList, nil
-}
-
 func retrieveServicesFromServicesXIDs(svcsXIDs []string) []*Service {
 	services := []*Service{}
 	for _, svcXID := range svcsXIDs {
 		svcUID := dgraph.GetUID(svcXID, IsService)
 		if svcUID == "" {
+			log.Debugf("dst svc with xid: (%s) not in dgraph", svcXID)
 			continue
 		}
 

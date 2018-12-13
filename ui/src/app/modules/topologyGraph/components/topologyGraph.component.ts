@@ -57,7 +57,6 @@ export class TopologyGraphComponent implements OnInit {
         }
     };
 
-
     network: any;
 
     constructor(private router: Router, private topologyService: TopologyGraphService) {
@@ -86,13 +85,11 @@ export class TopologyGraphComponent implements OnInit {
                 return;
             }
             this.nodes = response;
-            if (nodeType == 'pod') {
-                for (let item of this.nodes) {
-                    if (item.cid && this.serviceList.indexOf(item.cid) === -1) {
-                        for (let cid of item.cid) {
-                            if (this.serviceList.indexOf(cid) === -1) {
-                                this.serviceList.push(cid);
-                            }
+            for (let item of this.nodes) {
+                if (item.cid && this.serviceList.indexOf(item.cid) === -1) {
+                    for (let cid of item.cid) {
+                        if (this.serviceList.indexOf(cid) === -1) {
+                            this.serviceList.push(cid);
                         }
                     }
                 }
@@ -199,9 +196,13 @@ export class TopologyGraphComponent implements OnInit {
         this.NODE_STATUS = STATUS_WAIT;
         this.EDGE_STATUS = STATUS_WAIT;
         this.data = {};
+        let nodeShape: string = 'dot';
+        if (nodeType == 'service') {
+            nodeShape = 'star';
+        }
         this.options = {
             nodes: {
-                shape: 'dot',
+                shape: nodeShape,
                 size: 16
             },
             physics: {

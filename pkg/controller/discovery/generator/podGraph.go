@@ -57,11 +57,17 @@ var (
 
 // GetGraphPodNodes returns graph-nodes for pod interactions
 func GetGraphPodNodes() []Node {
+	if podNodes == nil {
+		return []Node{}
+	}
 	return *podNodes
 }
 
 // GetGraphPodEdges returns graph-edges for pod interactions
 func GetGraphPodEdges() []Edge {
+	if podEdges == nil {
+		return []Edge{}
+	}
 	return *podEdges
 }
 

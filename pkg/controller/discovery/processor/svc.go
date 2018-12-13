@@ -37,6 +37,10 @@ var svcwg sync.WaitGroup
 // generate a 1:1 mapping between the communicating services.
 func ProcessServiceInteractions(conf controller.Config) {
 	services := RetrieveServiceList(conf.Kubeclient, metav1.ListOptions{})
+	log.Debugf("service list retrieved: %v", services.Items)
+	if services == nil {
+		return
+	}
 
 	processServiceDetails(conf.Kubeclient, services)
 	linker.GenerateAndStoreSvcInteractions()
@@ -48,6 +52,7 @@ func processServiceDetails(client *kubernetes.Clientset, services *corev1.Servic
 	svcCount := len(services.Items)
 	log.Infof("Processing total of (%d) Services.", svcCount)
 
+	// TODO: restrict number of go routines, reason: decrease load on Kubernetes api server
 	svcwg.Add(svcCount)
 	{
 		for index, svc := range services.Items {
@@ -57,12 +62,16 @@ func processServiceDetails(client *kubernetes.Clientset, services *corev1.Servic
 				defer svcwg.Done()
 
 				selectorSet := labels.Set(svc.Spec.Selector)
+				log.Debugf("service: %s, selectorSet: (%v)", svc.Name, selectorSet)
 				if selectorSet != nil {
 					options := metav1.ListOptions{
 						LabelSelector: selectorSet.AsSelector().String(),
 					}
 					pods := RetrievePodList(client, options)
-					linker.PopulatePodToServiceTable(svc, pods)
+					if pods != nil {
+						log.Debugf("service: %s, podsCount: %d", svc.Name, len(pods.Items))
+						linker.PopulatePodToServiceTable(svc, pods)
+					}
 				}
 
 				log.Debugf("Finished processing Services (%d/%d)", index+1, svcCount)
