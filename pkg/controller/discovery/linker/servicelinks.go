@@ -18,6 +18,7 @@
 package linker
 
 import (
+	"fmt"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"sync"
 
@@ -47,7 +48,7 @@ func PopulatePodToServiceTable(svc corev1.Service, pods *corev1.PodList) {
 
 	err := models.StorePodServiceEdges(serviceKey, podsXIDsInService)
 	if err != nil {
-		log.Errorf("failed to store pod services edges: %s\n", err)
+		log.Errorf("failed to store pod services edges for service: (%s), error: %s\n", svc.Name, err)
 	}
 }
 
@@ -62,9 +63,10 @@ func GenerateAndStoreSvcInteractions() {
 	for _, service := range services {
 		destinationPods := getDestinationPods(service.Pod)
 		destinationServices := getServicesXIDsFromPods(destinationPods)
+		fmt.Printf("service: %v, xid: %s", service, service.Xid)
 		err = models.StoreServicesInteraction(service.Xid, destinationServices)
 		if err != nil {
-			log.Errorf("failed to store services interactions: %s\n", err)
+			log.Errorf("failed to store services interactions, error %s\n", err)
 		}
 	}
 }

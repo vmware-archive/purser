@@ -91,7 +91,7 @@ func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs [
 	uid := dgraph.GetUID(sourceServiceXID, IsService)
 	if uid == "" {
 		log.Debugf("Source Service " + sourceServiceXID + " is not persisted yet.")
-		return fmt.Errorf("source service: %s is not persisted yet", sourceServiceXID)
+		return fmt.Errorf("source service: (%s) is not persisted yet", sourceServiceXID)
 	}
 
 	services := retrieveServicesFromServicesXIDs(destinationServicesXIDs)
