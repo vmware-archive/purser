@@ -95,6 +95,7 @@ func StoreServicesInteraction(sourceServiceXID string, destinationServicesXIDs [
 	}
 
 	services := retrieveServicesFromServicesXIDs(destinationServicesXIDs)
+	log.Debugf("source service: %s, dstServicesCount: %d", sourceServiceXID, len(services))
 	source := Service{
 		ID:       dgraph.ID{UID: uid, Xid: sourceServiceXID},
 		Services: services,

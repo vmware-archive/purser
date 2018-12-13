@@ -37,10 +37,10 @@ var svcwg sync.WaitGroup
 // generate a 1:1 mapping between the communicating services.
 func ProcessServiceInteractions(conf controller.Config) {
 	services := RetrieveServiceList(conf.Kubeclient, metav1.ListOptions{})
-	log.Debugf("service list retrieved: %v", services.Items)
 	if services == nil {
 		return
 	}
+	log.Debugf("service list length retrieved: %d", len(services.Items))
 
 	processServiceDetails(conf.Kubeclient, services)
 	linker.GenerateAndStoreSvcInteractions()

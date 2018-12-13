@@ -63,7 +63,7 @@ func GenerateAndStoreSvcInteractions() {
 	for _, service := range services {
 		destinationPods := getDestinationPods(service.Pod)
 		destinationServices := getServicesXIDsFromPods(destinationPods)
-		fmt.Printf("service: %v, xid: %s", service, service.Xid)
+		log.Debugf("service: %d, dstPodsCount: %d, dstServices: %v", service.Name, len(destinationPods), destinationServices)
 		err = models.StoreServicesInteraction(service.Xid, destinationServices)
 		if err != nil {
 			log.Errorf("failed to store services interactions, error %s\n", err)
