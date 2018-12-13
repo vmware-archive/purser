@@ -26,6 +26,7 @@ import (
 func RetrieveAllServicesWithDstPods() ([]models.Service, error) {
 	const q = `query {
 		services(func: has(isService)) {
+			xid
 			name
 			pod {
 				name
