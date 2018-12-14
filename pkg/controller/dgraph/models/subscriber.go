@@ -18,6 +18,7 @@
 package models
 
 import (
+	"github.com/Sirupsen/logrus"
 	"time"
 
 	subscribers_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
@@ -32,11 +33,19 @@ const (
 // SubscriberCRD schema in dgraph
 type SubscriberCRD struct {
 	dgraph.ID
-	IsSubscriber bool   `json:"isSubscriber,omitempty"`
-	Name         string `json:"name,omitempty"`
-	StartTime    string `json:"startTime,omitempty"`
-	EndTime      string `json:"endTime,omitempty"`
-	Type         string `json:"type,omitempty"`
+	IsSubscriber bool           `json:"isSubscriber,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	StartTime    string         `json:"startTime,omitempty"`
+	EndTime      string         `json:"endTime,omitempty"`
+	Type         string         `json:"type,omitempty"`
+	Spec         SubscriberSpec `json:"spec"`
+}
+
+// SubscriberSpec definition details
+type SubscriberSpec struct {
+	Name    string            `json:"name"`
+	Headers map[string]string `json:"headers"`
+	URL     string            `json:"url"`
 }
 
 func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberCRD {
@@ -44,8 +53,13 @@ func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberC
 		Name:         subscriber.Name,
 		IsSubscriber: true,
 		Type:         subscribers_v1.SubscriberGroup,
-		ID:           dgraph.ID{Xid: subscriber.Name},
+		ID:           dgraph.ID{Xid: "subscriber-" + subscriber.Name},
 		StartTime:    subscriber.GetCreationTimestamp().Time.Format(time.RFC3339),
+		Spec: SubscriberSpec{
+			Name:    subscriber.Spec.Name,
+			Headers: subscriber.Spec.Headers,
+			URL:     subscriber.Spec.URL,
+		},
 	}
 
 	deletionTimestamp := subscriber.GetDeletionTimestamp()
@@ -57,16 +71,18 @@ func createSubscriberCRDObject(subscriber subscribers_v1.Subscriber) SubscriberC
 
 // StoreSubscriberCRD create a new subscriber CRD in the Dgraph and updates if already present.
 func StoreSubscriberCRD(subscriber subscribers_v1.Subscriber) (string, error) {
-	xid := subscriber.Name
+	xid := "subscriber-" + subscriber.Name
 	uid := dgraph.GetUID(xid, IsSubscriber)
 
-	newSubscriber := createSubscriberCRDObject(subscriber)
 	if uid != "" {
-		newSubscriber.UID = uid
+		return uid, nil
 	}
+
+	newSubscriber := createSubscriberCRDObject(subscriber)
 	assigned, err := dgraph.MutateNode(newSubscriber, dgraph.CREATE)
 	if err != nil {
 		return "", err
 	}
+	logrus.Infof("Subscriber: (%v) persisted in dgraph", subscriber.Name)
 	return assigned.Uids["blank-0"], nil
 }

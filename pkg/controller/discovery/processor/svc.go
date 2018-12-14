@@ -37,6 +37,10 @@ var svcwg sync.WaitGroup
 // generate a 1:1 mapping between the communicating services.
 func ProcessServiceInteractions(conf controller.Config) {
 	services := RetrieveServiceList(conf.Kubeclient, metav1.ListOptions{})
+	if services == nil {
+		log.Info("No services retrieved from cluster")
+		return
+	}
 
 	processServiceDetails(conf.Kubeclient, services)
 	linker.GenerateAndStoreSvcInteractions()
@@ -62,7 +66,9 @@ func processServiceDetails(client *kubernetes.Clientset, services *corev1.Servic
 						LabelSelector: selectorSet.AsSelector().String(),
 					}
 					pods := RetrievePodList(client, options)
-					linker.PopulatePodToServiceTable(svc, pods)
+					if pods != nil {
+						linker.PopulatePodToServiceTable(svc, pods)
+					}
 				}
 
 				log.Debugf("Finished processing Service (%d/%d)", index+1, svcCount)
