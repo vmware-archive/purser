@@ -166,10 +166,9 @@ func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 	return newRoot.Pods, nil
 }
 
-// RetrievePodsByLabelsFilter returns pods satisfying the filter conditions for labels (OR logic only)
-func RetrievePodsByLabelsFilter(labels map[string]string) ([]models.Pod, error) {
+// RetrievePodsUIDsByLabelsFilter returns pods satisfying the filter conditions for labels (OR logic only)
+func RetrievePodsUIDsByLabelsFilter(labels map[string][]string) ([]string, error) {
 	labelFilter := createFilterFromListOfLabels(labels)
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	q := `query {
 		var(func: has(isLabel)) @filter(` + labelFilter + `) {
             podUIDs as ~label @filter(has(isPod)) {
@@ -179,20 +178,6 @@ func RetrievePodsByLabelsFilter(labels map[string]string) ([]models.Pod, error) 
 		pods(func: uid(podUIDs)) {
 			uid
 			name
-			type
-			cpu: podCpu as cpuRequest
-			memory: podMemory as memoryRequest
-			storage: pvcStorage as storageRequest
-			st as startTime
-			stSeconds as math(since(st))
-			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-			et as endTime
-			isTerminated as count(endTime)
-			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			cpuCost: math(podCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(podMemory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(pvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	type root struct {
@@ -203,5 +188,17 @@ func RetrievePodsByLabelsFilter(labels map[string]string) ([]models.Pod, error) 
 	if err != nil {
 		return nil, err
 	}
-	return newRoot.Pods, nil
+	return removeDuplicates(newRoot.Pods), nil
+}
+
+func removeDuplicates(pods []models.Pod) []string {
+	duplicateChecker := make(map[string]bool)
+	var podsUIDs []string
+	for _, pod := range pods {
+		if _, isPresent := duplicateChecker[pod.UID]; !isPresent {
+			podsUIDs = append(podsUIDs, pod.UID)
+			duplicateChecker[pod.UID] = true
+		}
+	}
+	return podsUIDs
 }

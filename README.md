@@ -79,7 +79,7 @@ The following settings can be customized before Controller installation:
 - Change the default **log level**, **dgraph url** and **dgraph port** by editing `args` field in the [purser-controller-setup.yaml](./cluster/purser-controller-setup.yaml). (Default: `--log=info`, `--dgraphURL=purser-db`, `--dgraphPort=9080`)
 - Enable/Disable **resource interactions** capability by editing `args` field in the [purser-controller-setup.yaml](./cluster/purser-controller-setup.yaml) and uncommenting `pods/exec` rule from purser-permissions. (Default: `disabled`)
 - Enable **subscription to inventory changes** capability by creating an object of custom resource kind `Subscriber`. (Refer: [example-subscriber.yaml](./cluster/artifacts/example-subscriber.yaml))
-- Enable **customized logical grouping of resources** by creating an object of custom resource kind `Group`. (Refer: [example-group.yaml](./cluster/artifacts/example-group.yaml))
+- Enable **customized logical grouping of resources** by creating an object of custom resource kind `Group`. (Refer: [docs](docs/custom-group-installation-and-usage.md) for custom group installation and usage)
 
 #### Purser UI Setup
 Download the UI setup yaml file from [here](./cluster/purser-ui-setup.yaml).
@@ -116,7 +116,7 @@ For other installation methods such as **manual installation** or **installation
 
 ``` bash
 kubectl delete -f purser-controller-setup.yaml
-kubectl delete pvc datadir-dgraph-0
+kubectl delete pvc datadir-purser-dgraph-0
 ```
 
 ### Uninstalling Purser UI

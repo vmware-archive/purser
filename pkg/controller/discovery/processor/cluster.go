@@ -59,9 +59,10 @@ func RetrieveSubscriberList(subscriberClient *subscriber.SubscriberClient, optio
 
 // RetrieveGroupList returns list of group CRDs in the given namespace.
 func RetrieveGroupList(groupClient *groups.GroupClient, options metav1.ListOptions) *groupsv1.GroupList {
-	groups, err := groupClient.List(options)
+	crdGroups, err := groupClient.List(options)
 	if err != nil {
 		log.Errorf("failed to retrieve group list: %v ", err)
+		return nil
 	}
-	return groups
+	return crdGroups
 }

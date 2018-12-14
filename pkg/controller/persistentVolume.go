@@ -102,12 +102,12 @@ func collectPersistentVolumeClaim(claimName, namespace string) *groups_v1.Persis
 	capacity := pvc.Status.Capacity["storage"].DeepCopy()
 
 	return &groups_v1.PersistentVolumeClaim{
-		Name:                pvc.GetObjectMeta().GetName(),
-		VolumeName:          pvc.Spec.VolumeName,
-		RequestSizeInGB:     []float64{utils.BytesToGB(request.Value())},
-		CapacityAllotedInGB: []float64{utils.BytesToGB(capacity.Value())},
-		BoundTimes:          []meta_v1.Time{},
-		UnboundTimes:        []meta_v1.Time{},
+		Name:                  pvc.GetObjectMeta().GetName(),
+		VolumeName:            pvc.Spec.VolumeName,
+		RequestSizeInGB:       []float64{utils.BytesToGB(request.Value())},
+		CapacityAllocatedInGB: []float64{utils.BytesToGB(capacity.Value())},
+		BoundTimes:            []meta_v1.Time{},
+		UnboundTimes:          []meta_v1.Time{},
 	}
 }
 

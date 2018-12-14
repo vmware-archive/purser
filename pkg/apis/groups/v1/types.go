@@ -19,6 +19,7 @@ package v1
 
 import (
 	"github.com/vmware/purser/pkg/controller/metrics"
+	"time"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -41,12 +42,32 @@ type Group struct {
 
 // GroupSpec is the spec for the Group resource
 type GroupSpec struct {
-	Name               string                      `json:"name"`
-	Type               string                      `json:"type,omitempty"`
-	Labels             map[string]string           `json:"labels,omitempty"`
-	AllocatedResources *metrics.Metrics            `json:"metrics,omitempty"`
-	PodsMetrics        map[string]*metrics.Metrics `json:"pods,omitempty"`
-	PodsDetails        map[string]*PodDetails      `json:"podDetails,omitempty"`
+	Name               string                         `json:"name"`
+	Type               string                         `json:"type,omitempty"`
+	Expressions        map[string]map[string][]string `json:"labels,omitempty"`
+	AllocatedResources *GroupMetrics                  `json:"metrics,omitempty"`
+	PITMetrics         *GroupMetrics                  `json:"pitMetrics,omitempty"`
+	MTDMetrics         *GroupMetrics                  `json:"mtdMetrics,omitempty"`
+	MTDCost            *Cost                          `json:"mtdCost,omitempty"`
+	LastUpdated        time.Time                      `json:"lastUpdated,omitempty"`
+}
+
+// GroupMetrics ...
+type GroupMetrics struct {
+	CPULimit        float64
+	MemoryLimit     float64
+	StorageCapacity float64
+	CPURequest      float64
+	MemoryRequest   float64
+	StorageClaim    float64
+}
+
+// Cost details
+type Cost struct {
+	TotalCost   float64
+	CPUCost     float64
+	MemoryCost  float64
+	StorageCost float64
 }
 
 // GroupList is the list of Group resources
@@ -77,15 +98,15 @@ type PodDetails struct {
 // A PVC can be upgraded or downgraded, so maintaining capacityAllocated as a list
 // Whenever a PVC capacity changes will update UnboundTime for old capacity, and
 // append new capacity to capacityAllocated with bound time appended to BoundTimes
-// The i-th capacity alloacted corresponds to the i-th bound time and to i-th unbound time.
+// The i-th capacity allocated corresponds to the i-th bound time and to i-th unbound time.
 // Similarly for RequestSizeInGB
 type PersistentVolumeClaim struct {
-	Name                string
-	VolumeName          string
-	RequestSizeInGB     []float64
-	CapacityAllotedInGB []float64
-	BoundTimes          []meta_v1.Time
-	UnboundTimes        []meta_v1.Time
+	Name                  string
+	VolumeName            string
+	RequestSizeInGB       []float64
+	CapacityAllocatedInGB []float64
+	BoundTimes            []meta_v1.Time
+	UnboundTimes          []meta_v1.Time
 }
 
 // Container information for the pods associated with the Group resource
