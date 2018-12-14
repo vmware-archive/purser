@@ -28,13 +28,11 @@ import (
 	subcriber_v1 "github.com/vmware/purser/pkg/apis/subscriber/v1"
 	"github.com/vmware/purser/pkg/controller"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
-	"github.com/vmware/purser/pkg/controller/discovery/processor"
 
 	apps_v1beta1 "k8s.io/api/apps/v1beta1"
 	batch_v1 "k8s.io/api/batch/v1"
 	api_v1 "k8s.io/api/core/v1"
 	ext_v1beta1 "k8s.io/api/extensions/v1beta1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ProcessEvents processes the event and notifies the subscribers.
