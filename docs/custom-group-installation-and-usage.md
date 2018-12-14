@@ -1,7 +1,7 @@
 # Custom Group Installation and Usage
 
 To get resource and cost visibility for a particular set of pods Purser allows user to create custom logical group.
-User can define the label filter logic while creating the logical group i.e, pods satisfying these conditions will belong to this custom group.
+User can define the label filter logic(`AND of ORs`: Conjunctive normal form) while creating the logical group i.e, pods satisfying these conditions will belong to this custom group.
 
 ## Installing logical group definition and an example logical group
 
