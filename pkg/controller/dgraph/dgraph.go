@@ -147,6 +147,7 @@ func ExecuteQueryRaw(query string) ([]byte, error) {
 	resp, err := client.NewTxn().Query(ctx, query)
 	if err != nil {
 		log.Error(err)
+		return  nil, err
 	}
 	return resp.Json, err
 }

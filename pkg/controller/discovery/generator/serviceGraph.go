@@ -45,13 +45,14 @@ func GetGraphServiceEdges() []Edge {
 }
 
 // GenerateServiceNodesAndEdges ...
-func GenerateServiceNodesAndEdges(svcs []models.Service) {
+func GenerateServiceNodesAndEdges(services []models.Service) {
+	svcs := removeDuplicates(services)
 	svcUniqueID = 0
 	uniqueIDs := getServiceUniqueIDs(svcs)
-	svcNodes := createServiceNodes(svcs, uniqueIDs)
-	svcEdges := createServiceEdges(svcs, uniqueIDs)
-	setServiceGraphNodes(svcNodes)
-	setServiceGraphEdges(svcEdges)
+	nodes := createServiceNodes(svcs, uniqueIDs)
+	edges := createServiceEdges(svcs, uniqueIDs)
+	setServiceGraphNodes(nodes)
+	setServiceGraphEdges(edges)
 }
 
 func getServiceUniqueIDs(svcs []models.Service) map[string]int {
@@ -96,4 +97,16 @@ func setServiceGraphNodes(nodes []Node) {
 
 func setServiceGraphEdges(edges []Edge) {
 	svcEdges = &edges
+}
+
+func removeDuplicates(services []models.Service) []models.Service {
+	duplicateChecker := make(map[string]bool)
+	filteredSvcs := []models.Service{}
+	for _, svc := range services {
+		if _, isPresent := duplicateChecker[svc.Name]; !isPresent {
+			duplicateChecker[svc.Name] = true
+			filteredSvcs = append(filteredSvcs, svc)
+		}
+	}
+	return filteredSvcs
 }
