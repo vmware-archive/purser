@@ -18,7 +18,6 @@
 package linker
 
 import (
-	"fmt"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"sync"
 
