@@ -122,25 +122,26 @@ export class TopologyGraphComponent implements OnInit {
     private initNetwork() {
         let filteredNodes = [];
         let filteredEdges = [];
-        console.log(this.serviceName)
+        // console.log(this.serviceName)
         if (this.EDGE_STATUS === STATUS_READY && this.NODE_STATUS === STATUS_READY) {
             if (this.serviceName && this.serviceName !== 'ALL') {
                 let self = this;
-                console.log(this.nodes, "All nodes")
+                // console.log(this.nodes, "All nodes")
                 filteredNodes = this.nodes.filter(function (item) {
-                    return item.cid.indexOf(self.serviceName) > -1;
+                    // console.log(item, "item")
+                    return item.label == self.serviceName;
                 });
-                console.log(filteredNodes, "After filter")
+                // console.log(filteredNodes, "After filter")
                 let idsArr = [];
                 for (let item of filteredNodes) {
                     idsArr.push(item.id);
                 }
-                console.log(idsArr, "idsArr");
-                console.log(this.edges, "All edges")
+                // console.log(idsArr, "idsArr");
+                // console.log(this.edges, "All edges")
                 filteredEdges = this.edges.filter(function (item) {
                     return idsArr.indexOf(item.from) > -1 || idsArr.indexOf(item.to) > -1;
                 });
-                console.log(filteredEdges, "filtered edges")
+                // console.log(filteredEdges, "filtered edges")
                 let leftOutIdsArr = [];
                 for (let item of filteredEdges) {
                     if (leftOutIdsArr.indexOf(item.from) === -1) {
@@ -150,11 +151,11 @@ export class TopologyGraphComponent implements OnInit {
                         leftOutIdsArr.push(item.to);
                     }
                 }
-                console.log(leftOutIdsArr, "leftOutIdsArr")
+                // console.log(leftOutIdsArr, "leftOutIdsArr")
                 filteredNodes = this.nodes.filter(function (item) {
                     return leftOutIdsArr.indexOf(item.id) > -1;
                 })
-                console.log(filteredNodes, "refiltered nodes")
+                // console.log(filteredNodes, "refiltered nodes")
             } else {
                 filteredNodes = this.nodes;
                 filteredEdges = this.edges;
