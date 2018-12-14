@@ -88,7 +88,6 @@ func getServicesXIDsFromPods(pods []*models.Pod) []string {
 		log.Debugf("podXID: %s, svcsXIDs: %v", pod.Xid, svcsXIDs)
 		for _, svcXID := range svcsXIDs {
 			if _, isPresent := duplicateChecker[svcXID]; !isPresent {
-				fmt.Printf("----------------------------OK")
 				duplicateChecker[svcXID] = true
 				servicesXIDs = append(servicesXIDs, svcXID)
 			}

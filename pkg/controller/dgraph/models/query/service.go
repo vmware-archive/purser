@@ -29,8 +29,10 @@ func RetrieveAllServicesWithDstPods() ([]models.Service, error) {
 			xid
 			name
 			pod {
+				xid
 				name
 				pod {
+					xid
 					name
 				}
 			}
