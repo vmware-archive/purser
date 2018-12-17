@@ -37,6 +37,10 @@ var wg sync.WaitGroup
 // each pod in a given namespace and generates a 1:1 mapping between the communicating pods.
 func ProcessPodInteractions(conf controller.Config) {
 	k8sPods := RetrievePodList(conf.Kubeclient, metav1.ListOptions{})
+	if k8sPods == nil {
+		log.Info("No pods retrieved from cluster")
+		return
+	}
 
 	linker.PopulatePodIPTable(k8sPods)
 	processPodDetails(conf, k8sPods)
