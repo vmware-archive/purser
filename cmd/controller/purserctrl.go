@@ -68,7 +68,7 @@ func main() {
 
 // starts first discovery after 5 min of controller starting. Next runs will occur in every 59 min
 func startInteractionsDiscovery() {
-	time.Sleep(time.Minute * 2)
+	time.Sleep(time.Minute * 5)
 	runDiscovery()
 
 	c := cron.New()

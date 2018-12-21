@@ -40,7 +40,7 @@ export class TopologyGraphComponent implements OnInit {
             size: 16
         },
         physics: {
-            enabled: false,
+            enabled: true,
             /*forceAtlas2Based: {
                 gravitationalConstant: -26,
                 centralGravity: 0.005,
@@ -216,7 +216,7 @@ export class TopologyGraphComponent implements OnInit {
                 size: 16
             },
             physics: {
-                enabled: false,
+                enabled: true,
                 /*forceAtlas2Based: {
                     gravitationalConstant: -26,
                     centralGravity: 0.005,
