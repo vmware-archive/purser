@@ -30,7 +30,11 @@ import (
 
 // Dgraph Model Constants
 const (
-	IsNode = "isNode"
+	IsNode               = "isNode"
+	DefaultNodeInstance  = "default"
+	DefaultNodeOS        = "default"
+	InstanceTypeLabelKey = "beta.kubernetes.io/instance-type"
+	OSLabelKey           = "beta.kubernetes.io/os"
 )
 
 // Node schema in dgraph
@@ -44,6 +48,8 @@ type Node struct {
 	CPUCapity      float64 `json:"cpuCapacity,omitempty"`
 	MemoryCapacity float64 `json:"memoryCapacity,omitempty"`
 	Type           string  `json:"type,omitempty"`
+	InstanceType   string  `json:"instanceType,omitempty"`
+	OS             string  `json:"os,omitempty"`
 }
 
 func createNodeObject(node api_v1.Node) Node {
@@ -56,6 +62,12 @@ func createNodeObject(node api_v1.Node) Node {
 		CPUCapity:      utils.ConvertToFloat64CPU(node.Status.Capacity.Cpu()),
 		MemoryCapacity: utils.ConvertToFloat64GB(node.Status.Capacity.Memory()),
 	}
+
+	instanceType, os := getInstanceTypeAndOS(node)
+	newNode.InstanceType = instanceType
+	newNode.OS = os
+	log.Debugf("node: %s, instanceType: %s, os: %s", node.Name, newNode.InstanceType, newNode.OS)
+
 	nodeDeletionTimestamp := node.GetDeletionTimestamp()
 	if !nodeDeletionTimestamp.IsZero() {
 		newNode.EndTime = nodeDeletionTimestamp.Time.Format(time.RFC3339)
@@ -103,4 +115,20 @@ func StoreNode(node api_v1.Node) (string, error) {
 		log.Infof("Node with xid: (%s) persisted", xid)
 	}
 	return assigned.Uids["blank-0"], nil
+}
+
+// getInstanceTypeAndOS returns instance and os of a node
+func getInstanceTypeAndOS(node api_v1.Node) (string, string) {
+	nodeLabels := node.GetLabels()
+	instanceType := DefaultNodeInstance
+	os := DefaultNodeOS
+
+	if value, isPresent := nodeLabels[InstanceTypeLabelKey]; isPresent {
+		instanceType = value
+	}
+	if value, isPresent := nodeLabels[OSLabelKey]; isPresent {
+		os = value
+	}
+
+	return instanceType, os
 }
