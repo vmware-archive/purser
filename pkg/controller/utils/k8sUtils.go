@@ -30,6 +30,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// k8sUtils constants
 const (
 	StorageDefault = "purser-default"
 )
@@ -74,7 +75,7 @@ func RetrieveStorageClass(client *kubernetes.Clientset, options metav1.GetOption
 	return storageClass, err
 }
 
-// GetStorageType ...
+// GetFinalStorageTypeOfPV ...
 // input: persistent volume
 // output: the type(final) of PV's storage class
 // i.e., if PV has storage class A, A is of type B(storage class) and so on..
@@ -95,9 +96,8 @@ func GetFinalStorageTypeOfPV(pv api_v1.PersistentVolume, client *kubernetes.Clie
 func getFinalTypeOfStorageClass(client *kubernetes.Clientset, storageClassName string, cycleChecker map[string]bool) string {
 	if _, isVisited := cycleChecker[storageClassName]; isVisited {
 		return StorageDefault
-	} else {
-		cycleChecker[storageClassName] = true
 	}
+	cycleChecker[storageClassName] = true
 
 	storageClass, err := RetrieveStorageClass(client, metav1.GetOptions{}, storageClassName)
 	if err != nil {
