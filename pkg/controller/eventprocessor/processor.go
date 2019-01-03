@@ -146,7 +146,7 @@ func ProcessPayloads(payloads []*interface{}, conf *controller.Config) {
 			if err != nil {
 				log.Errorf("Error un marshalling payload " + payload.Data)
 			}
-			_, err = models.StorePersistentVolume(pv)
+			_, err = models.StorePersistentVolume(pv, conf.Kubeclient)
 			if err != nil {
 				log.Errorf("Error while persisting persistent volume %v", err)
 			}

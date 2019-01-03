@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package processor
+package utils
 
 import (
 	log "github.com/Sirupsen/logrus"
+	storagev1 "k8s.io/api/storage/v1"
 
 	groupsv1 "github.com/vmware/purser/pkg/apis/groups/v1"
 	groups "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
@@ -56,4 +57,14 @@ func RetrieveGroupList(groupClient *groups.GroupClient, options metav1.ListOptio
 		return nil
 	}
 	return crdGroups
+}
+
+// RetrieveStorageClass returns storage class with the given name. Nil if error is encountered
+func RetrieveStorageClass(client *kubernetes.Clientset, options metav1.GetOptions, name string) (*storagev1.StorageClass, error) {
+	storageClass, err := client.StorageV1().StorageClasses().Get(name, options)
+	if err != nil {
+		log.Errorf("failed to retrieve storage class: %s, err: %v", name, err)
+		return nil, err
+	}
+	return storageClass, err
 }

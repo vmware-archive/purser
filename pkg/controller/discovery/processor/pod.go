@@ -18,6 +18,7 @@
 package processor
 
 import (
+	"github.com/vmware/purser/pkg/controller/utils"
 	"sync"
 
 	"github.com/vmware/purser/pkg/controller"
@@ -36,7 +37,7 @@ var wg sync.WaitGroup
 // ProcessPodInteractions fetches details of all the running processes in each container of
 // each pod in a given namespace and generates a 1:1 mapping between the communicating pods.
 func ProcessPodInteractions(conf controller.Config) {
-	k8sPods := RetrievePodList(conf.Kubeclient, metav1.ListOptions{})
+	k8sPods := utils.RetrievePodList(conf.Kubeclient, metav1.ListOptions{})
 	if k8sPods == nil {
 		log.Info("No pods retrieved from cluster")
 		return

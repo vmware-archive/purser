@@ -18,6 +18,9 @@
 package models
 
 import (
+	"github.com/Sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"time"
 
 	"log"
@@ -30,6 +33,7 @@ import (
 // Dgraph Model Constants
 const (
 	IsPersistentVolume = "isPersistentVolume"
+	StorageDefault     = "purser-default"
 )
 
 // PersistentVolume schema in dgraph
@@ -41,9 +45,10 @@ type PersistentVolume struct {
 	EndTime            string  `json:"endTime,omitempty"`
 	Type               string  `json:"type,omitempty"`
 	StorageCapacity    float64 `json:"storageCapacity,omitempty"`
+	StorageType        string  `json:"storageType,omitempty"`
 }
 
-func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
+func createPersistentVolumeObject(pv api_v1.PersistentVolume, client *kubernetes.Clientset) PersistentVolume {
 	newPv := PersistentVolume{
 		Name:               "pv-" + pv.Name,
 		IsPersistentVolume: true,
@@ -53,6 +58,8 @@ func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
 	}
 	capacity := pv.Spec.Capacity["storage"]
 	newPv.StorageCapacity = utils.ConvertToFloat64GB(&capacity)
+	newPv.StorageType = getStorageType(pv, client)
+	logrus.Debugf("PV: %s, storageType: %s", newPv.Name, newPv.StorageType)
 
 	deletionTimestamp := pv.GetDeletionTimestamp()
 	if !deletionTimestamp.IsZero() {
@@ -62,11 +69,11 @@ func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
 }
 
 // StorePersistentVolume create a new persistent volume in the Dgraph and updates if already present.
-func StorePersistentVolume(pv api_v1.PersistentVolume) (string, error) {
+func StorePersistentVolume(pv api_v1.PersistentVolume, client *kubernetes.Clientset) (string, error) {
 	xid := pv.Name
 	uid := dgraph.GetUID(xid, IsPersistentVolume)
 
-	newPv := createPersistentVolumeObject(pv)
+	newPv := createPersistentVolumeObject(pv, client)
 	if uid != "" {
 		newPv.UID = uid
 	}
@@ -100,4 +107,44 @@ func CreateOrGetPersistentVolumeByID(xid string) string {
 		return ""
 	}
 	return assigned.Uids["blank-0"]
+}
+
+/* getStorageType
+   input: persistent volume
+   output: the type(final) of PV's storage class
+   i.e., if PV has storage class A, A is of type B(storage class) and so on..
+   until a storage class X is of its own type X. Then this function returns the final type of PV's storage as X
+
+   "purser-default" is returned in special cases:
+   1. if A is of type B, if B is of type A (i.e., if a cycle is found)
+   2. an error is encountered
+   3. if A is not having any type i.e., "" (empty string case)
+*/
+func getStorageType(pv api_v1.PersistentVolume, client *kubernetes.Clientset) string {
+	cycleChecker := make(map[string]bool)
+	logrus.Debugf("PV: %s, storageClass: %s", pv.Name, pv.Spec.StorageClassName)
+	return getFinalTypeOfStorageClass(client, pv.Spec.StorageClassName, cycleChecker)
+}
+
+// getFinalTypeOfStorageClass
+// this is helper function for func getStorageType
+func getFinalTypeOfStorageClass(client *kubernetes.Clientset, storageClassName string, cycleChecker map[string]bool) string {
+	if _, isVisited := cycleChecker[storageClassName]; isVisited {
+		return StorageDefault
+	} else {
+		cycleChecker[storageClassName] = true
+	}
+
+	storageClass, err := utils.RetrieveStorageClass(client, metav1.GetOptions{}, storageClassName)
+	if err != nil {
+		return StorageDefault
+	}
+
+	storageType := storageClass.Parameters["type"]
+	if storageType == "" {
+		return StorageDefault
+	} else if storageType == storageClassName {
+		return storageClassName
+	}
+	return getFinalTypeOfStorageClass(client, storageType, cycleChecker)
 }
