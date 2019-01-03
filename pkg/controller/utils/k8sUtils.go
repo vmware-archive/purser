@@ -24,9 +24,14 @@ import (
 	groupsv1 "github.com/vmware/purser/pkg/apis/groups/v1"
 	groups "github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
 
+	api_v1 "k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+)
+
+const (
+	StorageDefault = "purser-default"
 )
 
 // RetrievePodList returns list of pods in the given namespace.
@@ -67,4 +72,43 @@ func RetrieveStorageClass(client *kubernetes.Clientset, options metav1.GetOption
 		return nil, err
 	}
 	return storageClass, err
+}
+
+// GetStorageType ...
+// input: persistent volume
+// output: the type(final) of PV's storage class
+// i.e., if PV has storage class A, A is of type B(storage class) and so on..
+// until a storage class X is of its own type X. Then this function returns the final type of PV's storage as X
+//
+// "purser-default" is returned in special cases:
+// 1. if A is of type B, if B is of type A (i.e., if a cycle is found)
+// 2. an error is encountered
+// 3. if A is not having any type i.e., "" (empty string case)
+func GetFinalStorageTypeOfPV(pv api_v1.PersistentVolume, client *kubernetes.Clientset) string {
+	cycleChecker := make(map[string]bool)
+	log.Debugf("PV: %s, storageClass: %s", pv.Name, pv.Spec.StorageClassName)
+	return getFinalTypeOfStorageClass(client, pv.Spec.StorageClassName, cycleChecker)
+}
+
+// getFinalTypeOfStorageClass
+// this is helper function for func getStorageType
+func getFinalTypeOfStorageClass(client *kubernetes.Clientset, storageClassName string, cycleChecker map[string]bool) string {
+	if _, isVisited := cycleChecker[storageClassName]; isVisited {
+		return StorageDefault
+	} else {
+		cycleChecker[storageClassName] = true
+	}
+
+	storageClass, err := RetrieveStorageClass(client, metav1.GetOptions{}, storageClassName)
+	if err != nil {
+		return StorageDefault
+	}
+
+	storageType := storageClass.Parameters["type"]
+	if storageType == "" {
+		return StorageDefault
+	} else if storageType == storageClassName {
+		return storageClassName
+	}
+	return getFinalTypeOfStorageClass(client, storageType, cycleChecker)
 }
