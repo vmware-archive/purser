@@ -31,8 +31,8 @@ import (
 // Dgraph Model Constants
 const (
 	IsNode               = "isNode"
-	DefaultNodeInstance  = "default"
-	DefaultNodeOS        = "default"
+	DefaultNodeInstance  = "purser-default"
+	DefaultNodeOS        = "purser-default"
 	InstanceTypeLabelKey = "beta.kubernetes.io/instance-type"
 	OSLabelKey           = "beta.kubernetes.io/os"
 )
@@ -45,7 +45,7 @@ type Node struct {
 	StartTime      string  `json:"startTime,omitempty"`
 	EndTime        string  `json:"endTime,omitempty"`
 	Pods           []*Pod  `json:"pods,omitempty"`
-	CPUCapity      float64 `json:"cpuCapacity,omitempty"`
+	CPUCapacity    float64 `json:"cpuCapacity,omitempty"`
 	MemoryCapacity float64 `json:"memoryCapacity,omitempty"`
 	Type           string  `json:"type,omitempty"`
 	InstanceType   string  `json:"instanceType,omitempty"`
@@ -59,7 +59,7 @@ func createNodeObject(node api_v1.Node) Node {
 		Type:           "node",
 		ID:             dgraph.ID{Xid: node.Name},
 		StartTime:      node.GetCreationTimestamp().Time.Format(time.RFC3339),
-		CPUCapity:      utils.ConvertToFloat64CPU(node.Status.Capacity.Cpu()),
+		CPUCapacity:    utils.ConvertToFloat64CPU(node.Status.Capacity.Cpu()),
 		MemoryCapacity: utils.ConvertToFloat64GB(node.Status.Capacity.Memory()),
 	}
 

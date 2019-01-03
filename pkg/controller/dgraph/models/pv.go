@@ -18,6 +18,8 @@
 package models
 
 import (
+	"github.com/Sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
 	"time"
 
 	"log"
@@ -41,9 +43,10 @@ type PersistentVolume struct {
 	EndTime            string  `json:"endTime,omitempty"`
 	Type               string  `json:"type,omitempty"`
 	StorageCapacity    float64 `json:"storageCapacity,omitempty"`
+	StorageType        string  `json:"storageType,omitempty"`
 }
 
-func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
+func createPersistentVolumeObject(pv api_v1.PersistentVolume, client *kubernetes.Clientset) PersistentVolume {
 	newPv := PersistentVolume{
 		Name:               "pv-" + pv.Name,
 		IsPersistentVolume: true,
@@ -53,6 +56,8 @@ func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
 	}
 	capacity := pv.Spec.Capacity["storage"]
 	newPv.StorageCapacity = utils.ConvertToFloat64GB(&capacity)
+	newPv.StorageType = utils.GetFinalStorageTypeOfPV(pv, client)
+	logrus.Debugf("PV: %s, storageType: %s", newPv.Name, newPv.StorageType)
 
 	deletionTimestamp := pv.GetDeletionTimestamp()
 	if !deletionTimestamp.IsZero() {
@@ -62,11 +67,11 @@ func createPersistentVolumeObject(pv api_v1.PersistentVolume) PersistentVolume {
 }
 
 // StorePersistentVolume create a new persistent volume in the Dgraph and updates if already present.
-func StorePersistentVolume(pv api_v1.PersistentVolume) (string, error) {
+func StorePersistentVolume(pv api_v1.PersistentVolume, client *kubernetes.Clientset) (string, error) {
 	xid := pv.Name
 	uid := dgraph.GetUID(xid, IsPersistentVolume)
 
-	newPv := createPersistentVolumeObject(pv)
+	newPv := createPersistentVolumeObject(pv, client)
 	if uid != "" {
 		newPv.UID = uid
 	}

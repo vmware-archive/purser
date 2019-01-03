@@ -18,6 +18,7 @@
 package processor
 
 import (
+	"github.com/vmware/purser/pkg/controller/utils"
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
@@ -36,7 +37,7 @@ var svcwg sync.WaitGroup
 // ProcessServiceInteractions parses through the list of services and it's associated pods to
 // generate a 1:1 mapping between the communicating services.
 func ProcessServiceInteractions(conf controller.Config) {
-	services := RetrieveServiceList(conf.Kubeclient, metav1.ListOptions{})
+	services := utils.RetrieveServiceList(conf.Kubeclient, metav1.ListOptions{})
 	if services == nil {
 		log.Info("No services retrieved from cluster")
 		return
@@ -65,7 +66,7 @@ func processServiceDetails(client *kubernetes.Clientset, services *corev1.Servic
 					options := metav1.ListOptions{
 						LabelSelector: selectorSet.AsSelector().String(),
 					}
-					pods := RetrievePodList(client, options)
+					pods := utils.RetrievePodList(client, options)
 					if pods != nil {
 						linker.PopulatePodToServiceTable(svc, pods)
 					}

@@ -19,7 +19,7 @@ package eventprocessor
 
 import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
-	"github.com/vmware/purser/pkg/controller/discovery/processor"
+	"github.com/vmware/purser/pkg/controller/utils"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -32,7 +32,7 @@ import (
 // UpdateGroups retrieve all groups and updates them
 func UpdateGroups(groupCRDClient *groupsClient_v1.GroupClient) {
 	log.Infof("Started updating groups")
-	groups := processor.RetrieveGroupList(groupCRDClient, meta_v1.ListOptions{})
+	groups := utils.RetrieveGroupList(groupCRDClient, meta_v1.ListOptions{})
 	if groups == nil {
 		log.Debugf("GroupList is nil")
 		return
