@@ -32,16 +32,16 @@ const (
 	deliminator     = "-"
 	storageInstance = "Storage"
 	computeInstance = "Compute Instance"
+	priceError      = -1.0
 )
 
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
-func GetRateCardForAWS(region string) (*models.RateCard, error) {
+func GetRateCardForAWS(region string) *models.RateCard {
 	awsPricing, err := GetAWSPricing(region)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		return convertAWSPricingToPurserRateCard(region, awsPricing)
 	}
-	rateCard := convertAWSPricingToPurserRateCard(region, awsPricing)
-	return rateCard, nil
+	return nil
 }
 
 func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *models.RateCard {
@@ -63,77 +63,70 @@ func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, 
 
 	duplicateComputeInstanceChecker := make(map[string]bool)
 	for _, product := range products {
-		if product.ProductFamily == computeInstance {
-			key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
-			if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
-				nodePrice := getComputeInstancePrice(product, planList)
-				if nodePrice != nil {
-					duplicateComputeInstanceChecker[key] = true
-					logrus.Debugf("Node Price: %v", *nodePrice)
-					// TODO: store/update nodePrice in dgraph
-					nodePrices = append(nodePrices, nodePrice)
-				}
-			}
-		} else if product.ProductFamily == storageInstance {
-			storagePrice := getStorageInstancePrice(product, planList)
-			if storagePrice != nil {
-				logrus.Debugf("Storage Price: %v", *storagePrice)
-				// TODO: store/update storagePrice in dgraph
-				storagePrices = append(storagePrices, storagePrice)
+		priceInFloat64, unit := getResourcePrice(product, planList)
+		if priceInFloat64 != priceError {
+			switch product.ProductFamily {
+			case computeInstance:
+				nodePrices = updateComputeInstancePrices(product, priceInFloat64, duplicateComputeInstanceChecker, nodePrices)
+			case storageInstance:
+				storagePrices = updateStorageInstancePrices(product, priceInFloat64, unit, storagePrices)
 			}
 		}
 	}
 	return nodePrices, storagePrices
 }
 
-func getComputeInstancePrice(product Product, planList PlanList) *models.NodePrice {
+func getResourcePrice(product Product, planList PlanList) (float64, string) {
 	for _, pricingAttributes := range planList.OnDemand[product.Sku] {
 		for _, pricingData := range pricingAttributes.PriceDimensions {
 			for _, pricePerUnit := range pricingData.PricePerUnit {
 				priceInFloat64, err := strconv.ParseFloat(pricePerUnit, 64)
 				if err != nil {
 					logrus.Errorf("unable to parse string: %s to float. err: %v", pricePerUnit, err)
-					return nil
+					return priceError, "" // negative price means error
 				}
-				// Unit of Compute price USD-perHour
-				productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
-				return &models.NodePrice{
-					ID:              dgraph.ID{Xid: productXID},
-					IsNodePrice:     true,
-					InstanceType:    product.Attributes.InstanceType,
-					InstanceFamily:  product.Attributes.InstanceFamily,
-					OperatingSystem: product.Attributes.OperatingSystem,
-					Price:           priceInFloat64,
-				}
+				return priceInFloat64, pricingData.Unit
 			}
 		}
 	}
-	return nil
+	return priceError, ""
 }
 
-func getStorageInstancePrice(product Product, planList PlanList) *models.StoragePrice {
-	for _, pricingAttributes := range planList.OnDemand[product.Sku] {
-		for _, pricingData := range pricingAttributes.PriceDimensions {
-			for _, pricePerUnit := range pricingData.PricePerUnit {
-				priceInFloat64, err := strconv.ParseFloat(pricePerUnit, 64)
-				if err != nil {
-					logrus.Errorf("unable to parse string: %s to float. err: %v", pricePerUnit, err)
-					return nil
-				}
-				if pricingData.Unit == gbMonth {
-					// convert to GBHour
-					priceInFloat64 = priceInFloat64 / (30 * 24)
-				}
-				productXID := product.Attributes.VolumeType + deliminator + product.Attributes.UsageType
-				return &models.StoragePrice{
-					ID:             dgraph.ID{Xid: productXID},
-					IsStoragePrice: true,
-					VolumeType:     product.Attributes.VolumeType,
-					UsageType:      product.Attributes.UsageType,
-					Price:          priceInFloat64,
-				}
-			}
+func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
+	key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
+	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
+		// Unit of Compute price USD-perHour
+		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
+		nodePrice := &models.NodePrice{
+			ID:              dgraph.ID{Xid: productXID},
+			IsNodePrice:     true,
+			InstanceType:    product.Attributes.InstanceType,
+			InstanceFamily:  product.Attributes.InstanceFamily,
+			OperatingSystem: product.Attributes.OperatingSystem,
+			Price:           priceInFloat64,
 		}
+		duplicateComputeInstanceChecker[key] = true
+		logrus.Debugf("Node Price: %v", *nodePrice)
+		// TODO: store/update nodePrice in dgraph
+		nodePrices = append(nodePrices, nodePrice)
 	}
-	return nil
+	return nodePrices
+}
+
+func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit string, storagePrices []*models.StoragePrice) []*models.StoragePrice {
+	if unit == gbMonth {
+		// convert to GBHour
+		priceInFloat64 = priceInFloat64 / (30 * 24)
+	}
+	productXID := product.Attributes.VolumeType + deliminator + product.Attributes.UsageType
+	storagePrice := &models.StoragePrice{
+		ID:             dgraph.ID{Xid: productXID},
+		IsStoragePrice: true,
+		VolumeType:     product.Attributes.VolumeType,
+		UsageType:      product.Attributes.UsageType,
+		Price:          priceInFloat64,
+	}
+	// TODO: store/update storagePrice in dgraph
+	logrus.Debugf("Storage Price: %v", *storagePrice)
+	return append(storagePrices, storagePrice)
 }

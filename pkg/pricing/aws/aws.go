@@ -18,10 +18,15 @@
 package aws
 
 import (
-	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/utils"
 	"net/http"
 	"time"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/utils"
+)
+
+const (
+	httpTimeout = 100 * time.Second
 )
 
 // Pricing structure
@@ -67,7 +72,7 @@ type ProductAttributes struct {
 // input: region
 // retrieves data from http get to the corresponding url for that region
 func GetAWSPricing(region string) (*Pricing, error) {
-	var myClient = &http.Client{Timeout: 100 * time.Second}
+	var myClient = &http.Client{Timeout: httpTimeout}
 	rateCard := Pricing{}
 	err := utils.GetJSONResponse(myClient, getURLForRegion(region), &rateCard)
 	if err != nil {
