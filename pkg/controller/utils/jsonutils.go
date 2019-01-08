@@ -19,6 +19,7 @@ package utils
 
 import (
 	"encoding/json"
+	"net/http"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -30,4 +31,23 @@ func JSONMarshal(obj interface{}) []byte {
 		log.Error(err)
 	}
 	return bytes
+}
+
+// GetJSONResponse retrieves json response and converts it to target object.
+// Returns error if any failure is encountered.
+func GetJSONResponse(client *http.Client, url string, target interface{}) error {
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer closeResponse(resp)
+
+	return json.NewDecoder(resp.Body).Decode(target)
+}
+
+func closeResponse(resp *http.Response) {
+	err := resp.Body.Close()
+	if err != nil {
+		log.Errorf("unable to close response body. Reason: %v", err)
+	}
 }
