@@ -96,6 +96,9 @@ func CreateSchema() error {
 		isPod: bool .
 		isContainer: bool .
 		isProc: bool .
+		isNodePrice: bool .
+		isStoragePrice: bool .
+		isRateCard: bool .
 		pod: uid @reverse .
 		namespace: uid @reverse .
 		deployment: uid @reverse .
