@@ -67,7 +67,6 @@ func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, 
 	for _, product := range products {
 		priceInFloat64, unit := getResourcePrice(product, planList)
 		if priceInFloat64 != priceError {
-			//logrus.Debugf("productFamily: %s", product.ProductFamily)
 			switch product.ProductFamily {
 			case computeInstance:
 				nodePrices = updateComputeInstancePrices(product, priceInFloat64, duplicateComputeInstanceChecker, nodePrices)
