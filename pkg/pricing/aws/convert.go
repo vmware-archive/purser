@@ -26,13 +26,14 @@ import (
 )
 
 const (
-	na              = "na"
+	na              = "NA"
 	aws             = "aws"
 	gbMonth         = "GB-Mo"
 	deliminator     = "-"
 	storageInstance = "Storage"
 	computeInstance = "Compute Instance"
 	priceError      = -1.0
+	hoursInMonth    = 720
 )
 
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
@@ -45,13 +46,14 @@ func GetRateCardForAWS(region string) *models.RateCard {
 }
 
 func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *models.RateCard {
-	nodePrice, storagePrice := getResourcePricesFromAWSPricing(awsPricing)
+	nodePrices, storagePrices := getResourcePricesFromAWSPricing(awsPricing)
 	return &models.RateCard{
+		ID:            dgraph.ID{Xid: models.RateCardXID},
 		IsRateCard:    true,
 		CloudProvider: aws,
 		Region:        region,
-		NodePrices:    nodePrice,
-		StoragePrices: storagePrice,
+		NodePrices:    nodePrices,
+		StoragePrices: storagePrices,
 	}
 }
 
@@ -106,9 +108,11 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 			Price:           priceInFloat64,
 		}
 		duplicateComputeInstanceChecker[key] = true
-		logrus.Debugf("Node Price: %v", *nodePrice)
-		// TODO: store/update nodePrice in dgraph
-		nodePrices = append(nodePrices, nodePrice)
+		uid := models.StoreNodePrice(nodePrice, productXID)
+		if uid != "" {
+			nodePrice.ID = dgraph.ID{UID: uid, Xid: productXID}
+			nodePrices = append(nodePrices, nodePrice)
+		}
 	}
 	return nodePrices
 }
@@ -116,7 +120,7 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit string, storagePrices []*models.StoragePrice) []*models.StoragePrice {
 	if unit == gbMonth {
 		// convert to GBHour
-		priceInFloat64 = priceInFloat64 / (30 * 24)
+		priceInFloat64 = priceInFloat64 / hoursInMonth
 	}
 	productXID := product.Attributes.VolumeType + deliminator + product.Attributes.UsageType
 	storagePrice := &models.StoragePrice{
@@ -126,7 +130,10 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 		UsageType:      product.Attributes.UsageType,
 		Price:          priceInFloat64,
 	}
-	// TODO: store/update storagePrice in dgraph
-	logrus.Debugf("Storage Price: %v", *storagePrice)
-	return append(storagePrices, storagePrice)
+	uid := models.StoreStoragePrice(storagePrice, productXID)
+	if uid != "" {
+		storagePrice.ID = dgraph.ID{UID: uid, Xid: productXID}
+		storagePrices = append(storagePrices, storagePrice)
+	}
+	return storagePrices
 }

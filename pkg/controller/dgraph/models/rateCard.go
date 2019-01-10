@@ -17,7 +17,20 @@
 
 package models
 
-import "github.com/vmware/purser/pkg/controller/dgraph"
+import (
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/dgraph"
+)
+
+// RateCard constants
+const (
+	IsRateCard     = "isRateCard"
+	IsNodePrice    = "isNodePrice"
+	IsStoragePrice = "isStoragePrice"
+	RateCardXID    = "purser-rateCard"
+
+	AWS = "aws"
+)
 
 // RateCard structure
 type RateCard struct {
@@ -50,4 +63,60 @@ type StoragePrice struct {
 	Price          float64 `json:"price,omitempty"`
 }
 
-// TODO: store/update rate card in dgraph
+// StoreRateCard given a cloudProvider and region it gets rate card and stores(create/update) in dgraph
+func StoreRateCard(rateCard *RateCard) {
+	logrus.Debugf("IsRateCardNil: %v", rateCard == nil)
+	if rateCard != nil {
+		uid := dgraph.GetUID(RateCardXID, IsRateCard)
+		if uid != "" {
+			rateCard.ID = dgraph.ID{UID: uid, Xid: RateCardXID}
+		}
+		logrus.Debugf("RateCard: (%v)", rateCard)
+		_, err := dgraph.MutateNode(rateCard, dgraph.CREATE)
+		if err != nil {
+			logrus.Errorf("Unable to store rateCard reason: %v", err)
+			return
+		}
+		logrus.Infof("Successfully stored/updated rateCard")
+	}
+}
+
+// StoreNodePrice given nodePrice and its XID it stores(create/update) in dgraph
+func StoreNodePrice(nodePrice *NodePrice, productXID string) string {
+	uid := dgraph.GetUID(productXID, IsNodePrice)
+	if uid != "" {
+		nodePrice.ID = dgraph.ID{Xid: productXID, UID: uid}
+	}
+	logrus.Debugf("nodePrice: %v, productXID: %v\n", *nodePrice, productXID)
+	assigned, err := dgraph.MutateNode(nodePrice, dgraph.CREATE)
+	if err != nil {
+		logrus.Errorf("Unable to store nodePrice: (%v), reason: %v", nodePrice, err)
+		return ""
+	}
+	logrus.Debugf("Successfully stored/updated nodePrice: %v", productXID)
+
+	if uid != "" {
+		return uid
+	}
+	return assigned.Uids["blank-0"]
+}
+
+// StoreStoragePrice given storagePrice and its XID it stores(create/update) in dgraph
+func StoreStoragePrice(storagePrice *StoragePrice, productXID string) string {
+	uid := dgraph.GetUID(productXID, IsStoragePrice)
+	if uid != "" {
+		storagePrice.ID = dgraph.ID{Xid: productXID, UID: uid}
+	}
+	logrus.Debugf("storagePrice: %v, productXID: %v\n", *storagePrice, productXID)
+	assigned, err := dgraph.MutateNode(storagePrice, dgraph.CREATE)
+	if err != nil {
+		logrus.Errorf("Unable to store storagePrice: (%v), reason: %v", storagePrice, err)
+		return ""
+	}
+	logrus.Debugf("Successfully stored/updated storagePrice: %v", productXID)
+
+	if uid != "" {
+		return uid
+	}
+	return assigned.Uids["blank-0"]
+}
