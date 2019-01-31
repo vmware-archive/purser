@@ -64,7 +64,7 @@ func StoreProcess(procXID, containerXID string, podsXIDs []string, creationTimeS
 	procName := strings.Join(strings.Split(procXID, ":")[4:], "-")
 	containerUID := dgraph.GetUID(containerXID, IsContainer)
 	if containerUID == "" {
-		return fmt.Errorf("Container not persisted yet")
+		return fmt.Errorf("container not persisted yet")
 	}
 
 	procUID := dgraph.GetUID(procXID, IsProc)
