@@ -6,6 +6,8 @@
     <clr-dg-column [clrDgField]="'storage'">Storage</clr-dg-column>
     <clr-dg-column [clrDgField]="'mtdCost'">MTD Cost</clr-dg-column>
 
+    <clr-dg-placeholder>We couldn't find any custom groups!</clr-dg-placeholder>
+
     <clr-dg-row *clrDgItems="let group of groups">
       <clr-dg-cell>{{ group.name }}</clr-dg-cell>
       <clr-dg-cell>{{ group.podsCount }}</clr-dg-cell>
