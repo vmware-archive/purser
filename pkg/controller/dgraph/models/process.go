@@ -71,7 +71,7 @@ func StoreProcess(procXID, containerXID string, podsXIDs []string, creationTimeS
 	if procUID == "" {
 		assigned, err := newProc(procXID, procName, containerUID, containerXID, creationTimeStamp)
 		if err != nil {
-			logrus.Errorf("Unable to create proc: %s", procXID)
+			logrus.Errorf("unable to create proc: %s", procXID)
 			return err
 		}
 		log.Debugf("Process with xid: (%s) persisted in dgraph", procXID)

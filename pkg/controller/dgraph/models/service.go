@@ -115,7 +115,7 @@ func StorePodServiceEdges(svcXID string, podsXIDsInService []string) error {
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		return err
 	}
-	return fmt.Errorf("Service with xid: (%s) not in dgraph", svcXID)
+	return fmt.Errorf("service with xid: (%s) not in dgraph", svcXID)
 }
 
 // RetrieveAllServices returns all pods in the dgraph

@@ -62,31 +62,31 @@ func init() {
 	flag.StringVar(&version, "version", os.Getenv("KUBECTL_PLUGINS_LOCAL_FLAG_VERSION"), "Show version number")
 
 	flag.Usage = func() {
-		_, err := fmt.Fprintf(flag.CommandLine.Output(), description)
+		_, err := fmt.Fprint(flag.CommandLine.Output(), description)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		_, err = fmt.Fprintf(flag.CommandLine.Output(), usage)
+		_, err = fmt.Fprint(flag.CommandLine.Output(), usage)
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, err = fmt.Fprintf(flag.CommandLine.Output(), supportedCmds)
+		_, err = fmt.Fprint(flag.CommandLine.Output(), supportedCmds)
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, err = fmt.Fprintf(flag.CommandLine.Output(), options)
+		_, err = fmt.Fprint(flag.CommandLine.Output(), options)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		_, err = fmt.Fprintf(flag.CommandLine.Output(), "Example(s):\n\n")
+		_, err = fmt.Fprint(flag.CommandLine.Output(), "Example(s):\n\n")
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		printHelp()
-		_, err = fmt.Fprintf(flag.CommandLine.Output(), kubecltOption)
+		_, err = fmt.Fprint(flag.CommandLine.Output(), kubecltOption)
 		if err != nil {
 			log.Fatal(err)
 		}

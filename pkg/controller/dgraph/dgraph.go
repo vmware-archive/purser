@@ -171,7 +171,7 @@ func ExecuteQuery(query string, root interface{}) error {
 func MutateNode(data interface{}, mutateType string) (*api.Assigned, error) {
 	bytes := utils.JSONMarshal(data)
 	if bytes == nil {
-		return nil, fmt.Errorf("Unable to marshal data: %v", data)
+		return nil, fmt.Errorf("unable to marshal data: %v", data)
 	}
 
 	mu := &api.Mutation{

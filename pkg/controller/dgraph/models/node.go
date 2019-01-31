@@ -78,7 +78,7 @@ func createNodeObject(node api_v1.Node) Node {
 // createOrGetNodeByID create and returns the node if not present, otherwise simply returns node.
 func createOrGetNodeByID(xid string) (string, error) {
 	if xid == "" {
-		return "", fmt.Errorf("Node xid is empty")
+		return "", fmt.Errorf("node xid is empty")
 	}
 	uid := dgraph.GetUID(xid, IsNode)
 	if uid != "" {
