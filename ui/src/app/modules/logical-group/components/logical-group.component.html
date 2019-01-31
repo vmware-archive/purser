@@ -1,0 +1,45 @@
+<!-- <h1>Purser Logical Groups</h1> -->
+<div>
+  <table>
+      <tr>
+        <th>
+          Group Name 
+          <a (click)="sortName()" class="linksor">&#x25B2;</a>
+          <a (click)="revSortName()" class="linksor">&#x25BC;</a>
+        </th>
+        <th>
+          Number of Pods
+          <a (click)="sortPodsCount()" class="linksor">&#x25B2;</a>
+          <a (click)="revSortPodsCount()" class="linksor">&#x25BC;</a>
+        </th>
+        <th>
+          CPU
+          <a (click)="sortCPU()" class="linksor">&#x25B2;</a>
+          <a (click)="revSortCPU()" class="linksor">&#x25BC;</a>
+        </th>
+        <th>
+          Memory
+          <a (click)="sortMemory()" class="linksor">&#x25B2;</a>
+          <a (click)="revSortMemory()" class="linksor">&#x25BC;</a>
+        </th>
+        <th>
+          Storage
+          <a (click)="sortStorage()" class="linksor">&#x25B2;</a>
+          <a (click)="revSortStorage()" class="linksor">&#x25BC;</a>
+        </th>
+        <th>
+          MTD Cost
+          <a (click)="sortMTDCost()" class="linksor">&#x25B2;</a>
+          <a (click)="revMTDCost()" class="linksor">&#x25BC;</a>
+        </th>      
+      </tr>   
+      <tr *ngFor="let group of groups">
+        <td>{{ group.name }}</td>
+        <td>{{ group.podsCount }}</td>
+        <td>{{ group.cpu }}</td>
+        <td>{{ group.memory }}</td>
+        <td>{{ group.storage }}</td>
+        <td>{{ group.mtdCost }}</td>
+      </tr>
+  </table>
+</div>

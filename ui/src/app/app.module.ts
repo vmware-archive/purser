@@ -18,7 +18,7 @@ import { GoogleChartsModule } from 'angular-google-charts';
 
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
     ],
     imports: [
         BrowserModule,
