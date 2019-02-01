@@ -1,0 +1,10 @@
+[
+    { "name": "Group-3", "podsCount": 4, "cpu": 2, "memory": 7, "storage": 31, "mtdCost": 1.44 },
+    { "name": "Group-1", "podsCount": 2, "cpu": 1, "memory": 3, "storage": 47, "mtdCost": 0.94 },
+    { "name": "Group-4", "podsCount": 6, "cpu": 4, "memory": 10, "storage": 33, "mtdCost": 2.23 },
+    { "name": "Group-5", "podsCount": 3, "cpu": 2, "memory": 2.3, "storage": 64, "mtdCost": 1.04 },
+    { "name": "Group-2", "podsCount": 3, "cpu": 2.5, "memory": 3.1, "storage": 86, "mtdCost": 0.99 },
+    { "name": "Group-8", "podsCount": 2, "cpu": 1.1, "memory": 0.9, "storage": 12, "mtdCost": 0.12 },
+    { "name": "Group-7", "podsCount": 1, "cpu": 0.4, "memory": 0.8, "storage": 10, "mtdCost": 0.16 },
+    { "name": "Group-6", "podsCount": 4, "cpu": 2.6, "memory": 1.7, "storage": 44, "mtdCost": 1.09 }
+]

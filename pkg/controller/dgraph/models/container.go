@@ -105,7 +105,7 @@ func StoreAndRetrieveContainersAndMetrics(pod api_v1.Pod, podUID, namespaceUID s
 func StoreContainerProcessEdge(containerXID string, procsXIDs []string) error {
 	containerUID := dgraph.GetUID(containerXID, IsContainer)
 	if containerUID == "" {
-		return fmt.Errorf("Container: %s not persisted in dgraph", containerXID)
+		return fmt.Errorf("container: %s not persisted in dgraph", containerXID)
 	}
 
 	procs := retrieveProcessesFromProcessesXIDs(procsXIDs)

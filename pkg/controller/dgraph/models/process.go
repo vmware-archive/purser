@@ -64,17 +64,17 @@ func StoreProcess(procXID, containerXID string, podsXIDs []string, creationTimeS
 	procName := strings.Join(strings.Split(procXID, ":")[4:], "-")
 	containerUID := dgraph.GetUID(containerXID, IsContainer)
 	if containerUID == "" {
-		return fmt.Errorf("Container not persisted yet")
+		return fmt.Errorf("container not persisted yet")
 	}
 
 	procUID := dgraph.GetUID(procXID, IsProc)
 	if procUID == "" {
 		assigned, err := newProc(procXID, procName, containerUID, containerXID, creationTimeStamp)
 		if err != nil {
-			logrus.Errorf("Unable to create proc: %s", procXID)
+			logrus.Errorf("unable to create proc: %s", procXID)
 			return err
 		}
-		log.Infof("Process with xid: (%s) persisted in dgraph", procXID)
+		log.Debugf("Process with xid: (%s) persisted in dgraph", procXID)
 		procUID = assigned.Uids["blank-0"]
 	}
 

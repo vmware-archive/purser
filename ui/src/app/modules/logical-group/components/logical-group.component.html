@@ -1,0 +1,19 @@
+<clr-datagrid>
+    <clr-dg-column [clrDgField]="'name'">Group Name</clr-dg-column>
+    <clr-dg-column [clrDgField]="'podsCount'">Pods</clr-dg-column>
+    <clr-dg-column [clrDgField]="'cpu'">CPU</clr-dg-column>
+    <clr-dg-column [clrDgField]="'memory'">Memory</clr-dg-column>
+    <clr-dg-column [clrDgField]="'storage'">Storage</clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdCost'">MTD Cost</clr-dg-column>
+
+    <clr-dg-placeholder>We couldn't find any custom groups!</clr-dg-placeholder>
+
+    <clr-dg-row *clrDgItems="let group of groups">
+      <clr-dg-cell>{{ group.name }}</clr-dg-cell>
+      <clr-dg-cell>{{ group.podsCount }}</clr-dg-cell>
+      <clr-dg-cell>{{ group.cpu }}</clr-dg-cell>
+      <clr-dg-cell>{{ group.memory }}</clr-dg-cell>
+      <clr-dg-cell>{{ group.storage }}</clr-dg-cell>
+      <clr-dg-cell>{{ group.mtdCost }}</clr-dg-cell>
+    </clr-dg-row>
+</clr-datagrid>

@@ -6,6 +6,7 @@ import { HomeComponent } from './components/home.component';
 import { TopoGraphModule } from '../topo-graph/modules';
 import { TopologyGraphModule } from '../topologyGraph/modules';
 import { CapacityGraphModule } from '../capacity-graph/capacity-graph.module';
+import { LogicalGroupModule } from '../logical-group/logical-group.module'
 
 @NgModule({
     imports: [
@@ -14,7 +15,8 @@ import { CapacityGraphModule } from '../capacity-graph/capacity-graph.module';
         CommonModule,
         TopoGraphModule,
         TopologyGraphModule,
-        CapacityGraphModule
+        CapacityGraphModule,
+        LogicalGroupModule
     ],
     declarations: [HomeComponent]
 })
