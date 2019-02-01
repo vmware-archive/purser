@@ -19,6 +19,7 @@ package query
 
 import (
 	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
@@ -39,6 +40,7 @@ type GroupMetrics struct {
 	CostCPU        float64
 	CostMemory     float64
 	CostStorage    float64
+	PodsCount      int
 }
 
 // RetrieveGroupMetricsFromPodUIDs ...
