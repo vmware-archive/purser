@@ -66,7 +66,7 @@ func RetrieveGroupsData() ([]models.Group, error) {
 	}`
 
 	type root struct {
-		Groups []models.Group `json:groups`
+		Groups []models.Group `json:"groups,omitempty"`
 	}
 	newRoot := root{}
 	err := dgraph.ExecuteQuery(query, &newRoot)
