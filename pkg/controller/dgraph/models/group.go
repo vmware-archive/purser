@@ -18,8 +18,6 @@
 package models
 
 import (
-	"time"
-
 	"github.com/dgraph-io/dgo/protos/api"
 	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -35,8 +33,6 @@ type Group struct {
 	dgraph.ID
 	IsGroup        bool    `json:"isGroup,omitempty"`
 	Name           string  `json:"name,omitempty"`
-	StartTime      string  `json:"startTime,omitempty"`
-	EndTime        string  `json:"endTime,omitempty"`
 	PodsCount      int     `json:"podsCount,omitempty"`
 	MtdCPU         float64 `json:"mtdCPU,omitempty"`
 	MtdMemory      float64 `json:"mtdMemory,omitempty"`
@@ -59,8 +55,6 @@ func CreateOrUpdateGroup(group *groups_v1.Group, podsCount int) (*api.Assigned, 
 		ID:             dgraph.ID{Xid: xid},
 		IsGroup:        true,
 		Name:           group.Name,
-		StartTime:      group.GetCreationTimestamp().Time.Format(time.RFC3339),
-		EndTime:        group.GetDeletionTimestamp().Time.Format(time.RFC3339),
 		PodsCount:      podsCount,
 		MtdCPU:         group.Spec.MTDMetrics.CPURequest,
 		MtdMemory:      group.Spec.MTDMetrics.MemoryRequest,

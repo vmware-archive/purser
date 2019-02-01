@@ -432,13 +432,22 @@ func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
 func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
 	var err error
 	addHeaders(&w, r)
-	if err != nil {
-		logrus.Errorf("Unable to get response: (%v)", err)
-	}
 
 	err = json.NewEncoder(w).Encode(generator.GetGraphEdges())
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
+	}
+}
+
+// GetGroupsData listens on /groups endpoint
+func GetGroupsData(w http.ResponseWriter, r *http.Request) {
+	addHeaders(&w, r)
+
+	groupsData, err := query.RetrieveGroupsData()
+	if err != nil {
+		logrus.Errorf("unable to retrieve groups data from dgraph, %v", err)
+	} else {
+		encodeAndWrite(w, groupsData)
 	}
 }
 

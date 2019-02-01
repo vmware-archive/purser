@@ -77,11 +77,10 @@ func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupCl
 	} else {
 		log.Debugf("Updated group spec: (%v)", group.Spec)
 		log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
-	}
-
-	_, err = models.CreateOrUpdateGroup(group, groupMetrics.PodsCount)
-	if err != nil {
-		log.Errorf("unable to create or update group in dgraph: (%s), error: (%v)", group.Name, err)
+		_, err = models.CreateOrUpdateGroup(group, groupMetrics.PodsCount)
+		if err != nil {
+			log.Errorf("unable to create or update group in dgraph: (%s), error: (%v)", group.Name, err)
+		}
 	}
 }
 
