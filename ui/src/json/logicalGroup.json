@@ -1,10 +1,55 @@
 [
-    { "name": "Group-3", "podsCount": 4, "cpu": 2, "memory": 7, "storage": 31, "mtdCost": 1.44 },
-    { "name": "Group-1", "podsCount": 2, "cpu": 1, "memory": 3, "storage": 47, "mtdCost": 0.94 },
-    { "name": "Group-4", "podsCount": 6, "cpu": 4, "memory": 10, "storage": 33, "mtdCost": 2.23 },
-    { "name": "Group-5", "podsCount": 3, "cpu": 2, "memory": 2.3, "storage": 64, "mtdCost": 1.04 },
-    { "name": "Group-2", "podsCount": 3, "cpu": 2.5, "memory": 3.1, "storage": 86, "mtdCost": 0.99 },
-    { "name": "Group-8", "podsCount": 2, "cpu": 1.1, "memory": 0.9, "storage": 12, "mtdCost": 0.12 },
-    { "name": "Group-7", "podsCount": 1, "cpu": 0.4, "memory": 0.8, "storage": 10, "mtdCost": 0.16 },
-    { "name": "Group-6", "podsCount": 4, "cpu": 2.6, "memory": 1.7, "storage": 44, "mtdCost": 1.09 }
-]
+    {
+      "name": "vrbc",
+      "podsCount": 882,
+      "mtdCPU": 662.475759,
+      "cpu": 56.9,
+      "mtdCPUCost": 15.899418,
+      "mtdCost": 306.798539,
+      "mtdMemory": 29043.16396,
+      "mtdStorage": 3365.862511,
+      "memory": 1951.792969,
+      "storage": 275,
+      "mtdMemoryCost": 290.43164,
+      "mtdStorageCost": 0.467481
+    },
+    {
+      "name": "tango",
+      "podsCount": 6,
+      "mtdCPU": 223.35569,
+      "mtdMemory": 589.78287,
+      "cpu": 14.55,
+      "memory": 38.406295,
+      "mtdCPUCost": 5.360537,
+      "mtdMemoryCost": 5.897829,
+      "mtdCost": 11.258366
+    },
+    {
+      "name": "symphony",
+      "podsCount": 3,
+      "mtdCPU": 206.529147,
+      "mtdMemory": 812.197643,
+      "mtdStorage": 49.76606,
+      "cpu": 12.45,
+      "memory": 48.960938,
+      "storage": 3,
+      "mtdCPUCost": 4.9567,
+      "mtdMemoryCost": 8.121976,
+      "mtdStorageCost": 0.006912,
+      "mtdCost": 13.085588
+    },
+    {
+      "name": "ops-all",
+      "podsCount": 19,
+      "mtdCPU": 1336.188258,
+      "mtdMemory": 6132.373898,
+      "mtdStorage": 289910.168038,
+      "cpu": 88.75,
+      "memory": 399.859913,
+      "storage": 24380,
+      "mtdCPUCost": 32.068518,
+      "mtdMemoryCost": 61.323739,
+      "mtdStorageCost": 40.265299,
+      "mtdCost": 133.657556
+    }
+  ]
