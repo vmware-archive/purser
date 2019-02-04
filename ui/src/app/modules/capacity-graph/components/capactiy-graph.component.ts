@@ -76,7 +76,7 @@ export class CapactiyGraphComponent implements OnInit {
         let metricValue = capaData[this.selectedMetric] || 0;
         let metricCostValue = capaData[this.selectedMetric + 'Cost'] || 0;
         if (rootName) {
-            eachRow.push({ v: rootName, f: rootName + ', ' + this.selectedMetric + ': ' + metricValue + ', ' + this.selectedMetric + ' cost: ' + metricCostValue });
+            eachRow.push({ v: rootName, f: rootName + ', ' + this.selectedMetric + ': ' + metricValue.toFixed(2) + ', ' + this.selectedMetric + ' cost: ' + metricCostValue.toFixed(2) });
             eachRow.push(null);
             eachRow.push(0);
             if (this.uniqNames.indexOf(rootName) === -1) {
@@ -91,7 +91,7 @@ export class CapactiyGraphComponent implements OnInit {
         let parentName = item.name === parent.name ? parent.type : parent.name;
         let metricValue = item[this.selectedMetric] || 0;
         let metricCostValue = item[this.selectedMetric + 'Cost'] || 0;
-        eachRow.push({ v: item.name, f: item.name + ', ' + this.selectedMetric + ': ' + metricValue + ', ' + this.selectedMetric + ' cost: ' + metricCostValue, t: item.type });
+        eachRow.push({ v: item.name, f: item.name + ', ' + this.selectedMetric + ': ' + metricValue.toFixed(2) + ', ' + this.selectedMetric + ' cost: ' + metricCostValue.toFixed(2), t: item.type });
         eachRow.push(parentName);
         eachRow.push(metricValue);
         if (this.uniqNames.indexOf(item.name) === -1) {

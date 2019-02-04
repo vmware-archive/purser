@@ -1,19 +1,25 @@
 <clr-datagrid>
     <clr-dg-column [clrDgField]="'name'">Group Name</clr-dg-column>
     <clr-dg-column [clrDgField]="'podsCount'">Pods</clr-dg-column>
-    <clr-dg-column [clrDgField]="'cpu'">CPU</clr-dg-column>
-    <clr-dg-column [clrDgField]="'memory'">Memory</clr-dg-column>
-    <clr-dg-column [clrDgField]="'storage'">Storage</clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdCost'">MTD Cost</clr-dg-column>
+    <clr-dg-column [clrDgField]="'cpu'">CPU (vCPU)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'memory'">Memory (GB)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'storage'">Storage (GB)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdCPU'">CPU Hours(vCPU-hr)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdMemory'">Memory Hours (GB-hr)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdStorage'">Storage Hours (GB-hr)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdCost'">MTD Cost (US $)</clr-dg-column>
 
     <clr-dg-placeholder>We couldn't find any custom groups!</clr-dg-placeholder>
 
     <clr-dg-row *clrDgItems="let group of groups">
       <clr-dg-cell>{{ group.name }}</clr-dg-cell>
       <clr-dg-cell>{{ group.podsCount }}</clr-dg-cell>
-      <clr-dg-cell>{{ group.cpu }}</clr-dg-cell>
-      <clr-dg-cell>{{ group.memory }}</clr-dg-cell>
-      <clr-dg-cell>{{ group.storage }}</clr-dg-cell>
-      <clr-dg-cell>{{ group.mtdCost }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.cpu | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.memory | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.storage | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.mtdCPU | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.mtdMemory | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.mtdStorage | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.mtdCost | number: '1.0-2') || 0 }}</clr-dg-cell>
     </clr-dg-row>
 </clr-datagrid>

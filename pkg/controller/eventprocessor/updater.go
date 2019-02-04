@@ -18,9 +18,12 @@
 package eventprocessor
 
 import (
+	"time"
+
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/vmware/purser/pkg/controller/utils"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -74,6 +77,10 @@ func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupCl
 	} else {
 		log.Debugf("Updated group spec: (%v)", group.Spec)
 		log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
+		_, err = models.CreateOrUpdateGroup(group, groupMetrics.PodsCount)
+		if err != nil {
+			log.Errorf("unable to create or update group in dgraph: (%s), error: (%v)", group.Name, err)
+		}
 	}
 }
 
@@ -90,7 +97,7 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 
 	// if number of occurrences of UID == number of expressions that means the pod satisfies all the expressions(i.e, AND)
 	// get uid-query to retrieve such pods i.e, "uid1, uid2, uid2..."
-	uidQueryForPods := getUIDQueryForPods(podUIDsCounter, len(group.Spec.Expressions))
+	uidQueryForPods, podsCount := getUIDQueryForPods(podUIDsCounter, len(group.Spec.Expressions))
 	log.Debugf("Group: (%v), uidQuery: (%v)", group.Name, uidQueryForPods)
 
 	// get group metrics
@@ -99,6 +106,7 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 		log.Errorf("Unable to retrieve group metrics. UIDs: (%v)", uidQueryForPods)
 		return query.GroupMetrics{}
 	}
+	groupMetrics.PodsCount = podsCount
 	return groupMetrics
 }
 
@@ -133,9 +141,10 @@ func mapPodUIDsToNumberOfOccurences(podsFromExpressions [][]string) map[string]i
 // returns UIDs for pods that satisfy (number of its occurrences == expressions count) i.e,
 // if number of occurrences of UID == number of expressions that means the pod satisfies all the expressions(-> AND)
 // returns uid-query(i.e, "uid1, uid2, uid2...") that can retrieve desired pods
-func getUIDQueryForPods(podsUIDsCounter map[string]int, expressionsCount int) string {
+func getUIDQueryForPods(podsUIDsCounter map[string]int, expressionsCount int) (string, int) {
 	separator := ", "
 	isFirst := true
+	podsCount := 0
 	var uidQueryForPods string
 	for podUID, count := range podsUIDsCounter {
 		if count == expressionsCount {
@@ -145,7 +154,8 @@ func getUIDQueryForPods(podsUIDsCounter map[string]int, expressionsCount int) st
 				isFirst = false
 			}
 			uidQueryForPods += podUID
+			podsCount++
 		}
 	}
-	return uidQueryForPods
+	return uidQueryForPods, podsCount
 }

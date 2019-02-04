@@ -207,4 +207,10 @@ var routes = Routes{
 		"/edges",
 		GetPodDiscoveryEdges,
 	},
+	Route{
+		"GetGroupsData",
+		"GET",
+		"/groups",
+		GetGroupsData,
+	},
 }

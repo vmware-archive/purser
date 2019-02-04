@@ -19,7 +19,7 @@ export class LogicalGroupService {
 
         //console.log(_url);
 
-        return this.http.get(_devUrl, {
+        return this.http.get(_url, {
             observe: 'body',
             responseType: 'json'
         });

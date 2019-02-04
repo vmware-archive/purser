@@ -96,6 +96,7 @@ func CreateSchema() error {
 		isPod: bool .
 		isContainer: bool .
 		isProc: bool .
+		isGroup: bool .
 		isNodePrice: bool .
 		isStoragePrice: bool .
 		isRateCard: bool .

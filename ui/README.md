@@ -2,7 +2,7 @@
 
 Purser UI is designed to provide a visual representation to a host of features provided by Purser such as **cluster hierarchy**, **Pod and Service interactions** and **capacity allocations** for CPU, memory, disk space and other resources.    
  
- It has been generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.1.
+ It has been generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.1 and [Clarity Design System](https://clarity.design/).
 
 ## Installing Dependencies
 

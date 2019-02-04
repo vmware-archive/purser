@@ -19,6 +19,9 @@ package query
 
 import (
 	"fmt"
+
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
@@ -39,6 +42,35 @@ type GroupMetrics struct {
 	CostCPU        float64
 	CostMemory     float64
 	CostStorage    float64
+	PodsCount      int
+}
+
+// RetrieveGroupsData returns list of models.Group objects in json format
+// error is not nil if any failure is encountered
+func RetrieveGroupsData() ([]models.Group, error) {
+	query := `query {
+		groups(func: has(isGroup)) {
+			name
+			podsCount
+			mtdCPU
+			mtdMemory
+			mtdStorage
+			cpu
+			memory
+			storage
+			mtdCPUCost
+			mtdMemoryCost
+			mtdStorageCost
+			mtdCost
+		}
+	}`
+
+	type root struct {
+		Groups []models.Group `json:"groups,omitempty"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	return newRoot.Groups, err
 }
 
 // RetrieveGroupMetricsFromPodUIDs ...
