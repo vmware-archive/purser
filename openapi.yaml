@@ -571,7 +571,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/groups'
+                  $ref: '#/components/schemas/Groups'
 components:
   schemas:
     Hierarchy:
