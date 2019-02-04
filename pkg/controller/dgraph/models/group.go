@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
+// Group constants
 const (
 	IsGroup   = "isGroup"
 	XIDPrefix = "purser-group-"
