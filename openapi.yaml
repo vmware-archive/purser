@@ -560,6 +560,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Nodes'
+  /groups:
+    get:
+      description: Gets array of Group objects along with their metrics
+      responses:
+        200:
+          description: Operation Successful
+          content:
+            application/json; charset=UTF-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/groups'
 components:
   schemas:
     Hierarchy:
@@ -619,6 +631,46 @@ components:
         title:
           type: string
           example: 7 times communicated
+    Groups:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Group-1
+        podsCount:
+          type: integer
+          format: int32
+          example: 4
+        mtdCPU:
+          type: number
+          example: 10.2
+        mtdMemory:
+          type: number
+          example: 3.9
+        mtdStorage:
+          type: number
+          example: 41.5
+        cpu:
+          type: number
+          example: 2.04
+        memory:
+          type: number
+          example: 0.78
+        storage:
+          type: number
+          example: 8.3
+        mtdCPUCost:
+          type: number
+          example:  0.2448
+        mtdMemoryCost:
+          type: number
+          example: 0.039
+        mtdStorageCost:
+          type: number
+          example: 0.00576388852
+        mtdCost:
+          type: number
+          example: 0.28956388852
     Hierarchy_data_children:
       type: object
       properties:
