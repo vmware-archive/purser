@@ -29,7 +29,7 @@
                                     </div>
                                     <clr-radio-wrapper *ngFor="let item of metricOptions" class="radioWrapper">
                                         <input type="radio" clrRadio name="options" required value="{{item.value}}" [(ngModel)]="selectedMetric" (ngModelChange)="metricChange($event)"
-                                        />
+                                         style="cursor:pointer" />
                                         <label class="radioLabel">{{item.displayValue}}</label>
                                     </clr-radio-wrapper>
                                 </clr-radio-container>
@@ -39,7 +39,7 @@
                                     <div>
                                         <label>Filter</label>
                                     </div>
-                                    <select clrSelect name="filerItems" [(ngModel)]="selectedFilterItem" (ngModelChange)="filterItemChange($event)">
+                                    <select clrSelect name="filerItems" [(ngModel)]="selectedFilterItem" (ngModelChange)="filterItemChange($event)" style="cursor:pointer">
                                         <option value="select">--Select--</option>
                                         <option *ngFor="let item of filterItems">{{item}}</option>
                                     </select>
@@ -69,7 +69,7 @@
                     </div>
                     <div class="googleChartDiv">
                         <google-chart class="googleChart" [type]="'TreeMap'" [data]="graphData" [columnNames]="colNames" [options]="chartOptions"
-                            (select)="onSelect($event)"></google-chart>
+                            (select)="onSelect($event)" style="cursor:pointer"></google-chart>
                     </div>
                 </div>
                 <p class="card-text" *ngIf="CAPA_STATUS === 'WAIT'">

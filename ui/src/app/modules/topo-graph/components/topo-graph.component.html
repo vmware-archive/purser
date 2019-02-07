@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <google-chart class="googleChart" [type]="'OrgChart'" [data]="graphData" [columnNames]="colNames" [options]="chartOptions"
-                        (select)="onSelect($event)"></google-chart>
+                        (select)="onSelect($event)" style="cursor:pointer"></google-chart>
                 </div>
                 <p class="card-text" *ngIf="TOPO_STATUS === 'WAIT'">
                     <span class="spinner"></span>
