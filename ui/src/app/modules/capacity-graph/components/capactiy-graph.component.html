@@ -72,8 +72,26 @@
                             (select)="onSelect($event)"></google-chart>
                     </div>
                 </div>
-                <div class="card-text" *ngIf="CAPA_STATUS !== 'READY'">
-                    <span class="spinner"></span>
+                <p class="card-text" *ngIf="CAPA_STATUS === 'WAIT'">
+                        <span class="spinner"></span>
+                </p>
+                <div *ngIf="CAPA_STATUS === 'NO_DATA'">
+                    <div class="clr-row">
+                        <div class="clr-col-4">
+                            <div class="alert alert-warning" role="alert">
+                                <div class="alert-items">
+                                    <div class="alert-item static">
+                                        <div class="alert-icon-wrapper">
+                                            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                                        </div>
+                                        <span class="alert-text">
+                                            No data found
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

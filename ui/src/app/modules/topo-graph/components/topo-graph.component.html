@@ -38,9 +38,27 @@
                     <google-chart class="googleChart" [type]="'OrgChart'" [data]="graphData" [columnNames]="colNames" [options]="chartOptions"
                         (select)="onSelect($event)"></google-chart>
                 </div>
-                <p class="card-text" *ngIf="TOPO_STATUS !== 'READY'">
+                <p class="card-text" *ngIf="TOPO_STATUS === 'WAIT'">
                     <span class="spinner"></span>
                 </p>
+                <div *ngIf="TOPO_STATUS === 'NO_DATA'">
+                    <div class="clr-row">
+                        <div class="clr-col-4">
+                            <div class="alert alert-warning" role="alert">
+                                <div class="alert-items">
+                                    <div class="alert-item static">
+                                        <div class="alert-icon-wrapper">
+                                            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                                        </div>
+                                        <span class="alert-text">
+                                            No data found
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
