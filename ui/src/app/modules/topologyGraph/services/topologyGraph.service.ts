@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BACKEND_URL } from '../../../app.component'
 
 @Injectable()
 export class TopologyGraphService {
@@ -9,8 +10,7 @@ export class TopologyGraphService {
 
     public getNodes(serviceName) {
         let _devUrl: string = './json/nodes.json';
-        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
-        let _url: string = base_url + 'nodes';
+        let _url: string = BACKEND_URL + 'nodes';
         if (serviceName && serviceName !== 'ALL') {
             _url = _url + '?service=' + serviceName;
         }
@@ -23,8 +23,7 @@ export class TopologyGraphService {
 
     public getEdges(serviceName) {
         let _devUrl: string = './json/edges.json';
-        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
-        let _url: string = base_url + 'edges';
+        let _url: string = BACKEND_URL + 'edges';
         if (serviceName && serviceName !== 'ALL') {
             _url = _url + '?service=' + serviceName;
         }
@@ -37,8 +36,7 @@ export class TopologyGraphService {
 
     public getServiceList() {
         let _devUrl: string = './json/serviceList.json';
-        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
-        let _url: string = base_url + 'services';
+        let _url: string = BACKEND_URL + 'services';
 
         return this.http.get(_url, {
             observe: 'body',

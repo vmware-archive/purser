@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BACKEND_URL } from '../../../app.component'
 
 @Injectable()
 export class TopoGraphService {
@@ -9,8 +10,7 @@ export class TopoGraphService {
 
     public getTopoData(view?, type?, name?) {
         let _devUrl: string = './json/topology.json';
-        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
-        let _url: string = base_url + 'hierarchy';
+        let _url: string = BACKEND_URL + 'hierarchy';
 
         if (type) {
             _url = _url + '/' + type;
