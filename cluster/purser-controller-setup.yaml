@@ -41,9 +41,9 @@ kind: Service
 metadata:
   name: purser-db
   labels:
-    app: purser
+    app: purser-db
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: 5080
     targetPort: 5080
@@ -57,16 +57,31 @@ spec:
   - port: 9080
     targetPort: 9080
     name: server-grpc
-  - port: 8000
-    targetPort: 8000
-    name: ratel-http
+  selector:
+    app: purser-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: purser
+  labels:
+    app: purser
+spec:
+  type: NodePort
+  ports:
   - port: 3030
     targetPort: 3030
+    nodePort: 30300
+    protocol: TCP
     name: purser
+  - port: 4200
+    targetPort: 4200
+    nodePort: 30303
+    protocol: TCP
   selector:
     app: purser
 ---
-# This StatefulSet runs 1 pod with one Zero, one Server & one Ratel containers.
+# This StatefulSet runs 1 pod with one Zero, one Server containers.
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -76,28 +91,13 @@ spec:
   replicas: 1
   selector:
       matchLabels:
-        app: purser
+        app: purser-db
   template:
     metadata:
       labels:
-        app: purser
+        app: purser-db
     spec:
       containers:
-      - name: ratel
-        image: dgraph/dgraph:v1.0.9
-        imagePullPolicy: IfNotPresent
-        resources:
-          limits:
-            memory: 10Mi
-            cpu: 100m
-          requests:
-            memory: 10Mi
-            cpu: 100m
-        ports:
-        - containerPort: 8000
-          name: ratel-http
-        command:
-          - dgraph-ratel
       - name: zero
         image: dgraph/dgraph:v1.0.9
         imagePullPolicy: IfNotPresent
@@ -196,4 +196,8 @@ spec:
           name: purser
         command: ["/controller"]
         args: ["--log=info", "--interactions=disable", "--dgraphURL=purser-db", "--dgraphPort=9080"]
+      - name: purser-ui
+        image: kreddyj/purser-ui-test
+        ports:
+        - containerPort: 4200
 

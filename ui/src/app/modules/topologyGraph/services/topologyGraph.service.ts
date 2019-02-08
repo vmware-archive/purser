@@ -9,7 +9,8 @@ export class TopologyGraphService {
 
     public getNodes(serviceName) {
         let _devUrl: string = './json/nodes.json';
-        let _url: string = 'http://localhost:3030/nodes';
+        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
+        let _url: string = base_url + 'nodes';
         if (serviceName && serviceName !== 'ALL') {
             _url = _url + '?service=' + serviceName;
         }
@@ -22,7 +23,8 @@ export class TopologyGraphService {
 
     public getEdges(serviceName) {
         let _devUrl: string = './json/edges.json';
-        let _url: string = 'http://localhost:3030/edges';
+        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
+        let _url: string = base_url + 'edges';
         if (serviceName && serviceName !== 'ALL') {
             _url = _url + '?service=' + serviceName;
         }
@@ -35,7 +37,8 @@ export class TopologyGraphService {
 
     public getServiceList() {
         let _devUrl: string = './json/serviceList.json';
-        let _url: string = 'http://localhost:3030/services';
+        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
+        let _url: string = base_url + 'services';
 
         return this.http.get(_url, {
             observe: 'body',

@@ -9,7 +9,8 @@ export class TopoGraphService {
 
     public getTopoData(view?, type?, name?) {
         let _devUrl: string = './json/topology.json';
-        let _url: string = 'http://localhost:3030/hierarchy';
+        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
+        let _url: string = base_url + 'hierarchy';
 
         if (type) {
             _url = _url + '/' + type;

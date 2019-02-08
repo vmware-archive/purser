@@ -9,7 +9,8 @@ export class LogicalGroupService {
 
     public getLogicalGroupData(name?) {
         let _devUrl: string = './json/logicalGroup.json';
-        let _url: string = 'http://localhost:3030/groups';
+        let base_url: string = window.location.protocol + '//' + window.location.host.split(':')[0] + ':30300/';
+        let _url: string = base_url + 'groups';
 
 
         if (name) {
