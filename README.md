@@ -64,13 +64,19 @@ Purser has three components to install.
 - [Purser UI Setup](./README.md#Purser-UI-Setup)
 - [Purser Plugin Setup](./README.md#Purser-Plugin-Setup)
 
-#### Purser Controller Setup
-Download the controller setup yaml file from [here](cluster/purser-database-setup.yaml).
-
+#### Purser Setup
 ``` bash
-# Controller installation
-kubectl create -f purser-controller-setup.yaml
+# DB setup
+curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-database-setup.yaml -O
+kubectl create -f purser-database-setup.yaml
+
+# Purser controller and UI setup
+curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-setup.yaml -O
+kubectl create -f purser-setup.yaml
 ```
+**NOTE:** If you don't have `curl` installed you can download `purser-database-setup.yaml` from [here](./cluster/purser-database-setup.yaml)
+and `purser-setup.yaml` from [here](./cluster/purser-setup.yaml). Then `kubectl create -f purser-database-setup.yaml` 
+and `kubectl create -f purser-setup.yaml` will setup purser in your cluster.
 
 ##### Change Settings and Enable/Disable Purser Features
 
@@ -80,14 +86,6 @@ The following settings can be customized before Controller installation:
 - Enable/Disable **resource interactions** capability by editing `args` field in the [purser-controller-setup.yaml](cluster/purser-database-setup.yaml) and uncommenting `pods/exec` rule from purser-permissions. (Default: `disabled`)
 - Enable **subscription to inventory changes** capability by creating an object of custom resource kind `Subscriber`. (Refer: [example-subscriber.yaml](./cluster/artifacts/example-subscriber.yaml))
 - Enable **customized logical grouping of resources** by creating an object of custom resource kind `Group`. (Refer: [docs](docs/custom-group-installation-and-usage.md) for custom group installation and usage)
-
-#### Purser UI Setup
-Download the UI setup yaml file from [here](cluster/purser-setup.yaml).
-
-``` bash
-# UI installation
-kubectl create -f purser-ui-setup.yaml
-```
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
@@ -112,18 +110,14 @@ For other installation methods such as **manual installation** or **installation
 
 ## Uninstalling
 
-### Uninstalling Purser Controller
+### Uninstalling Purser
 
 ``` bash
-kubectl delete -f purser-controller-setup.yaml
+kubectl delete -f purser-database-setup.yaml
+kubectl delete -f purser-setup.yaml
 kubectl delete pvc datadir-purser-dgraph-0
 ```
 
-### Uninstalling Purser UI
-
-``` bash
-kubectl delete -f purser-ui-setup.yaml
-```
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
