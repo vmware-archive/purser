@@ -1,3 +1,4 @@
+<h3>Interactions</h3>
 <div class="actionDiv">
     <clr-select-container *ngIf="enableClustering">
         <label class="serviceSelectLabel">Select service</label>
@@ -18,6 +19,21 @@
     <div class="spinner">
     </div>
 </div>
-<div class="mainDiv" id="mynetwork" #networkContainer [hidden]="NODE_STATUS !== 'READY' && EDGE_STATUS !== 'READY'">
-
+<div *ngIf="NODE_STATUS === 'NO_DATA' || EDGE_STATUS === 'NO_DATA'">
+    <div class="clr-row">
+        <div class="clr-col-4">
+            <div class="alert alert-warning" role="alert">
+                <div class="alert-items">
+                    <div class="alert-item static">
+                        <div class="alert-icon-wrapper">
+                            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                        </div>
+                        <span class="alert-text">
+                            No data found
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

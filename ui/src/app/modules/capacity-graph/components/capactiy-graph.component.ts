@@ -31,11 +31,11 @@ export class CapactiyGraphComponent implements OnInit {
         minColor: '#009688',
         midColor: '#f7f7f7',
         maxColor: '#ee8100',
-        headerHeight: 25,
+        headerHeight: 40,
     };
     public selectedMetric: string = 'cpu';
     public metricOptions: any = [
-        { displayValue: 'CPU', value: 'cpu', units: '' },
+        { displayValue: 'CPU', value: 'cpu', units: 'vCPU' },
         { displayValue: 'Memory', value: 'memory', units: 'GB' },
         { displayValue: 'Storage', value: 'storage', units: 'GB' }
         //{ displayValue: 'Network', value: 'network' }
