@@ -75,7 +75,7 @@ make push
 
 ### Install Purser Plugin
 
-- Update the image name in [`purser-controller-setup.yaml`](../cluster/purser-controller-setup.yaml) to the docker image name that you pushed.
+- Update the image name in [`purser-controller-setup.yaml`](../cluster/purser-database-setup.yaml) to the docker image name that you pushed.
 
 - Install the controller in the cluster using `kubectl`.
 
