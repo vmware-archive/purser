@@ -93,6 +93,7 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
 			et as endTime
 			isTerminated as count(endTime)
+			isAlive as math(cond(isTerminated == 0, 1, 0))
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
 			pitPodCPU as math(cond(isTerminated == 0, cond(cpuRequestCount > 0, podCpu, 0.0), 0.0))
@@ -124,6 +125,7 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 			cpuCost: sum(val(podCpuCost))
 			memoryCost: sum(val(podMemoryCost))
 			storageCost: sum(val(podStorageCost))
+			livePods: sum(val(isAlive))
 		}
 	}`
 
@@ -180,5 +182,7 @@ func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
 		groupMetrics.CostMemory = value
 	case "storageCost":
 		groupMetrics.CostStorage = value
+	case "livePods":
+		groupMetrics.PodsCount = int(value)
 	}
 }
