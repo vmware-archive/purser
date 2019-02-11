@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BACKEND_URL } from '../../../app.component'
 
 @Injectable()
 export class CapacityGraphService {
@@ -9,7 +10,7 @@ export class CapacityGraphService {
 
     public getCapacityData(view?, type?, name?) {
         let _devUrl: string = './json/capacity.json';
-        let _url: string = 'http://localhost:3030/metrics';
+        let _url: string = BACKEND_URL + 'metrics';
 
         if (type) {
             _url = _url + '/' + type;

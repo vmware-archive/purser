@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BACKEND_URL } from '../../../app.component'
 
 @Injectable()
 export class LogicalGroupService {
@@ -9,8 +10,7 @@ export class LogicalGroupService {
 
     public getLogicalGroupData(name?) {
         let _devUrl: string = './json/logicalGroup.json';
-        let _url: string = 'http://localhost:3030/groups';
-
+        let _url: string = BACKEND_URL + 'groups';
 
         if (name) {
             _url = _url + '?name=' + name;

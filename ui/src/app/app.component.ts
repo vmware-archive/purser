@@ -2,6 +2,12 @@ import { Component, OnInit} from '@angular/core';
 import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { MCommon } from './common/messages/common.messages';
 
+// production environment
+export const BACKEND_URL = window.location.protocol + '//' + window.location.host.split(':')[0] +':30300/'
+
+// development environment
+// export const BACKEND_URL = 'http://localhost:3030/'
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',

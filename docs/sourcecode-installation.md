@@ -75,12 +75,17 @@ make push
 
 ### Install Purser Plugin
 
-- Update the image name in [`purser-controller-setup.yaml`](../cluster/purser-controller-setup.yaml) to the docker image name that you pushed.
+- Update the image name in [`purser-setup.yaml`](../cluster/purser-setup.yaml) to the docker image name that you pushed.
 
 - Install the controller in the cluster using `kubectl`.
 
   ``` bash
-  kubectl create -f purser-controller-setup.yaml
+  # DB setup
+  curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-database-setup.yaml -O
+  kubectl create -f purser-database-setup.yaml
+  
+  # Purser controller and UI setup
+  kubectl create -f purser-setup.yaml
   ```
 
   _Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
