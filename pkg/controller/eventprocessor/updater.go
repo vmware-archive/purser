@@ -97,7 +97,7 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 
 	// if number of occurrences of UID == number of expressions that means the pod satisfies all the expressions(i.e, AND)
 	// get uid-query to retrieve such pods i.e, "uid1, uid2, uid2..."
-	uidQueryForPods, podsCount := getUIDQueryForPods(podUIDsCounter, len(group.Spec.Expressions))
+	uidQueryForPods := getUIDQueryForPods(podUIDsCounter, len(group.Spec.Expressions))
 	log.Debugf("Group: (%v), uidQuery: (%v)", group.Name, uidQueryForPods)
 
 	// get group metrics
@@ -106,7 +106,6 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 		log.Errorf("Unable to retrieve group metrics. UIDs: (%v)", uidQueryForPods)
 		return query.GroupMetrics{}
 	}
-	groupMetrics.PodsCount = podsCount
 	return groupMetrics
 }
 
@@ -141,10 +140,9 @@ func mapPodUIDsToNumberOfOccurences(podsFromExpressions [][]string) map[string]i
 // returns UIDs for pods that satisfy (number of its occurrences == expressions count) i.e,
 // if number of occurrences of UID == number of expressions that means the pod satisfies all the expressions(-> AND)
 // returns uid-query(i.e, "uid1, uid2, uid2...") that can retrieve desired pods
-func getUIDQueryForPods(podsUIDsCounter map[string]int, expressionsCount int) (string, int) {
+func getUIDQueryForPods(podsUIDsCounter map[string]int, expressionsCount int) string {
 	separator := ", "
 	isFirst := true
-	podsCount := 0
 	var uidQueryForPods string
 	for podUID, count := range podsUIDsCounter {
 		if count == expressionsCount {
@@ -154,8 +152,7 @@ func getUIDQueryForPods(podsUIDsCounter map[string]int, expressionsCount int) (s
 				isFirst = false
 			}
 			uidQueryForPods += podUID
-			podsCount++
 		}
 	}
-	return uidQueryForPods, podsCount
+	return uidQueryForPods
 }
