@@ -81,8 +81,8 @@ and `kubectl create -f purser-setup.yaml` will setup purser in your cluster.
 
 The following settings can be customized before Controller installation:
 
-- Change the default **log level**, **dgraph url** and **dgraph port** by editing `args` field in the [purser-setup.yaml](cluster/purser-database-setup.yaml). (Default: `--log=info`, `--dgraphURL=purser-db`, `--dgraphPort=9080`)
-- Enable/Disable **resource interactions** capability by editing `args` field in the [purser-setup.yaml](cluster/purser-database-setup.yaml) and uncommenting `pods/exec` rule from purser-permissions. (Default: `disabled`)
+- Change the default **log level**, **dgraph url** and **dgraph port** by editing `args` field in the [purser-setup.yaml](cluster/purser-setup.yaml). (Default: `--log=info`, `--dgraphURL=purser-db`, `--dgraphPort=9080`)
+- Enable/Disable **resource interactions** capability by editing `args` field in the [purser-setup.yaml](cluster/purser-setup.yaml) and uncommenting `pods/exec` rule from purser-permissions. (Default: `disabled`)
 - Enable **subscription to inventory changes** capability by creating an object of custom resource kind `Subscriber`. (Refer: [example-subscriber.yaml](./cluster/artifacts/example-subscriber.yaml))
 - Enable **customized logical grouping of resources** by creating an object of custom resource kind `Group`. (Refer: [docs](docs/custom-group-installation-and-usage.md) for custom group installation and usage)
 
