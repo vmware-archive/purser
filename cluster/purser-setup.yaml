@@ -96,5 +96,12 @@ spec:
       - name: purser-ui
         image: kreddyj/purser-ui:1.0.1
         imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 250Mi
+            cpu: 100m
+          requests:
+            memory: 250Mi
+            cpu: 100m
         ports:
         - containerPort: 4200
