@@ -422,7 +422,12 @@ func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.Errorf("Unable to get response: (%v)", err)
 	}
-	err = json.NewEncoder(w).Encode(generator.GetGraphNodes())
+	nodes := generator.GetGraphNodes()
+	if nodes != nil {
+		logrus.Infof("No edges found")
+		return
+	}
+	err = json.NewEncoder(w).Encode(nodes)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
@@ -433,7 +438,12 @@ func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
 	var err error
 	addHeaders(&w, r)
 
-	err = json.NewEncoder(w).Encode(generator.GetGraphEdges())
+	edges := generator.GetGraphEdges()
+	if edges == nil {
+		logrus.Infof("No edges found")
+		return
+	}
+	err = json.NewEncoder(w).Encode(edges)
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
