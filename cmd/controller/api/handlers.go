@@ -424,7 +424,7 @@ func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
 	}
 	nodes := generator.GetGraphNodes()
 	if nodes != nil {
-		logrus.Infof("No edges found")
+		logrus.Infof("No nodes found")
 		return
 	}
 	err = json.NewEncoder(w).Encode(nodes)
