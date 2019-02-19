@@ -155,6 +155,7 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 		VolumeType:     product.Attributes.VolumeType,
 		UsageType:      product.Attributes.UsageType,
 		Price:          priceInFloat64,
+		PricePerGB:     strconv.FormatFloat(priceInFloat64, 'f', 11, 64),
 	}
 	uid := models.StoreStoragePrice(storagePrice, productXID)
 	if uid != "" {
