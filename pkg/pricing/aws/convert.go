@@ -79,7 +79,6 @@ func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, 
 		case storageInstance:
 			storagePrices = updateStorageInstancePrices(product, priceInFloat64, unit, storagePrices)
 		}
-
 	}
 	return nodePrices, storagePrices
 }
@@ -154,6 +153,8 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
 	pricePerCPU := defaultCPUCostPerCPUPerHour
 	pricePerGB := defaultMemCostPerGBPerHour
+
+	// priceInFloat64 should be greater than 0 otherwise this function returns default pricing
 	if priceInFloat64 != priceError && priceInFloat64 != 0 {
 		cpu, err := strconv.ParseFloat(product.Attributes.Vcpu, 64)
 		if err == nil {
