@@ -19,6 +19,7 @@ package aws
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -34,6 +35,12 @@ const (
 	computeInstance = "Compute Instance"
 	priceError      = -1.0
 	hoursInMonth    = 720
+
+	// TODO: Determine priceSplitRatio according to instance type i.e, compute optimized or memory optimized etc
+	priceSplitRatio                = 0.5
+	defaultCPUCostPerCPUPerHour    = "0.024"
+	defaultMemCostPerGBPerHour     = "0.01"
+	defaultStorageCostPerGBPerHour = "0.00013888888"
 )
 
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
@@ -99,6 +106,23 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
 		// Unit of Compute price USD-perHour
 		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
+
+		var pricePerCPU, pricePerGB string
+		cpu, err := strconv.ParseFloat(product.Attributes.CPU, 64)
+		if err != nil {
+			pricePerCPU = defaultCPUCostPerCPUPerHour
+		} else {
+			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
+		}
+
+		memWithUnits := product.Attributes.Memory
+		mem, err := strconv.ParseFloat(strings.Split(memWithUnits, " GiB")[0], 64)
+		if err != nil {
+			pricePerCPU = defaultMemCostPerGBPerHour
+		} else {
+			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/mem, 'f', 11, 64)
+		}
+
 		nodePrice := &models.NodePrice{
 			ID:              dgraph.ID{Xid: productXID},
 			IsNodePrice:     true,
@@ -106,6 +130,8 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 			InstanceFamily:  product.Attributes.InstanceFamily,
 			OperatingSystem: product.Attributes.OperatingSystem,
 			Price:           priceInFloat64,
+			PricePerCPU:     pricePerCPU,
+			PricePerMemory:  pricePerGB,
 		}
 		duplicateComputeInstanceChecker[key] = true
 		uid := models.StoreNodePrice(nodePrice, productXID)

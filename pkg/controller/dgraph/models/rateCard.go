@@ -51,6 +51,8 @@ type NodePrice struct {
 	InstanceFamily  string  `json:"instanceFamily,omitempty"`
 	OperatingSystem string  `json:"operatingSystem,omitempty"`
 	Price           float64 `json:"price,omitempty"`
+	PricePerCPU     string  `json:"cpuPrice,omitempty"`
+	PricePerMemory  string  `json:"memoryPrice,omitempty"`
 }
 
 // StoragePrice structure
