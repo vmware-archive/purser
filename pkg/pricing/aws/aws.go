@@ -66,7 +66,7 @@ type ProductAttributes struct {
 	PreInstalledSW  string
 	VolumeType      string
 	UsageType       string
-	CPU             string
+	Vcpu            string
 	Memory          string
 }
 

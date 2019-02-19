@@ -106,7 +106,7 @@ func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, s
 	pricePerCPU := defaultCPUCostPerCPUPerHour
 	pricePerGB := defaultMemCostPerGBPerHour
 	if priceInFloat64 != priceError {
-		cpu, err := strconv.ParseFloat(product.Attributes.CPU, 64)
+		cpu, err := strconv.ParseFloat(product.Attributes.Vcpu, 64)
 		if err == nil {
 			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
 		}
