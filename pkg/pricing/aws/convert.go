@@ -41,6 +41,7 @@ const (
 	defaultCPUCostPerCPUPerHour    = "0.024"
 	defaultMemCostPerGBPerHour     = "0.01"
 	defaultStorageCostPerGBPerHour = "0.00013888888"
+	defaultStorageCostInFloat64    = 0.00013888888
 )
 
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
@@ -73,14 +74,15 @@ func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, 
 	duplicateComputeInstanceChecker := make(map[string]bool)
 	for _, product := range products {
 		priceInFloat64, unit := getResourcePrice(product, planList)
-		if priceInFloat64 != priceError {
-			switch product.ProductFamily {
-			case computeInstance:
-				nodePrices = updateComputeInstancePrices(product, priceInFloat64, duplicateComputeInstanceChecker, nodePrices)
-			case storageInstance:
-				storagePrices = updateStorageInstancePrices(product, priceInFloat64, unit, storagePrices)
-			}
+		switch product.ProductFamily {
+		case computeInstance:
+			pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
+			nodePrices = updateComputeInstancePrices(
+				product, priceInFloat64, pricePerCPU, pricePerGB, duplicateComputeInstanceChecker, nodePrices)
+		case storageInstance:
+			storagePrices = updateStorageInstancePrices(product, priceInFloat64, unit, storagePrices)
 		}
+
 	}
 	return nodePrices, storagePrices
 }
@@ -101,28 +103,29 @@ func getResourcePrice(product Product, planList PlanList) (float64, string) {
 	return priceError, ""
 }
 
-func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
-	key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
-	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
-		// Unit of Compute price USD-perHour
-		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
-
-		var pricePerCPU, pricePerGB string
+func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
+	pricePerCPU := defaultCPUCostPerCPUPerHour
+	pricePerGB := defaultMemCostPerGBPerHour
+	if priceInFloat64 != priceError {
 		cpu, err := strconv.ParseFloat(product.Attributes.CPU, 64)
-		if err != nil {
-			pricePerCPU = defaultCPUCostPerCPUPerHour
-		} else {
+		if err == nil {
 			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
 		}
 
 		memWithUnits := product.Attributes.Memory
 		mem, err := strconv.ParseFloat(strings.Split(memWithUnits, " GiB")[0], 64)
-		if err != nil {
-			pricePerCPU = defaultMemCostPerGBPerHour
-		} else {
+		if err == nil {
 			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/mem, 'f', 11, 64)
 		}
+	}
+	return pricePerCPU, pricePerGB
+}
 
+func updateComputeInstancePrices(product Product, priceInFloat64 float64, pricePerCPU, pricePerGB string, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
+	key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
+	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
+		// Unit of Compute price USD-perHour
+		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
 		nodePrice := &models.NodePrice{
 			ID:              dgraph.ID{Xid: productXID},
 			IsNodePrice:     true,
@@ -144,10 +147,13 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 }
 
 func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit string, storagePrices []*models.StoragePrice) []*models.StoragePrice {
-	if unit == gbMonth {
+	if priceInFloat64 == priceError {
+		priceInFloat64 = defaultStorageCostInFloat64
+	} else if unit == gbMonth {
 		// convert to GBHour
 		priceInFloat64 = priceInFloat64 / hoursInMonth
 	}
+
 	productXID := product.Attributes.VolumeType + deliminator + product.Attributes.UsageType
 	storagePrice := &models.StoragePrice{
 		ID:             dgraph.ID{Xid: productXID},
