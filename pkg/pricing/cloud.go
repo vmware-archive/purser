@@ -22,10 +22,12 @@ import (
 	"github.com/vmware/purser/pkg/pricing/aws"
 )
 
+// constants for cloud provider pricing
 const (
 	AWS = "aws"
 )
 
+// Cloud structure used for pricing
 type Cloud struct {
 	CloudProvider string
 	Region        string
@@ -37,6 +39,7 @@ func GetClusterProviderAndRegion() (string, string) {
 	return AWS, "us-east-1"
 }
 
+// PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph
 func (c *Cloud) PopulateRateCard() {
 	switch c.CloudProvider {
 	case AWS:
