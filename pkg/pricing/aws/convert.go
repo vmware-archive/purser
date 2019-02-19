@@ -112,7 +112,7 @@ func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, s
 		}
 
 		memWithUnits := product.Attributes.Memory
-		mem, err := strconv.ParseFloat(strings.Split(memWithUnits, " GiB")[0], 64)
+		mem, err := strconv.ParseFloat(strings.Join(strings.Split(strings.Split(memWithUnits, " GiB")[0], ","), ""), 64)
 		if err == nil {
 			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/mem, 'f', 11, 64)
 		}
