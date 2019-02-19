@@ -19,6 +19,7 @@ package aws
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -34,6 +35,12 @@ const (
 	computeInstance = "Compute Instance"
 	priceError      = -1.0
 	hoursInMonth    = 720
+
+	// TODO: Determine priceSplitRatio according to instance type i.e, compute optimized or memory optimized etc
+	priceSplitRatio             = 0.5
+	defaultCPUCostPerCPUPerHour = "0.024"
+	defaultMemCostPerGBPerHour  = "0.01"
+	defaultStorageCostInFloat64 = 0.00013888888
 )
 
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
@@ -66,14 +73,15 @@ func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, 
 	duplicateComputeInstanceChecker := make(map[string]bool)
 	for _, product := range products {
 		priceInFloat64, unit := getResourcePrice(product, planList)
-		if priceInFloat64 != priceError {
-			switch product.ProductFamily {
-			case computeInstance:
-				nodePrices = updateComputeInstancePrices(product, priceInFloat64, duplicateComputeInstanceChecker, nodePrices)
-			case storageInstance:
-				storagePrices = updateStorageInstancePrices(product, priceInFloat64, unit, storagePrices)
-			}
+		switch product.ProductFamily {
+		case computeInstance:
+			pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
+			nodePrices = updateComputeInstancePrices(
+				product, priceInFloat64, pricePerCPU, pricePerGB, duplicateComputeInstanceChecker, nodePrices)
+		case storageInstance:
+			storagePrices = updateStorageInstancePrices(product, priceInFloat64, unit, storagePrices)
 		}
+
 	}
 	return nodePrices, storagePrices
 }
@@ -94,7 +102,25 @@ func getResourcePrice(product Product, planList PlanList) (float64, string) {
 	return priceError, ""
 }
 
-func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
+func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
+	pricePerCPU := defaultCPUCostPerCPUPerHour
+	pricePerGB := defaultMemCostPerGBPerHour
+	if priceInFloat64 != priceError {
+		cpu, err := strconv.ParseFloat(product.Attributes.CPU, 64)
+		if err == nil {
+			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
+		}
+
+		memWithUnits := product.Attributes.Memory
+		mem, err := strconv.ParseFloat(strings.Split(memWithUnits, " GiB")[0], 64)
+		if err == nil {
+			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/mem, 'f', 11, 64)
+		}
+	}
+	return pricePerCPU, pricePerGB
+}
+
+func updateComputeInstancePrices(product Product, priceInFloat64 float64, pricePerCPU, pricePerGB string, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
 	key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
 	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
 		// Unit of Compute price USD-perHour
@@ -106,6 +132,8 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 			InstanceFamily:  product.Attributes.InstanceFamily,
 			OperatingSystem: product.Attributes.OperatingSystem,
 			Price:           priceInFloat64,
+			PricePerCPU:     pricePerCPU,
+			PricePerMemory:  pricePerGB,
 		}
 		duplicateComputeInstanceChecker[key] = true
 		uid := models.StoreNodePrice(nodePrice, productXID)
@@ -118,10 +146,13 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 }
 
 func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit string, storagePrices []*models.StoragePrice) []*models.StoragePrice {
-	if unit == gbMonth {
+	if priceInFloat64 == priceError {
+		priceInFloat64 = defaultStorageCostInFloat64
+	} else if unit == gbMonth {
 		// convert to GBHour
 		priceInFloat64 = priceInFloat64 / hoursInMonth
 	}
+
 	productXID := product.Attributes.VolumeType + deliminator + product.Attributes.UsageType
 	storagePrice := &models.StoragePrice{
 		ID:             dgraph.ID{Xid: productXID},
@@ -129,6 +160,7 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 		VolumeType:     product.Attributes.VolumeType,
 		UsageType:      product.Attributes.UsageType,
 		Price:          priceInFloat64,
+		PricePerGB:     strconv.FormatFloat(priceInFloat64, 'f', 11, 64),
 	}
 	uid := models.StoreStoragePrice(storagePrice, productXID)
 	if uid != "" {

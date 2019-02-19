@@ -112,7 +112,8 @@ func startCronJobForPopulatingRateCard() {
 	cloud.PopulateRateCard()
 
 	c := cron.New()
-	err := c.AddFunc("@every 7d", cloud.PopulateRateCard)
+
+	err := c.AddFunc("@every 168h", cloud.PopulateRateCard)
 	if err != nil {
 		log.Error(err)
 	}
