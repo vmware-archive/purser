@@ -37,11 +37,10 @@ const (
 	hoursInMonth    = 720
 
 	// TODO: Determine priceSplitRatio according to instance type i.e, compute optimized or memory optimized etc
-	priceSplitRatio                = 0.5
-	defaultCPUCostPerCPUPerHour    = "0.024"
-	defaultMemCostPerGBPerHour     = "0.01"
-	defaultStorageCostPerGBPerHour = "0.00013888888"
-	defaultStorageCostInFloat64    = 0.00013888888
+	priceSplitRatio             = 0.5
+	defaultCPUCostPerCPUPerHour = "0.024"
+	defaultMemCostPerGBPerHour  = "0.01"
+	defaultStorageCostInFloat64 = 0.00013888888
 )
 
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
