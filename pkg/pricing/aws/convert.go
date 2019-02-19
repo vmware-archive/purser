@@ -75,9 +75,7 @@ func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, 
 		priceInFloat64, unit := getResourcePrice(product, planList)
 		switch product.ProductFamily {
 		case computeInstance:
-			pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
-			nodePrices = updateComputeInstancePrices(
-				product, priceInFloat64, pricePerCPU, pricePerGB, duplicateComputeInstanceChecker, nodePrices)
+			nodePrices = updateComputeInstancePrices(product, priceInFloat64, duplicateComputeInstanceChecker, nodePrices)
 		case storageInstance:
 			storagePrices = updateStorageInstancePrices(product, priceInFloat64, unit, storagePrices)
 		}
@@ -102,30 +100,12 @@ func getResourcePrice(product Product, planList PlanList) (float64, string) {
 	return priceError, ""
 }
 
-func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
-	pricePerCPU := defaultCPUCostPerCPUPerHour
-	pricePerGB := defaultMemCostPerGBPerHour
-	if priceInFloat64 != priceError && priceInFloat64 != 0 {
-		cpu, err := strconv.ParseFloat(product.Attributes.Vcpu, 64)
-		if err == nil {
-			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
-		}
-
-		memWithUnits := product.Attributes.Memory
-		// memWithUnits format: "3,126 GiB"
-		mem, err := strconv.ParseFloat(strings.Join(strings.Split(strings.Split(memWithUnits, " GiB")[0], ","), ""), 64)
-		if err == nil {
-			pricePerGB = strconv.FormatFloat(priceSplitRatio*priceInFloat64/mem, 'f', 11, 64)
-		}
-	}
-	return pricePerCPU, pricePerGB
-}
-
-func updateComputeInstancePrices(product Product, priceInFloat64 float64, pricePerCPU, pricePerGB string, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
+func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
 	key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
 	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
 		// Unit of Compute price USD-perHour
 		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
+		pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
 		nodePrice := &models.NodePrice{
 			ID:              dgraph.ID{Xid: productXID},
 			IsNodePrice:     true,
@@ -169,4 +149,23 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 		storagePrices = append(storagePrices, storagePrice)
 	}
 	return storagePrices
+}
+
+func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
+	pricePerCPU := defaultCPUCostPerCPUPerHour
+	pricePerGB := defaultMemCostPerGBPerHour
+	if priceInFloat64 != priceError && priceInFloat64 != 0 {
+		cpu, err := strconv.ParseFloat(product.Attributes.Vcpu, 64)
+		if err == nil {
+			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
+		}
+
+		memWithUnits := product.Attributes.Memory
+		// memWithUnits format: "3,126 GiB"
+		mem, err := strconv.ParseFloat(strings.Join(strings.Split(strings.Split(memWithUnits, " GiB")[0], ","), ""), 64)
+		if err == nil {
+			pricePerGB = strconv.FormatFloat(priceSplitRatio*priceInFloat64/mem, 'f', 11, 64)
+		}
+	}
+	return pricePerCPU, pricePerGB
 }
