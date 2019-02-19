@@ -105,7 +105,7 @@ func getResourcePrice(product Product, planList PlanList) (float64, string) {
 func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
 	pricePerCPU := defaultCPUCostPerCPUPerHour
 	pricePerGB := defaultMemCostPerGBPerHour
-	if priceInFloat64 != priceError {
+	if priceInFloat64 != priceError && priceInFloat64 != 0 {
 		cpu, err := strconv.ParseFloat(product.Attributes.Vcpu, 64)
 		if err == nil {
 			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
