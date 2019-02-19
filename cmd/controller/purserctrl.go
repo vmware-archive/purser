@@ -21,6 +21,8 @@ import (
 	"flag"
 	"time"
 
+	"github.com/vmware/purser/pkg/pricing"
+
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/robfig/cron"
@@ -61,6 +63,7 @@ func main() {
 		go startInteractionsDiscovery()
 	}
 	go startCronJobForUpdatingCustomGroups()
+	go startCronJobForPopulatingRateCard()
 	controller.Start(&conf)
 }
 
@@ -100,4 +103,18 @@ func startCronJobForUpdatingCustomGroups() {
 
 func runGroupUpdate() {
 	eventprocessor.UpdateGroups(conf.Groupcrdclient)
+}
+
+func startCronJobForPopulatingRateCard() {
+	cloud := &pricing.Cloud{}
+	// find cloud provider and region
+	cloud.CloudProvider, cloud.Region = pricing.GetClusterProviderAndRegion()
+	cloud.PopulateRateCard()
+
+	c := cron.New()
+	err := c.AddFunc("@every 7d", cloud.PopulateRateCard)
+	if err != nil {
+		log.Error(err)
+	}
+	c.Start()
 }
