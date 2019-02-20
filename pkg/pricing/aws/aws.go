@@ -66,6 +66,8 @@ type ProductAttributes struct {
 	PreInstalledSW  string
 	VolumeType      string
 	UsageType       string
+	Vcpu            string
+	Memory          string
 }
 
 // GetAWSPricing function details

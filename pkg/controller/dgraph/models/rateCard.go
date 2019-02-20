@@ -51,6 +51,8 @@ type NodePrice struct {
 	InstanceFamily  string  `json:"instanceFamily,omitempty"`
 	OperatingSystem string  `json:"operatingSystem,omitempty"`
 	Price           float64 `json:"price,omitempty"`
+	PricePerCPU     string  `json:"cpuPrice,omitempty"`
+	PricePerMemory  string  `json:"memoryPrice,omitempty"`
 }
 
 // StoragePrice structure
@@ -61,6 +63,7 @@ type StoragePrice struct {
 	VolumeType     string  `json:"volumeType,omitempty"`
 	UsageType      string  `json:"usageType,omitempty"`
 	Price          float64 `json:"price,omitempty"`
+	PricePerGB     string  `json:"pricePerGB,omitempty"`
 }
 
 // StoreRateCard given a cloudProvider and region it gets rate card and stores(create/update) in dgraph
