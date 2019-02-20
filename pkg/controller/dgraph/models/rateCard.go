@@ -180,22 +180,18 @@ func retrieveNodePrice(xid string) (*NodePrice, error) {
 
 // getPerUnitResourcePriceForNode returns price per cpu and price per memory
 func getPerUnitResourcePriceForNode(nodeName string) (string, string) {
-	cpuPrice := DefaultCPUCostPerCPUPerHour
-	memoryPrice := DefaultMemCostPerGBPerHour
 	node, err := retrieveNode(nodeName)
 	if err == nil {
 		return getPricePerUnitResourceFromNodePrice(*node)
 	}
-	return cpuPrice, memoryPrice
+	return DefaultCPUCostPerCPUPerHour, DefaultMemCostPerGBPerHour
 }
 
 func getPricePerUnitResourceFromNodePrice(node Node) (string, string) {
-	cpuPrice := DefaultCPUCostPerCPUPerHour
-	memoryPrice := DefaultMemCostPerGBPerHour
 	nodePriceXID := node.InstanceType + "-" + node.OS
 	nodePrice, err := retrieveNodePrice(nodePriceXID)
 	if err == nil {
-		cpuPrice, memoryPrice = nodePrice.PricePerCPU, nodePrice.PricePerMemory
+		return nodePrice.PricePerCPU, nodePrice.PricePerMemory
 	}
-	return cpuPrice, memoryPrice
+	return DefaultCPUCostPerCPUPerHour, DefaultMemCostPerGBPerHour
 }
