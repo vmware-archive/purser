@@ -25,6 +25,10 @@ import (
 // constants for cloud provider pricing
 const (
 	AWS = "aws"
+
+	defaultCPUCostPerCPUPerHour    = "0.024"
+	defaultMemCostPerGBPerHour     = "0.01"
+	defaultStorageCostPerGBPerHour = "0.00013888888"
 )
 
 // Cloud structure used for pricing
@@ -36,7 +40,9 @@ type Cloud struct {
 // GetClusterProviderAndRegion returns cluster provider(ex: aws) and region(ex: us-east-1)
 func GetClusterProviderAndRegion() (string, string) {
 	// TODO: https://github.com/vmware/purser/issues/143
-	return AWS, "us-east-1"
+	cloudProvider := AWS
+	region := "us-east-1"
+	return cloudProvider, region
 }
 
 // PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph

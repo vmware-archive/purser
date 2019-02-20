@@ -20,6 +20,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/utils"
 )
@@ -64,9 +66,11 @@ func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
 					replicasetPodIsTerminated as count(endTime)
 					replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
 					replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600)
-					replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-					replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
-					replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
+					pricePerCPU as cpuPrice
+					pricePerMemory as memoryPrice
+					replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * pricePerCPU)
+					replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * pricePerMemory)
+					replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
 				}
 				deploymentReplicasetCpu as sum(val(replicasetPodCpu))
 				deploymentReplicasetMemory as sum(val(replicasetPodMemory))

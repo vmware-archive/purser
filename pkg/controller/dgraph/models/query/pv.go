@@ -20,6 +20,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/utils"
 )
@@ -67,7 +69,7 @@ func RetrievePVMetrics(name string) JSONDataWrapper {
 				isTerminatedChild as count(endTime)
 				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
 				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
-				storageCost: math(pvcStorage * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
+				storageCost: math(pvcStorage * durationInHoursChild * ` + models.DefaultStorageCostPerGBPerHour + `)
 			}
 			storage: storage as storageCapacity
 			st as startTime
@@ -77,7 +79,7 @@ func RetrievePVMetrics(name string) JSONDataWrapper {
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			storageCost: math(storage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
+			storageCost: math(storage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
         }
     }`
 	return getJSONDataFromQuery(query)

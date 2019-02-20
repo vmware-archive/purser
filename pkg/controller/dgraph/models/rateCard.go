@@ -18,6 +18,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 )
@@ -122,4 +124,80 @@ func StoreStoragePrice(storagePrice *StoragePrice, productXID string) string {
 		return uid
 	}
 	return assigned.Uids["blank-0"]
+}
+
+// retrieveNode given a node name it returns pointer to models.Node - nil in case of error
+func retrieveNode(name string) (*Node, error) {
+	query := `query {
+		nodes(func: has(isNode)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			startTime
+			endTime
+			cpuCapacity
+			memoryCapacity
+			instanceType
+			os
+        }
+    }`
+	type root struct {
+		Nodes []Node `json:"nodes"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil {
+		return nil, err
+	} else if len(newRoot.Nodes) < 1 {
+		return nil, fmt.Errorf("no node with name: %v", name)
+	}
+
+	return &newRoot.Nodes[0], nil
+}
+
+// retrieveNodePrice given a node name it returns pointer to models.Node - nil in case of error
+func retrieveNodePrice(xid string) (*NodePrice, error) {
+	query := `query {
+		nodePrices(func: has(isNodePrice)) @filter(eq(xid, "` + xid + `")) {
+			instanceType
+			instanceFamily
+			operatingSystem
+			price
+			cpuPrice
+			memoryPrice
+        }
+    }`
+	type root struct {
+		NodePrices []NodePrice `json:"nodePrices"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil {
+		return nil, err
+	} else if len(newRoot.NodePrices) < 1 {
+		return nil, fmt.Errorf("no node with xid: %v", xid)
+	}
+
+	return &newRoot.NodePrices[0], nil
+}
+
+// getPerUnitResourcePriceForNode returns price per cpu and price per memory
+func getPerUnitResourcePriceForNode(nodeName string) (string, string) {
+	cpuPrice := DefaultCPUCostPerCPUPerHour
+	memoryPrice := DefaultMemCostPerGBPerHour
+	node, err := retrieveNode(nodeName)
+	if err == nil {
+		return getPricePerUnitResourceFromNodePrice(*node)
+	}
+	return cpuPrice, memoryPrice
+}
+
+func getPricePerUnitResourceFromNodePrice(node Node) (string, string) {
+	cpuPrice := DefaultCPUCostPerCPUPerHour
+	memoryPrice := DefaultMemCostPerGBPerHour
+	nodePriceXID := node.InstanceType + "-" + node.OS
+	nodePrice, err := retrieveNodePrice(nodePriceXID)
+	if err == nil {
+		cpuPrice, memoryPrice = nodePrice.PricePerCPU, nodePrice.PricePerMemory
+	}
+	return cpuPrice, memoryPrice
 }

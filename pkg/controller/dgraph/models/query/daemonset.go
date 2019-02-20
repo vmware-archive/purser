@@ -20,6 +20,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/utils"
 )
@@ -67,9 +69,11 @@ func RetrieveDaemonsetMetrics(name string) JSONDataWrapper {
 				isTerminated as count(endTime)
 				secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 				durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-				cpuCost: podCpuCost as math(podCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: podMemCost as math(podMemory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: pvcStorageCost as math(pvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
+				pricePerCPU as cpuPrice
+				pricePerMemory as memoryPrice
+				cpuCost: podCpuCost as math(podCpu * durationInHours * pricePerCPU)
+				memoryCost: podMemCost as math(podMemory * durationInHours * pricePerMemory)
+				storageCost: pvcStorageCost as math(pvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
 			}
 			cpu: sum(val(podCpu))
 			memory: sum(val(podMemory))

@@ -60,6 +60,8 @@ type Pod struct {
 	Type           string                   `json:"type,omitempty"`
 	Cid            []Service                `json:"cid,omitempty"`
 	Labels         []*Label                 `json:"label,omitempty"`
+	CPUPrice       string                   `json:"cpuPrice,omitempty"`
+	MemoryPrice    string                   `json:"memoryPrice,omitempty"`
 }
 
 // Metrics ...
@@ -129,6 +131,9 @@ func StorePod(k8sPod api_v1.Pod) error {
 		}
 		populatePodLabels(&pod, k8sPod.Labels)
 	}
+
+	// store/update CPUPrice, MemoryPrice
+	pod.CPUPrice, pod.MemoryPrice = getPerUnitResourcePriceForNode(k8sPod.Spec.NodeName)
 
 	_, err := dgraph.MutateNode(pod, dgraph.UPDATE)
 	return err

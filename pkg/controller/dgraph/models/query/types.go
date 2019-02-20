@@ -28,13 +28,6 @@ const (
 	False    = "false"
 )
 
-// Cost constants
-const (
-	defaultCPUCostPerCPUPerHour    = "0.024"
-	defaultMemCostPerGBPerHour     = "0.01"
-	defaultStorageCostPerGBPerHour = "0.00013888888"
-)
-
 // Children structure
 type Children struct {
 	Name        string  `json:"name,omitempty"`

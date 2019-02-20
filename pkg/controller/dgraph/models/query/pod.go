@@ -103,6 +103,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 		return JSONDataWrapper{}
 	}
 	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
+	cpuPrice, memoryPrice := getPricePerResourceForPod(name)
 	query := `query {
 		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
@@ -119,8 +120,8 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
 				cpu: cpu as cpuRequest
 				memory: memory as memoryRequest
-				cpuCost: math(cpu * durationInHoursChild * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(memory * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
+				cpuCost: math(cpu * durationInHoursChild * ` + cpuPrice + `)
+				memoryCost: math(memory * durationInHoursChild * ` + memoryPrice + `)
 			}
 			cpu: podCpu as cpuRequest
 			memory: podMemory as memoryRequest
@@ -132,12 +133,31 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			cpuCost: math(podCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(podMemory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(pvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
+			cpuCost: math(podCpu * durationInHours * ` + cpuPrice + `)
+			memoryCost: math(podMemory * durationInHours * ` + memoryPrice + `)
+			storageCost: math(pvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	return getJSONDataFromQuery(query)
+}
+
+func getPricePerResourceForPod(name string) (string, string) {
+	query := `query {
+		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+			cpuPrice
+			memoryPrice
+		}
+	}`
+	type root struct {
+		Pods []models.Pod `json:"pod"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil || len(newRoot.Pods) < 1 {
+		return models.DefaultCPUCostPerCPUPerHour, models.DefaultMemCostPerGBPerHour
+	}
+	pod := newRoot.Pods[0]
+	return pod.CPUPrice, pod.MemoryPrice
 }
 
 // RetrievePodsInteractionsForAllLivePodsWithCount returns all pods in the dgraph

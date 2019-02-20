@@ -103,7 +103,7 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 	key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
 	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
 		// Unit of Compute price USD-perHour
-		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
+		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.OperatingSystem
 		pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
 		nodePrice := &models.NodePrice{
 			ID:              dgraph.ID{Xid: productXID},

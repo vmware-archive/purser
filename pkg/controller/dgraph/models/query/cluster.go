@@ -20,6 +20,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
@@ -81,9 +83,11 @@ func RetrieveClusterMetrics(view string) JSONDataWrapper {
 				isTerminated as count(endTime)
 				secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 				durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-				cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(storage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
+				pricePerCPU as cpuPrice
+				pricePerMemory as memoryPrice
+				cpuCost: math(cpu * durationInHours * pricePerCPU)
+				memoryCost: math(memory * durationInHours * pricePerMemory)
+				storageCost: math(storage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
 			}
 		}`
 	} else {
@@ -100,9 +104,11 @@ func RetrieveClusterMetrics(view string) JSONDataWrapper {
 					isTerminated as count(endTime)
 					secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 					durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-					namespacePodCpuCost as math(namespacePodCpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-					namespacePodMemoryCost as math(namespacePodMem * durationInHours * ` + defaultMemCostPerGBPerHour + `)
-					namespacePodStorageCost as math(namespacePvcStorage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
+					pricePerCPU as cpuPrice
+					pricePerMemory as memoryPrice
+					namespacePodCpuCost as math(namespacePodCpu * durationInHours * pricePerCPU)
+					namespacePodMemoryCost as math(namespacePodMem * durationInHours * pricePerMemory)
+					namespacePodStorageCost as math(namespacePvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
 				}
 				namespaceCpu as sum(val(namespacePodCpu))
 				namespaceMem as sum(val(namespacePodMem))

@@ -20,6 +20,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/utils"
 )
@@ -69,9 +71,11 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 				isTerminatedChild as count(endTime)
 				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
 				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
-				cpuCost: math(podCpu * durationInHoursChild * ` + defaultCPUCostPerCPUPerHour + `)
-				memoryCost: math(podMemory * durationInHoursChild * ` + defaultMemCostPerGBPerHour + `)
-				storageCost: math(pvcStorage * durationInHoursChild * ` + defaultStorageCostPerGBPerHour + `)
+				podPricePerCPU as cpuPrice
+				podPricePerMemory as memoryPrice
+				cpuCost: math(podCpu * durationInHoursChild * podPricePerCPU)
+				memoryCost: math(podMemory * durationInHoursChild * podPricePerMemory)
+				storageCost: math(pvcStorage * durationInHoursChild * ` + models.DefaultStorageCostPerGBPerHour + `)
 			}
 			cpu: cpu as cpuCapacity
 			memory: memory as memoryCapacity
@@ -83,9 +87,11 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
-			storageCost: math(storage * durationInHours * ` + defaultStorageCostPerGBPerHour + `)
+			pricePerCPU as cpuPrice
+			pricePerMemory as memoryPrice
+			cpuCost: math(cpu * durationInHours * pricePerCPU)
+			memoryCost: math(memory * durationInHours * pricePerMemory)
+			storageCost: math(storage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
 		}
 	}`
 	return getJSONDataFromQuery(query)
