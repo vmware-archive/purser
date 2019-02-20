@@ -20,8 +20,6 @@ package eventprocessor
 import (
 	"time"
 
-	"github.com/vmware/purser/pkg/controller"
-
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
@@ -44,20 +42,14 @@ func UpdateGroups(groupCRDClient *groupsClient_v1.GroupClient) {
 	}
 	log.Debugf("Retrieved groups of length: %d", len(groups.Items))
 	for _, group := range groups.Items {
-		UpdateGroup(group, groupCRDClient, controller.Create)
+		UpdateGroup(group, groupCRDClient)
 	}
 }
 
 // UpdateGroup given a group it updates its spec with metrics
-func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupClient, eventType string) {
+func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupClient) {
 	if group == nil {
 		log.Warn("Received empty group to update")
-		return
-	}
-
-	if eventType == controller.Delete {
-		log.Debugf("Deleting group: %s", group.Name)
-		models.DeleteGroup(group.Name)
 		return
 	}
 

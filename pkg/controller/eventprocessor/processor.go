@@ -188,13 +188,13 @@ func ProcessPayloads(payloads []*interface{}, conf *controller.Config) {
 				log.Errorf("Error un marshalling payload " + payload.Data)
 			} else {
 				if payload.EventType == controller.Delete {
-					UpdateGroup(groupCRD, conf.Groupcrdclient, controller.Delete)
+					models.DeleteGroup(groupCRD.Name)
 				} else {
 					group, err := conf.Groupcrdclient.Get(groupCRD.Name)
 					if err != nil {
 						log.Errorf("Unable to get group from client: (%v)", err)
 					} else {
-						UpdateGroup(group, conf.Groupcrdclient, controller.Create)
+						UpdateGroup(group, conf.Groupcrdclient)
 					}
 				}
 			}
