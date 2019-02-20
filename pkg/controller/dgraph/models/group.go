@@ -18,6 +18,7 @@
 package models
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/dgraph-io/dgo/protos/api"
 	groups_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -72,4 +73,20 @@ func CreateOrUpdateGroup(group *groups_v1.Group, podsCount int) (*api.Assigned, 
 		grp.ID = dgraph.ID{Xid: xid, UID: uid}
 	}
 	return dgraph.MutateNode(grp, dgraph.CREATE)
+}
+
+// DeleteGroup deletes group from dgraph
+func DeleteGroup(name string) {
+	xid := XIDPrefix + name
+	uid := dgraph.GetUID(xid, IsGroup)
+
+	if uid != "" {
+		grp := Group{ID: dgraph.ID{UID: uid}}
+		_, err := dgraph.MutateNode(grp, dgraph.DELETE)
+		if err != nil {
+			logrus.Errorf("error while deleting group: %v, err: %v", name, err)
+		}
+		return
+	}
+	logrus.Infof("Group: %s not yet persisted", name)
 }
