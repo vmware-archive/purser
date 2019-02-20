@@ -50,6 +50,8 @@ type Node struct {
 	Type           string  `json:"type,omitempty"`
 	InstanceType   string  `json:"instanceType,omitempty"`
 	OS             string  `json:"os,omitempty"`
+	CPUPrice       string  `json:"cpuPrice,omitempty"`
+	MemoryPrice    string  `json:"memoryPrice,omitempty"`
 }
 
 func createNodeObject(node api_v1.Node) Node {
@@ -106,6 +108,8 @@ func StoreNode(node api_v1.Node) (string, error) {
 	if uid != "" {
 		newNode.UID = uid
 	}
+
+	newNode.CPUPrice, newNode.MemoryPrice = getPricePerUnitResourceFromNodePrice(newNode)
 	assigned, err := dgraph.MutateNode(newNode, dgraph.CREATE)
 	if err != nil {
 		return "", err

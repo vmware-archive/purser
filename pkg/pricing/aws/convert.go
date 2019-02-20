@@ -26,21 +26,16 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
+// AWS specific constants
 const (
 	na              = "NA"
-	aws             = "aws"
 	gbMonth         = "GB-Mo"
 	deliminator     = "-"
 	storageInstance = "Storage"
 	computeInstance = "Compute Instance"
-	priceError      = -1.0
-	hoursInMonth    = 720
 
 	// TODO: Determine priceSplitRatio according to instance type i.e, compute optimized or memory optimized etc
-	priceSplitRatio             = 0.5
-	defaultCPUCostPerCPUPerHour = "0.024"
-	defaultMemCostPerGBPerHour  = "0.01"
-	defaultStorageCostInFloat64 = 0.00013888888
+	priceSplitRatio = 0.5
 )
 
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
@@ -57,7 +52,7 @@ func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *mode
 	return &models.RateCard{
 		ID:            dgraph.ID{Xid: models.RateCardXID},
 		IsRateCard:    true,
-		CloudProvider: aws,
+		CloudProvider: models.AWS,
 		Region:        region,
 		NodePrices:    nodePrices,
 		StoragePrices: storagePrices,
@@ -90,20 +85,20 @@ func getResourcePrice(product Product, planList PlanList) (float64, string) {
 				priceInFloat64, err := strconv.ParseFloat(pricePerUnit, 64)
 				if err != nil {
 					logrus.Errorf("unable to parse string: %s to float. err: %v", pricePerUnit, err)
-					return priceError, "" // negative price means error
+					return models.PriceError, "" // negative price means error
 				}
 				return priceInFloat64, pricingData.Unit
 			}
 		}
 	}
-	return priceError, ""
+	return models.PriceError, ""
 }
 
 func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplicateComputeInstanceChecker map[string]bool, nodePrices []*models.NodePrice) []*models.NodePrice {
 	key := product.Sku + product.Attributes.InstanceType + product.Attributes.OperatingSystem
 	if _, isPresent := duplicateComputeInstanceChecker[key]; !isPresent && product.Attributes.PreInstalledSW == na {
 		// Unit of Compute price USD-perHour
-		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.InstanceFamily + deliminator + product.Attributes.OperatingSystem
+		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.OperatingSystem
 		pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
 		nodePrice := &models.NodePrice{
 			ID:              dgraph.ID{Xid: productXID},
@@ -126,11 +121,11 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 }
 
 func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit string, storagePrices []*models.StoragePrice) []*models.StoragePrice {
-	if priceInFloat64 == priceError {
-		priceInFloat64 = defaultStorageCostInFloat64
+	if priceInFloat64 == models.PriceError {
+		priceInFloat64 = models.DefaultStorageCostInFloat64
 	} else if unit == gbMonth {
 		// convert to GBHour
-		priceInFloat64 = priceInFloat64 / hoursInMonth
+		priceInFloat64 = priceInFloat64 / models.HoursInMonth
 	}
 
 	productXID := product.Attributes.VolumeType + deliminator + product.Attributes.UsageType
@@ -151,11 +146,11 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 }
 
 func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
-	pricePerCPU := defaultCPUCostPerCPUPerHour
-	pricePerGB := defaultMemCostPerGBPerHour
+	pricePerCPU := models.DefaultCPUCostPerCPUPerHour
+	pricePerGB := models.DefaultMemCostPerGBPerHour
 
 	// priceInFloat64 should be greater than 0 otherwise this function returns default pricing
-	if priceInFloat64 != priceError && priceInFloat64 != 0 {
+	if priceInFloat64 != models.PriceError && priceInFloat64 != 0 {
 		cpu, err := strconv.ParseFloat(product.Attributes.Vcpu, 64)
 		if err == nil {
 			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)

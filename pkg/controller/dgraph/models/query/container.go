@@ -20,6 +20,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/utils"
 )
@@ -63,8 +65,8 @@ func RetrieveContainerMetrics(name string) JSONDataWrapper {
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
 			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			cpuCost: math(cpu * durationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-			memoryCost: math(memory * durationInHours * ` + defaultMemCostPerGBPerHour + `)
+			cpuCost: math(cpu * durationInHours * ` + models.DefaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * durationInHours * ` + models.DefaultMemCostPerGBPerHour + `)
 		}
 	}`
 	return getJSONDataFromQuery(query)

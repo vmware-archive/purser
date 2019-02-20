@@ -20,6 +20,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/utils"
@@ -72,9 +74,11 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 						replicasetPodIsTerminated as count(endTime)
 						replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
 						replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600)
-						replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-						replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
-						replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
+						replicasetPricePerCPU as cpuPrice
+						replicasetPricePerMemory as memoryPrice
+						replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * replicasetPricePerCPU)
+						replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * replicasetPricePerMemory)
+						replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
 			        }
 					deploymentReplicasetCpu as sum(val(replicasetPodCpu))
 			        deploymentReplicasetMemory as sum(val(replicasetPodMemory))
@@ -96,9 +100,11 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					statefulsetPodIsTerminated as count(endTime)
 					statefulsetPodSecondsSinceEnd as math(cond(statefulsetPodIsTerminated == 0, 0.0, since(statefulsetPodET)))
 					statefulsetPodDurationInHours as math((statefulsetPodSecondsSinceStart - statefulsetPodSecondsSinceEnd) / 3600)
-					statefulsetPodCpuCost as math(statefulsetPodCpu * statefulsetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-					statefulsetPodMemoryCost as math(statefulsetPodMemory * statefulsetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
-					statefulsetPvcStorageCost as math(statefulsetPvcStorage * statefulsetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
+					statefulsetPricePerCPU as cpuPrice
+					statefulsetPricePerMemory as memoryPrice
+					statefulsetPodCpuCost as math(statefulsetPodCpu * statefulsetPodDurationInHours * statefulsetPricePerCPU)
+					statefulsetPodMemoryCost as math(statefulsetPodMemory * statefulsetPodDurationInHours * statefulsetPricePerMemory)
+					statefulsetPvcStorageCost as math(statefulsetPvcStorage * statefulsetPodDurationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
                 }
 				~job @filter(has(isPod)) {
                     name
@@ -113,9 +119,11 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					jobPodIsTerminated as count(endTime)
 					jobPodSecondsSinceEnd as math(cond(jobPodIsTerminated == 0, 0.0, since(jobPodET)))
 					jobPodDurationInHours as math((jobPodSecondsSinceStart - jobPodSecondsSinceEnd) / 3600)
-					jobPodCpuCost as math(jobPodCpu * jobPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-					jobPodMemoryCost as math(jobPodMemory * jobPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
-					jobPvcStorageCost as math(jobPvcStorage * jobPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
+					jobPricePerCPU as cpuPrice
+					jobPricePerMemory as memoryPrice
+					jobPodCpuCost as math(jobPodCpu * jobPodDurationInHours * jobPricePerCPU)
+					jobPodMemoryCost as math(jobPodMemory * jobPodDurationInHours * jobPricePerMemory)
+					jobPvcStorageCost as math(jobPvcStorage * jobPodDurationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
                 }
 				~daemonset @filter(has(isPod)) {
                     name
@@ -130,9 +138,11 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					daemonsetPodIsTerminated as count(endTime)
 					daemonsetPodSecondsSinceEnd as math(cond(daemonsetPodIsTerminated == 0, 0.0, since(daemonsetPodET)))
 					daemonsetPodDurationInHours as math((daemonsetPodSecondsSinceStart - daemonsetPodSecondsSinceEnd) / 3600)
-					daemonsetPodCpuCost as math(daemonsetPodCpu * daemonsetPodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-					daemonsetPodMemoryCost as math(daemonsetPodMemory * daemonsetPodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
-					daemonsetPvcStorageCost as math(daemonsetPvcStorage * daemonsetPodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
+					daemonsetPricePerCPU as cpuPrice
+					daemonsetPricePerMemory as memoryPrice
+					daemonsetPodCpuCost as math(daemonsetPodCpu * daemonsetPodDurationInHours * daemonsetPricePerCPU)
+					daemonsetPodMemoryCost as math(daemonsetPodMemory * daemonsetPodDurationInHours * daemonsetPricePerMemory)
+					daemonsetPvcStorageCost as math(daemonsetPvcStorage * daemonsetPodDurationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
                 }
 				~replicaset @filter(has(isPod)) {
                     name
@@ -147,9 +157,11 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					replicasetSimplePodIsTerminated as count(endTime)
 					replicasetSimplePodSecondsSinceEnd as math(cond(replicasetSimplePodIsTerminated == 0, 0.0, since(replicasetSimplePodET)))
 					replicasetSimplePodDurationInHours as math((replicasetSimplePodSecondsSinceStart - replicasetSimplePodSecondsSinceEnd) / 3600)
-					replicasetSimplePodCpuCost as math(replicasetSimplePodCpu * replicasetSimplePodDurationInHours * ` + defaultCPUCostPerCPUPerHour + `)
-					replicasetSimplePodMemoryCost as math(replicasetSimplePodMemory * replicasetSimplePodDurationInHours * ` + defaultMemCostPerGBPerHour + `)
-					replicasetSimplePvcStorageCost as math(replicasetSimplePvcStorage * replicasetSimplePodDurationInHours * ` + defaultStorageCostPerGBPerHour + `)
+					replicasetSimplePricePerCPU as cpuPrice
+					replicasetSimplePricePerMemory as memoryPrice
+					replicasetSimplePodCpuCost as math(replicasetSimplePodCpu * replicasetSimplePodDurationInHours * replicasetSimplePricePerCPU)
+					replicasetSimplePodMemoryCost as math(replicasetSimplePodMemory * replicasetSimplePodDurationInHours * replicasetSimplePricePerMemory)
+					replicasetSimplePvcStorageCost as math(replicasetSimplePvcStorage * replicasetSimplePodDurationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
                 }
 				sumReplicasetSimplePodCpu as sum(val(replicasetSimplePodCpu))
 				sumDaemonsetPodCpu as sum(val(daemonsetPodCpu))
