@@ -60,8 +60,8 @@ type Pod struct {
 	Type           string                   `json:"type,omitempty"`
 	Cid            []Service                `json:"cid,omitempty"`
 	Labels         []*Label                 `json:"label,omitempty"`
-	CPUPrice       string                   `json:"cpuPrice,omitempty"`
-	MemoryPrice    string                   `json:"memoryPrice,omitempty"`
+	CPUPrice       float64                  `json:"cpuPrice,omitempty"`
+	MemoryPrice    float64                  `json:"memoryPrice,omitempty"`
 }
 
 // Metrics ...
