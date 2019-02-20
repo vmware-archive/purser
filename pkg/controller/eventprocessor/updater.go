@@ -20,6 +20,8 @@ package eventprocessor
 import (
 	"time"
 
+	"github.com/vmware/purser/pkg/controller"
+
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
@@ -42,16 +44,23 @@ func UpdateGroups(groupCRDClient *groupsClient_v1.GroupClient) {
 	}
 	log.Debugf("Retrieved groups of length: %d", len(groups.Items))
 	for _, group := range groups.Items {
-		UpdateGroup(group, groupCRDClient)
+		UpdateGroup(group, groupCRDClient, controller.Create)
 	}
 }
 
 // UpdateGroup given a group it updates its spec with metrics
-func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupClient) {
+func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupClient, eventType string) {
 	if group == nil {
 		log.Warn("Received empty group to update")
 		return
 	}
+
+	if eventType == controller.Delete {
+		log.Debugf("Deleting group: %s", group.Name)
+		models.DeleteGroup(group.Name)
+		return
+	}
+
 	groupMetrics := getGroupMetrics(group)
 	log.Debugf("GroupMetrics computed from dgraph data: (%v)", groupMetrics)
 	group.Spec.MTDMetrics = &groups_v1.GroupMetrics{
@@ -71,16 +80,18 @@ func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupCl
 		TotalCost:   groupMetrics.CostCPU + groupMetrics.CostMemory + groupMetrics.CostStorage,
 	}
 	group.Spec.LastUpdated = time.Now()
+
 	_, err := groupCRDClient.Update(group)
 	if err != nil {
 		log.Errorf("unable to update group: (%s), error: (%v)", group.Name, err)
-	} else {
-		log.Debugf("Updated group spec: (%v)", group.Spec)
-		log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
-		_, err = models.CreateOrUpdateGroup(group, groupMetrics.PodsCount)
-		if err != nil {
-			log.Errorf("unable to create or update group in dgraph: (%s), error: (%v)", group.Name, err)
-		}
+		return
+	}
+
+	log.Debugf("Updated group spec: (%v)", group.Spec)
+	log.Infof("Group spec is updated with metrics for group: (%s)", group.Name)
+	_, err = models.CreateOrUpdateGroup(group, groupMetrics.PodsCount)
+	if err != nil {
+		log.Errorf("unable to create or update group in dgraph: (%s), error: (%v)", group.Name, err)
 	}
 }
 

@@ -19,8 +19,9 @@ package eventprocessor
 
 import (
 	"encoding/json"
-	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"time"
+
+	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -181,16 +182,21 @@ func ProcessPayloads(payloads []*interface{}, conf *controller.Config) {
 				log.Errorf("Error while persisting job %v", err)
 			}
 		} else if payload.ResourceType == "Group" {
-			groupCRD := groups_v1.Group{}
-			err := json.Unmarshal([]byte(payload.Data), &groupCRD)
+			groupCRD := &groups_v1.Group{}
+			err := json.Unmarshal([]byte(payload.Data), groupCRD)
 			if err != nil {
 				log.Errorf("Error un marshalling payload " + payload.Data)
 			} else {
-				group, err := conf.Groupcrdclient.Get(groupCRD.Name)
-				if err != nil {
-					log.Errorf("Unable to get group from client: (%v)", err)
+				if payload.EventType == controller.Delete {
+					UpdateGroup(groupCRD, conf.Groupcrdclient, controller.Delete)
+				} else {
+					group, err := conf.Groupcrdclient.Get(groupCRD.Name)
+					if err != nil {
+						log.Errorf("Unable to get group from client: (%v)", err)
+					} else {
+						UpdateGroup(group, conf.Groupcrdclient, controller.Create)
+					}
 				}
-				UpdateGroup(group, conf.Groupcrdclient)
 			}
 		} else if payload.ResourceType == "Subscriber" {
 			subscriberCRD := subcriber_v1.Subscriber{}
