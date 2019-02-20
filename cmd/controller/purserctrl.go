@@ -106,7 +106,7 @@ func runGroupUpdate() {
 }
 
 func startCronJobForPopulatingRateCard() {
-	cloud := &pricing.Cloud{}
+	cloud := &pricing.Cloud{Kubeclient: conf.Kubeclient}
 	// find cloud provider and region
 	cloud.CloudProvider, cloud.Region = pricing.GetClusterProviderAndRegion()
 	cloud.PopulateRateCard()

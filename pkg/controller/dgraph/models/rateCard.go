@@ -30,8 +30,6 @@ const (
 	IsNodePrice    = "isNodePrice"
 	IsStoragePrice = "isStoragePrice"
 	RateCardXID    = "purser-rateCard"
-
-	AWS = "aws"
 )
 
 // RateCard structure

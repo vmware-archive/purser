@@ -18,38 +18,56 @@
 package pricing
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
+	"github.com/vmware/purser/pkg/controller/utils"
 	"github.com/vmware/purser/pkg/pricing/aws"
-)
-
-// constants for cloud provider pricing
-const (
-	AWS = "aws"
-
-	defaultCPUCostPerCPUPerHour    = "0.024"
-	defaultMemCostPerGBPerHour     = "0.01"
-	defaultStorageCostPerGBPerHour = "0.00013888888"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // Cloud structure used for pricing
 type Cloud struct {
 	CloudProvider string
 	Region        string
+	Kubeclient    *kubernetes.Clientset
 }
 
 // GetClusterProviderAndRegion returns cluster provider(ex: aws) and region(ex: us-east-1)
 func GetClusterProviderAndRegion() (string, string) {
 	// TODO: https://github.com/vmware/purser/issues/143
-	cloudProvider := AWS
+	cloudProvider := models.AWS
 	region := "us-east-1"
+	logrus.Infof("CloudProvider: %s, Region: %s", cloudProvider, region)
 	return cloudProvider, region
 }
 
 // PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph
 func (c *Cloud) PopulateRateCard() {
 	switch c.CloudProvider {
-	case AWS:
+	case models.AWS:
 		rateCard := aws.GetRateCardForAWS(c.Region)
 		models.StoreRateCard(rateCard)
+	}
+
+	// update cpuPrice, memoryPrice for pods,nodes in dgraph
+	c.updatePriceForUnitResource()
+}
+
+// whenever rateCard gets update price for unit resource persisted in dgraph should also get updated
+func (c *Cloud) updatePriceForUnitResource() {
+	nodes := utils.RetrieveNodeList(c.Kubeclient, metav1.ListOptions{})
+	for _, node := range nodes.Items {
+		_, err := models.StoreNode(node)
+		if err != nil {
+			logrus.Debugf("unable to store/update node: %s, err: %v", node.Name, err)
+		}
+	}
+	pods := utils.RetrievePodList(c.Kubeclient, metav1.ListOptions{})
+	for _, pod := range pods.Items {
+		err := models.StorePod(pod)
+		if err != nil {
+			logrus.Debugf("unable to store/update pod: %s, err: %v", pod.Name, err)
+		}
 	}
 }
