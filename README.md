@@ -1,8 +1,9 @@
-# Purser extension for K8s
+![logo](https://user-images.githubusercontent.com/42761785/53145168-2f4e4980-35c5-11e9-867b-8d637671ec23.png)
+# K8s Extension for Application Visibility
 
 [![Build Status](https://travis-ci.org/vmware/purser.svg?branch=master)](https://travis-ci.org/vmware/purser) [![Go Report Card](https://goreportcard.com/badge/github.com/vmware/purser)](https://goreportcard.com/report/github.com/vmware/purser)
 
-- [What is Purser?](#purser)
+- [What is Purser?](#overview)
 - [Features](#features)
 - [Setup and Installation](#setup-and-installation)
 - [Uninstalling](#uninstalling)
@@ -10,7 +11,7 @@
 - [Additional Documentation](#additional-documentation)
 - [Community, Discussion, Contribution and Support](#community-discussion-contribution-and-support)
 
-## Purser
+## Overview
 
 Purser is an extension to Kubernetes tasked at providing an insight into *cluster topology*, *costing*, *capacity allocations* and *resource interactions* along with the provision of *logical grouping of resources* for Kubernetes based cloud native applications in a cloud neutral manner, with the focus on catering to a multitude of users ranging from Sys Admins, to DevOps to Developers.
 
@@ -43,7 +44,7 @@ Purser with it's robust CLI and UI capabilities provides a set of features inclu
  
  - Capability to subscribe to inventory changes via web-hook implementation. 
 
-### Purser UI demo
+### UI Demo
 
  ![demo](https://user-images.githubusercontent.com/42761785/49430222-74d25600-f7d0-11e8-97ad-ba1388fb6d8f.gif)
 
