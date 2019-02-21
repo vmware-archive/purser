@@ -81,17 +81,18 @@ func StoreAndRetrieveContainersAndMetrics(pod api_v1.Pod, podUID, namespaceUID s
 	memoryRequest := &resource.Quantity{}
 	cpuLimit := &resource.Quantity{}
 	memoryLimit := &resource.Quantity{}
+
 	for _, c := range pod.Spec.Containers {
 		container, err := storeContainerIfNotExist(c, pod, podUID, namespaceUID)
 		if err == nil {
 			containers = append(containers, container)
-			requests := c.Resources.Requests
-			limits := c.Resources.Limits
-			utils.AddResourceAToResourceB(requests.Cpu(), cpuRequest)
-			utils.AddResourceAToResourceB(requests.Memory(), memoryRequest)
-			utils.AddResourceAToResourceB(limits.Cpu(), cpuLimit)
-			utils.AddResourceAToResourceB(limits.Memory(), memoryLimit)
 		}
+		requests := c.Resources.Requests
+		limits := c.Resources.Limits
+		utils.AddResourceAToResourceB(requests.Cpu(), cpuRequest)
+		utils.AddResourceAToResourceB(requests.Memory(), memoryRequest)
+		utils.AddResourceAToResourceB(limits.Cpu(), cpuLimit)
+		utils.AddResourceAToResourceB(limits.Memory(), memoryLimit)
 	}
 	return containers, Metrics{
 		CPURequest:    utils.ConvertToFloat64CPU(cpuRequest),

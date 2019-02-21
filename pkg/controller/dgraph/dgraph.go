@@ -114,6 +114,23 @@ func CreateSchema() error {
 		label: uid @reverse .
 		key: string @index(term) .
 		value: string @index(term) .
+		cpu: float .
+		cpuRequest: float .
+		cpuLimit: float .
+		cpuCapacity: float .
+		cpuPrice: float .
+		memory: float .
+		memoryRequest: float .
+		memoryLimit: float .
+		memoryCapacity: float .
+		memoryPrice: float .
+		mtdCPU: float .
+		mtdCPUCost: float .
+		mtdCost: float .
+		mtdMemory: float .
+		mtdMemoryCost: float .
+		price: float .
+		podsCount: int .
 	`
 	ctx := context.Background()
 	err := client.Alter(ctx, op)
