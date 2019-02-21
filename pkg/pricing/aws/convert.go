@@ -135,7 +135,6 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 		VolumeType:     product.Attributes.VolumeType,
 		UsageType:      product.Attributes.UsageType,
 		Price:          priceInFloat64,
-		PricePerGB:     strconv.FormatFloat(priceInFloat64, 'f', 11, 64),
 	}
 	uid := models.StoreStoragePrice(storagePrice, productXID)
 	if uid != "" {
@@ -145,22 +144,22 @@ func updateStorageInstancePrices(product Product, priceInFloat64 float64, unit s
 	return storagePrices
 }
 
-func getPriceForUnitResource(product Product, priceInFloat64 float64) (string, string) {
-	pricePerCPU := models.DefaultCPUCostPerCPUPerHour
-	pricePerGB := models.DefaultMemCostPerGBPerHour
+func getPriceForUnitResource(product Product, priceInFloat64 float64) (float64, float64) {
+	pricePerCPU := models.DefaultCPUCostInFloat64
+	pricePerGB := models.DefaultMemCostInFloat64
 
 	// priceInFloat64 should be greater than 0 otherwise this function returns default pricing
 	if priceInFloat64 != models.PriceError && priceInFloat64 != 0 {
 		cpu, err := strconv.ParseFloat(product.Attributes.Vcpu, 64)
 		if err == nil {
-			pricePerCPU = strconv.FormatFloat(priceSplitRatio*priceInFloat64/cpu, 'f', 11, 64)
+			pricePerCPU = priceSplitRatio * priceInFloat64 / cpu
 		}
 
 		memWithUnits := product.Attributes.Memory
 		// memWithUnits format: "3,126 GiB"
 		mem, err := strconv.ParseFloat(strings.Join(strings.Split(strings.Split(memWithUnits, " GiB")[0], ","), ""), 64)
 		if err == nil {
-			pricePerGB = strconv.FormatFloat((1-priceSplitRatio)*priceInFloat64/mem, 'f', 11, 64)
+			pricePerGB = (1 - priceSplitRatio) * priceInFloat64 / mem
 		}
 	}
 	return pricePerCPU, pricePerGB

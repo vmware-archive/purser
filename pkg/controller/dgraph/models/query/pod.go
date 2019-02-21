@@ -19,6 +19,7 @@ package query
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -103,7 +104,9 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 		return JSONDataWrapper{}
 	}
 	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
-	cpuPrice, memoryPrice := getPricePerResourceForPod(name)
+	cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(name)
+	cpuPrice := strconv.FormatFloat(cpuPriceInFloat64, 'f', 11, 64)
+	memoryPrice := strconv.FormatFloat(memoryPriceInFloat64, 'f', 11, 64)
 	query := `query {
 		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			name
@@ -141,7 +144,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 	return getJSONDataFromQuery(query)
 }
 
-func getPricePerResourceForPod(name string) (string, string) {
+func getPricePerResourceForPod(name string) (float64, float64) {
 	query := `query {
 		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			cpuPrice
@@ -154,7 +157,7 @@ func getPricePerResourceForPod(name string) (string, string) {
 	newRoot := root{}
 	err := dgraph.ExecuteQuery(query, &newRoot)
 	if err != nil || len(newRoot.Pods) < 1 {
-		return models.DefaultCPUCostPerCPUPerHour, models.DefaultMemCostPerGBPerHour
+		return models.DefaultCPUCostInFloat64, models.DefaultMemCostInFloat64
 	}
 	pod := newRoot.Pods[0]
 	return pod.CPUPrice, pod.MemoryPrice

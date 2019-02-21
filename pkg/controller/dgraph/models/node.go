@@ -50,8 +50,8 @@ type Node struct {
 	Type           string  `json:"type,omitempty"`
 	InstanceType   string  `json:"instanceType,omitempty"`
 	OS             string  `json:"os,omitempty"`
-	CPUPrice       string  `json:"cpuPrice,omitempty"`
-	MemoryPrice    string  `json:"memoryPrice,omitempty"`
+	CPUPrice       float64 `json:"cpuPrice,omitempty"`
+	MemoryPrice    float64 `json:"memoryPrice,omitempty"`
 }
 
 func createNodeObject(node api_v1.Node) Node {

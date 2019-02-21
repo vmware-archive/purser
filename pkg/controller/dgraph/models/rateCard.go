@@ -51,8 +51,8 @@ type NodePrice struct {
 	InstanceFamily  string  `json:"instanceFamily,omitempty"`
 	OperatingSystem string  `json:"operatingSystem,omitempty"`
 	Price           float64 `json:"price,omitempty"`
-	PricePerCPU     string  `json:"cpuPrice,omitempty"`
-	PricePerMemory  string  `json:"memoryPrice,omitempty"`
+	PricePerCPU     float64 `json:"cpuPrice,omitempty"`
+	PricePerMemory  float64 `json:"memoryPrice,omitempty"`
 }
 
 // StoragePrice structure
@@ -63,7 +63,6 @@ type StoragePrice struct {
 	VolumeType     string  `json:"volumeType,omitempty"`
 	UsageType      string  `json:"usageType,omitempty"`
 	Price          float64 `json:"price,omitempty"`
-	PricePerGB     string  `json:"pricePerGB,omitempty"`
 }
 
 // StoreRateCard given a cloudProvider and region it gets rate card and stores(create/update) in dgraph
@@ -179,19 +178,19 @@ func retrieveNodePrice(xid string) (*NodePrice, error) {
 }
 
 // getPerUnitResourcePriceForNode returns price per cpu and price per memory
-func getPerUnitResourcePriceForNode(nodeName string) (string, string) {
+func getPerUnitResourcePriceForNode(nodeName string) (float64, float64) {
 	node, err := retrieveNode(nodeName)
 	if err == nil {
 		return getPricePerUnitResourceFromNodePrice(*node)
 	}
-	return DefaultCPUCostPerCPUPerHour, DefaultMemCostPerGBPerHour
+	return DefaultCPUCostInFloat64, DefaultMemCostInFloat64
 }
 
-func getPricePerUnitResourceFromNodePrice(node Node) (string, string) {
+func getPricePerUnitResourceFromNodePrice(node Node) (float64, float64) {
 	nodePriceXID := node.InstanceType + "-" + node.OS
 	nodePrice, err := retrieveNodePrice(nodePriceXID)
 	if err == nil {
 		return nodePrice.PricePerCPU, nodePrice.PricePerMemory
 	}
-	return DefaultCPUCostPerCPUPerHour, DefaultMemCostPerGBPerHour
+	return DefaultCPUCostInFloat64, DefaultMemCostInFloat64
 }
