@@ -23,7 +23,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 
 	api_v1 "k8s.io/api/core/v1"
@@ -73,7 +72,7 @@ type Metrics struct {
 }
 
 // newPod creates a new node for the pod in the Dgraph
-func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
+func newPod(k8sPod api_v1.Pod) Pod {
 	pod := Pod{
 		Name:      "pod-" + k8sPod.Name,
 		IsPod:     true,
@@ -91,7 +90,7 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 	}
 	pod.Pvcs, pod.StorageRequest = getPodVolumes(k8sPod)
 	setPodOwners(&pod, k8sPod)
-	return dgraph.MutateNode(pod, dgraph.CREATE)
+	return pod
 }
 
 // StorePod updates the pod details and create it a new node if not exists.
@@ -100,14 +99,25 @@ func StorePod(k8sPod api_v1.Pod) error {
 	xid := k8sPod.Namespace + ":" + k8sPod.Name
 	uid := dgraph.GetUID(xid, IsPod)
 
-	var pod Pod
+	pod := newPod(k8sPod)
 	if uid == "" {
-		assigned, err := newPod(k8sPod)
+		assigned, err := dgraph.MutateNode(pod, dgraph.CREATE)
 		if err != nil {
 			return err
 		}
 		log.Infof("Pod with xid: (%s) persisted in dgraph", xid)
 		uid = assigned.Uids["blank-0"]
+	} else {
+		// case when pod is already persisted in dgraph
+		// delete end time for pod
+		log.Debugf("[SYNC] deleting endTime for pod in dgraph, xid: %s", xid)
+
+		oldPod := Pod{ID: dgraph.ID{UID: uid}, EndTime: ""}
+		_, err := dgraph.MutateNode(oldPod, dgraph.DELETE)
+		if err != nil {
+			return fmt.Errorf("unable to delete endTime for pod, xid: %s, uid: %v, err: %v", xid, uid, err)
+		}
+		log.Debugf("[SYNC] deleted endTime for pod, xid: %s, uid: %s", xid, uid)
 	}
 
 	podDeletedTimestamp := k8sPod.GetDeletionTimestamp()
@@ -116,25 +126,18 @@ func StorePod(k8sPod api_v1.Pod) error {
 			ID:      dgraph.ID{Xid: xid, UID: uid},
 			EndTime: podDeletedTimestamp.Time.Format(time.RFC3339),
 		}
-		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
+		podData := RetrievePodWithContainers(xid)
+		SoftDeleteContainersInTerminatedPod(podData.Containers, podDeletedTimestamp.Time.Format(time.RFC3339))
 	} else {
 		namespaceUID := CreateOrGetNamespaceByID(k8sPod.Namespace)
-		containers, metrics := StoreAndRetrieveContainersAndMetrics(k8sPod, uid, namespaceUID)
-		pod = Pod{
-			ID:            dgraph.ID{Xid: xid, UID: uid},
-			Name:          "pod-" + k8sPod.Name,
-			Containers:    containers,
-			CPURequest:    metrics.CPURequest,
-			CPULimit:      metrics.CPULimit,
-			MemoryRequest: metrics.MemoryRequest,
-			MemoryLimit:   metrics.MemoryLimit,
-		}
+		StoreContainersAndMetricsInPod(k8sPod, uid, namespaceUID, &pod)
 		populatePodLabels(&pod, k8sPod.Labels)
 	}
 
 	// store/update CPUPrice, MemoryPrice
 	pod.CPUPrice, pod.MemoryPrice = getPerUnitResourcePriceForNode(k8sPod.Spec.NodeName)
 
+	pod.ID = dgraph.ID{UID: uid, Xid: xid}
 	_, err := dgraph.MutateNode(pod, dgraph.UPDATE)
 	return err
 }
@@ -262,4 +265,26 @@ func populatePodLabels(pod *Pod, podLabels map[string]string) {
 		labels = append(labels, GetLabel(key, value))
 	}
 	pod.Labels = labels
+}
+
+// RetrievePodWithContainers given a name of pod it retrieves its containers
+func RetrievePodWithContainers(xid string) Pod {
+	query := `query {
+		pods(func: has(isPod)) @filter(eq(xid, "` + xid + `")) {
+			name
+			containers: ~pod @filter(has(isContainer)) {
+				uid
+			}
+		}
+	}`
+	type root struct {
+		Pods []Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil || len(newRoot.Pods) < 1 {
+		log.Errorf("unable to retrieve pod with containers: %v", err)
+		return Pod{}
+	}
+	return newRoot.Pods[0]
 }

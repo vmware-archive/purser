@@ -20,6 +20,8 @@ package models
 import (
 	"time"
 
+	"github.com/Sirupsen/logrus"
+
 	"log"
 
 	"github.com/vmware/purser/pkg/controller/dgraph"
@@ -81,6 +83,11 @@ func StorePersistentVolumeClaim(pvc api_v1.PersistentVolumeClaim) (string, error
 	newPvc := createPvcObject(pvc)
 	if uid != "" {
 		newPvc.UID = uid
+		oldPvc := PersistentVolumeClaim{ID: dgraph.ID{UID: uid}, EndTime: ""}
+		_, err := dgraph.MutateNode(oldPvc, dgraph.DELETE)
+		if err != nil {
+			logrus.Errorf("unable to delete end time for pvc: %s, err: %v", xid, err)
+		}
 	}
 	assigned, err := dgraph.MutateNode(newPvc, dgraph.CREATE)
 	if err != nil {

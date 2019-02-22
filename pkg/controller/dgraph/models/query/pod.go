@@ -27,6 +27,28 @@ import (
 	"github.com/vmware/purser/pkg/controller/utils"
 )
 
+// RetrieveAllLivePods will return all pods without endTime in dgraph. Error is returned if any
+// failure is encountered in the process.
+func RetrieveAllLivePods() []models.Pod {
+	query := `query {
+		pods(func: has(isPod)) @filter(NOT has(endTime)) {
+			uid
+			xid
+			name
+		}
+	}`
+	type root struct {
+		Pods []models.Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil {
+		logrus.Errorf("unable to retrieve all live pods: %v", err)
+		return nil
+	}
+	return newRoot.Pods
+}
+
 // RetrievePodsInteractions returns inbound and outbound interactions of a pod
 func RetrievePodsInteractions(name string, isOrphan bool) []byte {
 	var query string

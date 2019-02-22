@@ -73,17 +73,17 @@ func newContainer(container api_v1.Container, podUID, namespaceUID string, pod a
 	return dgraph.MutateNode(c, dgraph.CREATE)
 }
 
-// StoreAndRetrieveContainersAndMetrics fetchs the list of containers in given pod
+// StoreContainersAndMetricsInPod fetchs the list of containers in given pod
 // Create a new container in dgraph if container is not in it.
-func StoreAndRetrieveContainersAndMetrics(pod api_v1.Pod, podUID, namespaceUID string) ([]*Container, Metrics) {
+func StoreContainersAndMetricsInPod(k8sPod api_v1.Pod, podUID, namespaceUID string, pod *Pod) {
 	containers := []*Container{}
 	cpuRequest := &resource.Quantity{}
 	memoryRequest := &resource.Quantity{}
 	cpuLimit := &resource.Quantity{}
 	memoryLimit := &resource.Quantity{}
 
-	for _, c := range pod.Spec.Containers {
-		container, err := storeContainerIfNotExist(c, pod, podUID, namespaceUID)
+	for _, c := range k8sPod.Spec.Containers {
+		container, err := storeContainerIfNotExist(c, k8sPod, podUID, namespaceUID)
 		if err == nil {
 			containers = append(containers, container)
 		}
@@ -94,12 +94,11 @@ func StoreAndRetrieveContainersAndMetrics(pod api_v1.Pod, podUID, namespaceUID s
 		utils.AddResourceAToResourceB(limits.Cpu(), cpuLimit)
 		utils.AddResourceAToResourceB(limits.Memory(), memoryLimit)
 	}
-	return containers, Metrics{
-		CPURequest:    utils.ConvertToFloat64CPU(cpuRequest),
-		CPULimit:      utils.ConvertToFloat64CPU(cpuLimit),
-		MemoryRequest: utils.ConvertToFloat64GB(memoryRequest),
-		MemoryLimit:   utils.ConvertToFloat64GB(memoryLimit),
-	}
+	pod.Containers = containers
+	pod.CPURequest = utils.ConvertToFloat64CPU(cpuRequest)
+	pod.CPULimit = utils.ConvertToFloat64CPU(cpuLimit)
+	pod.MemoryRequest = utils.ConvertToFloat64GB(memoryRequest)
+	pod.MemoryLimit = utils.ConvertToFloat64GB(memoryLimit)
 }
 
 // StoreContainerProcessEdge ...
@@ -132,6 +131,13 @@ func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID, namesp
 		}
 		log.Infof("Container with xid: (%s) persisted in dgraph", containerXid)
 		containerUID = assigned.Uids["blank-0"]
+	} else {
+		// container exists so delete end time if persisted
+		container := Container{ID: dgraph.ID{UID: containerUID}, EndTime: ""}
+		_, err := dgraph.MutateNode(container, dgraph.DELETE)
+		if err != nil {
+			log.Debugf("unable to delete end time for container: %s, err: %v", containerXid, err)
+		}
 	}
 
 	container = &Container{
@@ -140,9 +146,14 @@ func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID, namesp
 	return container, nil
 }
 
-func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time) {
+// SoftDeleteContainersInTerminatedPod soft deletes i.e, adds endTime
+func SoftDeleteContainersInTerminatedPod(containers []*Container, endTime string) {
+	if containers == nil {
+		return
+	}
+
 	for _, container := range containers {
-		container.EndTime = endTime.Format(time.RFC3339)
+		container.EndTime = endTime
 	}
 	_, err := dgraph.MutateNode(containers, dgraph.UPDATE)
 	if err != nil {
