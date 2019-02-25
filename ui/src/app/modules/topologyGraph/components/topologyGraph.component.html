@@ -19,4 +19,24 @@
     <div class="spinner">
     </div>
 </div>
-<div class="mainDiv" id="mynetwork" #networkContainer [hidden]="NODE_STATUS !== 'READY' && EDGE_STATUS !== 'READY'">
+
+<div class="mainDiv" id="mynetwork" #networkContainer>
+
+<div *ngIf="NODE_STATUS === 'NO_DATA' || EDGE_STATUS === 'NO_DATA'">
+        <div class="clr-row">
+            <div class="clr-col-4">
+                <div class="alert alert-warning" role="alert">
+                    <div class="alert-items">
+                        <div class="alert-item static">
+                            <div class="alert-icon-wrapper">
+                                <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                            </div>
+                            <span class="alert-text">
+                                Experimental feature disabled!
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

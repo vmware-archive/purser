@@ -54,6 +54,7 @@
                                         <th class="left">Type</th>
                                         <th class="right" *ngFor="let item of metricOptions">{{item.displayValue + (item.units ? '('+item.units+')' : '')}}</th>
                                         <th class="right" *ngFor="let item of metricOptions">{{item.displayValue + ' Cost ($)'}}</th>
+                                        <th class="right">Total Cost ($)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -62,6 +63,7 @@
                                         <td class="left">{{rootItem.type || '-'}}</td>
                                         <td class="right" *ngFor="let item of metricOptions">{{rootItem[item.value] | number: '1.0-2' || 0}}</td>
                                         <td class="right" *ngFor="let item of metricOptions">{{rootItem[item.value+'Cost'] | number: '1.0-2' || 0}}</td>
+                                        <td class="right">{{rootItem['cpuCost'] + rootItem['memoryCost'] + rootItem['storageCost'] | number: '1.0-2' || 0}}</td>
                                     </tr>
                                 </tbody>
                             </table>
