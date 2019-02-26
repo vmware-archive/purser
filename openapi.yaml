@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://localhost:3030
 paths:
-  /hierarchy:
+  /api/hierarchy:
     get:
       description: Gets the top level cluster hierachy
       parameters:
@@ -27,7 +27,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/namespace:
+  /api/hierarchy/namespace:
     get:
       description: Gets the K8s Namespace hierachy
       parameters:
@@ -47,7 +47,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/pvc:
+  /api/hierarchy/pvc:
     get:
       description: Gets the K8s PVC hierachy
       parameters:
@@ -67,7 +67,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/job:
+  /api/hierarchy/job:
     get:
       description: Gets the K8s Job hierachy
       parameters:
@@ -87,7 +87,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/container:
+  /api/hierarchy/container:
     get:
       description: Gets the K8s container hierachy
       parameters:
@@ -107,7 +107,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/replicaset:
+  /api/hierarchy/replicaset:
     get:
       description: Gets the K8s Replicaset hierachy
       parameters:
@@ -127,7 +127,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/pod:
+  /api/hierarchy/pod:
     get:
       description: Gets the K8s Pod hierachy
       parameters:
@@ -147,7 +147,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/node:
+  /api/hierarchy/node:
     get:
       description: Gets the K8s Node hierachy
       parameters:
@@ -167,7 +167,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/daemonset:
+  /api/hierarchy/daemonset:
     get:
       description: Gets the K8s Daemonset hierachy
       parameters:
@@ -187,7 +187,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/deployment:
+  /api/hierarchy/deployment:
     get:
       description: Gets the K8s Deployment hierachy
       parameters:
@@ -207,7 +207,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/pv:
+  /api/hierarchy/pv:
     get:
       description: Gets the K8s PV hierachy
       parameters:
@@ -227,7 +227,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/statefulset:
+  /api/hierarchy/statefulset:
     get:
       description: Gets the K8s Statefulset hierachy
       parameters:
@@ -247,7 +247,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /hierarchy/process:
+  /api/hierarchy/process:
     get:
       description: Gets the K8s container process hierachy
       parameters:
@@ -267,7 +267,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Hierarchy'
-  /metrics:
+  /api/metrics:
     get:
       description: Gets the complete K8s cluster metrics
       parameters:
@@ -287,7 +287,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/namespace:
+  /api/metrics/namespace:
     get:
       description: Gets the K8s Namespace metrics
       parameters:
@@ -307,7 +307,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/pvc:
+  /api/metrics/pvc:
     get:
       description: Gets the K8s PVC metrics
       parameters:
@@ -327,7 +327,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/job:
+  /api/metrics/job:
     get:
       description: Gets the K8s Job metrics
       parameters:
@@ -347,7 +347,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/container:
+  /api/metrics/container:
     get:
       description: Gets the K8s container metrics
       parameters:
@@ -367,7 +367,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/replicaset:
+  /api/metrics/replicaset:
     get:
       description: Gets the K8s Replicaset metrics
       parameters:
@@ -387,7 +387,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/pod:
+  /api/metrics/pod:
     get:
       description: Gets the K8s Pod metrics
       parameters:
@@ -407,7 +407,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/node:
+  /api/metrics/node:
     get:
       description: Gets the K8s Node metrics
       parameters:
@@ -427,7 +427,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/daemonset:
+  /api/metrics/daemonset:
     get:
       description: Gets the K8s Daemonset metrics
       parameters:
@@ -447,7 +447,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/deployment:
+  /api/metrics/deployment:
     get:
       description: Gets the K8s Deployment metrics
       parameters:
@@ -467,7 +467,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/pv:
+  /api/metrics/pv:
     get:
       description: Gets the K8s PV metrics
       parameters:
@@ -487,7 +487,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /metrics/statefulset:
+  /api/metrics/statefulset:
     get:
       description: Gets the K8s Statefulset metrics
       parameters:
@@ -507,7 +507,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Metrics'
-  /interactions/pod:
+  /api/interactions/pod:
     get:
       description: Gets K8s Pods interactions
       parameters:
@@ -536,7 +536,7 @@ paths:
             application/json; charset=UTF-8:
               schema:
                 $ref: '#/components/schemas/Interactions'
-  /edges:
+  /api/edges:
     get:
       description: Gets edges between Dgraph Components
       responses:
@@ -548,7 +548,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Edges'
-  /nodes:
+  /api/nodes:
     get:
       description: Gets Dgraph node Components
       responses:
@@ -560,7 +560,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Nodes'
-  /groups:
+  /api/groups:
     get:
       description: Gets array of Group objects along with their metrics
       responses:
