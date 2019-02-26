@@ -67,7 +67,7 @@ Purser has three components to install.
 #### Purser Setup
 ``` bash
 # Namespace setup
-kubectl crete ns purser
+kubectl create ns purser
 
 # DB setup
 curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-database-setup.yaml -O
