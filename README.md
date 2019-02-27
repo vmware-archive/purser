@@ -65,25 +65,35 @@ Purser has three components to install.
 - [Purser Plugin Setup](./README.md#Purser-Plugin-Setup)
 
 #### Purser Setup
+The following steps will install Purser in your cluster at namespace `purser`.
+Creation of this namespace is needed because purser needs to create a service-account which requires namespace.
+Also, the frontend will use kubernetes DNS to call backend for data and this DNS contains a field for namespace.
 ``` bash
+# Namespace setup
+kubectl create ns purser
+
 # DB setup
 curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-database-setup.yaml -O
-kubectl create -f purser-database-setup.yaml
+kubectl --namespace=purser create -f purser-database-setup.yaml
 
-# Purser controller and UI setup
-curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-setup.yaml -O
-kubectl create -f purser-setup.yaml
+# Purser controller setup
+curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-controller-setup.yaml -O
+kubectl --namespace=purser create -f purser-controller-setup.yaml
+
+# Purser UI setup
+curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-ui-setup.yaml -O
+kubectl --namespace=purser create -f purser-ui-setup.yaml
 ```
-**NOTE:** If you don't have `curl` installed you can download `purser-database-setup.yaml` from [here](./cluster/purser-database-setup.yaml)
-and `purser-setup.yaml` from [here](./cluster/purser-setup.yaml). Then `kubectl create -f purser-database-setup.yaml` 
-and `kubectl create -f purser-setup.yaml` will setup purser in your cluster.
+**NOTE:** If you don't have `curl` installed you can download `purser-database-setup.yaml` from [here](./cluster/purser-database-setup.yaml), `purser-controller-setup.yaml` from [here](cluster/purser-controller-setup.yaml) and `purser-ui-setup.yaml` from [here](cluster/purser-ui-setup.yaml). 
+Then `kubectl create -f purser-database-setup.yaml` ,
+`kubectl create -f purser-controller-setup.yaml` and `kubectl create -f purser-ui-setup.yaml` will setup purser in your cluster.
 
 ##### Change Settings and Enable/Disable Purser Features
 
 The following settings can be customized before Controller installation:
 
-- Change the default **log level**, **dgraph url** and **dgraph port** by editing `args` field in the [purser-setup.yaml](cluster/purser-setup.yaml). (Default: `--log=info`, `--dgraphURL=purser-db`, `--dgraphPort=9080`)
-- Enable/Disable **resource interactions** capability by editing `args` field in the [purser-setup.yaml](cluster/purser-setup.yaml) and uncommenting `pods/exec` rule from purser-permissions. (Default: `disabled`)
+- Change the default **log level**, **dgraph url** and **dgraph port** by editing `args` field in the [purser-controller-setup.yaml](cluster/purser-controller-setup.yaml). (Default: `--log=info`, `--dgraphURL=purser-db`, `--dgraphPort=9080`)
+- Enable/Disable **resource interactions** capability by editing `args` field in the [purser-controller-setup.yaml](cluster/purser-controller-setup.yaml) and uncommenting `pods/exec` rule from purser-permissions. (Default: `disabled`)
 - Enable **subscription to inventory changes** capability by creating an object of custom resource kind `Subscriber`. (Refer: [example-subscriber.yaml](./cluster/artifacts/example-subscriber.yaml))
 - Enable **customized logical grouping of resources** by creating an object of custom resource kind `Group`. (Refer: [docs](docs/custom-group-installation-and-usage.md) for custom group installation and usage)
 
@@ -113,9 +123,10 @@ For other installation methods such as **manual installation** or **installation
 ### Uninstalling Purser
 
 ``` bash
-kubectl delete -f purser-database-setup.yaml
-kubectl delete -f purser-setup.yaml
-kubectl delete pvc datadir-purser-dgraph-0
+kubectl --namespace=purser delete -f purser-database-setup.yaml
+kubectl --namespace=purser delete -f purser-controller-setup.yaml
+kubectl --namespace=purser delete -f purser-ui-setup.yaml
+kubectl --namespace=purser delete pvc datadir-purser-dgraph-0
 ```
 
 

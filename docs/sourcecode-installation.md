@@ -75,17 +75,28 @@ make push
 
 ### Install Purser Plugin
 
-- Update the image name in [`purser-setup.yaml`](../cluster/purser-setup.yaml) to the docker image name that you pushed.
+- Update the image name in [`purser-controller-setup.yaml`](../cluster/purser-controller-setup.yaml) to the docker image name that you pushed.
 
 - Install the controller in the cluster using `kubectl`.
 
+The following steps will install Purser in your cluster at namespace `purser`.
+Creation of this namespace is needed because purser needs to create a service-account which requires namespace.
+Also, the frontend will use kubernetes DNS to call backend for data and this DNS contains a field for namespace.
+
   ``` bash
+  # Namespace setup
+  kubectl create ns purser
+  
   # DB setup
   curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-database-setup.yaml -O
-  kubectl create -f purser-database-setup.yaml
+  kubectl --namespace=purser create -f purser-database-setup.yaml
   
-  # Purser controller and UI setup
-  kubectl create -f purser-setup.yaml
+  # Purser controller setup
+  kubectl --namespace=purser create -f purser-controller-setup.yaml
+  
+  # Purser UI setup
+  curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-ui-setup.yaml -O
+  kubectl --namespace=purser create -f purser-ui-setup.yaml
   ```
 
   _Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._

@@ -36,32 +36,20 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: purser-service-account
-    namespace: default
+    namespace: purser
 ---
-# Service Purser - ports required for controller and ui
 apiVersion: v1
 kind: Service
 metadata:
   name: purser
-  labels:
-    app: purser
 spec:
-  type: NodePort
-  ports:
-  - port: 3030
-    targetPort: 3030
-    nodePort: 30300
-    protocol: TCP
-    name: purser
-  - port: 4200
-    targetPort: 4200
-    nodePort: 30303
-    protocol: TCP
-    name: purser-ui
   selector:
     app: purser
+  ports:
+  - protocol: TCP
+    port: 3030
+    targetPort: http
 ---
-# Purser deployment - Replicas 1, Containers 2 (controller and UI)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -78,30 +66,18 @@ spec:
     spec:
       serviceAccountName: purser-service-account
       containers:
-      - name: purser-controller
-        image: kreddyj/controller-amd64:1.0.1
-        imagePullPolicy: Always
-        resources:
-          limits:
-            memory: 1000Mi
-            cpu: 300m
-          requests:
-            memory: 1000Mi
-            cpu: 300m
-        ports:
-        - containerPort: 3030
-          name: purser
-        command: ["/controller"]
-        args: ["--log=info", "--interactions=disable", "--dgraphURL=purser-db", "--dgraphPort=9080"]
-      - name: purser-ui
-        image: kreddyj/purser-ui:1.0.1
-        imagePullPolicy: Always
-        resources:
-          limits:
-            memory: 1000Mi
-            cpu: 300m
-          requests:
-            memory: 1000Mi
-            cpu: 300m
-        ports:
-        - containerPort: 4200
+        - name: purser-controller
+          image: kreddyj/controller-amd64:1.0.2
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 1000Mi
+              cpu: 300m
+            requests:
+              memory: 1000Mi
+              cpu: 300m
+          ports:
+            - name: http
+              containerPort: 3030
+          command: ["/controller"]
+          args: ["--log=info", "--interactions=disable", "--dgraphURL=purser-db", "--dgraphPort=9080"]
