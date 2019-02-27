@@ -65,6 +65,9 @@ Purser has three components to install.
 - [Purser Plugin Setup](./README.md#Purser-Plugin-Setup)
 
 #### Purser Setup
+The following steps will install Purser in your cluster at namespace `purser`.
+Creation of this namespace is needed because purser needs to create a service-account which requires namespace.
+Also, the frontend will use kubernetes DNS to call backend for data and this DNS contains a field for namespace.
 ``` bash
 # Namespace setup
 kubectl create ns purser
