@@ -57,6 +57,7 @@ func createDaemonsetObject(daemonset ext_v1beta1.DaemonSet) Daemonset {
 	daemonsetDeletionTimestamp := daemonset.GetDeletionTimestamp()
 	if !daemonsetDeletionTimestamp.IsZero() {
 		newDaemonset.EndTime = daemonsetDeletionTimestamp.Time.Format(time.RFC3339)
+		newDaemonset.Xid += newDaemonset.EndTime
 	}
 	return newDaemonset
 }

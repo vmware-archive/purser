@@ -112,11 +112,13 @@ func StorePod(k8sPod api_v1.Pod) error {
 
 	podDeletedTimestamp := k8sPod.GetDeletionTimestamp()
 	if !podDeletedTimestamp.IsZero() {
+		endTime := podDeletedTimestamp.Time.Format(time.RFC3339)
 		pod = Pod{
-			ID:      dgraph.ID{Xid: xid, UID: uid},
-			EndTime: podDeletedTimestamp.Time.Format(time.RFC3339),
+			ID:      dgraph.ID{Xid: xid + endTime, UID: uid},
+			EndTime: endTime,
 		}
-		deleteContainersInTerminatedPod(pod.Containers, podDeletedTimestamp.Time)
+		podData := RetrievePodWithContainers(xid)
+		deleteContainersInTerminatedPod(podData.Containers, podDeletedTimestamp.Time)
 	} else {
 		namespaceUID := CreateOrGetNamespaceByID(k8sPod.Namespace)
 		containers, metrics := StoreAndRetrieveContainersAndMetrics(k8sPod, uid, namespaceUID)
@@ -262,4 +264,26 @@ func populatePodLabels(pod *Pod, podLabels map[string]string) {
 		labels = append(labels, GetLabel(key, value))
 	}
 	pod.Labels = labels
+}
+
+// RetrievePodWithContainers given a name of pod it retrieves its containers
+func RetrievePodWithContainers(xid string) Pod {
+	query := `query {
+		pods(func: has(isPod)) @filter(eq(xid, "` + xid + `")) {
+			name
+			containers: ~pod @filter(has(isContainer)) {
+				uid
+			}
+		}
+	}`
+	type root struct {
+		Pods []Pod `json:"pods"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil || len(newRoot.Pods) < 1 {
+		log.Errorf("unable to retrieve pod with containers: %v", err)
+		return Pod{}
+	}
+	return newRoot.Pods[0]
 }

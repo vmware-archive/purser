@@ -76,9 +76,10 @@ func StoreService(service api_v1.Service) error {
 
 	svcDeletionTimestamp := service.GetDeletionTimestamp()
 	if !svcDeletionTimestamp.IsZero() {
+		et := svcDeletionTimestamp.Time.Format(time.RFC3339)
 		updatedService := Service{
-			ID:      dgraph.ID{Xid: xid, UID: uid},
-			EndTime: svcDeletionTimestamp.Time.Format(time.RFC3339),
+			ID:      dgraph.ID{Xid: xid + et, UID: uid},
+			EndTime: et,
 		}
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		return err

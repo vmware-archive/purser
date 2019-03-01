@@ -141,8 +141,12 @@ func storeContainerIfNotExist(c api_v1.Container, pod api_v1.Pod, podUID, namesp
 }
 
 func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time) {
+	if containers == nil {
+		return
+	}
 	for _, container := range containers {
 		container.EndTime = endTime.Format(time.RFC3339)
+		container.Xid += container.EndTime
 	}
 	_, err := dgraph.MutateNode(containers, dgraph.UPDATE)
 	if err != nil {
