@@ -57,6 +57,8 @@ func createJobObject(job batch_v1.Job) Job {
 	jobDeletionTimestamp := job.GetDeletionTimestamp()
 	if !jobDeletionTimestamp.IsZero() {
 		newJob.EndTime = jobDeletionTimestamp.Time.Format(time.RFC3339)
+		newJob.Xid += newJob.EndTime
+		newJob.Name += "*" + newJob.EndTime
 	}
 	return newJob
 }

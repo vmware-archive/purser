@@ -58,6 +58,8 @@ func createReplicasetObject(replicaset ext_v1beta1.ReplicaSet) Replicaset {
 	replicasetDeletionTimestamp := replicaset.GetDeletionTimestamp()
 	if !replicasetDeletionTimestamp.IsZero() {
 		newReplicaset.EndTime = replicasetDeletionTimestamp.Time.Format(time.RFC3339)
+		newReplicaset.Xid += newReplicaset.EndTime
+		newReplicaset.Name += "*" + newReplicaset.EndTime
 	}
 	setReplicasetOwners(&newReplicaset, replicaset)
 	return newReplicaset

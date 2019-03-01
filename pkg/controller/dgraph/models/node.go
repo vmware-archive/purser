@@ -73,6 +73,8 @@ func createNodeObject(node api_v1.Node) Node {
 	nodeDeletionTimestamp := node.GetDeletionTimestamp()
 	if !nodeDeletionTimestamp.IsZero() {
 		newNode.EndTime = nodeDeletionTimestamp.Time.Format(time.RFC3339)
+		newNode.Xid += newNode.EndTime
+		newNode.Name += "*" + newNode.EndTime
 	}
 	return newNode
 }

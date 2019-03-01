@@ -53,6 +53,8 @@ func newNamespace(namespace api_v1.Namespace) Namespace {
 	nsDeletionTimestamp := namespace.GetDeletionTimestamp()
 	if !nsDeletionTimestamp.IsZero() {
 		ns.EndTime = nsDeletionTimestamp.Time.Format(time.RFC3339)
+		ns.Xid += ns.EndTime
+		ns.Name += "*" + ns.EndTime
 	}
 	return ns
 }

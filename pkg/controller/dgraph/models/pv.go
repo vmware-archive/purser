@@ -18,9 +18,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-	"time"
 
 	"log"
 
@@ -62,6 +63,8 @@ func createPersistentVolumeObject(pv api_v1.PersistentVolume, client *kubernetes
 	deletionTimestamp := pv.GetDeletionTimestamp()
 	if !deletionTimestamp.IsZero() {
 		newPv.EndTime = deletionTimestamp.Time.Format(time.RFC3339)
+		newPv.Xid += newPv.EndTime
+		newPv.Name += "*" + newPv.EndTime
 	}
 	return newPv
 }
