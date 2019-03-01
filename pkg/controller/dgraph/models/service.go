@@ -80,6 +80,7 @@ func StoreService(service api_v1.Service) error {
 		updatedService := Service{
 			ID:      dgraph.ID{Xid: xid + et, UID: uid},
 			EndTime: et,
+			Name:    "service-" + service.Name + "*" + et,
 		}
 		_, err := dgraph.MutateNode(updatedService, dgraph.UPDATE)
 		return err

@@ -64,6 +64,7 @@ func createPersistentVolumeObject(pv api_v1.PersistentVolume, client *kubernetes
 	if !deletionTimestamp.IsZero() {
 		newPv.EndTime = deletionTimestamp.Time.Format(time.RFC3339)
 		newPv.Xid += newPv.EndTime
+		newPv.Name += "*" + newPv.EndTime
 	}
 	return newPv
 }

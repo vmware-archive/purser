@@ -70,6 +70,7 @@ func createPvcObject(pvc api_v1.PersistentVolumeClaim) PersistentVolumeClaim {
 	if !deletionTimestamp.IsZero() {
 		newPvc.EndTime = deletionTimestamp.Time.Format(time.RFC3339)
 		newPvc.Xid += newPvc.EndTime
+		newPvc.Name += "*" + newPvc.EndTime
 	}
 	return newPvc
 }

@@ -59,6 +59,7 @@ func createDeploymentObject(deployment apps_v1beta1.Deployment) Deployment {
 	if !deploymentDeletionTimestamp.IsZero() {
 		newDeployment.EndTime = deploymentDeletionTimestamp.Time.Format(time.RFC3339)
 		newDeployment.Xid += newDeployment.EndTime
+		newDeployment.Name += "*" + newDeployment.EndTime
 	}
 	return newDeployment
 }

@@ -116,6 +116,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 		pod = Pod{
 			ID:      dgraph.ID{Xid: xid + endTime, UID: uid},
 			EndTime: endTime,
+			Name:    "pod-" + k8sPod.Name + "*" + endTime,
 		}
 		podData := RetrievePodWithContainers(xid)
 		deleteContainersInTerminatedPod(podData.Containers, podDeletedTimestamp.Time)

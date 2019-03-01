@@ -58,6 +58,7 @@ func createStatefulsetObject(statefulset apps_v1beta1.StatefulSet) Statefulset {
 	if !statefulsetDeletionTimestamp.IsZero() {
 		newStatefulset.EndTime = statefulsetDeletionTimestamp.Time.Format(time.RFC3339)
 		newStatefulset.Xid += newStatefulset.EndTime
+		newStatefulset.Name += "*" + newStatefulset.EndTime
 	}
 	return newStatefulset
 }

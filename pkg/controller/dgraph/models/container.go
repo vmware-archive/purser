@@ -147,6 +147,7 @@ func deleteContainersInTerminatedPod(containers []*Container, endTime time.Time)
 	for _, container := range containers {
 		container.EndTime = endTime.Format(time.RFC3339)
 		container.Xid += container.EndTime
+		container.Name += "*" + container.EndTime // * in name indicates dead resources
 	}
 	_, err := dgraph.MutateNode(containers, dgraph.UPDATE)
 	if err != nil {
