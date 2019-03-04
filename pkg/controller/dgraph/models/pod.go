@@ -80,7 +80,6 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 		Type:      "pod",
 		ID:        dgraph.ID{Xid: k8sPod.Namespace + ":" + k8sPod.Name},
 		StartTime: k8sPod.GetCreationTimestamp().Time.Format(time.RFC3339),
-		EndTime:   "",
 	}
 	nodeUID, err := createOrGetNodeByID(k8sPod.Spec.NodeName)
 	if err == nil {
