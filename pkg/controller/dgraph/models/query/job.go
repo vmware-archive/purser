@@ -68,7 +68,7 @@ func RetrieveJobMetrics(name string) JSONDataWrapper {
 				et as endTime
 				isTerminated as count(endTime)
 				secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-				durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
+				durationInHours as math(cond(secondsSinceStart > secondsSinceEnd, (secondsSinceStart - secondsSinceEnd) / 3600, 0.0))
 				pricePerCPU as cpuPrice
 				pricePerMemory as memoryPrice
 				cpuCost: podCpuCost as math(podCpu * durationInHours * pricePerCPU)

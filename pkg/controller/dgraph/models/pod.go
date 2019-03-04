@@ -97,6 +97,10 @@ func newPod(k8sPod api_v1.Pod) (*api.Assigned, error) {
 // StorePod updates the pod details and create it a new node if not exists.
 // It also populates Containers of a pod.
 func StorePod(k8sPod api_v1.Pod) error {
+	if k8sPod.Namespace == "" || k8sPod.Name == "" {
+		return fmt.Errorf("pod name/namespace is empty, name: %s, namesapce: %s", k8sPod.Name, k8sPod.Namespace)
+	}
+
 	xid := k8sPod.Namespace + ":" + k8sPod.Name
 	uid := dgraph.GetUID(xid, IsPod)
 

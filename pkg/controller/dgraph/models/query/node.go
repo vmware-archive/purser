@@ -70,7 +70,7 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 				etChild as endTime
 				isTerminatedChild as count(endTime)
 				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
-				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
+				durationInHoursChild as math(cond(secondsSinceStartChild > secondsSinceEndChild, (secondsSinceStartChild - secondsSinceEndChild) / 3600, 0.0))
 				podPricePerCPU as cpuPrice
 				podPricePerMemory as memoryPrice
 				cpuCost: math(podCpu * durationInHoursChild * podPricePerCPU)
@@ -86,7 +86,7 @@ func RetrieveNodeMetrics(name string) JSONDataWrapper {
 			et as endTime
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
+			durationInHours as math(cond(secondsSinceStart > secondsSinceEnd, (secondsSinceStart - secondsSinceEnd) / 3600, 0.0))
 			pricePerCPU as cpuPrice
 			pricePerMemory as memoryPrice
 			cpuCost: math(cpu * durationInHours * pricePerCPU)

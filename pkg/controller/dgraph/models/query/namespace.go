@@ -73,7 +73,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 						replicasetPodET as endTime
 						replicasetPodIsTerminated as count(endTime)
 						replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
-						replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600)
+						replicasetPodDurationInHours as math(cond(replicasetPodSecondsSinceStart > replicasetPodSecondsSinceEnd, (replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600, 0.0))
 						replicasetPricePerCPU as cpuPrice
 						replicasetPricePerMemory as memoryPrice
 						replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * replicasetPricePerCPU)
@@ -99,7 +99,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					statefulsetPodET as endTime
 					statefulsetPodIsTerminated as count(endTime)
 					statefulsetPodSecondsSinceEnd as math(cond(statefulsetPodIsTerminated == 0, 0.0, since(statefulsetPodET)))
-					statefulsetPodDurationInHours as math((statefulsetPodSecondsSinceStart - statefulsetPodSecondsSinceEnd) / 3600)
+					 statefulsetPodDurationInHours as math(cond(statefulsetPodSecondsSinceStart > statefulsetPodSecondsSinceEnd, (statefulsetPodSecondsSinceStart - statefulsetPodSecondsSinceEnd) / 3600, 0.0))
 					statefulsetPricePerCPU as cpuPrice
 					statefulsetPricePerMemory as memoryPrice
 					statefulsetPodCpuCost as math(statefulsetPodCpu * statefulsetPodDurationInHours * statefulsetPricePerCPU)
@@ -118,7 +118,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					jobPodET as endTime
 					jobPodIsTerminated as count(endTime)
 					jobPodSecondsSinceEnd as math(cond(jobPodIsTerminated == 0, 0.0, since(jobPodET)))
-					jobPodDurationInHours as math((jobPodSecondsSinceStart - jobPodSecondsSinceEnd) / 3600)
+					jobPodDurationInHours as math(cond(jobPodSecondsSinceStart > jobPodSecondsSinceEnd, (jobPodSecondsSinceStart - jobPodSecondsSinceEnd) / 3600, 0.0))
 					jobPricePerCPU as cpuPrice
 					jobPricePerMemory as memoryPrice
 					jobPodCpuCost as math(jobPodCpu * jobPodDurationInHours * jobPricePerCPU)
@@ -137,7 +137,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					daemonsetPodET as endTime
 					daemonsetPodIsTerminated as count(endTime)
 					daemonsetPodSecondsSinceEnd as math(cond(daemonsetPodIsTerminated == 0, 0.0, since(daemonsetPodET)))
-					daemonsetPodDurationInHours as math((daemonsetPodSecondsSinceStart - daemonsetPodSecondsSinceEnd) / 3600)
+					daemonsetPodDurationInHours as math(cond(daemonsetPodSecondsSinceStart > daemonsetPodSecondsSinceEnd, (daemonsetPodSecondsSinceStart - daemonsetPodSecondsSinceEnd) / 3600, 0.0))
 					daemonsetPricePerCPU as cpuPrice
 					daemonsetPricePerMemory as memoryPrice
 					daemonsetPodCpuCost as math(daemonsetPodCpu * daemonsetPodDurationInHours * daemonsetPricePerCPU)
@@ -156,7 +156,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 					replicasetSimplePodET as endTime
 					replicasetSimplePodIsTerminated as count(endTime)
 					replicasetSimplePodSecondsSinceEnd as math(cond(replicasetSimplePodIsTerminated == 0, 0.0, since(replicasetSimplePodET)))
-					replicasetSimplePodDurationInHours as math((replicasetSimplePodSecondsSinceStart - replicasetSimplePodSecondsSinceEnd) / 3600)
+					replicasetSimplePodDurationInHours as math(cond(replicasetSimplePodSecondsSinceStart > replicasetSimplePodSecondsSinceEnd, (replicasetSimplePodSecondsSinceStart - replicasetSimplePodSecondsSinceEnd) / 3600, 0.0))
 					replicasetSimplePricePerCPU as cpuPrice
 					replicasetSimplePricePerMemory as memoryPrice
 					replicasetSimplePodCpuCost as math(replicasetSimplePodCpu * replicasetSimplePodDurationInHours * replicasetSimplePricePerCPU)

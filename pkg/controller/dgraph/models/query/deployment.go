@@ -65,7 +65,7 @@ func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
 					replicasetPodET as endTime
 					replicasetPodIsTerminated as count(endTime)
 					replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
-					replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600)
+					replicasetPodDurationInHours as math(cond(replicasetPodSecondsSinceStart > replicasetPodSecondsSinceEnd, (replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600, 0.0))
 					pricePerCPU as cpuPrice
 					pricePerMemory as memoryPrice
 					replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * pricePerCPU)

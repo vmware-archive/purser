@@ -142,7 +142,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 				etChild as endTime
 				isTerminatedChild as count(endTime)
 				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
-				durationInHoursChild as math((secondsSinceStartChild - secondsSinceEndChild) / 3600)
+				durationInHoursChild as math(cond(secondsSinceStartChild > secondsSinceEndChild, (secondsSinceStartChild - secondsSinceEndChild) / 3600, 0.0))
 				cpu: cpu as cpuRequest
 				memory: memory as memoryRequest
 				cpuCost: math(cpu * durationInHoursChild * ` + cpuPrice + `)
@@ -157,7 +157,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 			et as endTime
 			isTerminated as count(endTime)
 			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
+			durationInHours as math(cond(secondsSinceStart > secondsSinceEnd, (secondsSinceStart - secondsSinceEnd) / 3600, 0.0))
 			cpuCost: math(podCpu * durationInHours * ` + cpuPrice + `)
 			memoryCost: math(podMemory * durationInHours * ` + memoryPrice + `)
 			storageCost: math(pvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
