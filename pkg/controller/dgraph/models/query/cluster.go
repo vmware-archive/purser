@@ -18,13 +18,8 @@
 package query
 
 import (
-	"fmt"
-
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
-
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrieveClusterHierarchy returns all namespaces if view is logical and returns all nodes with disks if view is physical
@@ -67,68 +62,10 @@ func RetrieveClusterHierarchy(view string) JSONDataWrapper {
 // returns all nodes and disks with metrics if view is physical
 func RetrieveClusterMetrics(view string) JSONDataWrapper {
 	var query string
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 	if view == Physical {
-		query = `query {
-			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
-				name
-				type
-				cpu: cpu as cpuCapacity
-				memory: memory as memoryCapacity
-				storage: storage as storageCapacity
-				st as startTime
-				stSeconds as math(since(st))
-				secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-				et as endTime
-				isTerminated as count(endTime)
-				secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-				durationInHours as math(cond(secondsSinceStart > secondsSinceEnd, (secondsSinceStart - secondsSinceEnd) / 3600, 0.0))
-				pricePerCPU as cpuPrice
-				pricePerMemory as memoryPrice
-				cpuCost: math(cpu * durationInHours * pricePerCPU)
-				memoryCost: math(memory * durationInHours * pricePerMemory)
-				storageCost: math(storage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
-			}
-		}`
+		query = getQueryForPhysicalResources()
 	} else {
-		query = `query {
-			ns as var(func: has(isNamespace)) {
-				~namespace @filter(has(isPod)){
-					namespacePodCpu as cpuRequest
-					namespacePodMem as memoryRequest
-					namespacePvcStorage as storageRequest
-					st as startTime
-					stSeconds as math(since(st))
-					secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-					et as endTime
-					isTerminated as count(endTime)
-					secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-					durationInHours as math(cond(secondsSinceStart > secondsSinceEnd, (secondsSinceStart - secondsSinceEnd) / 3600, 0.0))
-					pricePerCPU as cpuPrice
-					pricePerMemory as memoryPrice
-					namespacePodCpuCost as math(namespacePodCpu * durationInHours * pricePerCPU)
-					namespacePodMemoryCost as math(namespacePodMem * durationInHours * pricePerMemory)
-					namespacePodStorageCost as math(namespacePvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
-				}
-				namespaceCpu as sum(val(namespacePodCpu))
-				namespaceMem as sum(val(namespacePodMem))
-				namespaceStorage as sum(val(namespacePvcStorage))
-				namespaceCpuCost as sum(val(namespacePodCpuCost))
-				namespaceMemCost as sum(val(namespacePodMemoryCost))
-				namespaceStorageCost as sum(val(namespacePodStorageCost))
-			}
-	
-			children(func: uid(ns)) {
-				name
-				type
-				cpu: val(namespaceCpu)
-				memory: val(namespaceMem)
-				storage: val(namespaceStorage)
-				cpuCost: val(namespaceCpuCost)
-				memoryCost: val(namespaceMemCost)
-				storageCost: val(namespaceStorageCost)
-			}
-		}`
+		query = getQueryForLogicalResources()
 	}
 
 	parentRoot := ParentWrapper{}

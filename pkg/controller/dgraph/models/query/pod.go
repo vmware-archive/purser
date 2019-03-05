@@ -18,13 +18,9 @@
 package query
 
 import (
-	"fmt"
-	"strconv"
-
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrieveAllLivePods will return all pods without endTime in dgraph. Error is returned if any
@@ -106,16 +102,7 @@ func RetrievePodHierarchy(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for pod, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := `query {
-		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~pod @filter(has(isContainer)) {
-				name
-				type
-			}
-		}
-	}`
+	query := getQueryForHierarchy("isPod", "pod", name, "@filter(has(isContainer))")
 	return getJSONDataFromQuery(query)
 }
 
@@ -125,44 +112,7 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for pod, empty name is given")
 		return JSONDataWrapper{}
 	}
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
-	cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(name)
-	cpuPrice := strconv.FormatFloat(cpuPriceInFloat64, 'f', 11, 64)
-	memoryPrice := strconv.FormatFloat(memoryPriceInFloat64, 'f', 11, 64)
-	query := `query {
-		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~pod @filter(has(isContainer)) {
-				name
-				type
-				stChild as startTime
-				stSecondsChild as math(since(stChild))
-				secondsSinceStartChild as math(cond(stSecondsChild > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSecondsChild))
-				etChild as endTime
-				isTerminatedChild as count(endTime)
-				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
-				durationInHoursChild as math(cond(secondsSinceStartChild > secondsSinceEndChild, (secondsSinceStartChild - secondsSinceEndChild) / 3600, 0.0))
-				cpu: cpu as cpuRequest
-				memory: memory as memoryRequest
-				cpuCost: math(cpu * durationInHoursChild * ` + cpuPrice + `)
-				memoryCost: math(memory * durationInHoursChild * ` + memoryPrice + `)
-			}
-			cpu: podCpu as cpuRequest
-			memory: podMemory as memoryRequest
-			storage: pvcStorage as storageRequest
-			st as startTime
-			stSeconds as math(since(st))
-			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-			et as endTime
-			isTerminated as count(endTime)
-			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math(cond(secondsSinceStart > secondsSinceEnd, (secondsSinceStart - secondsSinceEnd) / 3600, 0.0))
-			cpuCost: math(podCpu * durationInHours * ` + cpuPrice + `)
-			memoryCost: math(podMemory * durationInHours * ` + memoryPrice + `)
-			storageCost: math(pvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
-		}
-	}`
+	query := getQueryForPodMetrics(name)
 	return getJSONDataFromQuery(query)
 }
 

@@ -18,12 +18,7 @@
 package query
 
 import (
-	"fmt"
-
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrievePVHierarchy returns hierarchy for a given pv
@@ -32,17 +27,7 @@ func RetrievePVHierarchy(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for PV, empty name is given")
 		return JSONDataWrapper{}
 	}
-
-	query := `query {
-		parent(func: has(isPersistentVolume)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~pv @filter(has(isPersistentVolumeClaim)) {
-				name
-				type
-			}
-        }
-    }`
+	query := getQueryForHierarchy("isPersistentVolume", "pv", name, "@filter(has(isPersistentVolumeClaim))")
 	return getJSONDataFromQuery(query)
 }
 
@@ -53,34 +38,6 @@ func RetrievePVMetrics(name string) JSONDataWrapper {
 		return JSONDataWrapper{}
 	}
 
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
-	query := `query {
-		parent(func: has(isPersistentVolume)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~pv @filter(has(isPersistentVolumeClaim)) {
-				name
-				type
-				storage: pvcStorage as storageCapacity
-				stChild as startTime
-				stSecondsChild as math(since(stChild))
-				secondsSinceStartChild as math(cond(stSecondsChild > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSecondsChild))
-				etChild as endTime
-				isTerminatedChild as count(endTime)
-				secondsSinceEndChild as math(cond(isTerminatedChild == 0, 0.0, since(etChild)))
-				durationInHoursChild as math(cond(secondsSinceStartChild > secondsSinceEndChild, (secondsSinceStartChild - secondsSinceEndChild) / 3600, 0.0))
-				storageCost: math(pvcStorage * durationInHoursChild * ` + models.DefaultStorageCostPerGBPerHour + `)
-			}
-			storage: storage as storageCapacity
-			st as startTime
-			stSeconds as math(since(st))
-			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-			et as endTime
-			isTerminated as count(endTime)
-			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math(cond(secondsSinceStart > secondsSinceEnd, (secondsSinceStart - secondsSinceEnd) / 3600, 0.0))
-			storageCost: math(storage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
-        }
-    }`
+	query := getQueryForPVMetrics(name)
 	return getJSONDataFromQuery(query)
 }
