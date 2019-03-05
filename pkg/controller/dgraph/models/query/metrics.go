@@ -21,26 +21,6 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
-// DaemonsetMetrics query
-func getQueryForDaemonsetMetrics(name string) string {
-	return getQueryForPodParentMetrics("isDaemonset", "daemonset", name)
-}
-
-// JobMetrics query
-func getQueryForJobMetrics(name string) string {
-	return getQueryForPodParentMetrics("isJob", "job", name)
-}
-
-// ReplicasetMetrics query
-func getQueryForReplicasetMetrics(name string) string {
-	return getQueryForPodParentMetrics("isReplicaset", "replicaset", name)
-}
-
-// StatefulsetMetrics query
-func getQueryForStatefulsetMetrics(name string) string {
-	return getQueryForPodParentMetrics("isStatefulset", "statefulset", name)
-}
-
 // DeploymentMetrics query
 func getQueryForDeploymentMetrics(name string) string {
 	return `query {

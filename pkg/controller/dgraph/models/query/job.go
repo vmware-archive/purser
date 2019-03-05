@@ -37,6 +37,6 @@ func RetrieveJobMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for job, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := getQueryForJobMetrics(name)
+	query := getQueryForPodParentMetrics("isJob", "job", name)
 	return getJSONDataFromQuery(query)
 }

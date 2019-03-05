@@ -37,6 +37,6 @@ func RetrieveStatefulsetMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for statefulset, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := getQueryForStatefulsetMetrics(name)
+	query := getQueryForPodParentMetrics("isStatefulset", "statefulset", name)
 	return getJSONDataFromQuery(query)
 }

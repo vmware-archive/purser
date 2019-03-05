@@ -37,6 +37,6 @@ func RetrieveDaemonsetMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for daemonset, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := getQueryForDaemonsetMetrics(name)
+	query := getQueryForPodParentMetrics("isDaemonset", "daemonset", name)
 	return getJSONDataFromQuery(query)
 }

@@ -37,6 +37,6 @@ func RetrieveReplicasetMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for replicaset, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := getQueryForReplicasetMetrics(name)
+	query := getQueryForPodParentMetrics("isReplicaset", "replicaset", name)
 	return getJSONDataFromQuery(query)
 }
