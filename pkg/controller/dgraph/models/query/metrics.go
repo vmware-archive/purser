@@ -76,15 +76,7 @@ func getQueryForPodMetrics(name, cpuPrice, memoryPrice string) string {
 				cpuCost: math(cpu * durationInHoursContainer * ` + cpuPrice + `)
 				memoryCost: math(memory * durationInHoursContainer * ` + memoryPrice + `)
 			}
-			name
-			type
-			cpu: podCpu as cpuRequest
-			memory: podMemory as memoryRequest
-			storage: pvcStorage as storageRequest
-			` + getQueryForTimeComputation("") + `
-			cpuCost: math(podCpu * durationInHours * ` + cpuPrice + `)
-			memoryCost: math(podMemory * durationInHours * ` + memoryPrice + `)
-			storageCost: math(pvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
+			` + getQueryForMetricsComputationWithAlias("Pod") + `
 		}
 	}`
 }
