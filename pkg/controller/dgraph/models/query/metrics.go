@@ -18,8 +18,6 @@
 package query
 
 import (
-	"strconv"
-
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
@@ -94,10 +92,7 @@ func getQueryForDeploymentMetrics(name string) string {
 }
 
 // PodMetrics query
-func getQueryForPodMetrics(name string) string {
-	cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(name)
-	cpuPrice := strconv.FormatFloat(cpuPriceInFloat64, 'f', 11, 64)
-	memoryPrice := strconv.FormatFloat(memoryPriceInFloat64, 'f', 11, 64)
+func getQueryForPodMetrics(name, cpuPrice, memoryPrice string) string {
 	return `query {
 		parent(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			children: ~pod @filter(has(isContainer)) {
@@ -118,6 +113,21 @@ func getQueryForPodMetrics(name string) string {
 			cpuCost: math(podCpu * durationInHours * ` + cpuPrice + `)
 			memoryCost: math(podMemory * durationInHours * ` + memoryPrice + `)
 			storageCost: math(pvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
+		}
+	}`
+}
+
+// ContainerMetrics query
+func getQueryForContainerMetrics(name string) string {
+	return `query {
+		parent(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
+			name
+			type
+			cpu: cpu as cpuRequest
+			memory: memory as memoryRequest
+			` + getQueryForTimeComputation("") + `
+			cpuCost: math(cpu * durationInHours * ` + models.DefaultCPUCostPerCPUPerHour + `)
+			memoryCost: math(memory * durationInHours * ` + models.DefaultMemCostPerGBPerHour + `)
 		}
 	}`
 }
@@ -166,7 +176,7 @@ func getQueryForNodeMetrics(name string) string {
 			type
 			cpu: cpu as cpuCapacity
 			memory: memory as memoryCapacity
-			storage: storage as sum(val(podStorage))
+			storage: storage as sum(val(storagePod))
 			` + getQueryForTimeComputation("") + `
 			` + getQueryForCostWithPriceWithAlias("") + `
 		}
@@ -205,12 +215,12 @@ func getQueryForNamespaceMetrics(name string) string {
 				` + getQueryForAggregatingChildMetrics("SumJobPod", "JobPod") + `
 				` + getQueryForAggregatingChildMetrics("SumStatefulsetPod", "StatefulsetPod") + `
 				` + getQueryForAggregatingChildMetrics("SumDeploymentReplicaset", "DeploymentReplicaset") + `
-				namespaceChildCpu as math(cpu` + "SumReplicasetSimplePod" + ` + cpu` + "SumDaemonsetPod" + ` + cpu` + "SumJobPod" + ` + cpu` + "SumStatefulsetPod" + ` + cpu` + "SumDeploymentReplicaset" + `)
-				namespaceChildMemory as math(memory` + "SumReplicasetSimplePod" + ` + memory` + "SumDaemonsetPod" + ` + memory` + "SumJobPod" + ` + memory` + "SumStatefulsetPod" + ` + memory` + "SumDeploymentReplicaset" + `)
-				namespaceChildStorage as math(storage` + "SumReplicasetSimplePod" + ` + storage` + "SumDaemonsetPod" + ` + storage` + "SumJobPod" + ` + storage` + "SumStatefulsetPod" + ` + storage` + "SumDeploymentReplicaset" + `)
-				namespaceChildCpuCost as math(cpuCost` + "SumReplicasetSimplePod" + ` + cpuCost` + "SumDaemonsetPod" + ` + cpuCost` + "SumJobPod" + ` + cpuCost` + "SumStatefulsetPod" + ` + cpuCost` + "SumDeploymentReplicaset" + `)
-				namespaceChildMemoryCost as math(memoryCost` + "SumReplicasetSimplePod" + ` + memoryCost` + "SumDaemonsetPod" + ` + memoryCost` + "SumJobPod" + ` + memoryCost` + "SumStatefulsetPod" + ` + memoryCost` + "SumDeploymentReplicaset" + `)
-				namespaceChildStorageCost as math(storageCost` + "SumReplicasetSimplePod" + ` + storageCost` + "SumDaemonsetPod" + ` + storageCost` + "SumJobPod" + ` + storageCost` + "SumStatefulsetPod" + ` + storageCost` + "SumDeploymentReplicaset" + `)
+				cpuNamespaceChild as math(cpu` + "SumReplicasetSimplePod" + ` + cpu` + "SumDaemonsetPod" + ` + cpu` + "SumJobPod" + ` + cpu` + "SumStatefulsetPod" + ` + cpu` + "SumDeploymentReplicaset" + `)
+				memoryNamespaceChild as math(memory` + "SumReplicasetSimplePod" + ` + memory` + "SumDaemonsetPod" + ` + memory` + "SumJobPod" + ` + memory` + "SumStatefulsetPod" + ` + memory` + "SumDeploymentReplicaset" + `)
+				storageNamespaceChild as math(storage` + "SumReplicasetSimplePod" + ` + storage` + "SumDaemonsetPod" + ` + storage` + "SumJobPod" + ` + storage` + "SumStatefulsetPod" + ` + storage` + "SumDeploymentReplicaset" + `)
+				cpuCostNamespaceChild as math(cpuCost` + "SumReplicasetSimplePod" + ` + cpuCost` + "SumDaemonsetPod" + ` + cpuCost` + "SumJobPod" + ` + cpuCost` + "SumStatefulsetPod" + ` + cpuCost` + "SumDeploymentReplicaset" + `)
+				memoryCostNamespaceChild as math(memoryCost` + "SumReplicasetSimplePod" + ` + memoryCost` + "SumDaemonsetPod" + ` + memoryCost` + "SumJobPod" + ` + memoryCost` + "SumStatefulsetPod" + ` + memoryCost` + "SumDeploymentReplicaset" + `)
+				storageCostNamespaceChild as math(storageCost` + "SumReplicasetSimplePod" + ` + storageCost` + "SumDaemonsetPod" + ` + storageCost` + "SumJobPod" + ` + storageCost` + "SumStatefulsetPod" + ` + storageCost` + "SumDeploymentReplicaset" + `)
 			}
 			` + getQueryForAggregatingChildMetrics("Namespace", "NamespaceChild") + `
 		}
@@ -287,6 +297,7 @@ func getQueryForGroupMetrics(podsUIDs string) string {
 			cpuLimitCount as count(cpuLimit)
 			memoryLimitCount as count(memoryLimit)
 			` + getQueryForTimeComputation("") + `
+			isAlive as math(cond(isTerminated == 0, 1, 0))
 			pitPodCPU as math(cond(isTerminated == 0, cond(cpuRequestCount > 0, podCpu, 0.0), 0.0))
 			pitPodMemory as math(cond(isTerminated == 0, cond(memoryRequestCount > 0, podMemory, 0.0), 0.0))
 			pitPvcStorage as math(cond(isTerminated == 0, cond(storageRequestCount > 0, pvcStorage, 0.0), 0.0))

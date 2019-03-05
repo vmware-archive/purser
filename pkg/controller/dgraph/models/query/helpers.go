@@ -63,7 +63,7 @@ func getQueryForTimeComputation(suffix string) string {
 			secondsSinceStart` + suffix + ` as math(cond(stSeconds` + suffix + ` > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds` + suffix + `))
 			et` + suffix + ` as endTime
 			isTerminated` + suffix + ` as count(endTime)
-			secondsSinceEnd` + suffix + ` as math(cond(isTerminated == 0, 0.0, since(et` + suffix + `)))
+			secondsSinceEnd` + suffix + ` as math(cond(isTerminated` + suffix + ` == 0, 0.0, since(et` + suffix + `)))
 			durationInHours` + suffix + ` as math(cond(secondsSinceStart` + suffix + ` > secondsSinceEnd` + suffix + `, (secondsSinceStart` + suffix + ` - secondsSinceEnd` + suffix + `) / 3600, 0.0))`
 }
 

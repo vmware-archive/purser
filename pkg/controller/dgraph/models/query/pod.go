@@ -18,6 +18,8 @@
 package query
 
 import (
+	"strconv"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
@@ -112,7 +114,10 @@ func RetrievePodMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for pod, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := getQueryForPodMetrics(name)
+	cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(name)
+	cpuPrice := strconv.FormatFloat(cpuPriceInFloat64, 'f', 11, 64)
+	memoryPrice := strconv.FormatFloat(memoryPriceInFloat64, 'f', 11, 64)
+	query := getQueryForPodMetrics(name, cpuPrice, memoryPrice)
 	return getJSONDataFromQuery(query)
 }
 
