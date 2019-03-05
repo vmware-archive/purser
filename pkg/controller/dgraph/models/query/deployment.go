@@ -18,12 +18,7 @@
 package query
 
 import (
-	"fmt"
-
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrieveDeploymentHierarchy returns hierarchy for a given deployment
@@ -32,16 +27,7 @@ func RetrieveDeploymentHierarchy(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for deployment, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := `query {
-		parent(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~deployment @filter(has(isReplicaset)) {
-				name
-				type
-			}
-		}
-	}`
+	query := getQueryForHierarchy("isDeployment", "deployment", name, "@filter(has(isReplicaset))")
 	return getJSONDataFromQuery(query)
 }
 
@@ -51,62 +37,6 @@ func RetrieveDeploymentMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for deployment, empty name is given")
 		return JSONDataWrapper{}
 	}
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
-	query := `query {
-		dep as var(func: has(isDeployment)) @filter(eq(name, "` + name + `")) {
-			~deployment @filter(has(isReplicaset)) {
-				~replicaset @filter(has(isPod)) {
-					replicasetPodCpu as cpuRequest
-					replicasetPodMemory as memoryRequest
-					replicasetPvcStorage as storageRequest
-					replicasetPodST as startTime
-					replicasetPodSTSeconds as math(since(replicasetPodST))
-					replicasetPodSecondsSinceStart as math(cond(replicasetPodSTSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, replicasetPodSTSeconds))
-					replicasetPodET as endTime
-					replicasetPodIsTerminated as count(endTime)
-					replicasetPodSecondsSinceEnd as math(cond(replicasetPodIsTerminated == 0, 0.0, since(replicasetPodET)))
-					replicasetPodDurationInHours as math((replicasetPodSecondsSinceStart - replicasetPodSecondsSinceEnd) / 3600)
-					pricePerCPU as cpuPrice
-					pricePerMemory as memoryPrice
-					replicasetPodCpuCost as math(replicasetPodCpu * replicasetPodDurationInHours * pricePerCPU)
-					replicasetPodMemoryCost as math(replicasetPodMemory * replicasetPodDurationInHours * pricePerMemory)
-					replicasetPvcStorageCost as math(replicasetPvcStorage * replicasetPodDurationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
-				}
-				deploymentReplicasetCpu as sum(val(replicasetPodCpu))
-				deploymentReplicasetMemory as sum(val(replicasetPodMemory))
-				deploymentReplicasetStorage as sum(val(replicasetPvcStorage))
-				deploymentReplicasetCpuCost as sum(val(replicasetPodCpuCost))
-				deploymentReplicasetMemoryCost as sum(val(replicasetPodMemoryCost))
-				deploymentReplicasetStorageCost as sum(val(replicasetPvcStorageCost))
-			}
-			deploymentCpu as sum(val(deploymentReplicasetCpu))
-			deploymentMemory as sum(val(deploymentReplicasetMemory))
-			deploymentStorage as sum(val(deploymentReplicasetStorage))
-			deploymentCpuCost as sum(val(deploymentReplicasetCpuCost))
-			deploymentMemoryCost as sum(val(deploymentReplicasetMemoryCost))
-			deploymentStorageCost as sum(val(deploymentReplicasetStorageCost))
-		}
-
-		parent(func: uid(dep)) {
-			name
-			type
-			children: ~deployment @filter(has(isReplicaset)) {
-				name
-				type
-				cpu: val(deploymentReplicasetCpu)
-				memory: val(deploymentReplicasetMemory)
-				storage: val(deploymentReplicasetStorage)
-				cpuCost: val(deploymentReplicasetCpuCost)
-				memoryCost: val(deploymentReplicasetMemoryCost)
-				storageCost: val(deploymentReplicasetStorageCost)
-			}
-			cpu: val(deploymentCpu)
-			memory: val(deploymentMemory)
-			storage: val(deploymentStorage)
-			cpuCost: val(deploymentCpuCost)
-			memoryCost: val(deploymentMemoryCost)
-			storageCost: val(deploymentStorageCost)
-		}
-	}`
+	query := getQueryForDeploymentMetrics(name)
 	return getJSONDataFromQuery(query)
 }

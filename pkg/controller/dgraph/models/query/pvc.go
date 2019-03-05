@@ -18,12 +18,7 @@
 package query
 
 import (
-	"fmt"
-
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrievePVCMetrics returns metrics for a given pvc
@@ -33,21 +28,6 @@ func RetrievePVCMetrics(name string) JSONDataWrapper {
 		return JSONDataWrapper{}
 	}
 
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
-	query := `query {
-		parent(func: has(isPersistentVolumeClaim)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			storage: storage as storageCapacity
-			st as startTime
-			stSeconds as math(since(st))
-			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-			et as endTime
-			isTerminated as count(endTime)
-			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			storageCost: math(storage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
-        }
-    }`
+	query := getQueryForPVCMetrics(name)
 	return getJSONDataFromQuery(query)
 }

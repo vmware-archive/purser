@@ -18,13 +18,10 @@
 package query
 
 import (
-	"fmt"
-
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // GroupMetrics structure
@@ -48,22 +45,7 @@ type GroupMetrics struct {
 // RetrieveGroupsData returns list of models.Group objects in json format
 // error is not nil if any failure is encountered
 func RetrieveGroupsData() ([]models.Group, error) {
-	query := `query {
-		groups(func: has(isGroup)) {
-			name
-			podsCount
-			mtdCPU
-			mtdMemory
-			mtdStorage
-			cpu
-			memory
-			storage
-			mtdCPUCost
-			mtdMemoryCost
-			mtdStorageCost
-			mtdCost
-		}
-	}`
+	query := getQueryForAllGroupsData()
 
 	type root struct {
 		Groups []models.Group `json:"groups,omitempty"`
@@ -75,61 +57,7 @@ func RetrieveGroupsData() ([]models.Group, error) {
 
 // RetrieveGroupMetricsFromPodUIDs ...
 func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
-	query := `query {
-		var(func: uid(` + podsUIDs + `)) {
-			podCpu as cpuRequest
-			podMemory as memoryRequest
-			pvcStorage as storageRequest
-			podCpuLimit as cpuLimit
-			podMemoryLimit as memoryLimit
-			cpuRequestCount as count(cpuRequest)
-			memoryRequestCount as count(memoryRequest)
-			storageRequestCount as count(storageRequest)
-			cpuLimitCount as count(cpuLimit)
-			memoryLimitCount as count(memoryLimit)
-			st as startTime
-			stSeconds as math(since(st))
-			secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-			et as endTime
-			isTerminated as count(endTime)
-			isAlive as math(cond(isTerminated == 0, 1, 0))
-			secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-			durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-			pitPodCPU as math(cond(isTerminated == 0, cond(cpuRequestCount > 0, podCpu, 0.0), 0.0))
-			pitPodMemory as math(cond(isTerminated == 0, cond(memoryRequestCount > 0, podMemory, 0.0), 0.0))
-			pitPvcStorage as math(cond(isTerminated == 0, cond(storageRequestCount > 0, pvcStorage, 0.0), 0.0))
-			pitPodCPULimit as math(cond(isTerminated == 0, cond(cpuLimitCount > 0, podCpuLimit, 0.0), 0.0))
-			pitPodMemoryLimit as math(cond(isTerminated == 0, cond(memoryLimitCount > 0, podMemoryLimit, 0.0), 0.0))
-			mtdPodCPU as math(podCpu * durationInHours)
-			mtdPodMemory as math(podMemory * durationInHours)
-			mtdPvcStorage as math(pvcStorage * durationInHours)
-			mtdPodCPULimit as math(podCpuLimit * durationInHours)
-			mtdPodMemoryLimit as math(podMemoryLimit * durationInHours)
-			pricePerCPU as cpuPrice
-			pricePerMemory as memoryPrice
-			podCpuCost as math(mtdPodCPU * pricePerCPU)
-			podMemoryCost as math(mtdPodMemory * pricePerMemory)
-			podStorageCost as math(mtdPvcStorage * ` + models.DefaultStorageCostPerGBPerHour + `)
-		}
-		
-		group() {
-			pitCPU: sum(val(pitPodCPU))
-			pitMemory: sum(val(pitPodMemory))
-			pitStorage: sum(val(pitPvcStorage))
-			pitCPULimit: sum(val(pitPodCPULimit))
-			pitMemoryLimit: sum(val(pitPodMemoryLimit))
-			mtdCPU: sum(val(mtdPodCPU))
-			mtdMemory: sum(val(mtdPodMemory))
-			mtdStorage: sum(val(mtdPvcStorage))
-			mtdCPULimit: sum(val(mtdPodCPULimit))
-			mtdMemoryLimit: sum(val(mtdPodMemoryLimit))
-			cpuCost: sum(val(podCpuCost))
-			memoryCost: sum(val(podMemoryCost))
-			storageCost: sum(val(podStorageCost))
-			livePods: sum(val(isAlive))
-		}
-	}`
+	query := getQueryForGroupMetrics(podsUIDs)
 
 	type root struct {
 		JSONMetrics []map[string]float64 `json:"group"`

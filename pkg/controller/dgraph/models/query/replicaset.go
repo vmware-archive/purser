@@ -18,12 +18,7 @@
 package query
 
 import (
-	"fmt"
-
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/utils"
 )
 
 // RetrieveReplicasetHierarchy returns hierarchy for a given replicaset
@@ -32,16 +27,7 @@ func RetrieveReplicasetHierarchy(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for replicaset, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := `query {
-		parent(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~replicaset @filter(has(isPod)) {
-				name
-				type
-			}
-		}
-	}`
+	query := getQueryForHierarchy("isReplicaset", "replicaset", name, "@filter(has(isPod))")
 	return getJSONDataFromQuery(query)
 }
 
@@ -51,37 +37,6 @@ func RetrieveReplicasetMetrics(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for replicaset, empty name is given")
 		return JSONDataWrapper{}
 	}
-	secondsSinceMonthStart := fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
-	query := `query {
-		parent(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~replicaset @filter(has(isPod)) {
-				name
-				type
-				cpu: podCpu as cpuRequest
-				memory: podMemory as memoryRequest
-				storage: pvcStorage as storageRequest
-				st as startTime
-				stSeconds as math(since(st))
-				secondsSinceStart as math(cond(stSeconds > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds))
-				et as endTime
-				isTerminated as count(endTime)
-				secondsSinceEnd as math(cond(isTerminated == 0, 0.0, since(et)))
-				durationInHours as math((secondsSinceStart - secondsSinceEnd) / 3600)
-				pricePerCPU as cpuPrice
-				pricePerMemory as memoryPrice
-				cpuCost: podCpuCost as math(podCpu * durationInHours * pricePerCPU)
-				memoryCost: podMemCost as math(podMemory * durationInHours * pricePerMemory)
-				storageCost: pvcStorageCost as math(pvcStorage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
-			}
-			cpu: sum(val(podCpu))
-			memory: sum(val(podMemory))
-			storage: sum(val(pvcStorage))
-			cpuCost: sum(val(podCpuCost))
-			memoryCost: sum(val(podMemCost))
-			storageCost: sum(val(pvcStorageCost))
-		}
-	}`
+	query := getQueryForPodParentMetrics("isReplicaset", "replicaset", name)
 	return getJSONDataFromQuery(query)
 }
