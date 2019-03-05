@@ -122,6 +122,17 @@ func getQueryFromSubQueryWithAlias(suffix string) string {
 			storageCost: val(storageCost` + suffix + `)`
 }
 
+func getQueryForPodParentMetrics(parentCheck, parentType, parentName string) string {
+	return `query {
+		parent(func: has(` + parentCheck + `)) @filter(eq(name, "` + parentName + `")) {
+			children: ~` + parentType + ` @filter(has(isPod)) {
+				` + getQueryForMetricsComputationWithAliasAndVariables("Pod") + `
+			}
+			` + getQueryForAggregatingChildMetricsWithAlias("Pod") + `
+		}
+	}`
+}
+
 func getQueryForHierarchy(parentCheck, parentType, parentName, childFilter string) string {
 	return `query {
 		parent(func: has(` + parentCheck + `)) @filter(eq(name, "` + parentName + `")) {

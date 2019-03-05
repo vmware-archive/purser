@@ -23,50 +23,22 @@ import (
 
 // DaemonsetMetrics query
 func getQueryForDaemonsetMetrics(name string) string {
-	return `query {
-		parent(func: has(isDaemonset)) @filter(eq(name, "` + name + `")) {
-			children: ~daemonset @filter(has(isPod)) {
-				` + getQueryForMetricsComputationWithAliasAndVariables("Pod") + `
-			}
-			` + getQueryForAggregatingChildMetricsWithAlias("Pod") + `
-		}
-	}`
+	return getQueryForPodParentMetrics("isDaemonset", "daemonset", name)
 }
 
 // JobMetrics query
 func getQueryForJobMetrics(name string) string {
-	return `query {
-		parent(func: has(isJob)) @filter(eq(name, "` + name + `")) {
-			children: ~job @filter(has(isPod)) {
-				` + getQueryForMetricsComputationWithAliasAndVariables("Pod") + `
-			}
-			` + getQueryForAggregatingChildMetricsWithAlias("Pod") + `
-		}
-	}`
+	return getQueryForPodParentMetrics("isJob", "job", name)
 }
 
 // ReplicasetMetrics query
 func getQueryForReplicasetMetrics(name string) string {
-	return `query {
-		parent(func: has(isReplicaset)) @filter(eq(name, "` + name + `")) {
-			children: ~replicaset @filter(has(isPod)) {
-				` + getQueryForMetricsComputationWithAliasAndVariables("Pod") + `
-			}
-			` + getQueryForAggregatingChildMetricsWithAlias("Pod") + `
-		}
-	}`
+	return getQueryForPodParentMetrics("isReplicaset", "replicaset", name)
 }
 
 // StatefulsetMetrics query
 func getQueryForStatefulsetMetrics(name string) string {
-	return `query {
-		parent(func: has(isStatefulset)) @filter(eq(name, "` + name + `")) {
-			children: ~statefulset @filter(has(isPod)) {
-				` + getQueryForMetricsComputationWithAliasAndVariables("Pod") + `
-			}
-			` + getQueryForAggregatingChildMetricsWithAlias("Pod") + `
-		}
-	}`
+	return getQueryForPodParentMetrics("isStatefulset", "statefulset", name)
 }
 
 // DeploymentMetrics query
