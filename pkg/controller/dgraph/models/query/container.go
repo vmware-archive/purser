@@ -27,16 +27,7 @@ func RetrieveContainerHierarchy(name string) JSONDataWrapper {
 		logrus.Errorf("wrong type of query for container, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := `query {
-		parent(func: has(isContainer)) @filter(eq(name, "` + name + `")) {
-			name
-			type
-			children: ~container @filter(has(isProc)) {
-				name
-				type
-			}
-		}
-	}`
+	query := getQueryForHierarchy("isContainer", "container", name, "@filter(has(isProc))")
 	return getJSONDataFromQuery(query)
 }
 
