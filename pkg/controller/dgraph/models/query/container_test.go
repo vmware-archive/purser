@@ -44,10 +44,9 @@ func mockDgraphForContainerQueries(isDataToBeFoundInDgraph bool) {
 				}
 				dummyParentWrapper.Parent = []Parent{parent}
 				return nil
-			} else {
-				// No data found for the given container in dgraph
-				return nil
 			}
+			// No data found for the given container in dgraph
+			return nil
 		} else if query == containerHierarchyTestQuery {
 			dummyParentWrapper, ok := root.(*ParentWrapper)
 			if !ok {
