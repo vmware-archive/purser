@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupForContainerDgraphDataRetrieve(isDataToBeFoundInDgraph bool) {
+func mockDgraphForContainerQueries(isDataToBeFoundInDgraph bool) {
 	executeQuery = func(query string, root interface{}) error {
 		if query == containerMetricTestQuery {
 			if isDataToBeFoundInDgraph {
@@ -64,7 +64,7 @@ func setupForContainerDgraphDataRetrieve(isDataToBeFoundInDgraph bool) {
 	}
 }
 
-func shutdownForContainerDgraphDataRetrieve() {
+func removeMockDgraphForContainerQueries() {
 	executeQuery = dgraph.ExecuteQuery
 }
 
@@ -77,8 +77,8 @@ func TestRetrieveContainerHierarchyWithNameEmpty(t *testing.T) {
 
 // TestRetrieveContainerHierarchy ...
 func TestRetrieveContainerHierarchy(t *testing.T) {
-	setupForContainerDgraphDataRetrieve(testDataFoundInDgraph)
-	defer shutdownForContainerDgraphDataRetrieve()
+	mockDgraphForContainerQueries(testDataFoundInDgraph)
+	defer removeMockDgraphForContainerQueries()
 
 	got := RetrieveContainerHierarchy(testContainerName)
 	expected := JSONDataWrapper{
@@ -99,8 +99,8 @@ func TestRetrieveContainerMetricsWithNameEmpty(t *testing.T) {
 
 // TestRetrieveContainerMetrics ...
 func TestRetrieveContainerMetrics(t *testing.T) {
-	setupForContainerDgraphDataRetrieve(testDataFoundInDgraph)
-	defer shutdownForContainerDgraphDataRetrieve()
+	mockDgraphForContainerQueries(testDataFoundInDgraph)
+	defer removeMockDgraphForContainerQueries()
 
 	got := RetrieveContainerMetrics(testContainerName)
 	expected := JSONDataWrapper{
@@ -118,8 +118,8 @@ func TestRetrieveContainerMetrics(t *testing.T) {
 
 // TestRetrieveContainerMetricsWithErrorFromDgraph ...
 func TestRetrieveContainerMetricsWithErrorFromDgraph(t *testing.T) {
-	setupForContainerDgraphDataRetrieve(testDataFoundInDgraph)
-	defer shutdownForContainerDgraphDataRetrieve()
+	mockDgraphForContainerQueries(testDataFoundInDgraph)
+	defer removeMockDgraphForContainerQueries()
 
 	got := RetrieveContainerMetrics("container-wrong-name")
 	expected := JSONDataWrapper{}
@@ -128,8 +128,8 @@ func TestRetrieveContainerMetricsWithErrorFromDgraph(t *testing.T) {
 
 // TestRetrieveContainerMetricsWithNoDataFromDgraph ...
 func TestRetrieveContainerMetricsWithNoDataFromDgraph(t *testing.T) {
-	setupForContainerDgraphDataRetrieve(testNoDataFoundInDgraph)
-	defer shutdownForContainerDgraphDataRetrieve()
+	mockDgraphForContainerQueries(testDataNotFoundInDgraph)
+	defer removeMockDgraphForContainerQueries()
 
 	got := RetrieveContainerMetrics(testContainerName)
 	expected := JSONDataWrapper{}

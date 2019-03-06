@@ -31,7 +31,7 @@ const (
 	testContainerName          = "container-purser-controller"
 	testJobName                = "job-purser"
 	testDataFoundInDgraph      = true
-	testNoDataFoundInDgraph    = false
+	testDataNotFoundInDgraph   = false
 )
 
 const deploymentMetricTestQuery = `query {
