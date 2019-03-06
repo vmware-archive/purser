@@ -24,30 +24,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestGetQueryForMetricsComputationWithAliasAndVariables ...
 func TestGetQueryForMetricsComputationWithAliasAndVariables(t *testing.T) {
 	got := getQueryForMetricsComputationWithAliasAndVariables("Pod")
 	expected := testQueryForMetricsComputationWithAliasAndVariables
 	assert.Equal(t, expected, got)
 }
 
+// TestGetQueryForAggregatingChildMetricsWithAlias ...
 func TestGetQueryForAggregatingChildMetricsWithAlias(t *testing.T) {
 	got := getQueryForAggregatingChildMetricsWithAlias("Pod")
 	expected := testQueryForAggregatingChildMetricsWithAlias
 	assert.Equal(t, expected, got)
 }
 
+// TestGetQueryForPodParentMetrics ...
 func TestGetQueryForPodParentMetrics(t *testing.T) {
 	got := getQueryForPodParentMetrics("isJob", "job", "job-purser")
 	expected := testQueryForPodParentMetrics
 	assert.Equal(t, expected, got)
 }
 
+// TestGetQueryForHierarchy ...
 func TestGetQueryForHierarchy(t *testing.T) {
 	got := getQueryForHierarchy("isNode", "node", "node-minikube", "@filter(has(isPod))")
 	expected := testQueryForHierarchy
 	assert.Equal(t, expected, got)
 }
 
+// TestGetSecondsSinceMonthStart ...
 func TestGetSecondsSinceMonthStart(t *testing.T) {
 	maxSecondsInAMonth := 2678400.0
 	got := getSecondsSinceMonthStart()
