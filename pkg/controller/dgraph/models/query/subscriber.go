@@ -18,7 +18,6 @@
 package query
 
 import (
-	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
@@ -37,7 +36,7 @@ func RetrieveSubscribers() ([]models.SubscriberCRD, error) {
 		Subscribers []models.SubscriberCRD `json:"subscribers"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
+	err := executeQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}

@@ -21,7 +21,6 @@ import (
 	"strconv"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
@@ -39,7 +38,7 @@ func RetrieveAllLivePods() []models.Pod {
 		Pods []models.Pod `json:"pods"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
+	err := executeQuery(query, &newRoot)
 	if err != nil {
 		logrus.Errorf("unable to retrieve all live pods: %v", err)
 		return nil
@@ -90,7 +89,7 @@ func RetrievePodsInteractions(name string, isOrphan bool) []byte {
 		}`
 	}
 
-	result, err := dgraph.ExecuteQueryRaw(query)
+	result, err := executeQueryRaw(query)
 	if err != nil {
 		logrus.Errorf("Error while retrieving query for pods interactions. Name: (%v), isOrphan: (%v), error: (%v)", name, isOrphan, err)
 		return nil
@@ -132,7 +131,7 @@ func getPricePerResourceForPod(name string) (float64, float64) {
 		Pods []models.Pod `json:"pod"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
+	err := executeQuery(query, &newRoot)
 	if err != nil || len(newRoot.Pods) < 1 {
 		return models.DefaultCPUCostInFloat64, models.DefaultMemCostInFloat64
 	}
@@ -159,7 +158,7 @@ func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 		Pods []models.Pod `json:"pods"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
+	err := executeQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +183,7 @@ func RetrievePodsUIDsByLabelsFilter(labels map[string][]string) ([]string, error
 		Pods []models.Pod `json:"pods"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
+	err := executeQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}

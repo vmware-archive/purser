@@ -21,7 +21,6 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
 // GroupMetrics structure
@@ -51,7 +50,7 @@ func RetrieveGroupsData() ([]models.Group, error) {
 		Groups []models.Group `json:"groups,omitempty"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
+	err := executeQuery(query, &newRoot)
 	return newRoot.Groups, err
 }
 
@@ -63,7 +62,7 @@ func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 		JSONMetrics []map[string]float64 `json:"group"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
+	err := executeQuery(query, &newRoot)
 	if err != nil {
 		return GroupMetrics{}, err
 	}

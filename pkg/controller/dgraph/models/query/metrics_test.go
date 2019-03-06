@@ -24,8 +24,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const mockSecondsSinceMonthStart = "1.45"
-
 func setupForMetricQueryTesting() {
 	secondsFromFirstOfCurrentMonth = func() string {
 		return mockSecondsSinceMonthStart
@@ -46,14 +44,14 @@ func TestMain(m *testing.M) {
 
 // TestGetQueryForDeploymentMetrics ...
 func TestGetQueryForDeploymentMetrics(t *testing.T) {
-	got := getQueryForDeploymentMetrics("deployment-purser")
+	got := getQueryForDeploymentMetrics(testDeploymentName)
 	expected := deploymentMetricTestQuery
 	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForGroupMetrics ...
 func TestGetQueryForGroupMetrics(t *testing.T) {
-	got := getQueryForGroupMetrics("0x3e283, 0x3e288")
+	got := getQueryForGroupMetrics(testPodUIDs)
 	expected := groupMetricTestQuery
 	assert.Equal(t, expected, got)
 }
@@ -67,42 +65,42 @@ func TestGetQueryForAllGroupsData(t *testing.T) {
 
 // TestGetQueryForNamespaceMetrics ...
 func TestGetQueryForNamespaceMetrics(t *testing.T) {
-	got := getQueryForNamespaceMetrics("namespace-default")
+	got := getQueryForNamespaceMetrics(testNamespaceName)
 	expected := namespaceMetricTestQuery
 	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForNodeMetrics ...
 func TestGetQueryForNodeMetrics(t *testing.T) {
-	got := getQueryForNodeMetrics("node-default")
+	got := getQueryForNodeMetrics(testNodeName)
 	expected := nodeMetricTestQuery
 	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForPodMetrics ...
 func TestGetQueryForPodMetrics(t *testing.T) {
-	got := getQueryForPodMetrics("pod-purser-dgraph-0", "0.24", "0.1")
+	got := getQueryForPodMetrics(testPodName, testCPUPrice, testMemoryPrice)
 	expected := podMetricTestQuery
 	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForPVMetrics ...
 func TestGetQueryForPVMetrics(t *testing.T) {
-	got := getQueryForPVMetrics("pv-datadir-purser-dgraph")
+	got := getQueryForPVMetrics(testPVName)
 	expected := pvMetricTestQuery
 	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForPVCMetrics ...
 func TestGetQueryForPVCMetrics(t *testing.T) {
-	got := getQueryForPVCMetrics("pvc-datadir-purser-dgraph")
+	got := getQueryForPVCMetrics(testPVCName)
 	expected := pvcMetricTestQuery
 	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForContainerMetrics ...
 func TestGetQueryForContainerMetrics(t *testing.T) {
-	got := getQueryForContainerMetrics("container-purser-controller")
+	got := getQueryForContainerMetrics(testContainerName)
 	expected := containerMetricTestQuery
 	assert.Equal(t, expected, got)
 }

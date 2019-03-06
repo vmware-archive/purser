@@ -22,6 +22,9 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
+var executeQuery = dgraph.ExecuteQuery
+var executeQueryRaw = dgraph.ExecuteQueryRaw
+
 // RetrieveClusterHierarchy returns all namespaces if view is logical and returns all nodes with disks if view is physical
 func RetrieveClusterHierarchy(view string) JSONDataWrapper {
 	var query string
@@ -42,7 +45,7 @@ func RetrieveClusterHierarchy(view string) JSONDataWrapper {
 	}
 
 	parentRoot := ParentWrapper{}
-	err := dgraph.ExecuteQuery(query, &parentRoot)
+	err := executeQuery(query, &parentRoot)
 	if err != nil {
 		logrus.Errorf("Unable to execute query for retrieving cluster hierarchy: (%v)", err)
 		return JSONDataWrapper{}
@@ -69,7 +72,7 @@ func RetrieveClusterMetrics(view string) JSONDataWrapper {
 	}
 
 	parentRoot := ParentWrapper{}
-	err := dgraph.ExecuteQuery(query, &parentRoot)
+	err := executeQuery(query, &parentRoot)
 	calculateAggregateMetrics(&parentRoot)
 	if err != nil {
 		logrus.Errorf("Unable to execute query for retrieving cluster metrics: (%v)", err)

@@ -19,7 +19,6 @@ package query
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
 // RetrieveNamespaceHierarchy returns hierarchy for a given namespace
@@ -44,7 +43,7 @@ func RetrieveNamespaceMetrics(name string) JSONDataWrapper {
 // getJSONDataFromQuery executes query and wraps the data in a desired structure(JSONDataWrapper)
 func getJSONDataFromQuery(query string) JSONDataWrapper {
 	parentRoot := ParentWrapper{}
-	err := dgraph.ExecuteQuery(query, &parentRoot)
+	err := executeQuery(query, &parentRoot)
 	if err != nil || len(parentRoot.Parent) == 0 {
 		logrus.Errorf("Unable to execute query, err: (%v), length of output: (%d)", err, len(parentRoot.Parent))
 		return JSONDataWrapper{}

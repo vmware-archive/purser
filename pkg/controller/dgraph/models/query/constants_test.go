@@ -17,6 +17,23 @@
 
 package query
 
+const (
+	mockSecondsSinceMonthStart = "1.45"
+	testCPUPrice               = "0.24"
+	testMemoryPrice            = "0.1"
+	testNodeName               = "node-minikube"
+	testNamespaceName          = "namespace-default"
+	testPodUIDs                = "0x3e283, 0x3e288"
+	testDeploymentName         = "deployment-purser"
+	testPodName                = "pod-purser-dgraph-0"
+	testPVName                 = "pv-datadir-purser-dgraph"
+	testPVCName                = "pvc-datadir-purser-dgraph"
+	testContainerName          = "container-purser-controller"
+	testJobName                = "job-purser"
+	testDataFoundInDgraph      = true
+	testNoDataFoundInDgraph    = false
+)
+
 const deploymentMetricTestQuery = `query {
 		dep as var(func: has(isDeployment)) @filter(eq(name, "deployment-purser")) {
 			~deployment @filter(has(isReplicaset)) {
@@ -314,7 +331,7 @@ const namespaceMetricTestQuery = `query {
     }`
 
 const nodeMetricTestQuery = `query {
-		parent(func: has(isNode)) @filter(eq(name, "node-default")) {
+		parent(func: has(isNode)) @filter(eq(name, "node-minikube")) {
 			children: ~node @filter(has(isPod)) {
 				name
 			type
@@ -580,6 +597,17 @@ const testQueryForHierarchy = `query {
 			name
 			type
 			children: ~node @filter(has(isPod)) {
+				name
+				type
+			}
+		}
+	}`
+
+const containerHierarchyTestQuery = `query {
+		parent(func: has(isContainer)) @filter(eq(name, "container-purser-controller")) {
+			name
+			type
+			children: ~container @filter(has(isProc)) {
 				name
 				type
 			}
