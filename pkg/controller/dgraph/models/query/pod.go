@@ -18,28 +18,20 @@
 package query
 
 import (
-	"strconv"
-
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
+
+type podRoot struct {
+	Pods []models.Pod `json:"pod"`
+}
 
 // RetrieveAllLivePods will return all pods without endTime in dgraph. Error is returned if any
 // failure is encountered in the process.
 func RetrieveAllLivePods() []models.Pod {
-	query := `query {
-		pods(func: has(isPod)) @filter(NOT has(endTime)) {
-			uid
-			xid
-			name
-		}
-	}`
-	type root struct {
-		Pods []models.Pod `json:"pods"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
+	query := getAllLivePodsQuery()
+	newRoot := podRoot{}
+	err := executeQuery(query, &newRoot)
 	if err != nil {
 		logrus.Errorf("unable to retrieve all live pods: %v", err)
 		return nil
@@ -90,35 +82,12 @@ func RetrievePodsInteractions(name string, isOrphan bool) []byte {
 		}`
 	}
 
-	result, err := dgraph.ExecuteQueryRaw(query)
+	result, err := executeQueryRaw(query)
 	if err != nil {
 		logrus.Errorf("Error while retrieving query for pods interactions. Name: (%v), isOrphan: (%v), error: (%v)", name, isOrphan, err)
 		return nil
 	}
 	return result
-}
-
-// RetrievePodHierarchy returns hierarchy for a given pod
-func RetrievePodHierarchy(name string) JSONDataWrapper {
-	if name == All {
-		logrus.Errorf("wrong type of query for pod, empty name is given")
-		return JSONDataWrapper{}
-	}
-	query := getQueryForHierarchy("isPod", "pod", name, "@filter(has(isContainer))")
-	return getJSONDataFromQuery(query)
-}
-
-// RetrievePodMetrics returns metrics for a given pod
-func RetrievePodMetrics(name string) JSONDataWrapper {
-	if name == All {
-		logrus.Errorf("wrong type of query for pod, empty name is given")
-		return JSONDataWrapper{}
-	}
-	cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(name)
-	cpuPrice := strconv.FormatFloat(cpuPriceInFloat64, 'f', 11, 64)
-	memoryPrice := strconv.FormatFloat(memoryPriceInFloat64, 'f', 11, 64)
-	query := getQueryForPodMetrics(name, cpuPrice, memoryPrice)
-	return getJSONDataFromQuery(query)
 }
 
 func getPricePerResourceForPod(name string) (float64, float64) {
@@ -128,12 +97,10 @@ func getPricePerResourceForPod(name string) (float64, float64) {
 			memoryPrice
 		}
 	}`
-	type root struct {
-		Pods []models.Pod `json:"pod"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
+	newRoot := podRoot{}
+	err := executeQuery(query, &newRoot)
 	if err != nil || len(newRoot.Pods) < 1 {
+		logrus.Errorf("err: %v", err)
 		return models.DefaultCPUCostInFloat64, models.DefaultMemCostInFloat64
 	}
 	pod := newRoot.Pods[0]
@@ -159,7 +126,7 @@ func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 		Pods []models.Pod `json:"pods"`
 	}
 	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
+	err := executeQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -169,22 +136,9 @@ func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 // RetrievePodsUIDsByLabelsFilter returns pods satisfying the filter conditions for labels (OR logic only)
 func RetrievePodsUIDsByLabelsFilter(labels map[string][]string) ([]string, error) {
 	labelFilter := createFilterFromListOfLabels(labels)
-	q := `query {
-		var(func: has(isLabel)) @filter(` + labelFilter + `) {
-            podUIDs as ~label @filter(has(isPod)) {
-				name
-			}
-		}
-		pods(func: uid(podUIDs)) {
-			uid
-			name
-		}
-	}`
-	type root struct {
-		Pods []models.Pod `json:"pods"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
+	q := getQueryForPodsWithLabelFilter(labelFilter)
+	newRoot := podRoot{}
+	err := executeQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}

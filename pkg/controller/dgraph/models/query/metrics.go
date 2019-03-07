@@ -179,7 +179,7 @@ func getQueryForNamespaceMetrics(name string) string {
 }
 
 // LogicalResourcesMetrics query
-func getQueryForLogicalResources() string {
+func getMetricsQueryForLogicalResources() string {
 	return `query {
 			ns as var(func: has(isNamespace)) {
 				~namespace @filter(has(isPod)){
@@ -189,17 +189,36 @@ func getQueryForLogicalResources() string {
 			}
 	
 			children(func: uid(ns)) {
-				getQueryFromSubQueryWithAlias
 				` + getQueryFromSubQueryWithAlias("Namespace") + `
 			}
 		}`
 }
 
 // PhysicalResourcesMetrics query
-func getQueryForPhysicalResources() string {
+func getMetricsQueryForPhysicalResources() string {
 	return `query {
 			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
 				` + getQueryForMetricsComputationWithAlias("") + `
+			}
+		}`
+}
+
+// LogicalResourcesHierarchy query
+func getHierarchyQueryForLogicalResource() string {
+	return `query {
+			children(func: has(isNamespace)) {
+				name
+				type
+			}
+		}`
+}
+
+// PhysicalResourcesHierarchy query
+func getHierarchyQueryForPhysicalResource() string {
+	return `query {
+			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
+				name
+				type
 			}
 		}`
 }
@@ -274,6 +293,42 @@ func getQueryForGroupMetrics(podsUIDs string) string {
 			memoryCost: sum(val(podMemoryCost))
 			storageCost: sum(val(podStorageCost))
 			livePods: sum(val(isAlive))
+		}
+	}`
+}
+
+func getQueryForSubscribersRetrieval() string {
+	return `query {
+		subscribers(func: has(isSubscriber)) @filter(NOT(has(endTime))) {
+			name
+			Spec {
+				headers
+				url
+			}
+		}
+	}`
+}
+
+func getAllLivePodsQuery() string {
+	return `query {
+		pods(func: has(isPod)) @filter(NOT has(endTime)) {
+			uid
+			xid
+			name
+		}
+	}`
+}
+
+func getQueryForPodsWithLabelFilter(labelFilter string) string {
+	return `query {
+		var(func: has(isLabel)) @filter(` + labelFilter + `) {
+            podUIDs as ~label @filter(has(isPod)) {
+				name
+			}
+		}
+		pods(func: uid(podUIDs)) {
+			uid
+			name
 		}
 	}`
 }

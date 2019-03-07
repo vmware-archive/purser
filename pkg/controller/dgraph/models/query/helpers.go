@@ -24,6 +24,8 @@ import (
 	"github.com/vmware/purser/pkg/controller/utils"
 )
 
+var secondsFromFirstOfCurrentMonth = getSecondsSinceMonthStart
+
 func getSecondsSinceMonthStart() string {
 	return fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 }
@@ -57,7 +59,7 @@ func getQueryForMetricsComputation(suffix string) string {
 }
 
 func getQueryForTimeComputation(suffix string) string {
-	secondsSinceMonthStart := getSecondsSinceMonthStart()
+	secondsSinceMonthStart := secondsFromFirstOfCurrentMonth()
 	return `st` + suffix + ` as startTime
 			stSeconds` + suffix + ` as math(since(st` + suffix + `))
 			secondsSinceStart` + suffix + ` as math(cond(stSeconds` + suffix + ` > ` + secondsSinceMonthStart + `, ` + secondsSinceMonthStart + `, stSeconds` + suffix + `))
