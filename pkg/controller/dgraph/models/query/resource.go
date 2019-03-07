@@ -23,6 +23,7 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+// Cluster resource constants
 const (
 	ContainerCheck = "isContainer"
 	ContainerType  = "container"
