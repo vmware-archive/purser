@@ -203,6 +203,13 @@ func TestGetQueryForResourceMetricsPVC(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
+// TestGetQueryForResourceMetricsContainer ...
+func TestGetQueryForResourceMetricsContainer(t *testing.T) {
+	got := getQueryForResourceMetrics(ContainerCheck, ContainerType, testContainerName)
+	expected := containerMetricTestQuery
+	assert.Equal(t, expected, got)
+}
+
 // TestGetQueryForResourceMetricsPod ...
 func TestGetQueryForResourceMetricsPod(t *testing.T) {
 	mockDgraphForResourceQueries(testMetrics, testNoDgraphError)

@@ -97,6 +97,8 @@ func getQueryForResourceMetrics(resourceCheck, resourceType, resourceName string
 		return getQueryForPVMetrics(resourceName)
 	case PVCType:
 		return getQueryForPVCMetrics(resourceName)
+	case ContainerType:
+		return getQueryForContainerMetrics(resourceName)
 	case PodType:
 		cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(resourceName)
 		cpuPrice := strconv.FormatFloat(cpuPriceInFloat64, 'f', 11, 64)
