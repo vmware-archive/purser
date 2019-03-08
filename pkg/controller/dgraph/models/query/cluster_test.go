@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func mockDgraphForClusterQueries() {
+func mockDgraphForClusterQueries(queryType string) {
 	executeQuery = func(query string, root interface{}) error {
 		if query == "" {
 			return fmt.Errorf("unable to connect/retrieve data from dgraph")
@@ -34,21 +34,18 @@ func mockDgraphForClusterQueries() {
 		if !ok {
 			return fmt.Errorf("wrong root received")
 		}
-
-		if query == physicalResourceHierarchyTestQuery || query == logicalResourceHierarchyTestQuery {
-			firstNamespace := Children{
+		var first, second Children
+		if queryType == testHierarchy {
+			first = Children{
 				Name: "namespace-first",
 				Type: NamespaceType,
 			}
-			secondNamespace := Children{
+			second = Children{
 				Name: "namespace-second",
 				Type: NamespaceType,
 			}
-			hierarchyChildren := []Children{firstNamespace, secondNamespace}
-			dummyParentWrapper.Children = hierarchyChildren
-			return nil
-		} else if query == phycialResourcesMetricTestQuery || query == logicalResourcesMetricTestQuery {
-			firstNamespaceWithMetrics := Children{
+		} else if queryType == testMetrics {
+			first = Children{
 				Name:        "namespace-first",
 				Type:        NamespaceType,
 				CPU:         0.90,
@@ -58,7 +55,7 @@ func mockDgraphForClusterQueries() {
 				MemoryCost:  0.31,
 				StorageCost: 0.11,
 			}
-			secondNamespaceWithMetrics := Children{
+			second = Children{
 				Name:        "namespace-second",
 				Type:        NamespaceType,
 				CPU:         0.30,
@@ -68,18 +65,16 @@ func mockDgraphForClusterQueries() {
 				MemoryCost:  0.91,
 				StorageCost: 0.21,
 			}
-			metricsChildren := []Children{firstNamespaceWithMetrics, secondNamespaceWithMetrics}
-			dummyParentWrapper.Children = metricsChildren
-			return nil
 		}
-
-		return fmt.Errorf("no data found")
+		children := []Children{first, second}
+		dummyParentWrapper.Children = children
+		return nil
 	}
 }
 
 // TestRetrieveClusterHierarchyNoView ...
 func TestRetrieveClusterHierarchyNoView(t *testing.T) {
-	mockDgraphForClusterQueries()
+	mockDgraphForClusterQueries(testHierarchy)
 	got := RetrieveClusterHierarchy("")
 	expected := JSONDataWrapper{}
 	assert.Equal(t, expected, got)
@@ -87,7 +82,7 @@ func TestRetrieveClusterHierarchyNoView(t *testing.T) {
 
 // TestRetrieveClusterHierarchyLogicalView ...
 func TestRetrieveClusterHierarchyLogicalView(t *testing.T) {
-	mockDgraphForClusterQueries()
+	mockDgraphForClusterQueries(testHierarchy)
 	got := RetrieveClusterHierarchy(Logical)
 	firstNamespace := Children{
 		Name: "namespace-first",
@@ -110,7 +105,7 @@ func TestRetrieveClusterHierarchyLogicalView(t *testing.T) {
 
 // TestRetrieveClusterHierarchyPhysicalView ...
 func TestRetrieveClusterHierarchyPhysicalView(t *testing.T) {
-	mockDgraphForClusterQueries()
+	mockDgraphForClusterQueries(testHierarchy)
 	got := RetrieveClusterHierarchy(Physical)
 	firstNamespace := Children{
 		Name: "namespace-first",
@@ -133,7 +128,7 @@ func TestRetrieveClusterHierarchyPhysicalView(t *testing.T) {
 
 // TestRetrieveClusterMetricsNoView ...
 func TestRetrieveClusterMetricsNoView(t *testing.T) {
-	mockDgraphForClusterQueries()
+	mockDgraphForClusterQueries(testMetrics)
 	got := RetrieveClusterMetrics("")
 	expected := JSONDataWrapper{}
 	assert.Equal(t, expected, got)
@@ -141,7 +136,7 @@ func TestRetrieveClusterMetricsNoView(t *testing.T) {
 
 // TestRetrieveClusterMetricsLogicalView ...
 func TestRetrieveClusterMetricsLogicalView(t *testing.T) {
-	mockDgraphForClusterQueries()
+	mockDgraphForClusterQueries(testMetrics)
 	got := RetrieveClusterMetrics(Logical)
 	firstNamespaceWithMetrics := Children{
 		Name:        "namespace-first",
@@ -182,7 +177,7 @@ func TestRetrieveClusterMetricsLogicalView(t *testing.T) {
 
 // TestRetrieveClusterMetricsPhysicalView ...
 func TestRetrieveClusterMetricsPhysicalView(t *testing.T) {
-	mockDgraphForClusterQueries()
+	mockDgraphForClusterQueries(testMetrics)
 	got := RetrieveClusterMetrics(Physical)
 	firstNamespaceWithMetrics := Children{
 		Name:        "namespace-first",

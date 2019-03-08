@@ -28,32 +28,28 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
-func mockDgraphForPodQueries(dgraphError bool) {
+func mockDgraphForPodQueries(queryType string) {
 	executeQuery = func(query string, root interface{}) error {
-		if dgraphError {
-			return fmt.Errorf("unable to connect/retrieve data from dgraph")
-		}
-
-		if query == podsWithLabelFilterTestQuery {
+		if queryType == testLabelFilterPods {
 			dummyPodList, ok := root.(*podRoot)
 			if !ok {
 				return fmt.Errorf("wrong root received")
 			}
 			dummyPodList.Pods = []models.Pod{
 				{
-					ID:   dgraph.ID{UID: "0x3e283"},
+					ID:   dgraph.ID{UID: testPodUID},
 					Name: testPodName,
 				},
 			}
 			return nil
-		} else if query == allLivePodsTestQuery {
+		} else if queryType == testAlivePods {
 			dummyPodList, ok := root.(*podRoot)
 			if !ok {
 				return fmt.Errorf("wrong root received")
 			}
 			dummyPodList.Pods = []models.Pod{
 				{
-					ID:   dgraph.ID{UID: "0x3e283", Xid: "purser:" + testPodName},
+					ID:   dgraph.ID{UID: testPodUID, Xid: testPodXID},
 					Name: testPodName,
 				},
 			}
@@ -70,38 +66,46 @@ func mockDgraphForPodQueries(dgraphError bool) {
 
 // TestRetrievePodsUIDsByLabelsFilterWithError ...
 func TestRetrievePodsUIDsByLabelsFilterWithError(t *testing.T) {
-	mockDgraphForPodQueries(testDgraphError)
+	mockDgraphForPodQueries(testWrongQuery)
+
+	// input setup
 	labels := make(map[string][]string)
 	labels["k1"] = []string{"v1"}
-	_, err := RetrievePodsUIDsByLabelsFilter(labels)
+	inputLabelFilter := CreateFilterFromListOfLabels(labels)
+
+	_, err := RetrievePodsUIDsByLabelsFilter(inputLabelFilter)
 	assert.Error(t, err)
 }
 
 // TestRetrievePodsUIDsByLabelsFilter ...
 func TestRetrievePodsUIDsByLabelsFilter(t *testing.T) {
-	mockDgraphForPodQueries(testNoDgraphError)
+	mockDgraphForPodQueries(testLabelFilterPods)
+
+	// input setup
 	labels := make(map[string][]string)
 	labels["k1"] = []string{"v1"}
-	got, err := RetrievePodsUIDsByLabelsFilter(labels)
-	expected := []string{"0x3e283"}
+	inputLabelFilter := CreateFilterFromListOfLabels(labels)
+
+	got, err := RetrievePodsUIDsByLabelsFilter(inputLabelFilter)
+	expected := []string{testPodUID}
 	assert.NoError(t, err)
 	assert.Equal(t, expected, got)
 }
 
 // TestRetrieveAllLivePodsWithDgraphError ...
 func TestRetrieveAllLivePodsWithDgraphError(t *testing.T) {
-	mockDgraphForPodQueries(testDgraphError)
+	mockDgraphForPodQueries(testWrongQuery)
 	got := RetrieveAllLivePods()
 	assert.Nil(t, got)
 }
 
 // TestRetrieveAllLivePods ...
 func TestRetrieveAllLivePods(t *testing.T) {
-	mockDgraphForPodQueries(testNoDgraphError)
+	mockDgraphForPodQueries(testAlivePods)
 	got := RetrieveAllLivePods()
 	expected := []models.Pod{
 		{
-			ID:   dgraph.ID{UID: "0x3e283", Xid: "purser:" + testPodName},
+			ID:   dgraph.ID{UID: testPodUID, Xid: testPodXID},
 			Name: testPodName,
 		},
 	}
@@ -109,10 +113,10 @@ func TestRetrieveAllLivePods(t *testing.T) {
 }
 
 func TestPodInteractionsErrorCase(t *testing.T) {
-	mockDgraphForPodQueries(testNoDgraphError)
+	mockDgraphForPodQueries(testPodInteractions)
 	gotAllOrphan := RetrievePodsInteractions("", true)
 	gotAllNonOrphan := RetrievePodsInteractions("", false)
-	gotWithName := RetrievePodsInteractions("pod-purser", false)
+	gotWithName := RetrievePodsInteractions(testPodName, false)
 	_, err := RetrievePodsInteractionsForAllLivePodsWithCount()
 	assert.Nil(t, gotAllOrphan)
 	assert.Nil(t, gotAllNonOrphan)

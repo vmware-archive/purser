@@ -26,13 +26,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupForMetricQueryTesting() {
+func mockSecondsSinceMonthStart() {
 	secondsFromFirstOfCurrentMonth = func() string {
-		return mockSecondsSinceMonthStart
+		return testSecondsSinceMonthStart
 	}
 }
 
-func shutdownForMetricQueryTesting() {
+func removeMocks() {
 	secondsFromFirstOfCurrentMonth = getSecondsSinceMonthStart
 	executeQuery = dgraph.ExecuteQuery
 	executeQueryRaw = dgraph.ExecuteQueryRaw
@@ -40,22 +40,15 @@ func shutdownForMetricQueryTesting() {
 
 // TestMain ...
 func TestMain(m *testing.M) {
-	setupForMetricQueryTesting()
+	mockSecondsSinceMonthStart()
 	code := m.Run()
-	shutdownForMetricQueryTesting()
+	removeMocks()
 	os.Exit(code)
-}
-
-// TestGetQueryForDeploymentMetrics ...
-func TestGetQueryForDeploymentMetrics(t *testing.T) {
-	got := getQueryForDeploymentMetrics(testDeploymentName)
-	expected := deploymentMetricTestQuery
-	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForGroupMetrics ...
 func TestGetQueryForGroupMetrics(t *testing.T) {
-	got := getQueryForGroupMetrics(testPodUIDs)
+	got := getQueryForGroupMetrics(testPodUIDList)
 	expected := groupMetricTestQuery
 	assert.Equal(t, expected, got)
 }
@@ -64,48 +57,6 @@ func TestGetQueryForGroupMetrics(t *testing.T) {
 func TestGetQueryForAllGroupsData(t *testing.T) {
 	got := getQueryForAllGroupsData()
 	expected := allGroupsDataTestQuery
-	assert.Equal(t, expected, got)
-}
-
-// TestGetQueryForNamespaceMetrics ...
-func TestGetQueryForNamespaceMetrics(t *testing.T) {
-	got := getQueryForNamespaceMetrics(testNamespaceName)
-	expected := namespaceMetricTestQuery
-	assert.Equal(t, expected, got)
-}
-
-// TestGetQueryForNodeMetrics ...
-func TestGetQueryForNodeMetrics(t *testing.T) {
-	got := getQueryForNodeMetrics(testNodeName)
-	expected := nodeMetricTestQuery
-	assert.Equal(t, expected, got)
-}
-
-// TestGetQueryForPodMetrics ...
-func TestGetQueryForPodMetrics(t *testing.T) {
-	got := getQueryForPodMetrics(testPodName, testCPUPrice, testMemoryPrice)
-	expected := podMetricTestQuery
-	assert.Equal(t, expected, got)
-}
-
-// TestGetQueryForPVMetrics ...
-func TestGetQueryForPVMetrics(t *testing.T) {
-	got := getQueryForPVMetrics(testPVName)
-	expected := pvMetricTestQuery
-	assert.Equal(t, expected, got)
-}
-
-// TestGetQueryForPVCMetrics ...
-func TestGetQueryForPVCMetrics(t *testing.T) {
-	got := getQueryForPVCMetrics(testPVCName)
-	expected := pvcMetricTestQuery
-	assert.Equal(t, expected, got)
-}
-
-// TestGetQueryForContainerMetrics ...
-func TestGetQueryForContainerMetrics(t *testing.T) {
-	got := getQueryForContainerMetrics(testContainerName)
-	expected := containerMetricTestQuery
 	assert.Equal(t, expected, got)
 }
 

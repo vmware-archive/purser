@@ -18,12 +18,10 @@
 package query
 
 const (
-	mockSecondsSinceMonthStart = "1.45"
-	testCPUPrice               = "0.24000000000"
-	testMemoryPrice            = "0.10000000000"
+	testSecondsSinceMonthStart = "1.45"
 	testNodeName               = "node-minikube"
 	testNamespaceName          = "namespace-default"
-	testPodUIDs                = "0x3e283, 0x3e288"
+	testPodUIDList             = "0x3e283, 0x3e288"
 	testDeploymentName         = "deployment-purser"
 	testPodName                = "pod-purser-dgraph-0"
 	testPVName                 = "pv-datadir-purser-dgraph"
@@ -31,10 +29,20 @@ const (
 	testContainerName          = "container-purser-controller"
 	testJobName                = "job-purser"
 	testDaemonsetName          = "daemonset-purser"
-	testDgraphError            = true
-	testNoDgraphError          = false
-	testHierarchy              = true
-	testMetrics                = false
+	testPodUID                 = "0x3e283"
+	testPodXID                 = "purser:pod-purser-dgraph-0"
+	testCPUPrice               = 0.24
+	testMemoryPrice            = 0.1
+
+	testHierarchy            = "hierarchy"
+	testMetrics              = "metrics"
+	testRetrieveAllGroups    = "retrieveAllGroups"
+	testRetrieveGroupMetrics = "retrieveGroupMetrics"
+	testRetrieveSubscribers  = "retrieveSubscribers"
+	testLabelFilterPods      = "labelFilterPods"
+	testAlivePods            = "alivePods"
+	testPodInteractions      = "podInteractions"
+	testWrongQuery           = "wrongQuery"
 )
 
 const deploymentMetricTestQuery = `query {
@@ -602,56 +610,5 @@ const testQueryForHierarchy = `query {
 				name
 				type
 			}
-		}
-	}`
-
-const podPriceTestQuery = `query {
-		pod(func: has(isPod)) @filter(eq(name, "pod-purser-dgraph-0")) {
-			cpuPrice
-			memoryPrice
-		}
-	}`
-
-const physicalResourceHierarchyTestQuery = `query {
-			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
-				name
-				type
-			}
-		}`
-
-const logicalResourceHierarchyTestQuery = `query {
-			children(func: has(isNamespace)) {
-				name
-				type
-			}
-		}`
-
-const subcriberRetrievalTestQuery = `query {
-		subscribers(func: has(isSubscriber)) @filter(NOT(has(endTime))) {
-			name
-			Spec {
-				headers
-				url
-			}
-		}
-	}`
-
-const podsWithLabelFilterTestQuery = `query {
-		var(func: has(isLabel)) @filter((eq(key, "k1") AND eq(value, "v1"))) {
-            podUIDs as ~label @filter(has(isPod)) {
-				name
-			}
-		}
-		pods(func: uid(podUIDs)) {
-			uid
-			name
-		}
-	}`
-
-const allLivePodsTestQuery = `query {
-		pods(func: has(isPod)) @filter(NOT has(endTime)) {
-			uid
-			xid
-			name
 		}
 	}`

@@ -134,8 +134,7 @@ func RetrievePodsInteractionsForAllLivePodsWithCount() ([]models.Pod, error) {
 }
 
 // RetrievePodsUIDsByLabelsFilter returns pods satisfying the filter conditions for labels (OR logic only)
-func RetrievePodsUIDsByLabelsFilter(labels map[string][]string) ([]string, error) {
-	labelFilter := createFilterFromListOfLabels(labels)
+func RetrievePodsUIDsByLabelsFilter(labelFilter string) ([]string, error) {
 	q := getQueryForPodsWithLabelFilter(labelFilter)
 	newRoot := podRoot{}
 	err := executeQuery(q, &newRoot)

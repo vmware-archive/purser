@@ -34,13 +34,9 @@ func mockMetricsMap(key string, value float64) map[string]float64 {
 	return metrics
 }
 
-func mockDgraphForGroupQueries(dgraphError bool) {
+func mockDgraphForGroupQueries(queryType string) {
 	executeQuery = func(query string, root interface{}) error {
-		if dgraphError {
-			return fmt.Errorf("unable to connect/retrieve data from dgraph")
-		}
-
-		if query == allGroupsDataTestQuery {
+		if queryType == testRetrieveAllGroups {
 			dummyGroupList, ok := root.(*groupsRoot)
 			if !ok {
 				return fmt.Errorf("wrong root received")
@@ -61,7 +57,7 @@ func mockDgraphForGroupQueries(dgraphError bool) {
 			}
 			dummyGroupList.Groups = []models.Group{dummyGroup}
 			return nil
-		} else if query == groupMetricTestQuery {
+		} else if queryType == testRetrieveGroupMetrics {
 			groupMetrics, ok := root.(*groupJSONMetrics)
 			if !ok {
 				return fmt.Errorf("wrong root received")
@@ -91,14 +87,14 @@ func mockDgraphForGroupQueries(dgraphError bool) {
 
 // TestRetrieveGroupsDataWithDgraphError ...
 func TestRetrieveGroupsDataWithDgraphError(t *testing.T) {
-	mockDgraphForGroupQueries(testDgraphError)
+	mockDgraphForGroupQueries(testWrongQuery)
 	_, err := RetrieveGroupsData()
 	assert.Error(t, err)
 }
 
 // TestRetrieveGroupsData ...
 func TestRetrieveGroupsData(t *testing.T) {
-	mockDgraphForGroupQueries(testNoDgraphError)
+	mockDgraphForGroupQueries(testRetrieveAllGroups)
 	got, err := RetrieveGroupsData()
 	expected := []models.Group{{
 		Name:           "group-purser",
@@ -120,15 +116,15 @@ func TestRetrieveGroupsData(t *testing.T) {
 
 // TestGroupMetricsFromPodUIDsWithDgraphError ...
 func TestGroupMetricsFromPodUIDsWithDgraphError(t *testing.T) {
-	mockDgraphForGroupQueries(testDgraphError)
+	mockDgraphForGroupQueries(testWrongQuery)
 	_, err := RetrieveGroupMetricsFromPodUIDs("")
 	assert.Error(t, err)
 }
 
 // TestGroupMetricsFromPodUIDs ...
 func TestGroupMetricsFromPodUIDs(t *testing.T) {
-	mockDgraphForGroupQueries(testNoDgraphError)
-	got, err := RetrieveGroupMetricsFromPodUIDs(testPodUIDs)
+	mockDgraphForGroupQueries(testRetrieveGroupMetrics)
+	got, err := RetrieveGroupMetricsFromPodUIDs(testPodUIDList)
 	expected := GroupMetrics{
 		PITCpu:         1.3,
 		PITMemory:      2.4,

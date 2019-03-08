@@ -65,47 +65,55 @@ const (
 	StatefulsetType  = "statefulset"
 )
 
+// Resource structure
+type Resource struct {
+	Check       string
+	Type        string
+	Name        string
+	ChildFilter string
+}
+
 // RetrieveResourceHierarchy returns hierarchy for a given resource
-func RetrieveResourceHierarchy(resourceCheck, resourceType, resourceName, childFilter string) JSONDataWrapper {
-	if resourceName == All {
+func (r *Resource) RetrieveResourceHierarchy() JSONDataWrapper {
+	if r.Name == All {
 		logrus.Errorf("wrong type of query, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := getQueryForHierarchy(resourceCheck, resourceType, resourceName, childFilter)
+	query := r.getQueryForHierarchy()
 	return getJSONDataFromQuery(query)
 }
 
 // RetrieveResourceMetrics returns metrics for a given resource
-func RetrieveResourceMetrics(resourceCheck, resourceType, resourceName string) JSONDataWrapper {
-	if resourceName == All {
+func (r *Resource) RetrieveResourceMetrics() JSONDataWrapper {
+	if r.Name == All {
 		logrus.Errorf("wrong type of query, empty name is given")
 		return JSONDataWrapper{}
 	}
-	query := getQueryForResourceMetrics(resourceCheck, resourceType, resourceName)
+	query := r.getQueryForResourceMetrics()
 	return getJSONDataFromQuery(query)
 }
 
-func getQueryForResourceMetrics(resourceCheck, resourceType, resourceName string) string {
-	switch resourceType {
+func (r *Resource) getQueryForResourceMetrics() string {
+	switch r.Type {
 	case DeploymentType:
-		return getQueryForDeploymentMetrics(resourceName)
+		return getQueryForDeploymentMetrics(r.Name)
 	case NamespaceType:
-		return getQueryForNamespaceMetrics(resourceName)
+		return getQueryForNamespaceMetrics(r.Name)
 	case NodeType:
-		return getQueryForNodeMetrics(resourceName)
+		return getQueryForNodeMetrics(r.Name)
 	case PVType:
-		return getQueryForPVMetrics(resourceName)
+		return getQueryForPVMetrics(r.Name)
 	case PVCType:
-		return getQueryForPVCMetrics(resourceName)
+		return getQueryForPVCMetrics(r.Name)
 	case ContainerType:
-		return getQueryForContainerMetrics(resourceName)
+		return getQueryForContainerMetrics(r.Name)
 	case PodType:
-		cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(resourceName)
+		cpuPriceInFloat64, memoryPriceInFloat64 := getPricePerResourceForPod(r.Name)
 		cpuPrice := strconv.FormatFloat(cpuPriceInFloat64, 'f', 11, 64)
 		memoryPrice := strconv.FormatFloat(memoryPriceInFloat64, 'f', 11, 64)
-		return getQueryForPodMetrics(resourceName, cpuPrice, memoryPrice)
+		return getQueryForPodMetrics(r.Name, cpuPrice, memoryPrice)
 	}
-	return getQueryForPodParentMetrics(resourceCheck, resourceType, resourceName)
+	return r.getQueryForPodParentMetrics()
 }
 
 // getJSONDataFromQuery executes query and wraps the data in a desired structure(JSONDataWrapper)

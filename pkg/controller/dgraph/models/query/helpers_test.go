@@ -40,14 +40,25 @@ func TestGetQueryForAggregatingChildMetricsWithAlias(t *testing.T) {
 
 // TestGetQueryForPodParentMetrics ...
 func TestGetQueryForPodParentMetrics(t *testing.T) {
-	got := getQueryForPodParentMetrics("isJob", "job", testJobName)
+	input := Resource{
+		Check: JobCheck,
+		Type:  JobType,
+		Name:  testJobName,
+	}
+	got := input.getQueryForPodParentMetrics()
 	expected := testQueryForPodParentMetrics
 	assert.Equal(t, expected, got)
 }
 
 // TestGetQueryForHierarchy ...
 func TestGetQueryForHierarchy(t *testing.T) {
-	got := getQueryForHierarchy("isNode", "node", testNodeName, "@filter(has(isPod))")
+	input := &Resource{
+		Check:       NodeCheck,
+		Type:        NodeType,
+		Name:        testNodeName,
+		ChildFilter: IsPodFilter,
+	}
+	got := input.getQueryForHierarchy()
 	expected := testQueryForHierarchy
 	assert.Equal(t, expected, got)
 }
