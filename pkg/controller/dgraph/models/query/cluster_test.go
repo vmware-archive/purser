@@ -19,10 +19,33 @@ package query
 
 import (
 	"fmt"
+	"os"
 	"testing"
+
+	"github.com/vmware/purser/pkg/controller/dgraph"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func mockSecondsSinceMonthStart() {
+	secondsFromFirstOfCurrentMonth = func() string {
+		return testSecondsSinceMonthStart
+	}
+}
+
+func removeMocks() {
+	secondsFromFirstOfCurrentMonth = getSecondsSinceMonthStart
+	executeQuery = dgraph.ExecuteQuery
+	executeQueryRaw = dgraph.ExecuteQueryRaw
+}
+
+// TestMain ...
+func TestMain(m *testing.M) {
+	mockSecondsSinceMonthStart()
+	code := m.Run()
+	removeMocks()
+	os.Exit(code)
+}
 
 func mockDgraphForClusterQueries(queryType string) {
 	executeQuery = func(query string, root interface{}) error {

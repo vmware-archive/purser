@@ -123,3 +123,19 @@ func TestPodInteractionsErrorCase(t *testing.T) {
 	assert.Nil(t, gotWithName)
 	assert.Error(t, err)
 }
+
+func TestGetPricePerResourceForPodWithError(t *testing.T) {
+	mockDgraphForResourceQueries(testWrongQuery, testPodName, PodType)
+	gotCPUPrice, gotMemoryPrice := getPricePerResourceForPod(testPodName)
+	expectedCPUPrice, expectedMemoryPrice := models.DefaultCPUCostInFloat64, models.DefaultMemCostInFloat64
+	assert.Equal(t, expectedCPUPrice, gotCPUPrice)
+	assert.Equal(t, expectedMemoryPrice, gotMemoryPrice)
+}
+
+func TestGetPricePerResourceForPod(t *testing.T) {
+	mockDgraphForResourceQueries(testPodPrices, testPodName, PodType)
+	gotCPUPrice, gotMemoryPrice := getPricePerResourceForPod(testPodName)
+	expectedCPUPrice, expectedMemoryPrice := testCPUPrice, testMemoryPrice
+	assert.Equal(t, expectedCPUPrice, gotCPUPrice)
+	assert.Equal(t, expectedMemoryPrice, gotMemoryPrice)
+}
