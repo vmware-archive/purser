@@ -198,7 +198,13 @@ func getMetricsQueryForLogicalResources() string {
 func getMetricsQueryForPhysicalResources() string {
 	return `query {
 			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
-				` + getQueryForMetricsComputationWithAlias("") + `
+				name
+			type
+			cpu: cpu as cpuCapacity
+			memory: memory as memoryCapacity
+			storage: storage as storageCapacity
+			` + getQueryForTimeComputation("") + `
+			` + getQueryForCostWithPriceWithAlias("") + `
 			}
 		}`
 }
