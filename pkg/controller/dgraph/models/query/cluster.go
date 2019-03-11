@@ -22,27 +22,26 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
+var executeQuery = dgraph.ExecuteQuery
+var executeQueryRaw = dgraph.ExecuteQueryRaw
+
+func getClusterHierarchyQuery(view string) string {
+	switch view {
+	case Physical:
+		return getHierarchyQueryForPhysicalResource()
+	case Logical:
+		return getHierarchyQueryForLogicalResource()
+	default:
+		return ""
+	}
+}
+
 // RetrieveClusterHierarchy returns all namespaces if view is logical and returns all nodes with disks if view is physical
 func RetrieveClusterHierarchy(view string) JSONDataWrapper {
-	var query string
-	if view == Physical {
-		query = `query {
-			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
-				name
-				type
-			}
-		}`
-	} else {
-		query = `query {
-			children(func: has(isNamespace)) {
-				name
-				type
-			}
-		}`
-	}
+	query := getClusterHierarchyQuery(view)
 
 	parentRoot := ParentWrapper{}
-	err := dgraph.ExecuteQuery(query, &parentRoot)
+	err := executeQuery(query, &parentRoot)
 	if err != nil {
 		logrus.Errorf("Unable to execute query for retrieving cluster hierarchy: (%v)", err)
 		return JSONDataWrapper{}
@@ -58,18 +57,23 @@ func RetrieveClusterHierarchy(view string) JSONDataWrapper {
 	return root
 }
 
+func getClusterMetricsQuery(view string) string {
+	switch view {
+	case Physical:
+		return getMetricsQueryForPhysicalResources()
+	case Logical:
+		return getMetricsQueryForLogicalResources()
+	default:
+		return ""
+	}
+}
+
 // RetrieveClusterMetrics returns all namespaces with metrics if view is logical and
 // returns all nodes and disks with metrics if view is physical
 func RetrieveClusterMetrics(view string) JSONDataWrapper {
-	var query string
-	if view == Physical {
-		query = getQueryForPhysicalResources()
-	} else {
-		query = getQueryForLogicalResources()
-	}
-
+	query := getClusterMetricsQuery(view)
 	parentRoot := ParentWrapper{}
-	err := dgraph.ExecuteQuery(query, &parentRoot)
+	err := executeQuery(query, &parentRoot)
 	calculateAggregateMetrics(&parentRoot)
 	if err != nil {
 		logrus.Errorf("Unable to execute query for retrieving cluster metrics: (%v)", err)

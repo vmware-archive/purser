@@ -118,7 +118,8 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 func getPodUIDsFromAllExpressions(expressions map[string]map[string][]string) [][]string {
 	var podsUIDsFromExpressions [][]string
 	for _, selector := range expressions {
-		podsUIDsFromSelector, err := query.RetrievePodsUIDsByLabelsFilter(selector)
+		labelFilter := query.CreateFilterFromListOfLabels(selector)
+		podsUIDsFromSelector, err := query.RetrievePodsUIDsByLabelsFilter(labelFilter)
 		if err == nil {
 			podsUIDsFromExpressions = append(podsUIDsFromExpressions, podsUIDsFromSelector)
 		}

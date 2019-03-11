@@ -17,9 +17,9 @@
 
 package query
 
-// createFilterFromListOfLabels will return a filter logic like
+// CreateFilterFromListOfLabels will return a filter logic like
 // (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1")) OR (eq(key, "k1") AND eq(value, "v1"))
-func createFilterFromListOfLabels(labels map[string][]string) string {
+func CreateFilterFromListOfLabels(labels map[string][]string) string {
 	separator := " OR "
 	var filter string
 	isFirst := true

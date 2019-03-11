@@ -18,16 +18,18 @@
 package query
 
 import (
-	"github.com/Sirupsen/logrus"
+	"strconv"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-// RetrievePVCMetrics returns metrics for a given pvc
-func RetrievePVCMetrics(name string) JSONDataWrapper {
-	if name == All {
-		logrus.Errorf("wrong type of query for PVC, empty name is given")
-		return JSONDataWrapper{}
-	}
-
-	query := getQueryForPVCMetrics(name)
-	return getJSONDataFromQuery(query)
+// TestGetSecondsSinceMonthStart ...
+func TestGetSecondsSinceMonthStart(t *testing.T) {
+	maxSecondsInAMonth := 2678400.0
+	got := getSecondsSinceMonthStart()
+	gotFloat, err := strconv.ParseFloat(got, 64)
+	assert.NoError(t, err, "unable to convert secondsSinceMonthStart to float64")
+	assert.False(t, gotFloat > maxSecondsInAMonth, "secondsSinceMonthStart can't be greater than 2678400")
+	assert.False(t, gotFloat < 0, "secondsSinceMonthStart can't be less than 0")
 }

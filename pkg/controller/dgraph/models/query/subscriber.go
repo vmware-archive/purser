@@ -18,26 +18,18 @@
 package query
 
 import (
-	"github.com/vmware/purser/pkg/controller/dgraph"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 )
 
+type subscriberRoot struct {
+	Subscribers []models.SubscriberCRD `json:"subscribers"`
+}
+
 // RetrieveSubscribers gets all live subscribers
 func RetrieveSubscribers() ([]models.SubscriberCRD, error) {
-	q := `query {
-		subscribers(func: has(isSubscriber)) @filter(NOT(has(endTime))) {
-			name
-			Spec {
-				headers
-				url
-			}
-		}
-	}`
-	type root struct {
-		Subscribers []models.SubscriberCRD `json:"subscribers"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(q, &newRoot)
+	q := getQueryForSubscribersRetrieval()
+	newRoot := subscriberRoot{}
+	err := executeQuery(q, &newRoot)
 	if err != nil {
 		return nil, err
 	}

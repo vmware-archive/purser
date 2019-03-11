@@ -21,7 +21,6 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/dgraph"
 )
 
 // GroupMetrics structure
@@ -42,28 +41,33 @@ type GroupMetrics struct {
 	PodsCount      int
 }
 
+type groupsRoot struct {
+	Groups []models.Group `json:"groups,omitempty"`
+}
+
+type groupJSONMetrics struct {
+	JSONMetrics []map[string]float64 `json:"group"`
+}
+
 // RetrieveGroupsData returns list of models.Group objects in json format
 // error is not nil if any failure is encountered
 func RetrieveGroupsData() ([]models.Group, error) {
 	query := getQueryForAllGroupsData()
 
-	type root struct {
-		Groups []models.Group `json:"groups,omitempty"`
+	newRoot := groupsRoot{}
+	err := executeQuery(query, &newRoot)
+	if err != nil {
+		return []models.Group{}, err
 	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
-	return newRoot.Groups, err
+	return newRoot.Groups, nil
 }
 
 // RetrieveGroupMetricsFromPodUIDs ...
 func RetrieveGroupMetricsFromPodUIDs(podsUIDs string) (GroupMetrics, error) {
 	query := getQueryForGroupMetrics(podsUIDs)
 
-	type root struct {
-		JSONMetrics []map[string]float64 `json:"group"`
-	}
-	newRoot := root{}
-	err := dgraph.ExecuteQuery(query, &newRoot)
+	newRoot := groupJSONMetrics{}
+	err := executeQuery(query, &newRoot)
 	if err != nil {
 		return GroupMetrics{}, err
 	}
