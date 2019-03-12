@@ -99,3 +99,60 @@
         </div>
     </div>
 </div>
+
+<div class="row" style="margin-top: 5%" *ngIf="CAPA_STATUS === 'READY'">
+    <div class="headerBlock">
+        <div class="card-title">
+            <span class="headerText">{{resourceType + ' Resource Allocation vs Capacity'}}</span>
+        </div>
+    </div>
+</div>
+
+<div class="clr-row" *ngIf="CAPA_STATUS === 'READY'">
+    <div class="clr-col-12 clr-col-sm-4">
+            <div class="card">
+                <div class="card-block">
+                    <h4 class="card-title">CPU</h4>
+                    <p class="card-text">Allocated: {{ cpuAllocated }} vCPU<br />  Capacity: {{ cpuCapacity }} vCPU</p>
+                    <div class="progress-block">
+                        <label>CPU</label>
+                        <div class="progress-static labeled">
+                            <div class="progress-meter" [attr.data-value]="cpuRatio" [attr.data-displayval]="cpuRatio + '%'"></div>
+                            <span>{{ cpuRatio }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="clr-col-12 clr-col-sm-4">
+        <div class="card">
+            <div class="card-block">
+                <h4 class="card-title">Memory</h4>
+                <p class="card-text">Allocated: {{ memoryAllocated }} GB<br />  Capacity: {{ memoryCapacity }} GB</p>
+                <div class="progress-block">
+                    <label>Memory</label>
+                    <div class="progress-static labeled">
+                        <div class="progress-meter" [attr.data-value]="memoryRatio" [attr.data-displayval]="memoryRatio + '%'"></div>
+                        <span>{{ memoryRatio }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clr-col-12 clr-col-sm-4">
+        <div class="card">
+            <div class="card-block">
+                <h4 class="card-title">Storage</h4>
+                <p class="card-text">Allocated: {{ storageAllocated }} GB<br />  Capacity: {{ storageCapacity }} GB</p>
+                <div class="progress-block">
+                    <label>Storage</label>
+                    <div class="progress-static labeled">
+                        <div class="progress-meter" [attr.data-value]="storageRatio" [attr.data-displayval]="storageRatio + '%'"></div>
+                        <span>{{ storageRatio }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

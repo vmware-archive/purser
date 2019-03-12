@@ -6,7 +6,7 @@ import { MCommon } from './common/messages/common.messages';
 export const BACKEND_URL = window.location.protocol + '//' + window.location.host + '/api/'
 
 // development environment
-// export const BACKEND_URL = 'http://localhost:3030/'
+// export const BACKEND_URL = 'http://localhost:3030/api/'
 
 @Component({
     selector: 'app-root',

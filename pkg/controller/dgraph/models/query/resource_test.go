@@ -46,7 +46,7 @@ func mockDgraphForResourceQueries(queryType, resourceName, resourceType string) 
 			return fmt.Errorf("wrong root received")
 		}
 
-		var parent Parent
+		var parent ParentWrapper
 		if queryType == testMetrics {
 			firstPodWithMetrics := Children{
 				Name:        "pod-purser-1",
@@ -68,7 +68,7 @@ func mockDgraphForResourceQueries(queryType, resourceName, resourceType string) 
 				MemoryCost:  0.19,
 				StorageCost: 0.01,
 			}
-			parent = Parent{
+			parent = ParentWrapper{
 				Name:        resourceName,
 				Type:        resourceType,
 				Children:    []Children{firstPodWithMetrics, secondPodWithMetrics},
@@ -79,7 +79,7 @@ func mockDgraphForResourceQueries(queryType, resourceName, resourceType string) 
 				MemoryCost:  0.28,
 				StorageCost: 0.11,
 			}
-			dummyParentWrapper.Parent = []Parent{parent}
+			dummyParentWrapper.Parent = []ParentWrapper{parent}
 			return nil
 		} else if queryType == testHierarchy {
 			firstPod := Children{
@@ -90,12 +90,12 @@ func mockDgraphForResourceQueries(queryType, resourceName, resourceType string) 
 				Name: "pod-purser-2",
 				Type: PodType,
 			}
-			parent = Parent{
+			parent = ParentWrapper{
 				Name:     resourceName,
 				Type:     resourceType,
 				Children: []Children{firstPod, secondPod},
 			}
-			dummyParentWrapper.Parent = []Parent{parent}
+			dummyParentWrapper.Parent = []ParentWrapper{parent}
 			return nil
 		}
 		return fmt.Errorf("unable to retrieve data from dgraph")

@@ -124,6 +124,11 @@ func CreateSchema() error {
 		memoryLimit: float .
 		memoryCapacity: float .
 		memoryPrice: float .
+		storage: float .
+		storageRequest: float .
+		storageLimit: float .
+		storageCapacity: float .
+		storagePrice: float .
 		mtdCPU: float .
 		mtdCPUCost: float .
 		mtdCost: float .

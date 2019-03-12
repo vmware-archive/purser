@@ -37,7 +37,7 @@ func mockDgraphForSubscriberQueries(queryType string) {
 			dummySubscriber := models.SubscriberCRD{
 				Name: "subscriber-purser",
 				Spec: models.SubscriberSpec{
-					URL: "http://purer.com",
+					URL: "http://purser.com",
 				},
 			}
 			dummySubscriberList.Subscribers = []models.SubscriberCRD{dummySubscriber}
@@ -62,7 +62,7 @@ func TestRetrieveSubscribers(t *testing.T) {
 	expected := []models.SubscriberCRD{{
 		Name: "subscriber-purser",
 		Spec: models.SubscriberSpec{
-			URL: "http://purer.com",
+			URL: "http://purser.com",
 		},
 	}}
 	assert.Equal(t, expected, got)
