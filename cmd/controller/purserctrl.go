@@ -103,6 +103,9 @@ func startCronJobForUpdatingCustomGroups() {
 		log.Error(err)
 	}
 	err = c.AddFunc("@every 0h5m", query.ComputeClusterAllocationAndCapacity)
+	if err != nil {
+		log.Error(err)
+	}
 	c.Start()
 }
 
