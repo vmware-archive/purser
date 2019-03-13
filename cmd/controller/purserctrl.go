@@ -21,6 +21,8 @@ import (
 	"flag"
 	"time"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
+
 	"github.com/vmware/purser/pkg/pricing"
 
 	log "github.com/Sirupsen/logrus"
@@ -91,11 +93,16 @@ func runDiscovery() {
 }
 
 func startCronJobForUpdatingCustomGroups() {
+	query.ComputeClusterAllocationAndCapacity()
 	time.Sleep(time.Minute)
 	runGroupUpdate()
 
 	c := cron.New()
 	err := c.AddFunc("@every 0h5m", runGroupUpdate)
+	if err != nil {
+		log.Error(err)
+	}
+	err = c.AddFunc("@every 0h5m", query.ComputeClusterAllocationAndCapacity)
 	if err != nil {
 		log.Error(err)
 	}

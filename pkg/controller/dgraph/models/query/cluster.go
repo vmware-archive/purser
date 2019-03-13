@@ -25,6 +25,8 @@ import (
 var executeQuery = dgraph.ExecuteQuery
 var executeQueryRaw = dgraph.ExecuteQueryRaw
 
+var allocatedAndCapacity *ParentWrapper
+
 func getClusterHierarchyQuery(view string) string {
 	switch view {
 	case Physical:
@@ -105,4 +107,42 @@ func calculateAggregateMetrics(objRoot *ParentWrapper) {
 		objRoot.MemoryCost += obj.MemoryCost
 		objRoot.StorageCost += obj.StorageCost
 	}
+}
+
+// PopulateClusterAllocationAndCapacity ...
+func PopulateClusterAllocationAndCapacity(jsonData *JSONDataWrapper) {
+	if allocatedAndCapacity == nil {
+		ComputeClusterAllocationAndCapacity()
+	}
+	populateCapacityData(*allocatedAndCapacity, jsonData)
+}
+
+// ComputeClusterAllocationAndCapacity returns allocated, capacity for cpu, memory and storage
+func ComputeClusterAllocationAndCapacity() {
+	allocation := RetrieveClusterMetrics(Logical)
+	capacity := RetrieveClusterMetrics(Physical)
+	allocatedAndCapacity = &ParentWrapper{
+		CPUAllocated:     allocation.Data.CPU,
+		MemoryAllocated:  allocation.Data.Memory,
+		StorageAllocated: allocation.Data.Storage,
+		CPUCapacity:      capacity.Data.CPU,
+		MemoryCapacity:   capacity.Data.Memory,
+		StorageCapacity:  capacity.Data.Storage,
+	}
+}
+
+// PopulateNodeOrPVAllocationAndCapacity returns allocated, capacity for cpu, memory and storage
+func (r *Resource) PopulateNodeOrPVAllocationAndCapacity(jsonData *JSONDataWrapper) {
+	q := r.getQueryForResourceMetrics()
+	resourceData := getJSONDataFromQuery(q)
+	populateCapacityData(resourceData.Data, jsonData)
+}
+
+func populateCapacityData(allocatedAndCapacityData ParentWrapper, jsonData *JSONDataWrapper) {
+	jsonData.Data.CPUAllocated = allocatedAndCapacityData.CPUAllocated
+	jsonData.Data.MemoryAllocated = allocatedAndCapacityData.MemoryAllocated
+	jsonData.Data.StorageAllocated = allocatedAndCapacityData.StorageAllocated
+	jsonData.Data.CPUCapacity = allocatedAndCapacityData.CPUCapacity
+	jsonData.Data.MemoryCapacity = allocatedAndCapacityData.MemoryCapacity
+	jsonData.Data.StorageCapacity = allocatedAndCapacityData.StorageCapacity
 }

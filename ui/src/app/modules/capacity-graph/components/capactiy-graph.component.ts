@@ -15,6 +15,16 @@ const STATUS_WAIT = 'WAIT',
 
 
 export class CapactiyGraphComponent implements OnInit {
+    public cpuAllocated = 100.0;
+    public cpuCapacity = 100.0;
+    public cpuRatio = 100;
+    public memoryAllocated = 100.0;
+    public memoryCapacity = 100.0;
+    public memoryRatio = 100;
+    public storageAllocated = 100.0;
+    public storageCapacity = 100.0;
+    public storageRatio = 100;
+    public resourceType = 'Cluster';
 
     //PUBLIC
     public CAPA_STATUS = STATUS_WAIT;
@@ -48,7 +58,7 @@ export class CapactiyGraphComponent implements OnInit {
     //PRIVATE
     private orgCapaData: any = {};
     private capaData: any = {};
-    private keysToConsider: any = ['service', 'pod', 'container', 'process', 'cluster', 'namespace', 'deployment', 'replicaset', 'node', 'daemonset', 'job', 'statefulset', 'children'];
+    private keysToConsider: any = ['service', 'pod', 'container', 'process', 'cluster', 'namespace', 'deployment', 'replicaset', 'node', 'daemonset', 'job', 'statefulset', 'children', 'pv', 'pvc'];
     private uniqNames: any = [];
 
     constructor(private router: Router, private capacityGraphService: CapacityGraphService) { }
@@ -62,11 +72,68 @@ export class CapactiyGraphComponent implements OnInit {
             }
             this.capaData = response && response.data || {};
             this.orgCapaData = JSON.parse(JSON.stringify(this.capaData));
-            //console.log(this.capaData);
+
             this.constructData(this.capaData);
         }, (err) => {
             this.CAPA_STATUS = STATUS_NODATA;
         });
+    }
+
+    private computeAllocationRatios(data) {
+        if (!!data.cpuCapacity) {
+            this.cpuCapacity = data.cpuCapacity.toFixed(2);
+        } else {
+            this.cpuCapacity = 0;
+        }
+        if (!!data.cpuAllocated) {
+            this.cpuAllocated = data.cpuAllocated.toFixed(2);
+        } else {
+            this.cpuAllocated = 0;
+        }
+        this.cpuRatio = Math.round(this.cpuAllocated * 100 / this.cpuCapacity);
+
+        if (!!data.memoryCapacity) {
+            this.memoryCapacity = data.memoryCapacity.toFixed(2);
+        } else {
+            this.memoryCapacity = 0;
+        }
+        if (!!data.memoryAllocated) {
+            this.memoryAllocated = data.memoryAllocated.toFixed(2);
+        } else {
+            this.memoryAllocated = 0;
+        }
+        this.memoryRatio = Math.round(this.memoryAllocated * 100 / this.memoryCapacity);
+
+        if (!!data.storageCapacity) {
+            this.storageCapacity = data.storageCapacity.toFixed(2);
+        } else {
+            this.storageCapacity = 0;
+        }
+        if (!!data.storageAllocated) {
+            this.storageAllocated = data.storageAllocated.toFixed(2);
+        } else {
+            this.storageAllocated = 0;
+        }
+        this.storageRatio = Math.round(this.storageAllocated * 100 / this.storageCapacity);
+
+        if (data.type == 'node') {
+            this.resourceType = 'Node';
+            this.storageAllocated = 0;
+            this.storageCapacity = 0;
+            this.storageRatio = 0;
+        } else {
+            if (data.type == 'pv') {
+                this.resourceType = 'PersistentVolume';
+                this.cpuAllocated = 0;
+                this.cpuCapacity = 0;
+                this.cpuRatio = 0;
+                this.memoryAllocated = 0;
+                this.memoryCapacity = 0;
+                this.memoryRatio = 0;
+            } else {
+                this.resourceType = 'Cluster';
+            }
+        }
     }
 
     private constructRoot(capaData) {
@@ -119,6 +186,9 @@ export class CapactiyGraphComponent implements OnInit {
                 }
             }
         }
+
+        this.computeAllocationRatios(data);
+
         this.CAPA_STATUS = STATUS_READY;
         //console.log(this.graphData);
     }

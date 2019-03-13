@@ -35,6 +35,7 @@ const (
 	testAlivePods            = "alivePods"
 	testPodInteractions      = "podInteractions"
 	testPodPrices            = "podPrices"
+	testCapacity             = "capacityAllocation"
 	testWrongQuery           = "wrongQuery"
 	testCPUPrice             = 0.24
 	testMemoryPrice          = 0.1
