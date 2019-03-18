@@ -19,13 +19,48 @@ package query
 
 import (
 	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/dgraph"
 
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Login structure
+type Login struct {
+	dgraph.ID
+	IsLogin  bool   `json:"isLogin,omitempty"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+}
+
+// UpdateLogin ...
+func UpdateLogin(username, oldPassword, newPassword string) bool {
+	if CheckLogin(username, oldPassword) {
+		login, err := GetHashedPassword(username)
+		if err != nil {
+			logrus.Error(err)
+			return false
+		}
+		err = hashAndUpdatePassword(&login, newPassword)
+		if err == nil {
+			return true
+		}
+		logrus.Error(err)
+	}
+	return false
+}
+
+func hashAndUpdatePassword(login *Login, newPassword string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.MinCost)
+	if err != nil {
+		return err
+	}
+	login.Password = string(hashedPassword)
+	_, err = dgraph.MutateNode(login, dgraph.UPDATE)
+	return err
+}
+
 // GetHashedPassword ...
-func GetHashedPassword(username string) (models.Login, error) {
+func GetHashedPassword(username string) (Login, error) {
 	q := `query {
 		login(func: has(isLogin)) {
 			uid
@@ -35,12 +70,12 @@ func GetHashedPassword(username string) (models.Login, error) {
 	}`
 
 	type root struct {
-		LoginList []models.Login `json:"login"`
+		LoginList []Login `json:"login"`
 	}
 	newRoot := root{}
 	err := executeQuery(q, &newRoot)
 	if err != nil {
-		return models.Login{}, err
+		return Login{}, err
 	}
 	return newRoot.LoginList[0], nil
 }

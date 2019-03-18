@@ -85,7 +85,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !models.UpdateLogin(cred.Username, cred.Password, cred.NewPassword) {
+	if !query.UpdateLogin(cred.Username, cred.Password, cred.NewPassword) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
