@@ -21,6 +21,8 @@ import (
 	"flag"
 	"time"
 
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+
 	"github.com/vmware/purser/pkg/pricing"
 
 	log "github.com/Sirupsen/logrus"
@@ -41,6 +43,7 @@ var conf controller.Config
 const InClusterConfigPath = ""
 
 var interactions *string
+var cookieStoreKey *string
 
 func init() {
 	logLevel := flag.String("log", "info", "set log level as info or debug")
@@ -48,15 +51,19 @@ func init() {
 	dgraphPort := flag.String("dgraphPort", "9080", "dgraph zero port")
 	interactions = flag.String("interactions", "disable", "enable discovery of interactions")
 	kubeconfig := flag.String("kubeconfig", InClusterConfigPath, "path to the kubeconfig file")
+	cookieStoreKey = flag.String("key", "super-secret-key", "cookie store key")
 	flag.Parse()
 
 	utils.InitializeLogger(*logLevel)
 	config.Setup(&conf, *kubeconfig)
+
+	// start dgraph and create login if not exists
 	dgraph.Start(*dgraphURL, *dgraphPort)
+	models.StoreLogin()
 }
 
 func main() {
-	go api.StartServer()
+	go api.StartServer(*cookieStoreKey)
 	go eventprocessor.ProcessEvents(&conf)
 
 	if *interactions == "enable" {

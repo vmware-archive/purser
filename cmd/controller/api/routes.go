@@ -213,4 +213,22 @@ var routes = Routes{
 		"/api/groups",
 		GetGroupsData,
 	},
+	Route{
+		"Login",
+		"GET",
+		"/auth/login",
+		LoginUser,
+	},
+	Route{
+		"Logout",
+		"GET",
+		"/auth/logout",
+		LogoutUser,
+	},
+	Route{
+		"ChangePassword",
+		"GET",
+		"/auth/changePassword",
+		ChangePassword,
+	},
 }

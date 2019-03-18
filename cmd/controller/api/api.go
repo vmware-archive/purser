@@ -24,8 +24,11 @@ import (
 	"github.com/gorilla/handlers"
 )
 
+var cookieKey string
+
 // StartServer starts api server
-func StartServer() {
+func StartServer(cookieStoreKey string) {
+	cookieKey = cookieStoreKey
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedCredentials := handlers.AllowCredentials()
 	router := NewRouter()

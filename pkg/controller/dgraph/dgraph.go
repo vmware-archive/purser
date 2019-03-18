@@ -100,6 +100,7 @@ func CreateSchema() error {
 		isNodePrice: bool .
 		isStoragePrice: bool .
 		isRateCard: bool .
+        isLogin: bool .
 		pod: uid @reverse .
 		namespace: uid @reverse .
 		deployment: uid @reverse .
