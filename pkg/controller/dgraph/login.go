@@ -15,46 +15,46 @@
  * limitations under the License.
  */
 
-package models
+package dgraph
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/vmware/purser/pkg/controller/dgraph"
-	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Login structure
 type Login struct {
-	dgraph.ID
+	ID
 	IsLogin  bool   `json:"isLogin,omitempty"`
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 }
 
-// UpdateLogin ...
-func UpdateLogin(username, oldPassword, newPassword string) bool {
-	if query.CheckLogin(username, oldPassword) {
-		login, err := query.GetHashedPassword(username)
-		if err != nil {
-			logrus.Error(err)
-			return false
-		}
-		err = hashAndUpdatePassword(&login, newPassword)
-		if err == nil {
-			return true
-		}
-		logrus.Error(err)
-	}
-	return false
-}
+// Login constants
+const (
+	DefaultUsername = "admin"
+	DefaultPassword = "purser!123"
+	DefaultLoginXID = "purser-login-xid"
+	IsLogin         = "isLogin"
+)
 
-func hashAndUpdatePassword(login *Login, newPassword string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.MinCost)
-	if err != nil {
-		return err
+// StoreLogin ...
+func StoreLogin() {
+	uid := GetUID(DefaultLoginXID, IsLogin)
+	if uid == "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(DefaultPassword), bcrypt.MinCost)
+		if err != nil {
+			logrus.Errorf("error while hashing login information")
+		}
+		login := Login{
+			ID:       ID{Xid: DefaultLoginXID},
+			IsLogin:  true,
+			Username: DefaultUsername,
+			Password: string(hashedPassword),
+		}
+		_, err = MutateNode(login, CREATE)
+		if err != nil {
+			logrus.Errorf("error while storing login information")
+		}
 	}
-	login.Password = string(hashedPassword)
-	_, err = dgraph.MutateNode(login, dgraph.UPDATE)
-	return err
 }

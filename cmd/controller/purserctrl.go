@@ -21,8 +21,6 @@ import (
 	"flag"
 	"time"
 
-	"github.com/vmware/purser/pkg/controller/dgraph/models"
-
 	"github.com/vmware/purser/pkg/pricing"
 
 	log "github.com/Sirupsen/logrus"
@@ -59,7 +57,7 @@ func init() {
 
 	// start dgraph and create login if not exists
 	dgraph.Start(*dgraphURL, *dgraphPort)
-	models.StoreLogin()
+	dgraph.StoreLogin()
 }
 
 func main() {
