@@ -215,19 +215,19 @@ var routes = Routes{
 	},
 	Route{
 		"Login",
-		"GET",
+		"POST",
 		"/auth/login",
 		LoginUser,
 	},
 	Route{
 		"Logout",
-		"GET",
+		"POST",
 		"/auth/logout",
 		LogoutUser,
 	},
 	Route{
 		"ChangePassword",
-		"GET",
+		"POST",
 		"/auth/changePassword",
 		ChangePassword,
 	},

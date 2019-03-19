@@ -12,6 +12,7 @@ import { ROUTING } from "./app.routing";
 import { TopologyGraphModule } from './modules/topologyGraph/modules';
 import { TopoGraphModule } from './modules/topo-graph/modules';
 import { LeftNavigationModule } from './modules/left-navigation/modules';
+import { LoginModule } from './modules/login/login.module';
 import { HomeModule } from './modules/home/home.module';
 
 import { GoogleChartsModule } from 'angular-google-charts';
@@ -29,6 +30,7 @@ import { GoogleChartsModule } from 'angular-google-charts';
         ROUTING,
         TopologyGraphModule,
         TopoGraphModule,
+        LoginModule,
         LeftNavigationModule,
         HomeModule,
         GoogleChartsModule.forRoot()
