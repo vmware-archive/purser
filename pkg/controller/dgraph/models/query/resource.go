@@ -121,21 +121,11 @@ func getJSONDataFromQuery(query string) JSONDataWrapper {
 	parentRoot := ParentWrapper{}
 	err := executeQuery(query, &parentRoot)
 	if err != nil || len(parentRoot.Parent) == 0 {
-		logrus.Errorf("Unable to execute query, err: (%v), length of output: (%d)", err, len(parentRoot.Parent))
+		logrus.Errorf("Unable to execute query, err: (%v)", err)
 		return JSONDataWrapper{}
 	}
 	root := JSONDataWrapper{
-		Data: ParentWrapper{
-			Name:        parentRoot.Parent[0].Name,
-			Type:        parentRoot.Parent[0].Type,
-			Children:    parentRoot.Parent[0].Children,
-			CPU:         parentRoot.Parent[0].CPU,
-			Memory:      parentRoot.Parent[0].Memory,
-			Storage:     parentRoot.Parent[0].Storage,
-			CPUCost:     parentRoot.Parent[0].CPUCost,
-			MemoryCost:  parentRoot.Parent[0].MemoryCost,
-			StorageCost: parentRoot.Parent[0].StorageCost,
-		},
+		Data: parentRoot.Parent[0],
 	}
 	return root
 }

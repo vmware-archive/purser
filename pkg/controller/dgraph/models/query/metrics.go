@@ -90,8 +90,10 @@ func getQueryForPVMetrics(name string) string {
 			name
 			type
 			storage: storage as storageCapacity
+			storageCapacity
 			` + getQueryForTimeComputation("") + `
 			storageCost: math(storage * durationInHours * ` + models.DefaultStorageCostPerGBPerHour + `)
+			storageAllocated: sum(val(pvcStorage))
         }
     }`
 }
@@ -121,6 +123,10 @@ func getQueryForNodeMetrics(name string) string {
 			cpu: cpu as cpuCapacity
 			memory: memory as memoryCapacity
 			storage: storage as sum(val(storagePod))
+			cpuAllocated: sum(val(cpuPod))
+			memoryAllocated: sum(val(memoryPod))
+			cpuCapacity
+			memoryCapacity
 			` + getQueryForTimeComputation("") + `
 			` + getQueryForCostWithPriceWithAlias("") + `
 		}

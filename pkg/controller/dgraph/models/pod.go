@@ -140,7 +140,7 @@ func StorePod(k8sPod api_v1.Pod) error {
 	}
 
 	// store/update CPUPrice, MemoryPrice
-	pod.CPUPrice, pod.MemoryPrice = getPerUnitResourcePriceForNode(k8sPod.Spec.NodeName)
+	pod.CPUPrice, pod.MemoryPrice = getPerUnitResourcePriceForNode("node-" + k8sPod.Spec.NodeName)
 
 	_, err := dgraph.MutateNode(pod, dgraph.UPDATE)
 	return err

@@ -88,6 +88,16 @@ func mockDgraphForClusterQueries(queryType string) {
 				MemoryCost:  0.91,
 				StorageCost: 0.21,
 			}
+		} else if queryType == testCapacity {
+			parent := ParentWrapper{
+				CPUAllocated:     0.2,
+				CPUCapacity:      0.4,
+				MemoryAllocated:  1.2,
+				MemoryCapacity:   1.8,
+				StorageAllocated: 10.5,
+				StorageCapacity:  20.1,
+			}
+			dummyParentWrapper.Parent = []ParentWrapper{parent}
 		}
 		children := []Children{first, second}
 		dummyParentWrapper.Children = children
@@ -237,4 +247,73 @@ func TestRetrieveClusterMetricsPhysicalView(t *testing.T) {
 		},
 	}
 	assert.Equal(t, expected, got)
+}
+
+func TestPopulateClusterAllocationAndCapacityNil(t *testing.T) {
+	mockDgraphForClusterQueries(testMetrics)
+	old := allocatedAndCapacity
+	allocatedAndCapacity = nil
+	defer resetAllocatedAndCapacity(old)
+
+	data := &JSONDataWrapper{}
+	PopulateClusterAllocationAndCapacity(data)
+	expected := JSONDataWrapper{
+		Data: ParentWrapper{
+			CPUAllocated:     1.2,
+			CPUCapacity:      1.2,
+			MemoryAllocated:  12,
+			MemoryCapacity:   12,
+			StorageAllocated: 3,
+			StorageCapacity:  3,
+		},
+	}
+	assert.Equal(t, expected, *data)
+}
+
+func TestPopulateClusterAllocationAndCapacity(t *testing.T) {
+	old := allocatedAndCapacity
+	allocatedAndCapacity = &ParentWrapper{
+		CPUAllocated:     0.2,
+		CPUCapacity:      0.4,
+		MemoryAllocated:  1.2,
+		MemoryCapacity:   1.8,
+		StorageAllocated: 10.5,
+		StorageCapacity:  20.1,
+	}
+	defer resetAllocatedAndCapacity(old)
+
+	data := &JSONDataWrapper{}
+	PopulateClusterAllocationAndCapacity(data)
+	expected := getTestAllocatedCapacityData()
+	assert.Equal(t, expected, *data)
+}
+
+func resetAllocatedAndCapacity(old *ParentWrapper) {
+	allocatedAndCapacity = old
+}
+
+func TestPopulateNodeOrPVAllocationAndCapacity(t *testing.T) {
+	mockDgraphForClusterQueries(testCapacity)
+	data := &JSONDataWrapper{}
+	r := &Resource{
+		Check: NodeCheck,
+		Type:  NodeType,
+		Name:  testResourceName,
+	}
+	r.PopulateNodeOrPVAllocationAndCapacity(data)
+	expected := getTestAllocatedCapacityData()
+	assert.Equal(t, expected, *data)
+}
+
+func getTestAllocatedCapacityData() JSONDataWrapper {
+	return JSONDataWrapper{
+		Data: ParentWrapper{
+			CPUAllocated:     0.2,
+			CPUCapacity:      0.4,
+			MemoryAllocated:  1.2,
+			MemoryCapacity:   1.8,
+			StorageAllocated: 10.5,
+			StorageCapacity:  20.1,
+		},
+	}
 }
