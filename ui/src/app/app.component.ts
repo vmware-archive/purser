@@ -1,4 +1,5 @@
 import { Component, OnInit} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { MCommon } from './common/messages/common.messages';
 

@@ -6,6 +6,8 @@ import { TopologyGraphComponent } from './modules/topologyGraph/components/topol
 import { TopoGraphComponent } from './modules/topo-graph/components/topo-graph.component'
 import { CapactiyGraphComponent } from './modules/capacity-graph/components/capactiy-graph.component'
 import { LoginComponent } from './modules/login/components/login.component'
+import { LogoutComponent } from './modules/logout/components/logout.component'
+import { ChangepasswordComponent } from './modules/changepassword/components/changepassword.component'
 
 export const ROUTES: Routes = [
     { path: 'group', component: LogicalGroupComponent },
@@ -13,6 +15,8 @@ export const ROUTES: Routes = [
     { path: 'hierarchy', component: TopoGraphComponent },
     { path: 'capacity', component: CapactiyGraphComponent },
     { path: 'login', component: LoginComponent },
+    { path: 'logout', component: LogoutComponent },
+    { path: 'changepassword', component: ChangepasswordComponent },
     { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];
 

@@ -11,7 +11,7 @@
     <clr-dg-column [clrDgField]="'mtdStorage'">Storage Cost (US $)</clr-dg-column>
     <clr-dg-column [clrDgField]="'mtdCost'">Total Cost (US $)</clr-dg-column>
 
-    <clr-dg-placeholder>We couldn't find any custom groups!</clr-dg-placeholder>
+    <clr-dg-placeholder>We couldn't find any custom groups! Logged out? Click here to <a routerLink="./login">Signin</a> </clr-dg-placeholder>
 
     <clr-dg-row *clrDgItems="let group of groups">
       <clr-dg-cell>{{ group.name }}</clr-dg-cell>

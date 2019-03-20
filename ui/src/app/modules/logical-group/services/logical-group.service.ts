@@ -21,7 +21,8 @@ export class LogicalGroupService {
 
         return this.http.get(_url, {
             observe: 'body',
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: true,
         });
     }
 }

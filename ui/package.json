@@ -27,6 +27,7 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "angular-google-charts": "^0.1.0",
     "core-js": "^2.5.4",
+    "ngx-cookie-service": "^2.1.0",
     "rxjs": "~6.2.0",
     "vis": "^4.21.0",
     "zone.js": "~0.8.26"

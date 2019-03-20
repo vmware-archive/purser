@@ -9,9 +9,21 @@ import { LoginService } from '../services/login.service';
     styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-    public form: any = [
-        { username: 'username', password: 'password' },
-    ];
+    public form: any = {};
+    public LOGIN_STATUS = "wait";
     ngOnInit() {
+        this.LOGIN_STATUS = "wait";
+    }
+
+    constructor(private router: Router, private loginService: LoginService) { }
+
+    public submitLogin() {
+        var credentials = JSON.stringify(this.form);
+        let observableEntity: Observable<any> = this.loginService.sendLoginCredential(credentials);
+        observableEntity.subscribe((response) => {
+            this.LOGIN_STATUS = "success";
+        }, (err) => {
+            this.LOGIN_STATUS = "wrong";
+        });
     }
 }

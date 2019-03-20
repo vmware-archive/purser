@@ -37,12 +37,13 @@ type Credentials struct {
 	NewPassword string `json:"newPassword"`
 }
 
-const cookieName = "session-token"
+const cookieName = "session-token-purser"
 
 var store = sessions.NewCookieStore([]byte(cookieKey))
 
 // LoginUser listens on /auth/login endpoint
 func LoginUser(w http.ResponseWriter, r *http.Request) {
+	addAccessControlHeaders(&w, r)
 	var cred Credentials
 	err := json.NewDecoder(r.Body).Decode(&cred)
 	if err != nil {
@@ -55,20 +56,44 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, _ := store.Get(r, cookieName)
+	session, err := store.Get(r, cookieName)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	session.Values["authenticated"] = true
-	session.Save(r, w)
+	saveSession(session, w, r)
 }
 
 // LogoutUser listens on /auth/logout endpoint
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, cookieName)
+	addAccessControlHeaders(&w, r)
+	session, err := store.Get(r, cookieName)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	session.Values["authenticated"] = false
-	session.Save(r, w)
+	saveSession(session, w, r)
+}
+
+func saveSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) {
+	err := session.Save(r, w)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func isUserAuthenticated(r *http.Request) bool {
-	session, _ := store.Get(r, cookieName)
+	session, err := store.Get(r, cookieName)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		return false
+	}
 	// Check if user is authenticated
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		return false
@@ -78,6 +103,7 @@ func isUserAuthenticated(r *http.Request) bool {
 
 // ChangePassword listens on /auth/changePassword endpoint
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	addAccessControlHeaders(&w, r)
 	var cred Credentials
 	err := json.NewDecoder(r.Body).Decode(&cred)
 	if err != nil {
@@ -755,14 +781,14 @@ func GetGroupsData(w http.ResponseWriter, r *http.Request) {
 }
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
-	if origin := r.Header.Get("Origin"); origin == "https://app.swaggerhub.com" {
-		(*w).Header().Set("Access-Control-Allow-Origin", origin)
-	} else {
-		(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	}
+	addAccessControlHeaders(w, r)
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")
-	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 	(*w).WriteHeader(http.StatusOK)
+}
+
+func addAccessControlHeaders(w *http.ResponseWriter, r *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
 func writeBytes(w io.Writer, data []byte) {
