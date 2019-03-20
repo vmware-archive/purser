@@ -24,14 +24,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Login structure
-type Login struct {
-	dgraph.ID
-	IsLogin  bool   `json:"isLogin,omitempty"`
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
-}
-
 // UpdateLogin ...
 func UpdateLogin(username, oldPassword, newPassword string) bool {
 	if CheckLogin(username, oldPassword) {
@@ -49,7 +41,7 @@ func UpdateLogin(username, oldPassword, newPassword string) bool {
 	return false
 }
 
-func hashAndUpdatePassword(login *Login, newPassword string) error {
+func hashAndUpdatePassword(login *dgraph.Login, newPassword string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.MinCost)
 	if err != nil {
 		return err
@@ -60,7 +52,7 @@ func hashAndUpdatePassword(login *Login, newPassword string) error {
 }
 
 // GetHashedPassword ...
-func GetHashedPassword(username string) (Login, error) {
+func GetHashedPassword(username string) (dgraph.Login, error) {
 	q := `query {
 		login(func: has(isLogin)) {
 			uid
@@ -70,12 +62,12 @@ func GetHashedPassword(username string) (Login, error) {
 	}`
 
 	type root struct {
-		LoginList []Login `json:"login"`
+		LoginList []dgraph.Login `json:"login"`
 	}
 	newRoot := root{}
 	err := executeQuery(q, &newRoot)
 	if err != nil {
-		return Login{}, err
+		return dgraph.Login{}, err
 	}
 	return newRoot.LoginList[0], nil
 }
