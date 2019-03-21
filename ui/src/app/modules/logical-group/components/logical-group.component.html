@@ -1,5 +1,15 @@
 <h3>Custom Groups</h3>
 
+<div class="clr-row" style="margin-top: 2%; margin-bottom: -1%">
+  <div class="clr-col-1">
+    <button [clrLoading]="submitBtnState" type="submit" class="btn btn-success-outline" (click)="fillGroupData()">New Group</button>
+  </div>
+  <div class="clr-col-1">
+      <button [clrLoading]="submitBtnState" type="submit" class="btn btn-danger-outline" (click)="deleteGroupData()">Delete</button>
+    </div>
+  <div class="clr-col-10"></div>
+</div>
+
 <clr-datagrid>
     <clr-dg-column [clrDgField]="'name'">Group Name</clr-dg-column>
     <clr-dg-column [clrDgField]="'podsCount'">Pods</clr-dg-column>
@@ -11,7 +21,7 @@
     <clr-dg-column [clrDgField]="'mtdStorage'">Storage Cost (US $)</clr-dg-column>
     <clr-dg-column [clrDgField]="'mtdCost'">Total Cost (US $)</clr-dg-column>
 
-    <clr-dg-placeholder>We couldn't find any custom groups! Logged out? Click here to <a routerLink="./login">Signin</a> </clr-dg-placeholder>
+    <clr-dg-placeholder>We couldn't find any custom groups! Logged out? Click here to <a href="./login">Signin</a> </clr-dg-placeholder>
 
     <clr-dg-row *clrDgItems="let group of groups">
       <clr-dg-cell>{{ group.name }}</clr-dg-cell>
@@ -26,3 +36,73 @@
     </clr-dg-row>
 </clr-datagrid>
 <p class="p5"><i>* All costs are computed for Month To Date (MTD).</i></p>
+
+<clr-modal [(clrModalOpen)]="isCreateGroup" [clrModalSize]="'lg'">
+  <h3 class="modal-title">New Custom Group</h3>
+  <div class="modal-body">
+      <form class="clr-form clr-form-horizontal">
+          <div class="clr-form-control">
+              <label for="example" class="clr-control-label">Name</label>
+              <div class="clr-control-container">
+                  <div class="clr-input-wrapper">
+                      <input type="text" id="example" placeholder="Group Name" class="clr-input">
+                      <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+                  </div>
+              </div>
+          </div>
+          <div class="clr-form-control" *ngFor="let i of Arr(num).fill(1); let x = index">
+              <label for="example" class="clr-control-label">Label-Value {{ x+1 }} (Expr {{ getExprOfNum(x+1) }})</label>
+              <div class="clr-control-container">
+                  <div class="clr-input-wrapper">
+                      <input type="text" id="example" placeholder="Label" class="clr-input">
+                      <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+                      <input type="text" id="example" placeholder="Value" class="clr-input" style="margin-left: 4%">
+                      <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+                  </div>
+              </div>
+          </div>
+      </form>
+      <button type="button" class="btn btn-sm" (click)="increaseNum()">
+          <clr-icon shape="plus-circle" class="is-solid"></clr-icon>
+          OR
+      </button>
+      <button type="button" class="btn btn-sm" (click)="increaseExpression()">
+          <clr-icon shape="times-circle" class="is-solid"></clr-icon>
+          AND
+      </button>
+      <p class="p5">For defintion and usage of Custom Groups click <a href="https://github.com/vmware/purser/blob/master/docs/custom-group-installation-and-usage.md">here</a></p>
+  </div>
+  <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="isCreateGroup = false">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="createGroup()">Create</button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="isDeleteGroup" [clrModalSize]="'lg'">
+    <h3 class="modal-title">Delete Custom Group</h3>
+    <div class="modal-body">
+        <form class="clr-form clr-form-horizontal">
+            <div class="clr-form-control">
+                <label for="example" class="clr-control-label">Name</label>
+                <div class="clr-control-container">
+                    <clr-dropdown>
+                        <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
+                            {{ toBeDeletedGroup }}
+                            <clr-icon shape="caret down"></clr-icon>
+                        </button>
+                        <clr-dropdown-menu clrPosition="bottom" *clrIfOpen>
+                            <label class="dropdown-header">Select Group by name</label>
+                            <div *ngFor="let group of groups">
+                                <button type="button" clrDropdownItem (click)="setToBeDeletedGroup(group.name)">{{ group.name }}</button>
+                            </div>
+                        </clr-dropdown-menu>
+                    </clr-dropdown>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="isDeleteGroup = false">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="deleteGroup()">Delete</button>
+    </div>
+  </clr-modal>

@@ -4,10 +4,10 @@ import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, 
 import { MCommon } from './common/messages/common.messages';
 
 // production environment
-const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
+// const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
 
 // development environment
-// const BACKEND_BASE_URL = 'http://localhost:3030'
+const BACKEND_BASE_URL = 'http://localhost:3030'
 
 export const BACKEND_URL = BACKEND_BASE_URL + '/api/'
 export const BACKEND_AUTH_URL = BACKEND_BASE_URL + '/auth/'
@@ -21,6 +21,7 @@ export class AppComponent implements OnInit {
 
     public routeLoading: boolean = false;
     public messages: any = {};
+    public IS_LOGEDIN = true;
 
     constructor(public router: Router) {
         this.messages = {

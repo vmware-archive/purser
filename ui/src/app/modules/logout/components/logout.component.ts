@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BACKEND_AUTH_URL } from '../../../app.component'
+import { BACKEND_AUTH_URL } from '../../../app.component';
+import { AppComponent } from '../../../app.component';
 
 @Component({
     selector: 'app-logout',
@@ -16,7 +17,7 @@ export class LogoutComponent implements OnInit {
         this.LOGIN_STATUS = "wait";
     }
 
-    constructor(private router: Router, private http: HttpClient) { }
+    constructor(private router: Router, private http: HttpClient, private appComponent: AppComponent) { }
 
     public handleLogout() {
         let logoutURL = BACKEND_AUTH_URL + 'logout';
@@ -24,6 +25,7 @@ export class LogoutComponent implements OnInit {
             withCredentials: true
         };
         this.http.post(logoutURL, JSON.stringify({}), logoutOptions).subscribe((response) => {
+                this.appComponent.IS_LOGEDIN = false;
             }, (err)  => { 
                 console.log("Error", err);
             }
