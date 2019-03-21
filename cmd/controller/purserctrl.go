@@ -131,18 +131,3 @@ func startCronJobForPopulatingRateCard() {
 	}
 	c.Start()
 }
-
-func startCronJobForSyncingCluster() {
-	runSync()
-
-	c := cron.New()
-	err := c.AddFunc("@every 24h", runSync)
-	if err != nil {
-		log.Error(err)
-	}
-	c.Start()
-}
-
-func runSync() {
-	eventprocessor.SyncCluster(conf.Kubeclient)
-}

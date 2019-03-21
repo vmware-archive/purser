@@ -24,7 +24,7 @@
                     </div>
                 </div>
             </div>
-            <button [clrLoading]="submitBtnState" type="submit" class="btn btn-primary" (click)="submitLogin()">Login</button>
+            <button [clrLoading]="submitBtnState" type="submit" class="btn btn-primary" (click)="submitLogin()" (keyup.enter)="submitLogin()">Login</button>
         </div>
     </form>
 </div>
