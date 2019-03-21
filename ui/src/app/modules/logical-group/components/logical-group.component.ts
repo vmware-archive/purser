@@ -25,7 +25,10 @@ export class LogicalGroupComponent implements OnInit {
 
   public group: any;
 
-  constructor(private router: Router, private logicalGroupService: LogicalGroupService) { }
+  constructor(private router: Router, private logicalGroupService: LogicalGroupService) {
+    setInterval(() => this.ngOnInit(), 60000);
+   }
+
 
   private getLogicalGroupData() {
       let observableEntity: Observable<any> = this.logicalGroupService.getLogicalGroupData();
@@ -56,6 +59,7 @@ export class LogicalGroupComponent implements OnInit {
       observableEntity.subscribe((response) => {
           console.log("successfully created group");
           this.groupCreation = 'success';
+          setInterval(() => this.ngOnInit(), 6000);
       }, (err) => {
           console.log("failed to create group", err);
           this.groupCreation = 'fail';
@@ -69,6 +73,7 @@ export class LogicalGroupComponent implements OnInit {
       observableEntity.subscribe((response) => {
           console.log("successfully deleted group");
           this.groupDeletion = 'success';
+          setInterval(() => this.ngOnInit(), 6000);
       }, (err) => {
           console.log("failed to delete group", err);
           this.groupDeletion = 'fail';
@@ -91,7 +96,7 @@ export class LogicalGroupComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.reset()
+    this.reset();
   }
 
 }
