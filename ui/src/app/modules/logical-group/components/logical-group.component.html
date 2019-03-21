@@ -37,48 +37,27 @@
 </clr-datagrid>
 <p class="p5"><i>* All costs are computed for Month To Date (MTD).</i></p>
 
-<clr-modal [(clrModalOpen)]="isCreateGroup" [clrModalSize]="'lg'">
-  <h3 class="modal-title">New Custom Group</h3>
-  <div class="modal-body">
-      <form class="clr-form clr-form-horizontal">
-          <div class="clr-form-control">
-              <label for="example" class="clr-control-label">Name</label>
-              <div class="clr-control-container">
-                  <div class="clr-input-wrapper">
-                      <input type="text" id="example" placeholder="Group Name" class="clr-input">
-                      <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
-                  </div>
-              </div>
-          </div>
-          <div class="clr-form-control" *ngFor="let i of Arr(num).fill(1); let x = index">
-              <label for="example" class="clr-control-label">Label-Value {{ x+1 }} (Expr {{ getExprOfNum(x+1) }})</label>
-              <div class="clr-control-container">
-                  <div class="clr-input-wrapper">
-                      <input type="text" id="example" placeholder="Label" class="clr-input">
-                      <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
-                      <input type="text" id="example" placeholder="Value" class="clr-input" style="margin-left: 4%">
-                      <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
-                  </div>
-              </div>
-          </div>
-      </form>
-      <button type="button" class="btn btn-sm" (click)="increaseNum()">
-          <clr-icon shape="plus-circle" class="is-solid"></clr-icon>
-          OR
-      </button>
-      <button type="button" class="btn btn-sm" (click)="increaseExpression()">
-          <clr-icon shape="times-circle" class="is-solid"></clr-icon>
-          AND
-      </button>
-      <p class="p5">For defintion and usage of Custom Groups click <a href="https://github.com/vmware/purser/blob/master/docs/custom-group-installation-and-usage.md">here</a></p>
-  </div>
-  <div class="modal-footer">
-      <button type="button" class="btn btn-outline" (click)="isCreateGroup = false">Cancel</button>
-      <button type="button" class="btn btn-primary" (click)="createGroup()">Create</button>
-  </div>
-</clr-modal>
+<form novalidate #f="ngForm" (ngSubmit)="createGroup();">
+    <clr-modal [(clrModalOpen)]="isCreateGroup" [clrModalSize]="'lg'">
+    <h3 class="modal-title">New Custom Group</h3>
+    <div class="modal-body">
+        <form clrForm>
+            <clr-textarea-container>
+                <textarea clrTextarea [(ngModel)]="group" name="group" placeholder="Group Definition in JSON" rows="15" required></textarea>
+            </clr-textarea-container>
+          </form>
 
-<clr-modal [(clrModalOpen)]="isDeleteGroup" [clrModalSize]="'lg'">
+        <p class="p5">For an example creation of Custom Groups refer <a href="https://github.com/vmware/purser/blob/master/cluster/artifacts/example-group.json">this</a>.
+            For more details check <a href="https://github.com/vmware/purser/blob/master/docs/custom-group-installation-and-usage.md">this</a></p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="isCreateGroup = false">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="createGroup()">Create</button>
+    </div>
+    </clr-modal>
+</form>
+
+<clr-modal [(clrModalOpen)]="isDeleteGroup">
     <h3 class="modal-title">Delete Custom Group</h3>
     <div class="modal-body">
         <form class="clr-form clr-form-horizontal">

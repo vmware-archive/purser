@@ -18,10 +18,10 @@
 package apiHandlers
 
 import (
-	"net/http"
-	"io"
-	"github.com/Sirupsen/logrus"
 	"encoding/json"
+	"github.com/Sirupsen/logrus"
+	"io"
+	"net/http"
 )
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {

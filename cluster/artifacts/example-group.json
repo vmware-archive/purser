@@ -1,0 +1,35 @@
+{
+  "apiVersion": "vmware.purser.com/v1",
+  "kind": "Group",
+  "metadata": {
+    "name": "example-group"
+  },
+  "spec": {
+    "name": "example-group",
+    "labels": {
+      "expr1": {
+        "app": [
+          "sample-app",
+          "sample-app2"
+        ],
+        "env": [
+          "dev"
+        ]
+      },
+      "expr2": {
+        "namespace": [
+          "ns1",
+          "ns2"
+        ]
+      },
+      "expr3": {
+        "key1": [
+          "val1"
+        ],
+        "key2": [
+          "val2"
+        ]
+      }
+    }
+  }
+}

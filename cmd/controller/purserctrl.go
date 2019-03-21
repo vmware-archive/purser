@@ -63,15 +63,16 @@ func init() {
 }
 
 func main() {
-	go api.StartServer(*cookieStoreKey, *cookieName)
+	go api.StartServer(*cookieStoreKey, *cookieName, conf)
+	go startCronJobForPopulatingRateCard()
+	go startCronJobForSyncingCluster()
+	time.Sleep(time.Minute * 3)
 	go eventprocessor.ProcessEvents(&conf)
 
 	if *interactions == "enable" {
 		go startInteractionsDiscovery()
 	}
 	go startCronJobForUpdatingCustomGroups()
-	go startCronJobForPopulatingRateCard()
-	go startCronJobForSyncingCluster()
 	controller.Start(&conf)
 }
 
@@ -99,7 +100,6 @@ func runDiscovery() {
 
 func startCronJobForUpdatingCustomGroups() {
 	query.ComputeClusterAllocationAndCapacity()
-	time.Sleep(time.Minute)
 	runGroupUpdate()
 
 	c := cron.New()

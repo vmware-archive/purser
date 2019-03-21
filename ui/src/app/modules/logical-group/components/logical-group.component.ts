@@ -25,11 +25,16 @@ export class LogicalGroupComponent implements OnInit {
   public exprCount = [0];
   public exprStartIndices = [1];
   public toBeDeletedGroup = "Custom Group";
+  public newGroup = {
+    groupName: "",
+  }
 
-  constructor(private router: Router, private capacityGraphService: LogicalGroupService) { }
+  public group: any;
+
+  constructor(private router: Router, private logicalGroupService: LogicalGroupService) { }
 
   private getLogicalGroupData() {
-      let observableEntity: Observable<any> = this.capacityGraphService.getLogicalGroupData();
+      let observableEntity: Observable<any> = this.logicalGroupService.getLogicalGroupData();
       this.GROUP_STATUS = STATUS_WAIT;
       observableEntity.subscribe((response) => {
           if (!response) {
@@ -44,6 +49,7 @@ export class LogicalGroupComponent implements OnInit {
 
   public fillGroupData() {
     this.isCreateGroup = true;
+    this.group = null;
     this.num = 1;
     this.exprCount = [0];
   }
@@ -54,10 +60,23 @@ export class LogicalGroupComponent implements OnInit {
   }
 
   public createGroup() {
+    let observableEntity: Observable<any> = this.logicalGroupService.createCustomGroup(this.group);
+      observableEntity.subscribe((response) => {
+          console.log("successfully created group");
+      }, (err) => {
+          console.log("failed to create group", err);
+      });
     this.isCreateGroup = false;
   }
 
   public deleteGroup() {
+    console.log("deleting group ", this.toBeDeletedGroup)
+    let observableEntity: Observable<any> = this.logicalGroupService.deleteCustomGroup(this.toBeDeletedGroup);
+      observableEntity.subscribe((response) => {
+          console.log("successfully deleted group");
+      }, (err) => {
+          console.log("failed to delete group", err);
+      });
     this.isDeleteGroup = false;
   }
 
@@ -96,6 +115,7 @@ export class LogicalGroupComponent implements OnInit {
     this.old = 0;
     this.isDeleteGroup = false;
     this.toBeDeletedGroup = "Custom Group";
+    this.group = null;
   }
 
 }

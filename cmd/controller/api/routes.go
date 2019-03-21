@@ -18,8 +18,8 @@
 package api
 
 import (
-	"net/http"
 	"github.com/vmware/purser/cmd/controller/api/apiHandlers"
+	"net/http"
 )
 
 // Route structure
@@ -231,5 +231,17 @@ var routes = Routes{
 		"POST",
 		"/auth/changePassword",
 		apiHandlers.ChangePassword,
+	},
+	Route{
+		"DeleteGroup",
+		"POST",
+		"/api/group/delete",
+		apiHandlers.DeleteGroup,
+	},
+	Route{
+		"CreateGroup",
+		"POST",
+		"/api/group/create",
+		apiHandlers.CreateGroup,
 	},
 }

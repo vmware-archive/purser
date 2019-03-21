@@ -49,9 +49,6 @@ func (c *Cloud) PopulateRateCard() {
 		rateCard := aws.GetRateCardForAWS(c.Region)
 		models.StoreRateCard(rateCard)
 	}
-
-	// update cpuPrice, memoryPrice for pods,nodes in dgraph
-	c.updatePriceForUnitResource()
 }
 
 // whenever rateCard gets update price for unit resource persisted in dgraph should also get updated

@@ -28,7 +28,6 @@ import (
 	"github.com/vmware/purser/pkg/controller/discovery/generator"
 )
 
-
 // GetHomePage is the default api home page
 func GetHomePage(w http.ResponseWriter, r *http.Request) {
 	if isUserAuthenticated(w, r) {
