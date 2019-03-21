@@ -22,13 +22,14 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/handlers"
+	"github.com/vmware/purser/cmd/controller/api/apiHandlers"
+	"github.com/vmware/purser/pkg/controller"
 )
 
-var cookieKey string
-
 // StartServer starts api server
-func StartServer(cookieStoreKey string) {
-	cookieKey = cookieStoreKey
+func StartServer(cookieStoreKey, cookieName string, conf controller.Config) {
+	apiHandlers.SetGroupClient(conf)
+	apiHandlers.SetCookieStore(cookieStoreKey, cookieName)
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedCredentials := handlers.AllowCredentials()
 	router := NewRouter()

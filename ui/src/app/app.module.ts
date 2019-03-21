@@ -15,6 +15,7 @@ import { LeftNavigationModule } from './modules/left-navigation/modules';
 import { LoginModule } from './modules/login/login.module';
 import { LogoutModule } from './modules/logout/logout.module';
 import { ChangepasswordModule } from './modules/changepassword/changepassword.module';
+import { LogicalGroupModule } from './modules/logical-group/logical-group.module'
 import { HomeModule } from './modules/home/home.module';
 import { CookieService } from 'ngx-cookie-service';
 
@@ -35,6 +36,7 @@ import { GoogleChartsModule } from 'angular-google-charts';
         TopoGraphModule,
         LoginModule,
         LogoutModule,
+        LogicalGroupModule,
         ChangepasswordModule,
         LeftNavigationModule,
         HomeModule,

@@ -23,7 +23,7 @@ import (
 )
 
 type podRoot struct {
-	Pods []models.Pod `json:"pod"`
+	Pods []models.Pod `json:"pods"`
 }
 
 // RetrieveAllLivePods will return all pods without endTime in dgraph. Error is returned if any
@@ -92,7 +92,7 @@ func RetrievePodsInteractions(name string, isOrphan bool) []byte {
 
 func getPricePerResourceForPod(name string) (float64, float64) {
 	query := `query {
-		pod(func: has(isPod)) @filter(eq(name, "` + name + `")) {
+		pods(func: has(isPod)) @filter(eq(name, "` + name + `")) {
 			cpuPrice
 			memoryPrice
 		}

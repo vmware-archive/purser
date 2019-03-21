@@ -1,0 +1,29 @@
+{
+  "apiVersion": "vmware.purser.com/v1",
+  "kind": "Group",
+  "metadata": {
+    "name": "<enter-custom-group-name>"
+  },
+  "spec": {
+    "name": "<enter-custom-group-name>",
+    "labels": {
+      "expr1": {
+        "<enter-key-1>": [
+          "<enter-value-1>",
+          "<enter-value-2>"
+        ],
+        "<enter-key-2>": [
+          "<enter-value-3>"
+        ]
+      },
+      "expr2": {
+        "<enter-key-3>": [
+          "<enter-value-4>"
+        ],
+        "<enter-key-4>": [
+          "<enter-value-5>"
+        ]
+      }
+    }
+  }
+}

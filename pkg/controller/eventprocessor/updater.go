@@ -106,7 +106,7 @@ func getGroupMetrics(group *groups_v1.Group) query.GroupMetrics {
 	// get group metrics
 	groupMetrics, err := query.RetrieveGroupMetricsFromPodUIDs(uidQueryForPods)
 	if err != nil {
-		log.Errorf("Unable to retrieve group metrics. UIDs: (%v)", uidQueryForPods)
+		log.Errorf("Unable to retrieve group metrics, group: %v, UIDs: (%v)", group.Name, uidQueryForPods)
 		return query.GroupMetrics{}
 	}
 	return groupMetrics

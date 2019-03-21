@@ -16,18 +16,18 @@
                     <router-outlet></router-outlet>
                 </div>
             </div>
-            <clr-vertical-nav>
-                <a clrVerticalNavLink routerLink="./hierarchy" routerLinkActive="active">
-                    <clr-icon clrVerticalNavIcon shape="organization"></clr-icon>
-                    Hierarchy
+            <clr-vertical-nav *ngIf="IS_LOGEDIN">
+                <a clrVerticalNavLink routerLink="./group" routerLinkActive="active">
+                    <clr-icon clrVerticalNavIcon shape="blocks-group"></clr-icon>
+                    Custom Groups
                 </a>
                 <a clrVerticalNavLink routerLink="./capacity" routerLinkActive="active">
                     <clr-icon clrVerticalNavIcon shape="resource-pool"></clr-icon>
                     Capacity
                 </a>
-                <a clrVerticalNavLink routerLink="./group" routerLinkActive="active">
-                    <clr-icon clrVerticalNavIcon shape="blocks-group"></clr-icon>
-                    Custom Groups
+                <a clrVerticalNavLink routerLink="./hierarchy" routerLinkActive="active">
+                    <clr-icon clrVerticalNavIcon shape="organization"></clr-icon>
+                    Hierarchy
                 </a>
                 <a clrVerticalNavLink routerLink="./network" routerLinkActive="active">
                     <clr-icon clrVerticalNavIcon shape="network-globe"></clr-icon>

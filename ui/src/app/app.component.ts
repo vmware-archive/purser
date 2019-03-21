@@ -21,6 +21,7 @@ export class AppComponent implements OnInit {
 
     public routeLoading: boolean = false;
     public messages: any = {};
+    public IS_LOGEDIN = true;
 
     constructor(public router: Router) {
         this.messages = {
