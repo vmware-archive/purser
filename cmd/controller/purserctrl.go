@@ -65,7 +65,6 @@ func init() {
 func main() {
 	go api.StartServer(*cookieStoreKey, *cookieName, conf)
 	go startCronJobForPopulatingRateCard()
-	go startCronJobForSyncingCluster()
 	time.Sleep(time.Minute * 3)
 	go eventprocessor.ProcessEvents(&conf)
 

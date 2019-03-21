@@ -50,21 +50,3 @@ func (c *Cloud) PopulateRateCard() {
 		models.StoreRateCard(rateCard)
 	}
 }
-
-// whenever rateCard gets update price for unit resource persisted in dgraph should also get updated
-func (c *Cloud) updatePriceForUnitResource() {
-	nodes := utils.RetrieveNodeList(c.Kubeclient, metav1.ListOptions{})
-	for _, node := range nodes.Items {
-		_, err := models.StoreNode(node)
-		if err != nil {
-			logrus.Debugf("unable to store/update node: %s, err: %v", node.Name, err)
-		}
-	}
-	pods := utils.RetrievePodList(c.Kubeclient, metav1.ListOptions{})
-	for _, pod := range pods.Items {
-		err := models.StorePod(pod)
-		if err != nil {
-			logrus.Debugf("unable to store/update pod: %s, err: %v", pod.Name, err)
-		}
-	}
-}

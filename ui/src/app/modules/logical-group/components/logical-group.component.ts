@@ -19,15 +19,7 @@ export class LogicalGroupComponent implements OnInit {
   public GROUP_STATUS = STATUS_WAIT;
   public isCreateGroup = false;
   public isDeleteGroup = false;
-  Arr = Array;
-  public num:number = 1;
-  private old:number = 0;
-  public exprCount = [0];
-  public exprStartIndices = [1];
   public toBeDeletedGroup = "Custom Group";
-  public newGroup = {
-    groupName: "",
-  }
 
   public group: any;
 
@@ -50,8 +42,6 @@ export class LogicalGroupComponent implements OnInit {
   public fillGroupData() {
     this.isCreateGroup = true;
     this.group = null;
-    this.num = 1;
-    this.exprCount = [0];
   }
 
   public deleteGroupData() {
@@ -80,39 +70,13 @@ export class LogicalGroupComponent implements OnInit {
     this.isDeleteGroup = false;
   }
 
-  public increaseNum() {
-    this.num++;
-  }
-
-  public increaseExpression() {
-    this.exprCount.push(this.num - this.old);
-    this.old = this.num;
-    this.num++;
-    this.exprStartIndices.push(this.num);
-  }
-
-  public getExprOfNum(n) {
-    let exprNum = 0;
-    for (let startIndex of this.exprStartIndices) {
-      if (n < startIndex) {
-        return exprNum;
-      } else {
-        exprNum++;
-      }
-    }
-    return exprNum;
-  }
-
   public setToBeDeletedGroup(grpName) {
     this.toBeDeletedGroup = grpName
   }
 
   ngOnInit() {
     this.isCreateGroup = false;
-    this.num = 1;
     this.getLogicalGroupData();
-    this.exprCount = [0];
-    this.old = 0;
     this.isDeleteGroup = false;
     this.toBeDeletedGroup = "Custom Group";
     this.group = null;
