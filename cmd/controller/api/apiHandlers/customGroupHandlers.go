@@ -15,22 +15,24 @@
  * limitations under the License.
  */
 
-package api
+package apiHandlers
 
 import (
 	"net/http"
-
+	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/Sirupsen/logrus"
-	"github.com/gorilla/handlers"
-	"github.com/vmware/purser/cmd/controller/api/apiHandlers"
 )
 
-// StartServer starts api server
-func StartServer(cookieStoreKey, cookieName string) {
-	apiHandlers.SetCookieStore(cookieStoreKey, cookieName)
-	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
-	allowedCredentials := handlers.AllowCredentials()
-	router := NewRouter()
-	logrus.Info("Purser server started on port `localhost:3030`")
-	logrus.Fatal(http.ListenAndServe(":3030", handlers.CORS(allowedOrigins, allowedCredentials)(router)))
+// GetGroupsData listens on /groups endpoint
+func GetGroupsData(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+
+		groupsData, err := query.RetrieveGroupsData()
+		if err != nil {
+			logrus.Errorf("unable to retrieve groups data from dgraph, %v", err)
+		} else {
+			encodeAndWrite(w, groupsData)
+		}
+	}
 }

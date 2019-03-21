@@ -42,8 +42,7 @@ var conf controller.Config
 // InClusterConfigPath should be empty to get client and config for InCluster environment.
 const InClusterConfigPath = ""
 
-var interactions *string
-var cookieStoreKey *string
+var interactions, cookieStoreKey, cookieName *string
 
 func init() {
 	logLevel := flag.String("log", "info", "set log level as info or debug")
@@ -51,7 +50,8 @@ func init() {
 	dgraphPort := flag.String("dgraphPort", "9080", "dgraph zero port")
 	interactions = flag.String("interactions", "disable", "enable discovery of interactions")
 	kubeconfig := flag.String("kubeconfig", InClusterConfigPath, "path to the kubeconfig file")
-	cookieStoreKey = flag.String("key", "super-secret-key", "cookie store key")
+	cookieStoreKey = flag.String("cookieKey", "purser-super-secret-key", "cookie store key")
+	cookieName = flag.String("cookieName", "purser-session-token", "cookie store key")
 	flag.Parse()
 
 	utils.InitializeLogger(*logLevel)
@@ -63,7 +63,7 @@ func init() {
 }
 
 func main() {
-	go api.StartServer(*cookieStoreKey)
+	go api.StartServer(*cookieStoreKey, *cookieName)
 	go eventprocessor.ProcessEvents(&conf)
 
 	if *interactions == "enable" {

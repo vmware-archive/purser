@@ -1,0 +1,633 @@
+/*
+ * Copyright (c) 2018 VMware Inc. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package apiHandlers
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"github.com/Sirupsen/logrus"
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
+	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
+	"github.com/vmware/purser/pkg/controller/discovery/generator"
+)
+
+
+// GetHomePage is the default api home page
+func GetHomePage(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		_, err := fmt.Fprintf(w, "Welcome to the Purser!")
+		if err != nil {
+			logrus.Errorf("Unable to write welcome message to Homepage: (%v)", err)
+		}
+	}
+}
+
+// GetPodInteractions listens on /interactions/pod endpoint and returns pod interactions
+func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonResp []byte
+		if name, isName := queryParams[query.Name]; isName {
+			jsonResp = query.RetrievePodsInteractions(name[0], false)
+		} else {
+			if orphanVal, isOrphan := queryParams[query.Orphan]; isOrphan && orphanVal[0] == query.False {
+				jsonResp = query.RetrievePodsInteractions(query.All, false)
+			} else {
+				jsonResp = query.RetrievePodsInteractions(query.All, true)
+			}
+		}
+		writeBytes(w, jsonResp)
+	}
+}
+
+// GetClusterHierarchy listens on /hierarchy endpoint and returns all namespaces(or nodes and PV) in the cluster
+func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if view, isView := queryParams[query.View]; isView && view[0] == query.Physical {
+			jsonData = query.RetrieveClusterHierarchy(query.Physical)
+		} else {
+			jsonData = query.RetrieveClusterHierarchy(query.Logical)
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all children of namespace
+func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.NamespaceCheck,
+				Type:        query.NamespaceType,
+				Name:        name[0],
+				ChildFilter: query.NamespaceChildFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			jsonData = query.RetrieveClusterHierarchy(query.Logical)
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetDeploymentHierarchy listens on /hierarchy/deployment endpoint and returns all children of deployment
+func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.DeploymentCheck,
+				Type:        query.DeploymentType,
+				Name:        name[0],
+				ChildFilter: query.IsReplicasetFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for deployment, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetReplicasetHierarchy listens on /hierarchy/replicaset endpoint and returns all children of replicaset
+func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.ReplicasetCheck,
+				Type:        query.ReplicasetType,
+				Name:        name[0],
+				ChildFilter: query.IsPodFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for replicaset, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetStatefulsetHierarchy listens on /hierarchy/statefulset endpoint and returns all children of statefulset
+func GetStatefulsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.StatefulsetCheck,
+				Type:        query.StatefulsetType,
+				Name:        name[0],
+				ChildFilter: query.IsPodFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for statefulset, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetPodHierarchy listens on /hierarchy/pod endpoint and returns all children of pod
+func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.PodCheck,
+				Type:        query.PodType,
+				Name:        name[0],
+				ChildFilter: query.IsContainerFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for pod, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetContainerHierarchy listens on /hierarchy/container endpoint and returns all children of container
+func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.ContainerCheck,
+				Type:        query.ContainerType,
+				Name:        name[0],
+				ChildFilter: query.IsProcFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for container, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetEmptyHierarchy listens on /hierarchy/process and /hierarchy/pvc endpoint and returns empty data
+func GetEmptyHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetNodeHierarchy listens on /hierarchy/node endpoint and returns all children of node
+func GetNodeHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.NodeCheck,
+				Type:        query.NodeType,
+				Name:        name[0],
+				ChildFilter: query.IsPodFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for node, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetPVHierarchy listens on /hierarchy/pv endpoint and returns all children of PV
+func GetPVHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.PVCheck,
+				Type:        query.PVType,
+				Name:        name[0],
+				ChildFilter: query.IsPVCFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for PV, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetDaemonsetHierarchy listens on /hierarchy/daemonset endpoint and returns all children of Daemonset
+func GetDaemonsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.DaemonsetCheck,
+				Type:        query.DaemonsetType,
+				Name:        name[0],
+				ChildFilter: query.IsPodFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for Daemonset, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetJobHierarchy listens on /hierarchy/job endpoint and returns all children of Job
+func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check:       query.JobCheck,
+				Type:        query.JobType,
+				Name:        name[0],
+				ChildFilter: query.IsPodFilter,
+			}
+			jsonData = resourceQuery.RetrieveResourceHierarchy()
+		} else {
+			logrus.Errorf("wrong type of query for Job, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetClusterMetrics listens on /metrics endpoint with option for view(physical or logical)
+func GetClusterMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if view, isView := queryParams[query.View]; isView && view[0] == query.Physical {
+			jsonData = query.RetrieveClusterMetrics(query.Physical)
+		} else {
+			jsonData = query.RetrieveClusterMetrics(query.Logical)
+		}
+		query.PopulateClusterAllocationAndCapacity(&jsonData)
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetNamespaceMetrics listens on /metrics/namespace
+func GetNamespaceMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.NamespaceCheck,
+				Type:  query.NamespaceType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+		} else {
+			jsonData = query.RetrieveClusterMetrics(query.Logical)
+		}
+		query.PopulateClusterAllocationAndCapacity(&jsonData)
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetDeploymentMetrics listens on /metrics/deployment
+func GetDeploymentMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.DeploymentCheck,
+				Type:  query.DeploymentType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for deployment, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetDaemonsetMetrics listens on /metrics/daemonset
+func GetDaemonsetMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.DaemonsetCheck,
+				Type:  query.DaemonsetType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for daemonset, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetJobMetrics listens on /metrics/job
+func GetJobMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.JobCheck,
+				Type:  query.JobType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for job, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetStatefulsetMetrics listens on /metrics/statefulset
+func GetStatefulsetMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.StatefulsetCheck,
+				Type:  query.StatefulsetType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for statefulset, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetReplicasetMetrics listens on /metrics/replicaset
+func GetReplicasetMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.ReplicasetCheck,
+				Type:  query.ReplicasetType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for statefulset, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetNodeMetrics listens on /metrics/node
+func GetNodeMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.NodeCheck,
+				Type:  query.NodeType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			resourceQuery.PopulateNodeOrPVAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for node, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetPodMetrics listens on /metrics/pod
+func GetPodMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.PodCheck,
+				Type:  query.PodType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for pod, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetContainerMetrics listens on /metrics/container
+func GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.ContainerCheck,
+				Type:  query.ContainerType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for container, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetPVMetrics listens on /metrics/pv
+func GetPVMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.PVCheck,
+				Type:  query.PVType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			resourceQuery.PopulateNodeOrPVAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for PV, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetPVCMetrics listens on /metrics/pvc
+func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		addHeaders(&w, r)
+		queryParams := r.URL.Query()
+		logrus.Debugf("Query params: (%v)", queryParams)
+
+		var jsonData query.JSONDataWrapper
+		if name, isName := queryParams[query.Name]; isName {
+			resourceQuery := query.Resource{
+				Check: query.PVCCheck,
+				Type:  query.PVCType,
+				Name:  name[0],
+			}
+			jsonData = resourceQuery.RetrieveResourceMetrics()
+			query.PopulateClusterAllocationAndCapacity(&jsonData)
+		} else {
+			logrus.Errorf("wrong type of query for PVC, no name is given")
+		}
+		encodeAndWrite(w, jsonData)
+	}
+}
+
+// GetPodDiscoveryNodes listens on /discovery/pod/nodes endpoint
+func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		var pods []models.Pod
+		var err error
+
+		addHeaders(&w, r)
+		pods, err = query.RetrievePodsInteractionsForAllLivePodsWithCount()
+		generator.GeneratePodNodesAndEdges(pods)
+		if err != nil {
+			logrus.Errorf("Unable to get response: (%v)", err)
+		}
+		nodes := generator.GetGraphNodes()
+		if nodes != nil {
+			logrus.Infof("No nodes found")
+			return
+		}
+		err = json.NewEncoder(w).Encode(nodes)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
+	}
+}
+
+// GetPodDiscoveryEdges listens on /discovery/pod/edges endpoint
+func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		var err error
+		addHeaders(&w, r)
+
+		edges := generator.GetGraphEdges()
+		if edges == nil {
+			logrus.Infof("No edges found")
+			return
+		}
+		err = json.NewEncoder(w).Encode(edges)
+		if err != nil {
+			logrus.Errorf("Unable to encode to json: (%v)", err)
+		}
+	}
+}
