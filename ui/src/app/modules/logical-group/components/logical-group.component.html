@@ -85,3 +85,79 @@
         <button type="button" class="btn btn-danger" (click)="deleteGroup()">Delete</button>
     </div>
   </clr-modal>
+
+  <div *ngIf="groupCreation === 'fail'">
+    <div class="clr-row">
+        <div class="clr-col-4">
+            <div class="alert alert-danger" role="alert">
+                <div class="alert-items">
+                    <div class="alert-item static">
+                        <div class="alert-icon-wrapper">
+                            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                        </div>
+                        <span class="alert-text">
+                            Group creation failed, check console logs for more details
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="groupCreation === 'success'">
+    <div class="clr-row">
+        <div class="clr-col-4">
+            <div class="alert alert-success" role="alert">
+                <div class="alert-items">
+                    <div class="alert-item static">
+                        <div class="alert-icon-wrapper">
+                            <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+                        </div>
+                        <span class="alert-text">
+                            Successfully created group.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="groupDeletion === 'fail'">
+    <div class="clr-row">
+        <div class="clr-col-4">
+            <div class="alert alert-danger" role="alert">
+                <div class="alert-items">
+                    <div class="alert-item static">
+                        <div class="alert-icon-wrapper">
+                            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                        </div>
+                        <span class="alert-text">
+                            Group deletion failed, check console logs for more details
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="groupDeletion === 'success'">
+    <div class="clr-row">
+        <div class="clr-col-4">
+            <div class="alert alert-success" role="alert">
+                <div class="alert-items">
+                    <div class="alert-item static">
+                        <div class="alert-icon-wrapper">
+                            <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+                        </div>
+                        <span class="alert-text">
+                            Successfully deleted group.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

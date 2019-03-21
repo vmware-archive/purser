@@ -20,6 +20,8 @@ export class LogicalGroupComponent implements OnInit {
   public isCreateGroup = false;
   public isDeleteGroup = false;
   public toBeDeletedGroup = "Custom Group";
+  public groupCreation = 'wait';
+  public groupDeletion = 'wait';
 
   public group: any;
 
@@ -53,8 +55,10 @@ export class LogicalGroupComponent implements OnInit {
     let observableEntity: Observable<any> = this.logicalGroupService.createCustomGroup(this.group);
       observableEntity.subscribe((response) => {
           console.log("successfully created group");
+          this.groupCreation = 'success';
       }, (err) => {
           console.log("failed to create group", err);
+          this.groupCreation = 'fail';
       });
     this.isCreateGroup = false;
   }
@@ -64,8 +68,10 @@ export class LogicalGroupComponent implements OnInit {
     let observableEntity: Observable<any> = this.logicalGroupService.deleteCustomGroup(this.toBeDeletedGroup);
       observableEntity.subscribe((response) => {
           console.log("successfully deleted group");
+          this.groupDeletion = 'success';
       }, (err) => {
           console.log("failed to delete group", err);
+          this.groupDeletion = 'fail';
       });
     this.isDeleteGroup = false;
   }
@@ -80,6 +86,8 @@ export class LogicalGroupComponent implements OnInit {
     this.isDeleteGroup = false;
     this.toBeDeletedGroup = "Custom Group";
     this.group = null;
+    this.groupCreation = 'wait';
+    this.groupDeletion = 'wait';
   }
 
   ngOnInit() {
