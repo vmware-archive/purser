@@ -47,8 +47,8 @@
             </clr-textarea-container>
           </form>
 
-        <p class="p5">For an example creation of Custom Groups refer <a href="https://github.com/vmware/purser/blob/master/cluster/artifacts/example-group.json">this</a>.
-            For more details check <a href="https://github.com/vmware/purser/blob/master/docs/custom-group-installation-and-usage.md">this</a></p>
+        <p class="p5">For group template click <a href="https://github.com/vmware/purser/blob/master/cluster/artifacts/group-template.json">here</a>.<br/>
+            To read more about groups check <a href="https://github.com/vmware/purser/blob/master/docs/custom-group-installation-and-usage.md">this</a>.</p>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline" (click)="isCreateGroup = false">Cancel</button>
@@ -88,12 +88,13 @@
 
     <div *ngIf="groupCreation === 'fail'">
         <div class="clr-row">
-            <div class="clr-col-4">
+            <div class="clr-col-8">
                 <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
                     <clr-alert-item>
                         <div class="alert-item static">
                             <span class="alert-text">
-                                Group creation failed, check console logs for more details
+                                Group creation failed<br/><br/>
+                                Error: {{ creationError }}
                             </span>
                         </div>
                     </clr-alert-item>
@@ -136,12 +137,13 @@
 
     <div *ngIf="groupDeletion === 'fail'">
         <div class="clr-row">
-            <div class="clr-col-4">
+            <div class="clr-col-8">
                 <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
                     <clr-alert-item>
                         <div class="alert-item static">
                             <span class="alert-text">
-                                    Group deletion failed, check console logs for more details
+                                    Group deletion failed<br/><br/>
+                                    Error: {{ deletionError }}
                             </span>
                         </div>
                     </clr-alert-item>

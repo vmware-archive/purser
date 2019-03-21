@@ -60,7 +60,7 @@ func DeleteGroup(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		logrus.Errorf("unable to delete: query params: %v, err: %v", queryParams, err)
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }
 
@@ -74,13 +74,13 @@ func CreateGroup(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&newGroup)
 		if err != nil {
 			logrus.Errorf("unable to parse object as group, err: %v", err)
-			w.WriteHeader(http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		_, err = getGroupClient().Create(&newGroup)
 		if err != nil {
 			logrus.Errorf("unable to create group: %v", err)
-			w.WriteHeader(http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusOK)

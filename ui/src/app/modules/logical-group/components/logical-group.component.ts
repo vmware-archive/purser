@@ -22,6 +22,8 @@ export class LogicalGroupComponent implements OnInit {
   public toBeDeletedGroup = "Custom Group";
   public groupCreation = 'wait';
   public groupDeletion = 'wait';
+  public creationError = null;
+  public deletionError = null;
 
   public group: any;
 
@@ -59,10 +61,12 @@ export class LogicalGroupComponent implements OnInit {
       observableEntity.subscribe((response) => {
           console.log("successfully created group");
           this.groupCreation = 'success';
-          setInterval(() => this.ngOnInit(), 6000);
+          setTimeout(() => this.ngOnInit(), 6000);
       }, (err) => {
           console.log("failed to create group", err);
           this.groupCreation = 'fail';
+          this.creationError = err["error"];
+          ;
       });
     this.isCreateGroup = false;
   }
@@ -73,10 +77,11 @@ export class LogicalGroupComponent implements OnInit {
       observableEntity.subscribe((response) => {
           console.log("successfully deleted group");
           this.groupDeletion = 'success';
-          setInterval(() => this.ngOnInit(), 6000);
+          setTimeout(() => this.ngOnInit(), 6000);
       }, (err) => {
           console.log("failed to delete group", err);
           this.groupDeletion = 'fail';
+          this.deletionError = err["error"];
       });
     this.isDeleteGroup = false;
   }
