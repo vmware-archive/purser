@@ -20,9 +20,7 @@ package pricing
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
-	"github.com/vmware/purser/pkg/controller/utils"
 	"github.com/vmware/purser/pkg/pricing/aws"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 

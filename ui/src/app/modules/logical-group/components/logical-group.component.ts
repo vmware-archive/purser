@@ -74,12 +74,16 @@ export class LogicalGroupComponent implements OnInit {
     this.toBeDeletedGroup = grpName
   }
 
-  ngOnInit() {
+  public reset() {
     this.isCreateGroup = false;
     this.getLogicalGroupData();
     this.isDeleteGroup = false;
     this.toBeDeletedGroup = "Custom Group";
     this.group = null;
+  }
+
+  ngOnInit() {
+    this.reset()
   }
 
 }

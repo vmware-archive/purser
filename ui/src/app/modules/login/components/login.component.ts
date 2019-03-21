@@ -25,6 +25,7 @@ export class LoginComponent implements OnInit {
         observableEntity.subscribe((response) => {
             this.LOGIN_STATUS = "success";
             this.appComponent.IS_LOGEDIN = true;
+            this.router.navigateByUrl('/group');
         }, (err) => {
             this.LOGIN_STATUS = "wrong";
             this.appComponent.IS_LOGEDIN = false;
