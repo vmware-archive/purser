@@ -17,7 +17,8 @@ export class TopologyGraphService {
 
         return this.http.get(_url, {
             observe: 'body',
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: true
         });
     }
 
@@ -30,7 +31,8 @@ export class TopologyGraphService {
 
         return this.http.get(_url, {
             observe: 'body',
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: true
         });
     }
 
@@ -40,7 +42,8 @@ export class TopologyGraphService {
 
         return this.http.get(_url, {
             observe: 'body',
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: true
         });
     }
 }

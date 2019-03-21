@@ -33,6 +33,24 @@
                     <clr-icon clrVerticalNavIcon shape="network-globe"></clr-icon>
                     Interactions
                 </a>
+                <clr-vertical-nav-group routerLinkActive="active">
+                    <clr-icon shape="administrator" clrVerticalNavIcon></clr-icon>
+                    Admin
+                    <clr-vertical-nav-group-children>
+                        <a clrVerticalNavLink
+                        routerLink="./changepassword"
+                        routerLinkActive="active">
+                        <clr-icon shape="lock" clrVerticalNavIcon></clr-icon>
+                            Change Password
+                        </a>
+                        <a clrVerticalNavLink
+                        routerLink="./logout"
+                        routerLinkActive="active">
+                        <clr-icon shape="logout" clrVerticalNavIcon></clr-icon>
+                            Log Out
+                        </a>
+                    </clr-vertical-nav-group-children>
+                </clr-vertical-nav-group>
                 <div class="nav-divider"></div>
                 <a clrVerticalNavLink href="https://github.com/vmware/purser" routerLinkActive="active">
                     <img src="../assets/images/GitHub-Mark-32px.png" alt="GitHub" width="15" height="15">

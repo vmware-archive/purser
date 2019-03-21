@@ -197,46 +197,59 @@ func retrievePodsWithCountAsEdgeWeightFromPodsXIDs(podsXIDs []string, counts []f
 	return pods
 }
 
-// nolint: gocyclo
 func setPodOwners(pod *Pod, k8sPod api_v1.Pod) {
 	owners := k8sPod.GetObjectMeta().GetOwnerReferences()
-	if owners == nil {
-		return
-	}
 	for _, owner := range owners {
-		if owner.Kind == "Deployment" {
-			deploymentXID := k8sPod.Namespace + ":" + owner.Name
-			deploymentUID := CreateOrGetDeploymentByID(deploymentXID)
-			if deploymentUID != "" {
-				pod.Deployment = &Deployment{ID: dgraph.ID{UID: deploymentUID, Xid: deploymentXID}}
-			}
-		} else if owner.Kind == "ReplicaSet" {
-			replicasetXID := k8sPod.Namespace + ":" + owner.Name
-			replicasetUID := CreateOrGetReplicasetByID(replicasetXID)
-			if replicasetUID != "" {
-				pod.Replicaset = &Replicaset{ID: dgraph.ID{UID: replicasetUID, Xid: replicasetXID}}
-			}
-		} else if owner.Kind == "StatefulSet" {
-			statefulsetXID := k8sPod.Namespace + ":" + owner.Name
-			statefulsetUID := CreateOrGetStatefulsetByID(statefulsetXID)
-			if statefulsetUID != "" {
-				pod.Statefulset = &Statefulset{ID: dgraph.ID{UID: statefulsetUID, Xid: statefulsetXID}}
-			}
-		} else if owner.Kind == "Job" {
-			jobXID := k8sPod.Namespace + ":" + owner.Name
-			jobUID := CreateOrGetJobByID(jobXID)
-			if jobUID != "" {
-				pod.Job = &Job{ID: dgraph.ID{UID: jobUID, Xid: jobXID}}
-			}
-		} else if owner.Kind == "DaemonSet" {
-			daemonsetXID := k8sPod.Namespace + ":" + owner.Name
-			daemonsetUID := CreateOrGetDaemonsetByID(daemonsetXID)
-			if daemonsetUID != "" {
-				pod.Daemonset = &Daemonset{ID: dgraph.ID{UID: daemonsetUID, Xid: daemonsetXID}}
-			}
-		} else {
+		ownerXID := k8sPod.Namespace + ":" + owner.Name
+		switch owner.Kind {
+		case "Deployment":
+			updateDeploymentAsPodOwner(pod, ownerXID)
+		case "ReplicaSet":
+			updateReplicasetAsPodOwner(pod, ownerXID)
+		case "StatefulSet":
+			updateStatefulsetAsPodOwner(pod, ownerXID)
+		case "Job":
+			updateJobAsPodOwner(pod, ownerXID)
+		case "DaemonSet":
+			updateDaemonsetAsPodOwner(pod, ownerXID)
+		default:
 			log.Error("Unknown owner type " + owner.Kind + " for pod.")
 		}
+	}
+}
+
+func updateDeploymentAsPodOwner(pod *Pod, ownerXID string) {
+	deploymentUID := CreateOrGetDeploymentByID(ownerXID)
+	if deploymentUID != "" {
+		pod.Deployment = &Deployment{ID: dgraph.ID{UID: deploymentUID, Xid: ownerXID}}
+	}
+}
+
+func updateReplicasetAsPodOwner(pod *Pod, ownerXID string) {
+	replicasetUID := CreateOrGetReplicasetByID(ownerXID)
+	if replicasetUID != "" {
+		pod.Replicaset = &Replicaset{ID: dgraph.ID{UID: replicasetUID, Xid: ownerXID}}
+	}
+}
+
+func updateStatefulsetAsPodOwner(pod *Pod, ownerXID string) {
+	statefulsetUID := CreateOrGetStatefulsetByID(ownerXID)
+	if statefulsetUID != "" {
+		pod.Statefulset = &Statefulset{ID: dgraph.ID{UID: statefulsetUID, Xid: ownerXID}}
+	}
+}
+
+func updateJobAsPodOwner(pod *Pod, ownerXID string) {
+	jobUID := CreateOrGetJobByID(ownerXID)
+	if jobUID != "" {
+		pod.Job = &Job{ID: dgraph.ID{UID: jobUID, Xid: ownerXID}}
+	}
+}
+
+func updateDaemonsetAsPodOwner(pod *Pod, ownerXID string) {
+	daemonsetUID := CreateOrGetDaemonsetByID(ownerXID)
+	if daemonsetUID != "" {
+		pod.Daemonset = &Daemonset{ID: dgraph.ID{UID: daemonsetUID, Xid: ownerXID}}
 	}
 }
 

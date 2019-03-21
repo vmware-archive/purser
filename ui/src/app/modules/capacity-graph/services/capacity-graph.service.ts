@@ -29,7 +29,8 @@ export class CapacityGraphService {
 
         return this.http.get(_url, {
             observe: 'body',
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: true,
         });
     }
 }

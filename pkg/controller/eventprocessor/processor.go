@@ -67,147 +67,95 @@ func ProcessEvents(conf *controller.Config) {
 }
 
 // ProcessPayloads store payload info in dgraph. If payload is of type group then it updates its group spec
-// nolint: gocyclo
 func ProcessPayloads(payloads []*interface{}, conf *controller.Config) {
 	for _, event := range payloads {
 		payload := (*event).(*controller.Payload)
-		if payload.ResourceType == "Pod" {
-			pod := api_v1.Pod{}
-			err := json.Unmarshal([]byte(payload.Data), &pod)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			err = models.StorePod(pod)
-			if err != nil {
-				log.Errorf("Error while persisting pod %v", err)
-			}
-		} else if payload.ResourceType == "Service" {
-			service := api_v1.Service{}
-			err := json.Unmarshal([]byte(payload.Data), &service)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			err = models.StoreService(service)
-			if err != nil {
-				log.Errorf("Error while persisting service %v", err)
-			}
-		} else if payload.ResourceType == "Node" {
-			node := api_v1.Node{}
-			err := json.Unmarshal([]byte(payload.Data), &node)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreNode(node)
-			if err != nil {
-				log.Errorf("Error while persisting node %v", err)
-			}
-		} else if payload.ResourceType == "Namespace" {
-			ns := api_v1.Namespace{}
-			err := json.Unmarshal([]byte(payload.Data), &ns)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreNamespace(ns)
-			if err != nil {
-				log.Errorf("Error while persisting namespace %v", err)
-			}
-		} else if payload.ResourceType == "Deployment" {
-			deployment := apps_v1beta1.Deployment{}
-			err := json.Unmarshal([]byte(payload.Data), &deployment)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreDeployment(deployment)
-			if err != nil {
-				log.Errorf("Error while persisting deployment %v", err)
-			}
-		} else if payload.ResourceType == "ReplicaSet" {
-			replicaset := ext_v1beta1.ReplicaSet{}
-			err := json.Unmarshal([]byte(payload.Data), &replicaset)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreReplicaset(replicaset)
-			if err != nil {
-				log.Errorf("Error while persisting replicaset %v", err)
-			}
-		} else if payload.ResourceType == "StatefulSet" {
-			statefulset := apps_v1beta1.StatefulSet{}
-			err := json.Unmarshal([]byte(payload.Data), &statefulset)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreStatefulset(statefulset)
-			if err != nil {
-				log.Errorf("Error while persisting statefulset %v", err)
-			}
-		} else if payload.ResourceType == "PersistentVolume" {
-			pv := api_v1.PersistentVolume{}
-			err := json.Unmarshal([]byte(payload.Data), &pv)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StorePersistentVolume(pv, conf.Kubeclient)
-			if err != nil {
-				log.Errorf("Error while persisting persistent volume %v", err)
-			}
-		} else if payload.ResourceType == "PersistentVolumeClaim" {
-			pvc := api_v1.PersistentVolumeClaim{}
-			err := json.Unmarshal([]byte(payload.Data), &pvc)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StorePersistentVolumeClaim(pvc)
-			if err != nil {
-				log.Errorf("Error while persisting persistent volume claim %v", err)
-			}
-		} else if payload.ResourceType == "DaemonSet" {
-			daemonset := ext_v1beta1.DaemonSet{}
-			err := json.Unmarshal([]byte(payload.Data), &daemonset)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreDaemonset(daemonset)
-			if err != nil {
-				log.Errorf("Error while persisting daemonset %v", err)
-			}
-		} else if payload.ResourceType == "Job" {
-			job := batch_v1.Job{}
-			err := json.Unmarshal([]byte(payload.Data), &job)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreJob(job)
-			if err != nil {
-				log.Errorf("Error while persisting job %v", err)
-			}
-		} else if payload.ResourceType == "Group" {
-			groupCRD := &groups_v1.Group{}
-			err := json.Unmarshal([]byte(payload.Data), groupCRD)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			} else {
-				if payload.EventType == controller.Delete {
-					models.DeleteGroup(groupCRD.Name)
-				} else {
-					group, err := conf.Groupcrdclient.Get(groupCRD.Name)
-					if err != nil {
-						log.Errorf("Unable to get group from client: (%v)", err)
-					} else {
-						UpdateGroup(group, conf.Groupcrdclient)
-					}
-				}
-			}
-		} else if payload.ResourceType == "Subscriber" {
-			subscriberCRD := subcriber_v1.Subscriber{}
-			err := json.Unmarshal([]byte(payload.Data), &subscriberCRD)
-			if err != nil {
-				log.Errorf("Error un marshalling payload " + payload.Data)
-			}
-			_, err = models.StoreSubscriberCRD(subscriberCRD)
-			if err != nil {
-				log.Errorf("Error while persisting subscriber CRD %v", err)
-			}
+		handlePayloadBasedOnResource(payload, conf)
+	}
+}
+
+// nolint: gocyclo
+func handlePayloadBasedOnResource(payload *controller.Payload, conf *controller.Config) {
+	var err error
+	switch payload.ResourceType {
+	case "Pod":
+		pod := api_v1.Pod{}
+		unmarshalPayload(payload, &pod)
+		err = models.StorePod(pod)
+	case "Service":
+		service := api_v1.Service{}
+		unmarshalPayload(payload, &service)
+		err = models.StoreService(service)
+	case "Node":
+		node := api_v1.Node{}
+		unmarshalPayload(payload, &node)
+		_, err = models.StoreNode(node)
+	case "Namespace":
+		ns := api_v1.Namespace{}
+		unmarshalPayload(payload, &ns)
+		_, err = models.StoreNamespace(ns)
+	case "Deployment":
+		deployment := apps_v1beta1.Deployment{}
+		unmarshalPayload(payload, &deployment)
+		_, err = models.StoreDeployment(deployment)
+	case "ReplicaSet":
+		replicaset := ext_v1beta1.ReplicaSet{}
+		unmarshalPayload(payload, &replicaset)
+		_, err = models.StoreReplicaset(replicaset)
+	case "StatefulSet":
+		statefulset := apps_v1beta1.StatefulSet{}
+		unmarshalPayload(payload, &statefulset)
+		_, err = models.StoreStatefulset(statefulset)
+	case "PersistentVolume":
+		pv := api_v1.PersistentVolume{}
+		unmarshalPayload(payload, &pv)
+		_, err = models.StorePersistentVolume(pv, conf.Kubeclient)
+	case "PersistentVolumeClaim":
+		pvc := api_v1.PersistentVolumeClaim{}
+		unmarshalPayload(payload, &pvc)
+		_, err = models.StorePersistentVolumeClaim(pvc)
+	case "DaemonSet":
+		daemonset := ext_v1beta1.DaemonSet{}
+		unmarshalPayload(payload, &daemonset)
+		_, err = models.StoreDaemonset(daemonset)
+	case "Job":
+		job := batch_v1.Job{}
+		unmarshalPayload(payload, &job)
+		_, err = models.StoreJob(job)
+	case "Group":
+		groupCRD := &groups_v1.Group{}
+		unmarshalPayload(payload, &groupCRD)
+		handlePayloadForGroup(payload, conf, groupCRD.Name)
+	case "Subscriber":
+		subscriberCRD := subcriber_v1.Subscriber{}
+		unmarshalPayload(payload, &subscriberCRD)
+		_, err = models.StoreSubscriberCRD(subscriberCRD)
+	}
+	checkDgraphError(payload.ResourceType, err)
+}
+
+func unmarshalPayload(payload *controller.Payload, resource interface{}) {
+	err := json.Unmarshal([]byte(payload.Data), resource)
+	if err != nil {
+		log.Errorf("Error un marshalling payload " + payload.Data)
+	}
+}
+
+func checkDgraphError(resource string, err error) {
+	if err != nil {
+		log.Errorf("Error while persisting %s %v", resource, err)
+	}
+}
+
+func handlePayloadForGroup(payload *controller.Payload, conf *controller.Config, groupName string) {
+	if payload.EventType == controller.Delete {
+		models.DeleteGroup(groupName)
+	} else {
+		group, err := conf.Groupcrdclient.Get(groupName)
+		if err != nil {
+			log.Errorf("Unable to get group from client: (%v)", err)
+		} else {
+			UpdateGroup(group, conf.Groupcrdclient)
 		}
 	}
 }

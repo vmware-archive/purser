@@ -24,13 +24,105 @@ import (
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/gorilla/sessions"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/vmware/purser/pkg/controller/discovery/generator"
 )
 
+// Credentials structure
+type Credentials struct {
+	Password    string `json:"password"`
+	Username    string `json:"username"`
+	NewPassword string `json:"newPassword"`
+}
+
+const cookieName = "session-token-purser"
+
+var store = sessions.NewCookieStore([]byte(cookieKey))
+
+// LoginUser listens on /auth/login endpoint
+func LoginUser(w http.ResponseWriter, r *http.Request) {
+	addAccessControlHeaders(&w, r)
+	var cred Credentials
+	err := json.NewDecoder(r.Body).Decode(&cred)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if !query.CheckLogin(cred.Username, cred.Password) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	session, err := store.Get(r, cookieName)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	session.Values["authenticated"] = true
+	saveSession(session, w, r)
+}
+
+// LogoutUser listens on /auth/logout endpoint
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	addAccessControlHeaders(&w, r)
+	session, err := store.Get(r, cookieName)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	session.Values["authenticated"] = false
+	saveSession(session, w, r)
+}
+
+func saveSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) {
+	err := session.Save(r, w)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func isUserAuthenticated(r *http.Request) bool {
+	session, err := store.Get(r, cookieName)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		return false
+	}
+	// Check if user is authenticated
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		return false
+	}
+	return true
+}
+
+// ChangePassword listens on /auth/changePassword endpoint
+func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	addAccessControlHeaders(&w, r)
+	var cred Credentials
+	err := json.NewDecoder(r.Body).Decode(&cred)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if !query.UpdateLogin(cred.Username, cred.Password, cred.NewPassword) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+}
+
 // GetHomePage is the default api home page
 func GetHomePage(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	_, err := fmt.Fprintf(w, "Welcome to the Purser!")
 	if err != nil {
 		logrus.Errorf("Unable to write welcome message to Homepage: (%v)", err)
@@ -39,6 +131,10 @@ func GetHomePage(w http.ResponseWriter, r *http.Request) {
 
 // GetPodInteractions listens on /interactions/pod endpoint and returns pod interactions
 func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -58,6 +154,10 @@ func GetPodInteractions(w http.ResponseWriter, r *http.Request) {
 
 // GetClusterHierarchy listens on /hierarchy endpoint and returns all namespaces(or nodes and PV) in the cluster
 func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -73,6 +173,10 @@ func GetClusterHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetNamespaceHierarchy listens on /hierarchy/namespace endpoint and returns all children of namespace
 func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -94,6 +198,10 @@ func GetNamespaceHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetDeploymentHierarchy listens on /hierarchy/deployment endpoint and returns all children of deployment
 func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -115,6 +223,10 @@ func GetDeploymentHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetReplicasetHierarchy listens on /hierarchy/replicaset endpoint and returns all children of replicaset
 func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -136,6 +248,10 @@ func GetReplicasetHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetStatefulsetHierarchy listens on /hierarchy/statefulset endpoint and returns all children of statefulset
 func GetStatefulsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -157,6 +273,10 @@ func GetStatefulsetHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetPodHierarchy listens on /hierarchy/pod endpoint and returns all children of pod
 func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -178,6 +298,10 @@ func GetPodHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetContainerHierarchy listens on /hierarchy/container endpoint and returns all children of container
 func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -199,6 +323,10 @@ func GetContainerHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetEmptyHierarchy listens on /hierarchy/process and /hierarchy/pvc endpoint and returns empty data
 func GetEmptyHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -209,6 +337,10 @@ func GetEmptyHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetNodeHierarchy listens on /hierarchy/node endpoint and returns all children of node
 func GetNodeHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -230,6 +362,10 @@ func GetNodeHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetPVHierarchy listens on /hierarchy/pv endpoint and returns all children of PV
 func GetPVHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -251,6 +387,10 @@ func GetPVHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetDaemonsetHierarchy listens on /hierarchy/daemonset endpoint and returns all children of Daemonset
 func GetDaemonsetHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -272,6 +412,10 @@ func GetDaemonsetHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetJobHierarchy listens on /hierarchy/job endpoint and returns all children of Job
 func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -293,6 +437,10 @@ func GetJobHierarchy(w http.ResponseWriter, r *http.Request) {
 
 // GetClusterMetrics listens on /metrics endpoint with option for view(physical or logical)
 func GetClusterMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -309,6 +457,10 @@ func GetClusterMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetNamespaceMetrics listens on /metrics/namespace
 func GetNamespaceMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -330,6 +482,10 @@ func GetNamespaceMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetDeploymentMetrics listens on /metrics/deployment
 func GetDeploymentMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -351,6 +507,10 @@ func GetDeploymentMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetDaemonsetMetrics listens on /metrics/daemonset
 func GetDaemonsetMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -372,6 +532,10 @@ func GetDaemonsetMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetJobMetrics listens on /metrics/job
 func GetJobMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -393,6 +557,10 @@ func GetJobMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetStatefulsetMetrics listens on /metrics/statefulset
 func GetStatefulsetMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -414,6 +582,10 @@ func GetStatefulsetMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetReplicasetMetrics listens on /metrics/replicaset
 func GetReplicasetMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -435,6 +607,10 @@ func GetReplicasetMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetNodeMetrics listens on /metrics/node
 func GetNodeMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -456,6 +632,10 @@ func GetNodeMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetPodMetrics listens on /metrics/pod
 func GetPodMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -477,6 +657,10 @@ func GetPodMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetContainerMetrics listens on /metrics/container
 func GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -498,6 +682,10 @@ func GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetPVMetrics listens on /metrics/pv
 func GetPVMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -519,6 +707,10 @@ func GetPVMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetPVCMetrics listens on /metrics/pvc
 func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 	queryParams := r.URL.Query()
 	logrus.Debugf("Query params: (%v)", queryParams)
@@ -540,6 +732,10 @@ func GetPVCMetrics(w http.ResponseWriter, r *http.Request) {
 
 // GetPodDiscoveryNodes listens on /discovery/pod/nodes endpoint
 func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	var pods []models.Pod
 	var err error
 
@@ -562,6 +758,10 @@ func GetPodDiscoveryNodes(w http.ResponseWriter, r *http.Request) {
 
 // GetPodDiscoveryEdges listens on /discovery/pod/edges endpoint
 func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	var err error
 	addHeaders(&w, r)
 
@@ -578,6 +778,10 @@ func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
 
 // GetGroupsData listens on /groups endpoint
 func GetGroupsData(w http.ResponseWriter, r *http.Request) {
+	if !isUserAuthenticated(r) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	addHeaders(&w, r)
 
 	groupsData, err := query.RetrieveGroupsData()
@@ -589,14 +793,14 @@ func GetGroupsData(w http.ResponseWriter, r *http.Request) {
 }
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
-	if origin := r.Header.Get("Origin"); origin == "https://app.swaggerhub.com" {
-		(*w).Header().Set("Access-Control-Allow-Origin", origin)
-	} else {
-		(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	}
+	addAccessControlHeaders(w, r)
 	(*w).Header().Set("Content-Type", "application/json; charset=UTF-8")
-	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 	(*w).WriteHeader(http.StatusOK)
+}
+
+func addAccessControlHeaders(w *http.ResponseWriter, r *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 }
 
 func writeBytes(w io.Writer, data []byte) {

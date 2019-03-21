@@ -12,7 +12,11 @@ import { ROUTING } from "./app.routing";
 import { TopologyGraphModule } from './modules/topologyGraph/modules';
 import { TopoGraphModule } from './modules/topo-graph/modules';
 import { LeftNavigationModule } from './modules/left-navigation/modules';
+import { LoginModule } from './modules/login/login.module';
+import { LogoutModule } from './modules/logout/logout.module';
+import { ChangepasswordModule } from './modules/changepassword/changepassword.module';
 import { HomeModule } from './modules/home/home.module';
+import { CookieService } from 'ngx-cookie-service';
 
 import { GoogleChartsModule } from 'angular-google-charts';
 
@@ -29,11 +33,14 @@ import { GoogleChartsModule } from 'angular-google-charts';
         ROUTING,
         TopologyGraphModule,
         TopoGraphModule,
+        LoginModule,
+        LogoutModule,
+        ChangepasswordModule,
         LeftNavigationModule,
         HomeModule,
         GoogleChartsModule.forRoot()
     ],
-    providers: [],
+    providers: [ CookieService ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     bootstrap: [AppComponent]
 })

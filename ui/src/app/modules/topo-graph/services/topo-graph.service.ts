@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BACKEND_URL } from '../../../app.component'
+import { BACKEND_URL } from '../../../app.component';
+import { CookieService } from 'ngx-cookie-service';
 
 @Injectable()
 export class TopoGraphService {
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private cookieService: CookieService) {
 
     }
 
@@ -25,11 +26,10 @@ export class TopoGraphService {
             _devUrl = './json/topology1.json'; //testing purpose
         }
 
-        //console.log(_url);
-
         return this.http.get(_url, {
             observe: 'body',
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: true,
         });
     }
 }
