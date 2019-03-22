@@ -188,7 +188,7 @@ func getQueryForNamespaceMetrics(name string) string {
 func getMetricsQueryForLogicalResources() string {
 	return `query {
 			ns as var(func: has(isNamespace)) {
-				~namespace @filter(has(isPod)){
+				~namespace @filter(has(isPod) AND (NOT has(endTime))) {
 					` + getQueryForMetricsComputation("NamespacePod") + `
 				}
 				` + getQueryForAggregatingChildMetrics("Namespace", "NamespacePod") + `
@@ -203,7 +203,7 @@ func getMetricsQueryForLogicalResources() string {
 // PhysicalResourcesMetrics query
 func getMetricsQueryForPhysicalResources() string {
 	return `query {
-			children(func: has(name)) @filter(has(isNode) OR has(isPersistentVolume)) {
+			children(func: has(name)) @filter((has(isNode) OR has(isPersistentVolume)) AND (NOT has(endTime))) {
 				name
 			type
 			cpu: cpu as cpuCapacity

@@ -19,7 +19,6 @@ package apiHandlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/Sirupsen/logrus"
 	group_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
 	"github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
@@ -68,19 +67,22 @@ func DeleteGroup(w http.ResponseWriter, r *http.Request) {
 func CreateGroup(w http.ResponseWriter, r *http.Request) {
 	if isUserAuthenticated(w, r) {
 		addAccessControlHeaders(&w, r)
-		newGroup := group_v1.Group{}
-		fmt.Printf("body: %v\n", r.Body)
-		//json.Unmarshal([]byte(r.Body), &newGroup)
-		err := json.NewDecoder(r.Body).Decode(&newGroup)
+		groupData, err := convertRequestBodyToJSON(r)
 		if err != nil {
-			logrus.Errorf("unable to parse object as group, err: %v", err)
+			logrus.Errorf("unable to parse request as either JSON or YAML, err: %v", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		_, err = getGroupClient().Create(&newGroup)
-		if err != nil {
-			logrus.Errorf("unable to create group: %v", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+
+		newGroup := group_v1.Group{}
+		if jsonErr := json.Unmarshal(groupData, &newGroup); jsonErr != nil {
+			logrus.Errorf("unable to parse object as group, err: %v", jsonErr)
+			http.Error(w, jsonErr.Error(), http.StatusBadRequest)
+			return
+		}
+		if _, groupErr := getGroupClient().Create(&newGroup); groupErr != nil {
+			logrus.Errorf("unable to create group: %v", groupErr)
+			http.Error(w, groupErr.Error(), http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
