@@ -22,6 +22,8 @@ import (
 	"github.com/Sirupsen/logrus"
 	"io"
 	"net/http"
+	"io/ioutil"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
@@ -47,4 +49,13 @@ func encodeAndWrite(w io.Writer, obj interface{}) {
 	if err != nil {
 		logrus.Errorf("Unable to encode to json: (%v)", err)
 	}
+}
+
+func convertRequestBodyToJSON(r *http.Request) ([]byte, error) {
+	requestData, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	groupData, err := yaml.ToJSON(requestData)
+	return groupData, err
 }

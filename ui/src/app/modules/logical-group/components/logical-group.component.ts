@@ -28,7 +28,6 @@ export class LogicalGroupComponent implements OnInit {
   public group: any;
 
   constructor(private router: Router, private logicalGroupService: LogicalGroupService) {
-    setInterval(() => this.ngOnInit(), 60000);
    }
 
 
