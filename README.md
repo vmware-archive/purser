@@ -42,7 +42,7 @@ Purser with it's robust CLI and UI capabilities provides a set of features inclu
 
 ### UI Demo
 
- ![demo](https://user-images.githubusercontent.com/42761785/49430222-74d25600-f7d0-11e8-97ad-ba1388fb6d8f.gif)
+ ![demo](https://user-images.githubusercontent.com/42461220/54865566-35367680-4d8d-11e9-9e07-e9aa77d7c6ec.gif)
 
 ### CLI Demo
 
