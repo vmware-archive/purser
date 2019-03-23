@@ -23,10 +23,6 @@ The plugin component is a CLI tool interfacing with the `kubectl` that helps que
 
 The UI dashboard is a robust application that renders the Purser UI for providing visual representation to the complete cluster metrics in a single pane of glass. 
 
-### Demo
-
-![demo](/docs/img/purser-cli.gif)
-
 ## Features
 
 Purser with its robust CLI and UI capabilities provides a set of features including, but not limited to the list below.
@@ -46,7 +42,11 @@ Purser with its robust CLI and UI capabilities provides a set of features includ
 
 ### UI Demo
 
- ![demo](https://user-images.githubusercontent.com/42761785/49430222-74d25600-f7d0-11e8-97ad-ba1388fb6d8f.gif)
+ ![demo](https://user-images.githubusercontent.com/42461220/54865566-35367680-4d8d-11e9-9e07-e9aa77d7c6ec.gif)
+
+### CLI Demo
+
+ ![demo](/docs/img/purser-cli.gif)
 
 ## Setup and Installation
 
