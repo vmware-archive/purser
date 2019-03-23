@@ -29,7 +29,7 @@ The UI dashboard is a robust application that renders the Purser UI for providin
 
 ## Features
 
-Purser with it's robust CLI and UI capabilities provides a set of features including, but not limited to the list below.
+Purser with its robust CLI and UI capabilities provides a set of features including, but not limited to the list below.
  
  - Capability to provide visibility into the following aspects of the K8s cluster
     - workload cost associated with the native/custom resources
