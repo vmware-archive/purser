@@ -254,6 +254,10 @@ func getQueryForAllGroupsData() string {
 			mtdMemoryCost
 			mtdStorageCost
 			mtdCost
+			projectedCPUCost
+			projectedMemoryCost
+			projectedStorageCost
+			projectedCost
 		}
 	}`
 }
@@ -288,6 +292,9 @@ func getQueryForGroupMetrics(podsUIDs string) string {
 			podCpuCost as math(mtdPodCPU * pricePerCPU)
 			podMemoryCost as math(mtdPodMemory * pricePerMemory)
 			podStorageCost as math(mtdPvcStorage * ` + models.DefaultStorageCostPerGBPerHour + `)
+			podCPUCostPerHour as math(pitPodCPU * pricePerCPU)
+			podMemoryCostPerHour as math(pitPodMemory * pricePerMemory)
+			podStorageCostPerHour as math(pitPvcStorage * ` + models.DefaultStorageCostPerGBPerHour + `)
 		}
 		
 		group() {
@@ -304,6 +311,9 @@ func getQueryForGroupMetrics(podsUIDs string) string {
 			cpuCost: sum(val(podCpuCost))
 			memoryCost: sum(val(podMemoryCost))
 			storageCost: sum(val(podStorageCost))
+			cpuCostPerHour: sum(val(podCPUCostPerHour))
+			memoryCostPerHour: sum(val(podMemoryCostPerHour))
+			storageCostPerHour: sum(val(podStorageCostPerHour))
 			livePods: sum(val(isAlive))
 		}
 	}`

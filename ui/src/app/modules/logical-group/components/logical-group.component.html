@@ -1,30 +1,30 @@
 <h3>Custom Groups</h3>
 
 <div class="clr-row" style="margin-top: 2%; margin-bottom: -1%">
-  <div class="clr-col-1">
-    <button [clrLoading]="submitBtnState" type="submit" class="btn btn-success-outline" (click)="fillGroupData()">New Group</button>
-  </div>
-  <div class="clr-col-1">
-      <button [clrLoading]="submitBtnState" type="submit" class="btn btn-danger-outline" (click)="deleteGroupData()">Delete</button>
+    <div class="clr-col-4">
+        <button [clrLoading]="submitBtnState" type="submit" class="btn btn-success-outline" (click)="fillGroupData()"><clr-icon shape="plus"></clr-icon> ADD GROUP</button>
     </div>
-  <div class="clr-col-10"></div>
 </div>
 
 <clr-datagrid>
     <clr-dg-column [clrDgField]="'name'">Group Name</clr-dg-column>
-    <clr-dg-column [clrDgField]="'podsCount'">Pods</clr-dg-column>
-    <clr-dg-column [clrDgField]="'cpu'">CPU (vCPU)</clr-dg-column>
-    <clr-dg-column [clrDgField]="'memory'">Memory (GB)</clr-dg-column>
-    <clr-dg-column [clrDgField]="'storage'">Storage (GB)</clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdCPU'">CPU Cost (US $)</clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdMemory'">Memory Cost (US $)</clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdStorage'">Storage Cost (US $)</clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdCost'">Total Cost (US $)</clr-dg-column>
+    <clr-dg-column [clrDgField]="'podsCount'"><ng-container *clrDgHideableColumn="{hidden: true}">Pods</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'cpu'"><ng-container *clrDgHideableColumn="{hidden: false}">CPU (vCPU)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'memory'"><ng-container *clrDgHideableColumn="{hidden: false}">Memory (GB)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'storage'"><ng-container *clrDgHideableColumn="{hidden: false}">Storage (GB)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdCPU'"><ng-container *clrDgHideableColumn="{hidden: false}">CPU Cost (US $)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdMemory'"><ng-container *clrDgHideableColumn="{hidden: false}">Memory Cost (US $)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdStorage'"><ng-container *clrDgHideableColumn="{hidden: false}">Storage Cost (US $)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'mtdCost'"><ng-container *clrDgHideableColumn="{hidden: false}">Total Cost (US $)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'projectedCPU'"><ng-container *clrDgHideableColumn="{hidden: true}">Projected CPU Cost (US $)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'projectedMemory'"><ng-container *clrDgHideableColumn="{hidden: true}">Projected Memory Cost (US $)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'projectedStorage'"><ng-container *clrDgHideableColumn="{hidden: true}">Projected Storage Cost (US $)</ng-container></clr-dg-column>
+    <clr-dg-column [clrDgField]="'projectedCost'"><ng-container *clrDgHideableColumn="{hidden: true}">Projected Cost (US $)</ng-container></clr-dg-column>
 
     <clr-dg-placeholder>We couldn't find any custom groups! Logged out? Click here to <a href="./login">Signin</a> </clr-dg-placeholder>
 
     <clr-dg-row *clrDgItems="let group of groups">
-      <clr-dg-cell>{{ group.name }}</clr-dg-cell>
+      <clr-dg-cell><button class="btn btn-sm btn-link" style="padding:-4%; margin:-4%; text-align: left" (click)="showGroupDetails(group)">{{ group.name }}</button></clr-dg-cell>
       <clr-dg-cell>{{ group.podsCount }}</clr-dg-cell>
       <clr-dg-cell>{{ (group.cpu | number: '1.0-2') || 0 }}</clr-dg-cell>
       <clr-dg-cell>{{ (group.memory | number: '1.0-2') || 0 }}</clr-dg-cell>
@@ -33,7 +33,24 @@
       <clr-dg-cell>{{ (group.mtdMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
       <clr-dg-cell>{{ (group.mtdStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
       <clr-dg-cell>{{ (group.mtdCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.projectedCPUCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.projectedMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.projectedStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (group.projectedCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-action-overflow>
+            <button class="action-item" (click)="setToBeDeletedGroup(group.name)"><clr-icon shape="trash"></clr-icon>  DELETE</button>
+        </clr-dg-action-overflow>
     </clr-dg-row>
+
+    <clr-dg-footer>
+        <clr-dg-column-toggle>
+            <clr-dg-column-toggle-title>Hide/Show Features</clr-dg-column-toggle-title>
+            <clr-dg-column-toggle-button>Select All</clr-dg-column-toggle-button>
+        </clr-dg-column-toggle>
+        {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+        of {{pagination.totalItems}} groups
+        <clr-dg-pagination #pagination [clrDgPageSize]="currentPageSize"></clr-dg-pagination>
+    </clr-dg-footer>
 </clr-datagrid>
 <p class="p5"><i>* All costs are computed for Month To Date (MTD).</i></p>
 
@@ -58,98 +75,124 @@
 </form>
 
 <clr-modal [(clrModalOpen)]="isDeleteGroup">
-    <h3 class="modal-title">Delete Custom Group</h3>
-    <div class="modal-body">
-        <form class="clr-form clr-form-horizontal">
-            <div class="clr-form-control">
-                <label for="example" class="clr-control-label">Name</label>
-                <div class="clr-control-container">
-                    <clr-dropdown>
-                        <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
-                            {{ toBeDeletedGroup }}
-                            <clr-icon shape="caret down"></clr-icon>
-                        </button>
-                        <clr-dropdown-menu clrPosition="bottom" *clrIfOpen>
-                            <label class="dropdown-header">Select Group by name</label>
-                            <div *ngFor="let group of groups">
-                                <button type="button" clrDropdownItem (click)="setToBeDeletedGroup(group.name)">{{ group.name }}</button>
-                            </div>
-                        </clr-dropdown-menu>
-                    </clr-dropdown>
-                </div>
-            </div>
-        </form>
-    </div>
+    <h3 class="modal-title">Delete group {{ toBeDeletedGroup }}?</h3>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline" (click)="isDeleteGroup = false">Cancel</button>
         <button type="button" class="btn btn-danger" (click)="deleteGroup()">Delete</button>
     </div>
-  </clr-modal>
+</clr-modal>
 
-    <div *ngIf="groupCreation === 'fail'">
-        <div class="clr-row">
-            <div class="clr-col-8">
-                <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
-                    <clr-alert-item>
-                        <div class="alert-item static">
-                            <span class="alert-text">
-                                Group creation failed<br/><br/>
-                                Error: {{ creationError }}
-                            </span>
-                        </div>
-                    </clr-alert-item>
-                </clr-alert>
+<div *ngIf="groupCreation === 'fail'">
+    <div class="clr-row">
+        <div class="clr-col-8">
+            <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
+                <clr-alert-item>
+                    <div class="alert-item static">
+                        <span class="alert-text">
+                            Group creation failed<br/><br/>
+                            Error: {{ creationError }}
+                        </span>
+                    </div>
+                </clr-alert-item>
+            </clr-alert>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="groupCreation === 'success'">
+    <div class="clr-row">
+        <div class="clr-col-4">
+            <clr-alert clrAlertType="success" [clrAlertClosable]="true">
+                <clr-alert-item>
+                    <div class="alert-item static">
+                        <span class="alert-text">
+                                Successfully created group.
+                        </span>
+                    </div>
+                </clr-alert-item>
+            </clr-alert>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="groupDeletion === 'success'">
+    <div class="clr-row">
+        <div class="clr-col-4">
+            <clr-alert clrAlertType="success" [clrAlertClosable]="true">
+                <clr-alert-item>
+                    <div class="alert-item static">
+                        <span class="alert-text">
+                                Successfully deleted group.
+                        </span>
+                    </div>
+                </clr-alert-item>
+            </clr-alert>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="groupDeletion === 'fail'">
+    <div class="clr-row">
+        <div class="clr-col-8">
+            <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
+                <clr-alert-item>
+                    <div class="alert-item static">
+                        <span class="alert-text">
+                                Group deletion failed<br/><br/>
+                                Error: {{ deletionError }}
+                        </span>
+                    </div>
+                </clr-alert-item>
+            </clr-alert>
+        </div>
+    </div>
+</div>
+
+<div class="clr-row" *ngIf="isShowGroupDetails">
+    <div class="clr-col-lg-5 clr-col-md-8 clr-col-6">
+        <div class="card">
+            <div class="card-header">
+                Group: ({{ groupToFocus.name }}) Resource Details
+            </div>
+            <div class="card-block">
+                <div class="card-text">
+                    Pods      : {{ groupToFocus.podsCount }}<br/>
+                    CPU       : {{ groupToFocus.cpu }}<br/>
+                    Memory    : {{ groupToFocus.memory }}<br/>
+                    Storage   : {{ groupToFocus.storage }}<br/>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button class="btn btn-sm btn-link" (click)="showMTD()">MTD Costs</button>
+                <button class="btn btn-sm btn-link" (click)="showProjected()">Projected Costs</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div *ngIf="groupCreation === 'success'">
-        <div class="clr-row">
-            <div class="clr-col-4">
-                <clr-alert clrAlertType="success" [clrAlertClosable]="true">
-                    <clr-alert-item>
-                        <div class="alert-item static">
-                            <span class="alert-text">
-                                    Successfully created group.
-                            </span>
-                        </div>
-                    </clr-alert-item>
-                </clr-alert>
-            </div>
-        </div>
+<clr-modal [(clrModalOpen)]="isShowMTD" [clrModalSize]="'lg'">
+    <h3 class="modal-title">MTD Costs</h3>
+    <div class="modal-body">
+        <div class="googleChartDiv" *ngIf="isShowMTD">
+            <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
+        </div>        
     </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="isShowMTD = false">Close</button>
+    </div>
+</clr-modal>
 
-    <div *ngIf="groupDeletion === 'success'">
-        <div class="clr-row">
-            <div class="clr-col-4">
-                <clr-alert clrAlertType="success" [clrAlertClosable]="true">
-                    <clr-alert-item>
-                        <div class="alert-item static">
-                            <span class="alert-text">
-                                    Successfully deleted group.
-                            </span>
-                        </div>
-                    </clr-alert-item>
-                </clr-alert>
-            </div>
-        </div>
+<clr-modal [(clrModalOpen)]="isShowProjected" [clrModalSize]="'lg'">
+    <h3 class="modal-title">MTD Costs</h3>
+    <div class="modal-body">
+        <div class="googleChartDiv" *ngIf="isShowProjected">
+            <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
+        </div>        
     </div>
-
-    <div *ngIf="groupDeletion === 'fail'">
-        <div class="clr-row">
-            <div class="clr-col-8">
-                <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
-                    <clr-alert-item>
-                        <div class="alert-item static">
-                            <span class="alert-text">
-                                    Group deletion failed<br/><br/>
-                                    Error: {{ deletionError }}
-                            </span>
-                        </div>
-                    </clr-alert-item>
-                </clr-alert>
-            </div>
-        </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="isShowProjected = false">Close</button>
     </div>
+</clr-modal>
 
 
