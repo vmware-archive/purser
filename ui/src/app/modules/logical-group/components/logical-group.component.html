@@ -52,7 +52,6 @@
         <clr-dg-pagination #pagination [clrDgPageSize]="currentPageSize"></clr-dg-pagination>
     </clr-dg-footer>
 </clr-datagrid>
-<p class="p5"><i>* All costs are computed for Month To Date (MTD).</i></p>
 
 <form novalidate #f="ngForm" (ngSubmit)="createGroup();">
     <clr-modal [(clrModalOpen)]="isCreateGroup" [clrModalSize]="'lg'">
@@ -152,7 +151,7 @@
     <div class="clr-col-lg-5 clr-col-md-8 clr-col-6">
         <div class="card">
             <div class="card-header">
-                Group: ({{ groupToFocus.name }}) Resource Details
+                Resource Details for <b style="text-transform: uppercase;">{{ groupToFocus.name }}</b>
             </div>
             <div class="card-block">
                 <div class="card-text">
@@ -184,7 +183,7 @@
 </clr-modal>
 
 <clr-modal [(clrModalOpen)]="isShowProjected" [clrModalSize]="'lg'">
-    <h3 class="modal-title">MTD Costs</h3>
+    <h3 class="modal-title">Projected Costs</h3>
     <div class="modal-body">
         <div class="googleChartDiv" *ngIf="isShowProjected">
             <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
