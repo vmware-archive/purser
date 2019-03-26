@@ -32,6 +32,7 @@ export class LogicalGroupComponent implements OnInit {
   public donutOptions = {};
   public donutData = {"data": []};
   public group: any;
+  public costRatio = 100;
 
   constructor(private router: Router, private logicalGroupService: LogicalGroupService) {
   }
@@ -100,6 +101,7 @@ export class LogicalGroupComponent implements OnInit {
     console.log("group: ", group);
     this.groupToFocus = group;
     this.isShowGroupDetails = true;
+    this.costRatio = Math.round(this.groupToFocus.mtdCost * 100 / this.groupToFocus.projectedCost);
   }
 
   public reset() {
@@ -124,7 +126,7 @@ export class LogicalGroupComponent implements OnInit {
     };
 
     this.donutOptions = {
-      title: 'Total MTD Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.mtdCost,
+      title: 'Total MTD Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.mtdCost.toFixed(2),
       pieHole: 0,
       pieSliceText: 'value-and-percentage',
       width: 750,
@@ -149,7 +151,7 @@ export class LogicalGroupComponent implements OnInit {
     };
 
     this.donutOptions = {
-      title: 'Total Projected Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.projectedCost,
+      title: 'Total Projected Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.projectedCost.toFixed(2),
       pieHole: 0,
       pieSliceText: 'value-and-percentage',
       width: 750,

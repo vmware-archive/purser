@@ -148,17 +148,29 @@
 </div>
 
 <div class="clr-row" *ngIf="isShowGroupDetails">
-    <div class="clr-col-lg-5 clr-col-md-8 clr-col-6">
+    <div class="clr-col-lg-12 clr-col-md-12 clr-col-12">
         <div class="card">
             <div class="card-header">
                 Resource Details for <b style="text-transform: uppercase;">{{ groupToFocus.name }}</b>
             </div>
             <div class="card-block">
                 <div class="card-text">
-                    Pods      : {{ groupToFocus.podsCount }}<br/>
-                    CPU       : {{ groupToFocus.cpu }}<br/>
-                    Memory    : {{ groupToFocus.memory }}<br/>
-                    Storage   : {{ groupToFocus.storage }}<br/>
+                <div class="row">
+                    <div class="clr-col-4">
+                        <b>Pods</b>      : {{ groupToFocus.podsCount }}<br/>
+                        <b>CPU</b>       : {{ groupToFocus.cpu }}<br/>
+                        <b>Memory</b>    : {{ groupToFocus.memory }}<br/>
+                        <b>Storage</b>   : {{ groupToFocus.storage }}<br/>
+                    </div>
+                    <div class="clr-col-2"></div>
+                    <div class="clr-col-4 progress-block">
+                            <label>Current Cost vs Projected</label>
+                            <div class="progress-static labeled">
+                                <div class="progress-meter" [attr.data-value]="costRatio" [attr.data-displayval]="costRatio + '%'"></div>
+                            </div>
+                            <span style="margin: 1%">{{ costRatio }}%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
