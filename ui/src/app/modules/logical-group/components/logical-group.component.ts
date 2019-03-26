@@ -127,7 +127,7 @@ export class LogicalGroupComponent implements OnInit {
 
     this.donutOptions = {
       title: 'Total MTD Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.mtdCost.toFixed(2),
-      pieHole: 0,
+      pieHole: 0.3,
       pieSliceText: 'value-and-percentage',
       width: 750,
       height: 400,
@@ -152,7 +152,7 @@ export class LogicalGroupComponent implements OnInit {
 
     this.donutOptions = {
       title: 'Total Projected Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.projectedCost.toFixed(2),
-      pieHole: 0,
+      pieHole: 0.3,
       pieSliceText: 'value-and-percentage',
       width: 750,
       height: 400,
