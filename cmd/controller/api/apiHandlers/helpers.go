@@ -21,9 +21,9 @@ import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"io"
-	"net/http"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"net/http"
 )
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {

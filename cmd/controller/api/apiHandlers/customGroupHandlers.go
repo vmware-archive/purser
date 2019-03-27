@@ -23,7 +23,9 @@ import (
 	group_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
 	"github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
 	"github.com/vmware/purser/pkg/controller"
+	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
+	"github.com/vmware/purser/pkg/controller/eventprocessor"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 )
@@ -55,6 +57,7 @@ func DeleteGroup(w http.ResponseWriter, r *http.Request) {
 			err = getGroupClient().Delete(name[0], &meta_v1.DeleteOptions{})
 			if err == nil {
 				w.WriteHeader(http.StatusOK)
+				models.DeleteGroup(name[0])
 				return
 			}
 		}
@@ -86,6 +89,7 @@ func CreateGroup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+		eventprocessor.UpdateGroup(&newGroup, getGroupClient())
 	}
 }
 

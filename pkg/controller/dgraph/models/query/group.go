@@ -25,20 +25,23 @@ import (
 
 // GroupMetrics structure
 type GroupMetrics struct {
-	PITCpu         float64
-	PITMemory      float64
-	PITStorage     float64
-	PITCpuLimit    float64
-	PITMemoryLimit float64
-	MTDCpu         float64
-	MTDMemory      float64
-	MTDStorage     float64
-	MTDCpuLimit    float64
-	MTDMemoryLimit float64
-	CostCPU        float64
-	CostMemory     float64
-	CostStorage    float64
-	PodsCount      int
+	PITCpu             float64
+	PITMemory          float64
+	PITStorage         float64
+	PITCpuLimit        float64
+	PITMemoryLimit     float64
+	MTDCpu             float64
+	MTDMemory          float64
+	MTDStorage         float64
+	MTDCpuLimit        float64
+	MTDMemoryLimit     float64
+	CostCPU            float64
+	CostMemory         float64
+	CostStorage        float64
+	CostCPUPerHour     float64
+	CostMemoryPerHour  float64
+	CostStoragePerHour float64
+	PodsCount          int
 }
 
 type groupsRoot struct {
@@ -116,6 +119,12 @@ func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
 		groupMetrics.CostMemory = value
 	case "storageCost":
 		groupMetrics.CostStorage = value
+	case "cpuCostPerHour":
+		groupMetrics.CostCPUPerHour = value
+	case "memoryCostPerHour":
+		groupMetrics.CostMemoryPerHour = value
+	case "storageCostPerHour":
+		groupMetrics.CostStoragePerHour = value
 	case "livePods":
 		groupMetrics.PodsCount = int(value)
 	}

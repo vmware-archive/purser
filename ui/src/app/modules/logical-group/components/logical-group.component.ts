@@ -19,16 +19,23 @@ export class LogicalGroupComponent implements OnInit {
   public GROUP_STATUS = STATUS_WAIT;
   public isCreateGroup = false;
   public isDeleteGroup = false;
+  public isShowGroupDetails = false;
   public toBeDeletedGroup = "Custom Group";
+  public groupToFocus: any;
   public groupCreation = 'wait';
   public groupDeletion = 'wait';
   public creationError = null;
   public deletionError = null;
 
+  public isShowMTD = false;
+  public isShowProjected = false;
+  public donutOptions = {};
+  public donutData = {"data": []};
   public group: any;
+  public costRatio = 100;
 
   constructor(private router: Router, private logicalGroupService: LogicalGroupService) {
-   }
+  }
 
 
   private getLogicalGroupData() {
@@ -86,17 +93,76 @@ export class LogicalGroupComponent implements OnInit {
   }
 
   public setToBeDeletedGroup(grpName) {
-    this.toBeDeletedGroup = grpName
+    this.toBeDeletedGroup = grpName;
+    this.isDeleteGroup = true;
+  }
+
+  public showGroupDetails(group) {
+    console.log("group: ", group);
+    this.groupToFocus = group;
+    this.isShowGroupDetails = true;
+    this.costRatio = Math.round(this.groupToFocus.mtdCost * 100 / this.groupToFocus.projectedCost);
   }
 
   public reset() {
     this.isCreateGroup = false;
     this.getLogicalGroupData();
     this.isDeleteGroup = false;
+    this.isShowGroupDetails = false;
     this.toBeDeletedGroup = "Custom Group";
     this.group = null;
     this.groupCreation = 'wait';
     this.groupDeletion = 'wait';
+  }
+
+  public showMTD() {
+    this.isShowMTD = true;
+    this.donutData = {
+      "data": [
+        ['CPU', this.groupToFocus.mtdCPUCost],
+        ['Memory', this.groupToFocus.mtdMemoryCost],
+        ['Storage', this.groupToFocus.mtdStorageCost]
+      ]
+    };
+
+    this.donutOptions = {
+      title: 'Total MTD Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.mtdCost.toFixed(2),
+      pieHole: 0.3,
+      pieSliceText: 'value-and-percentage',
+      width: 750,
+      height: 400,
+      chartArea: {
+        left: "10%",
+        top: "10%",
+        height: "80%",
+        width: "80%"
+      }
+    };
+  }
+
+  public showProjected() {
+    this.isShowProjected = true;
+    this.donutData = {
+      "data": [
+        ['CPU', this.groupToFocus.projectedCPUCost],
+        ['Memory', this.groupToFocus.projectedMemoryCost],
+        ['Storage', this.groupToFocus.projectedStorageCost]
+      ]
+    };
+
+    this.donutOptions = {
+      title: 'Total Projected Cost for ' + this.groupToFocus.name + ': ' + this.groupToFocus.projectedCost.toFixed(2),
+      pieHole: 0.3,
+      pieSliceText: 'value-and-percentage',
+      width: 750,
+      height: 400,
+      chartArea: {
+        left: "10%",
+        top: "10%",
+        height: "80%",
+        width: "80%"
+      }
+    };
   }
 
   ngOnInit() {

@@ -35,3 +35,10 @@ func ConverTimeToRFC3339(queryTime time.Time) string {
 func GetSecondsSince(queryTime time.Time) float64 {
 	return time.Since(queryTime).Seconds()
 }
+
+// GetHoursRemainingInCurrentMonth returns number of hours remaining in the month
+func GetHoursRemainingInCurrentMonth() float64 {
+	now := time.Now()
+	monthEnd := time.Date(now.Year(), now.Month(), 30, 23, 59, 0, 0, time.Local)
+	return -time.Since(monthEnd).Hours()
+}
