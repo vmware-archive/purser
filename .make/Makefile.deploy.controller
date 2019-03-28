@@ -33,6 +33,7 @@ DOTFILE_IMAGE = $(subst :,_,$(subst /,_,$(IMAGE))-$(VERSION))
 container: $(DOCKER_OUT)/.container-$(DOTFILE_IMAGE) container-name
 $(DOCKER_OUT)/.container-$(DOTFILE_IMAGE): $(DOCKER_OUT)/bin/$(ARCH)/$(BIN) Dockerfile.in
 	@sed \
+	    -e 's|ARG_DOCK|$(DOCKER_OUT)|g' \
 	    -e 's|ARG_BIN|$(BIN)|g' \
 	    -e 's|ARG_ARCH|$(ARCH)|g' \
 	    -e 's|ARG_FROM|$(BASEIMAGE)|g' \
