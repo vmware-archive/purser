@@ -25,7 +25,7 @@ CMD := cmd/controller
 
 # Where to push the docker image.
 REGISTRY?=docker.io
-DOCKER_REPO?=vmwareh
+DOCKER_REPO?=kreddyj
 
 # Which architecture to build - see $(ALL_ARCH) for options.
 ARCH?= amd64
