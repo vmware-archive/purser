@@ -34,23 +34,31 @@ const (
 // Group schema in dgraph
 type Group struct {
 	dgraph.ID
-	IsGroup              bool    `json:"isGroup,omitempty"`
-	Name                 string  `json:"name,omitempty"`
-	PodsCount            int     `json:"podsCount,omitempty"`
-	MtdCPU               float64 `json:"mtdCPU,omitempty"`
-	MtdMemory            float64 `json:"mtdMemory,omitempty"`
-	MtdStorage           float64 `json:"mtdStorage,omitempty"`
-	CPU                  float64 `json:"cpu,omitempty"`
-	Memory               float64 `json:"memory,omitempty"`
-	Storage              float64 `json:"storage,omitempty"`
-	MtdCPUCost           float64 `json:"mtdCPUCost,omitempty"`
-	MtdMemoryCost        float64 `json:"mtdMemoryCost,omitempty"`
-	MtdStorageCost       float64 `json:"mtdStorageCost,omitempty"`
-	MtdCost              float64 `json:"mtdCost,omitempty"`
-	ProjectedCPUCost     float64 `json:"projectedCPUCost,omitempty"`
-	ProjectedMemoryCost  float64 `json:"projectedMemoryCost,omitempty"`
-	ProjectedStorageCost float64 `json:"projectedStorageCost,omitempty"`
-	ProjectedCost        float64 `json:"projectedCost,omitempty"`
+	IsGroup                  bool    `json:"isGroup,omitempty"`
+	Name                     string  `json:"name,omitempty"`
+	PodsCount                int     `json:"podsCount,omitempty"`
+	MtdCPU                   float64 `json:"mtdCPU,omitempty"`
+	MtdMemory                float64 `json:"mtdMemory,omitempty"`
+	MtdStorage               float64 `json:"mtdStorage,omitempty"`
+	CPU                      float64 `json:"cpu,omitempty"`
+	Memory                   float64 `json:"memory,omitempty"`
+	Storage                  float64 `json:"storage,omitempty"`
+	MtdCPUCost               float64 `json:"mtdCPUCost,omitempty"`
+	MtdMemoryCost            float64 `json:"mtdMemoryCost,omitempty"`
+	MtdStorageCost           float64 `json:"mtdStorageCost,omitempty"`
+	MtdCost                  float64 `json:"mtdCost,omitempty"`
+	ProjectedCPUCost         float64 `json:"projectedCPUCost,omitempty"`
+	ProjectedMemoryCost      float64 `json:"projectedMemoryCost,omitempty"`
+	ProjectedStorageCost     float64 `json:"projectedStorageCost,omitempty"`
+	ProjectedCost            float64 `json:"projectedCost,omitempty"`
+	LastMonthCPUCost         float64 `json:"lastMonthCPUCost,omitempty"`
+	LastMonthMemoryCost      float64 `json:"lastMonthMemoryCost,omitempty"`
+	LastMonthStorageCost     float64 `json:"lastMonthStorageCost,omitempty"`
+	LastMonthCost            float64 `json:"lastMonthCost,omitempty"`
+	LastLastMonthCPUCost     float64 `json:"lastLastMonthCPUCost,omitempty"`
+	LastLastMonthMemoryCost  float64 `json:"lastLastMonthMemoryCost,omitempty"`
+	LastLastMonthStorageCost float64 `json:"lastLastMonthStorageCost,omitempty"`
+	LastLastMonthCost        float64 `json:"lastLastMonthCost,omitempty"`
 }
 
 // CreateOrUpdateGroup updates group if it is already present in dgraph else it creates one

@@ -30,6 +30,22 @@ func getSecondsSinceMonthStart() string {
 	return fmt.Sprintf("%f", utils.GetSecondsSince(utils.GetCurrentMonthStartTime()))
 }
 
+func getSecondsSinceForOtherMonths() map[string]string {
+	secondsSince := make(map[string]string)
+	secondsInAverageMonth := 2592000.0 // 30 * 24 * 60 * 60
+	secondsSinceCurrentMonthStart := utils.GetSecondsSince(utils.GetCurrentMonthStartTime())
+	secondsSinceLastMonthStart := secondsSinceCurrentMonthStart + secondsInAverageMonth
+	secondsSinceLastLastMonthStart := secondsSinceCurrentMonthStart + 2*secondsInAverageMonth
+	secondsSinceLastMonthEnd := secondsSinceCurrentMonthStart - 1.0
+	secondsSinceLastLastMonthEnd := secondsSinceLastMonthStart - 1.0
+	secondsSince["currentMonthStart"] = fmt.Sprintf("%f", secondsSinceCurrentMonthStart)
+	secondsSince["lastMonthStart"] = fmt.Sprintf("%f", secondsSinceLastMonthStart)
+	secondsSince["lastMonthEnd"] = fmt.Sprintf("%f", secondsSinceLastMonthEnd)
+	secondsSince["lastLastMonthStart"] = fmt.Sprintf("%f", secondsSinceLastLastMonthStart)
+	secondsSince["lastLastMonthEnd"] = fmt.Sprintf("%f", secondsSinceLastLastMonthEnd)
+	return secondsSince
+}
+
 func getQueryForMetricsComputationWithAliasAndVariables(suffix string) string {
 	return `name
 			type

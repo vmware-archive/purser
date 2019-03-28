@@ -50,6 +50,8 @@ type GroupSpec struct {
 	MTDMetrics         *GroupMetrics                  `json:"mtdMetrics,omitempty"`
 	MTDCost            *Cost                          `json:"mtdCost,omitempty"`
 	PerHourCost        *Cost                          `json:"perHourCost,omitempty"`
+	LastMonthCost      *Cost                          `json:"lastMonthCost,omitempty"`
+	LastLastMonthCost  *Cost                          `json:"lastLastMonthCost,omitempty"`
 	LastUpdated        time.Time                      `json:"lastUpdated,omitempty"`
 }
 

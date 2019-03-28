@@ -34,7 +34,60 @@ export class LogicalGroupComponent implements OnInit {
   public group: any;
   public costRatio = 100;
 
+  public isViewCurrentMonth = true;
+  public isViewLastMonth = false;
+  public isViewLastThreeMonth = false;
+  public isViewProjected = false;
+
   constructor(private router: Router, private logicalGroupService: LogicalGroupService) {
+  }
+
+  public getCurrentMonthStatus() {
+    if (this.isViewCurrentMonth) {
+      return 'label-info'
+    } else {
+      return 'label-purple'
+    }
+  }
+
+  public getLastMonthStatus() {
+    if (this.isViewLastMonth) {
+      return 'label-info'
+    } else {
+      return 'label-purple'
+    }
+  }
+
+  public getLast3MonthStatus() {
+    if (this.isViewLastThreeMonth) {
+      return 'label-info'
+    } else {
+      return 'label-purple'
+    }
+  }
+
+  public getProjectedMonthStatus() {
+    if (this.isViewProjected) {
+      return 'label-info'
+    } else {
+      return 'label-purple'
+    }
+  }
+
+  public changeCurrentMonthView() {
+    this.isViewCurrentMonth = !this.isViewCurrentMonth;
+  }
+
+  public changeLastMonthView() {
+    this.isViewLastMonth = !this.isViewLastMonth;
+  }
+
+  public changeLast3MonthView() {
+    this.isViewLastThreeMonth = !this.isViewLastThreeMonth;
+  }
+
+  public changeProjectedMonthView() {
+    this.isViewProjected = !this.isViewProjected;
   }
 
 
