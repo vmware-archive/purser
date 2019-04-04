@@ -21,18 +21,24 @@ import (
 	"github.com/vmware/purser/pkg/controller/utils"
 
 	log "github.com/Sirupsen/logrus"
+	"time"
 )
 
 type resource struct {
 	ID
 }
 
-// RemoveResourcesInactiveInCurrentMonth deletes all resources which have their deletion time stamp before
+// RemoveResourcesInactive deletes all resources which have their deletion time stamp before
 // the start of current month.
-func RemoveResourcesInactiveInCurrentMonth() {
+func RemoveResourcesInactive() {
 	err := removeOldDeletedResources()
 	if err != nil {
 		log.Println(err)
+	}
+
+	err = removeOldDeletedPods()
+	if err != nil {
+		log.Error(err)
 	}
 }
 
@@ -50,9 +56,41 @@ func removeOldDeletedResources() error {
 	return err
 }
 
+func removeOldDeletedPods() error {
+	uids, err := retrievePodsWithEndTimeBeforeThreeMonths()
+	if err != nil {
+		return err
+	}
+	if len(uids) == 0 {
+		log.Println("No old deleted pods are present in dgraph")
+		return nil
+	}
+
+	_, err = MutateNode(uids, DELETE)
+	return err
+}
+
 func retrieveResourcesWithEndTimeBeforeCurrentMonthStart() ([]resource, error) {
 	q := `query {
-		resources(func: le(endTime, "` + utils.ConverTimeToRFC3339(utils.GetCurrentMonthStartTime()) + `")) {
+		resources(func: le(endTime, "` + utils.ConverTimeToRFC3339(utils.GetCurrentMonthStartTime()) + `")) @filter(NOT(has(isPod))) {
+			uid
+		}
+	}`
+
+	type root struct {
+		Resources []resource `json:"resources"`
+	}
+	newRoot := root{}
+	err := ExecuteQuery(q, &newRoot)
+	if err != nil {
+		return nil, err
+	}
+	return newRoot.Resources, nil
+}
+
+func retrievePodsWithEndTimeBeforeThreeMonths() ([]resource, error) {
+	q := `query {
+		resources(func: le(endTime, "` + utils.ConverTimeToRFC3339(utils.GetCurrentMonthStartTime().Add(-time.Hour*24*30*2)) + `")) @filter(has(isPod)) {
 			uid
 		}
 	}`

@@ -244,4 +244,10 @@ var routes = Routes{
 		"/api/group/create",
 		apiHandlers.CreateGroup,
 	},
+	Route{
+		"SyncCluster",
+		"GET",
+		"/api/sync",
+		apiHandlers.SyncCluster,
+	},
 }

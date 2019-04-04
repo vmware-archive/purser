@@ -21,16 +21,12 @@ import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	group_v1 "github.com/vmware/purser/pkg/apis/groups/v1"
-	"github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
-	"github.com/vmware/purser/pkg/controller"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/vmware/purser/pkg/controller/eventprocessor"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 )
-
-var groupClient *v1.GroupClient
 
 // GetGroupsData listens on /api/groups endpoint
 func GetGroupsData(w http.ResponseWriter, r *http.Request) {
@@ -91,13 +87,4 @@ func CreateGroup(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		eventprocessor.UpdateGroup(&newGroup, getGroupClient())
 	}
-}
-
-// SetGroupClient sets groupcrd client
-func SetGroupClient(conf controller.Config) {
-	groupClient = conf.Groupcrdclient
-}
-
-func getGroupClient() *v1.GroupClient {
-	return groupClient
 }

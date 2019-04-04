@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 	"github.com/vmware/purser/pkg/controller/discovery/generator"
+	"github.com/vmware/purser/pkg/controller/eventprocessor"
 )
 
 // GetHomePage is the default api home page
@@ -629,4 +630,18 @@ func GetPodDiscoveryEdges(w http.ResponseWriter, r *http.Request) {
 			logrus.Errorf("Unable to encode to json: (%v)", err)
 		}
 	}
+}
+
+// SyncCluster listens on /api/sync
+func SyncCluster(w http.ResponseWriter, r *http.Request) {
+	if isUserAuthenticated(w, r) {
+		w.WriteHeader(http.StatusAccepted)
+		go syncResourcesInCluster()
+	}
+}
+
+func syncResourcesInCluster() {
+	eventprocessor.SyncCluster(getKubeClient())
+	eventprocessor.UpdateGroups(getGroupClient())
+	query.ComputeClusterAllocationAndCapacity()
 }
