@@ -263,6 +263,7 @@ func getQueryForAllGroupsData() string {
 }
 
 func getQueryForGroupMetrics(podsUIDs string) string {
+	secondsSince := getSecondsSinceForOtherMonths()
 	return `query {
 		var(func: uid(` + podsUIDs + `)) {
 			podCpu as cpuRequest
@@ -275,26 +276,47 @@ func getQueryForGroupMetrics(podsUIDs string) string {
 			storageRequestCount as count(storageRequest)
 			cpuLimitCount as count(cpuLimit)
 			memoryLimitCount as count(memoryLimit)
-			` + getQueryForTimeComputation("") + `
+			podEndTime as endTime
+			isTerminated as count(endTime)
+			secondsSincePodEndTime as math(cond(isTerminated == 0, 0.0, since(podEndTime)))
+			podStartTime as startTime
+			secondsSincePodStartTime as math(since(podStartTime))
+			secondsSinceCurrentMonthTrueStart as math(cond(secondsSincePodStartTime > ` + secondsSince["currentMonthStart"] + `, ` + secondsSince["currentMonthStart"] + `, secondsSincePodStartTime))
+			currentMonthTrueDurationInHours as math(cond(secondsSinceCurrentMonthTrueStart > secondsSincePodEndTime, (secondsSinceCurrentMonthTrueStart - secondsSincePodEndTime)/3600, 0.0))
+			secondsSinceLastMonthTrueStart as math(cond(secondsSincePodStartTime > ` + secondsSince["lastMonthStart"] + `, ` + secondsSince["lastMonthStart"] + `, secondsSincePodStartTime))
+			secondsSinceLastMonthTrueEnd as math(cond(secondsSincePodEndTime > ` + secondsSince["lastMonthEnd"] + `, secondsSincePodEndTime, ` + secondsSince["lastMonthEnd"] + `))
+			lastMonthTrueDurationInHours as math(cond(secondsSinceLastMonthTrueStart > secondsSinceLastMonthTrueEnd, (secondsSinceLastMonthTrueStart - secondsSinceLastMonthTrueEnd)/3600, 0.0))
+			secondsSinceLastLastMonthTrueStart as math(cond(secondsSincePodStartTime > ` + secondsSince["lastLastMonthStart"] + `, ` + secondsSince["lastLastMonthStart"] + `, secondsSincePodStartTime))
+			secondsSinceLastLastMonthTrueEnd as math(cond(secondsSincePodEndTime > ` + secondsSince["lastLastMonthEnd"] + `, secondsSincePodEndTime, ` + secondsSince["lastLastMonthEnd"] + `))
+			lastLastMonthTrueDurationInHours as math(cond(secondsSinceLastLastMonthTrueStart > secondsSinceLastLastMonthTrueEnd, (secondsSinceLastLastMonthTrueStart - secondsSinceLastLastMonthTrueEnd)/3600, 0.0))
 			isAlive as math(cond(isTerminated == 0, 1, 0))
 			pitPodCPU as math(cond(isTerminated == 0, cond(cpuRequestCount > 0, podCpu, 0.0), 0.0))
 			pitPodMemory as math(cond(isTerminated == 0, cond(memoryRequestCount > 0, podMemory, 0.0), 0.0))
 			pitPvcStorage as math(cond(isTerminated == 0, cond(storageRequestCount > 0, pvcStorage, 0.0), 0.0))
 			pitPodCPULimit as math(cond(isTerminated == 0, cond(cpuLimitCount > 0, podCpuLimit, 0.0), 0.0))
 			pitPodMemoryLimit as math(cond(isTerminated == 0, cond(memoryLimitCount > 0, podMemoryLimit, 0.0), 0.0))
-			mtdPodCPU as math(podCpu * durationInHours)
-			mtdPodMemory as math(podMemory * durationInHours)
-			mtdPvcStorage as math(pvcStorage * durationInHours)
-			mtdPodCPULimit as math(podCpuLimit * durationInHours)
-			mtdPodMemoryLimit as math(podMemoryLimit * durationInHours)
+			mtdPodCPU as math(podCpu * currentMonthTrueDurationInHours)
+			mtdPodMemory as math(podMemory * currentMonthTrueDurationInHours)
+			mtdPvcStorage as math(pvcStorage * currentMonthTrueDurationInHours)
+			mtdPodCPULimit as math(podCpuLimit * currentMonthTrueDurationInHours)
+			mtdPodMemoryLimit as math(podMemoryLimit * currentMonthTrueDurationInHours)
 			pricePerCPU as cpuPrice
 			pricePerMemory as memoryPrice
 			podCpuCost as math(mtdPodCPU * pricePerCPU)
 			podMemoryCost as math(mtdPodMemory * pricePerMemory)
 			podStorageCost as math(mtdPvcStorage * ` + models.DefaultStorageCostPerGBPerHour + `)
-			podCPUCostPerHour as math(pitPodCPU * pricePerCPU)
-			podMemoryCostPerHour as math(pitPodMemory * pricePerMemory)
-			podStorageCostPerHour as math(pitPvcStorage * ` + models.DefaultStorageCostPerGBPerHour + `)
+			podLiveCPUCostPerHour as math(pitPodCPU * pricePerCPU)
+			podLiveMemoryCostPerHour as math(pitPodMemory * pricePerMemory)
+			podLiveStorageCostPerHour as math(pitPvcStorage * ` + models.DefaultStorageCostPerGBPerHour + `)
+			podCPUCostPerHour as math(podCpu * pricePerCPU)
+			podMemoryCostPerHour as math(podMemory * pricePerMemory)
+			podStorageCostPerHour as math(pvcStorage * ` + models.DefaultStorageCostPerGBPerHour + `)
+			podCPUCostLastMonth as math(podCPUCostPerHour * lastMonthTrueDurationInHours)
+			podMemoryCostLastMonth as math(podMemoryCostPerHour * lastMonthTrueDurationInHours)
+			podStorageCostLastMonth as math(podStorageCostPerHour * lastMonthTrueDurationInHours)
+			podCPUCostLastLastMonth as math(podCPUCostPerHour * lastLastMonthTrueDurationInHours)
+			podMemoryCostLastLastMonth as math(podMemoryCostPerHour * lastLastMonthTrueDurationInHours)
+			podStorageCostLastLastMonth as math(podStorageCostPerHour * lastLastMonthTrueDurationInHours)
 		}
 		
 		group() {
@@ -311,9 +333,15 @@ func getQueryForGroupMetrics(podsUIDs string) string {
 			cpuCost: sum(val(podCpuCost))
 			memoryCost: sum(val(podMemoryCost))
 			storageCost: sum(val(podStorageCost))
-			cpuCostPerHour: sum(val(podCPUCostPerHour))
-			memoryCostPerHour: sum(val(podMemoryCostPerHour))
-			storageCostPerHour: sum(val(podStorageCostPerHour))
+			cpuCostPerHour: sum(val(podLiveCPUCostPerHour))
+			memoryCostPerHour: sum(val(podLiveMemoryCostPerHour))
+			storageCostPerHour: sum(val(podLiveStorageCostPerHour))
+			lastMonthCPUCost: sum(val(podCPUCostLastMonth))
+			lastMonthMemoryCost: sum(val(podMemoryCostLastMonth))
+			lastMonthStorageCost: sum(val(podStorageCostLastMonth))
+			lastLastMonthCPUCost: sum(val(podCPUCostLastLastMonth))
+			lastLastMonthMemoryCost: sum(val(podMemoryCostLastLastMonth))
+			lastLastMonthStorageCost: sum(val(podStorageCostLastLastMonth))
 			livePods: sum(val(isAlive))
 		}
 	}`

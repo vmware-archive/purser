@@ -25,23 +25,29 @@ import (
 
 // GroupMetrics structure
 type GroupMetrics struct {
-	PITCpu             float64
-	PITMemory          float64
-	PITStorage         float64
-	PITCpuLimit        float64
-	PITMemoryLimit     float64
-	MTDCpu             float64
-	MTDMemory          float64
-	MTDStorage         float64
-	MTDCpuLimit        float64
-	MTDMemoryLimit     float64
-	CostCPU            float64
-	CostMemory         float64
-	CostStorage        float64
-	CostCPUPerHour     float64
-	CostMemoryPerHour  float64
-	CostStoragePerHour float64
-	PodsCount          int
+	PITCpu                   float64
+	PITMemory                float64
+	PITStorage               float64
+	PITCpuLimit              float64
+	PITMemoryLimit           float64
+	MTDCpu                   float64
+	MTDMemory                float64
+	MTDStorage               float64
+	MTDCpuLimit              float64
+	MTDMemoryLimit           float64
+	CostCPU                  float64
+	CostMemory               float64
+	CostStorage              float64
+	CostCPUPerHour           float64
+	CostMemoryPerHour        float64
+	CostStoragePerHour       float64
+	LastMonthCPUCost         float64
+	LastMonthMemoryCost      float64
+	LastMonthStorageCost     float64
+	LastLastMonthCPUCost     float64
+	LastLastMonthMemoryCost  float64
+	LastLastMonthStorageCost float64
+	PodsCount                int
 }
 
 type groupsRoot struct {
@@ -125,6 +131,18 @@ func populateMetric(groupMetrics *GroupMetrics, key string, value float64) {
 		groupMetrics.CostMemoryPerHour = value
 	case "storageCostPerHour":
 		groupMetrics.CostStoragePerHour = value
+	case "lastMonthCPUCost":
+		groupMetrics.LastMonthCPUCost = value
+	case "lastMonthMemoryCost":
+		groupMetrics.LastMonthMemoryCost = value
+	case "lastMonthStorageCost":
+		groupMetrics.LastMonthStorageCost = value
+	case "lastLastMonthCPUCost":
+		groupMetrics.LastLastMonthCPUCost = value
+	case "lastLastMonthMemoryCost":
+		groupMetrics.LastLastMonthMemoryCost = value
+	case "lastLastMonthStorageCost":
+		groupMetrics.LastLastMonthStorageCost = value
 	case "livePods":
 		groupMetrics.PodsCount = int(value)
 	}

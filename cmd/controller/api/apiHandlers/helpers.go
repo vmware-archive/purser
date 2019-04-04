@@ -24,7 +24,13 @@ import (
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"net/http"
+	"github.com/vmware/purser/pkg/controller"
+	"github.com/vmware/purser/pkg/client/clientset/typed/groups/v1"
+	"k8s.io/client-go/kubernetes"
 )
+
+var groupClient *v1.GroupClient
+var kubeClient *kubernetes.Clientset
 
 func addHeaders(w *http.ResponseWriter, r *http.Request) {
 	addAccessControlHeaders(w, r)
@@ -58,4 +64,18 @@ func convertRequestBodyToJSON(r *http.Request) ([]byte, error) {
 	}
 	groupData, err := yaml.ToJSON(requestData)
 	return groupData, err
+}
+
+// SetKubeClientAndGroupClient sets groupcrd client
+func SetKubeClientAndGroupClient(conf controller.Config) {
+	groupClient = conf.Groupcrdclient
+	kubeClient = conf.Kubeclient
+}
+
+func getGroupClient() *v1.GroupClient {
+	return groupClient
+}
+
+func getKubeClient() *kubernetes.Clientset {
+	return kubeClient
 }

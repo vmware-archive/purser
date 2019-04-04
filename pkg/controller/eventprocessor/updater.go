@@ -77,6 +77,18 @@ func UpdateGroup(group *groups_v1.Group, groupCRDClient *groupsClient_v1.GroupCl
 		StorageCost: groupMetrics.CostStoragePerHour,
 		TotalCost:   groupMetrics.CostCPUPerHour + groupMetrics.CostMemoryPerHour + groupMetrics.CostStoragePerHour,
 	}
+	group.Spec.LastMonthCost = &groups_v1.Cost{
+		CPUCost:     groupMetrics.LastMonthCPUCost,
+		MemoryCost:  groupMetrics.LastMonthMemoryCost,
+		StorageCost: groupMetrics.LastMonthStorageCost,
+		TotalCost:   groupMetrics.LastMonthCPUCost + groupMetrics.LastMonthMemoryCost + groupMetrics.LastMonthStorageCost,
+	}
+	group.Spec.LastLastMonthCost = &groups_v1.Cost{
+		CPUCost:     groupMetrics.LastLastMonthCPUCost,
+		MemoryCost:  groupMetrics.LastLastMonthMemoryCost,
+		StorageCost: groupMetrics.LastLastMonthStorageCost,
+		TotalCost:   groupMetrics.LastLastMonthCPUCost + groupMetrics.LastLastMonthMemoryCost + groupMetrics.LastLastMonthStorageCost,
+	}
 	group.Spec.LastUpdated = time.Now()
 
 	_, err := groupCRDClient.Update(group)

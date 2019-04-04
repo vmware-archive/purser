@@ -85,7 +85,7 @@ func startInteractionsDiscovery() {
 	if err != nil {
 		log.Error(err)
 	}
-	err = c.AddFunc("@daily", dgraph.RemoveResourcesInactiveInCurrentMonth)
+	err = c.AddFunc("@daily", dgraph.RemoveResourcesInactive)
 	if err != nil {
 		log.Error(err)
 	}

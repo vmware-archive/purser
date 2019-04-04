@@ -14,6 +14,7 @@ import { TopoGraphModule } from './modules/topo-graph/modules';
 import { LeftNavigationModule } from './modules/left-navigation/modules';
 import { LoginModule } from './modules/login/login.module';
 import { LogoutModule } from './modules/logout/logout.module';
+import { OptionsModule } from './modules/options/options.module';
 import { ChangepasswordModule } from './modules/changepassword/changepassword.module';
 import { LogicalGroupModule } from './modules/logical-group/logical-group.module'
 import { HomeModule } from './modules/home/home.module';
@@ -40,6 +41,7 @@ import { GoogleChartsModule } from 'angular-google-charts';
         ChangepasswordModule,
         LeftNavigationModule,
         HomeModule,
+        OptionsModule,
         GoogleChartsModule.forRoot()
     ],
     providers: [ CookieService ],
