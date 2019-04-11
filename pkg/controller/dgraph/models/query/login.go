@@ -24,16 +24,28 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UpdateLogin ...
-func UpdateLogin(username, oldPassword, newPassword string) bool {
-	if CheckLogin(username, oldPassword) {
-		login, err := GetHashedPassword(username)
+// Authenticate performs user authentication for service access
+func Authenticate(username, inputPassword string) bool {
+	if !validateUsername(username) {
+		return false
+	}
+	login, err := getLoginCredentials(username)
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+	return comparePasswords(login.Password, []byte(inputPassword))
+}
+
+// UpdatePassword updates stored password with new one for the given username in Dgraph
+func UpdatePassword(username, oldPassword, newPassword string) bool {
+	if Authenticate(username, oldPassword) {
+		login, err := getLoginCredentials(username)
 		if err != nil {
 			logrus.Error(err)
 			return false
 		}
-		err = hashAndUpdatePassword(&login, newPassword)
-		if err == nil {
+		if err = hashAndUpdatePassword(&login, newPassword); err == nil {
 			return true
 		}
 		logrus.Error(err)
@@ -51,42 +63,32 @@ func hashAndUpdatePassword(login *dgraph.Login, newPassword string) error {
 	return err
 }
 
-// GetHashedPassword ...
-func GetHashedPassword(username string) (dgraph.Login, error) {
+// getLoginCredentials returns a struct of hashed password and username.
+func getLoginCredentials(username string) (dgraph.Login, error) {
 	q := `query {
-		login(func: has(isLogin)) {
+		login(func: has(isLogin)) @filter(eq(username, ` + username + `)) {
 			uid
 			username
 			password
 		}
 	}`
-
 	type root struct {
 		LoginList []dgraph.Login `json:"login"`
 	}
 	newRoot := root{}
-	err := executeQuery(q, &newRoot)
-	if err != nil {
+	if err := executeQuery(q, &newRoot); err != nil {
 		return dgraph.Login{}, err
 	}
 	return newRoot.LoginList[0], nil
 }
 
-// CheckLogin ...
-func CheckLogin(username, inputPassword string) bool {
-	// get hashed pwd from db
-	login, err := GetHashedPassword(username)
-	if err != nil {
-		logrus.Error(err)
-		return false
-	}
-	return comparePasswords(login.Password, []byte(inputPassword))
+func validateUsername(username string) bool {
+	return username == "admin"
 }
 
 func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 	byteHash := []byte(hashedPwd)
-	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword(byteHash, plainPwd); err != nil {
 		logrus.Error(err)
 		return false
 	}
