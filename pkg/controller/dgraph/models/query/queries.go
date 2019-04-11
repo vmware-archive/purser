@@ -258,6 +258,14 @@ func getQueryForAllGroupsData() string {
 			projectedMemoryCost
 			projectedStorageCost
 			projectedCost
+			lastMonthCPUCost
+			lastMonthMemoryCost
+			lastMonthStorageCost
+			lastMonthCost
+			lastLastMonthCPUCost
+			lastLastMonthMemoryCost
+			lastLastMonthStorageCost
+			lastLastMonthCost
 		}
 	}`
 }

@@ -13,7 +13,7 @@
     Last Month Costs
 </button>
 <button type="button" (click)="changeLast3MonthView()" class="label clickable {{ getLast3MonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
-    Last 3 Months Costs
+    3 Months Costs
 </button>
 <button type="button" (click)="changeProjectedMonthView()" class="label clickable {{ getProjectedMonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
     Projected Costs
@@ -67,9 +67,9 @@
       <clr-dg-cell>{{ (group.lastMonthStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
       <clr-dg-cell>{{ (group.lastMonthCost | number: '1.0-2') || 0 }}</clr-dg-cell>
 
-      <clr-dg-cell>{{ ((group.mtdCPUCost + group.lastMonthCPUCost + group.lastLastMonthCPUCost)| number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ ((group.mtdMemoryCost + group.lastMonthMemoryCost + group.lastLastMonthMemoryCost)| number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ ((group.mtdStorageCost + group.lastMonthStorageCost + group.lastLastMonthStorageCost) | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (((group.mtdCPUCost || 0) + (group.lastMonthCPUCost || 0) + (group.lastLastMonthCPUCost || 0)) | number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (((group.mtdMemoryCost || 0) + (group.lastMonthMemoryCost || 0) + (group.lastLastMonthMemoryCost || 0))| number: '1.0-2') || 0 }}</clr-dg-cell>
+      <clr-dg-cell>{{ (((group.mtdStorageCost || 0) + (group.lastMonthStorageCost || 0) + (group.lastLastMonthStorageCost || 0)) | number: '1.0-2') || 0 }}</clr-dg-cell>
       <clr-dg-cell>{{ (((group.mtdCost || 0) + (group.lastMonthCost || 0) + (group.lastLastMonthCost || 0)) | number: '1.0-2') || 0 }}</clr-dg-cell>
       <clr-dg-action-overflow>
             <button class="action-item" (click)="setToBeDeletedGroup(group.name)"><clr-icon shape="trash"></clr-icon>  DELETE</button>
@@ -219,28 +219,30 @@
     </div>
 </div>
 
-<clr-modal [(clrModalOpen)]="isShowMTD" [clrModalSize]="'lg'">
-    <h3 class="modal-title">MTD Costs</h3>
-    <div class="modal-body">
-        <div class="googleChartDiv" *ngIf="isShowMTD">
-            <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
-        </div>        
+<div class="clr-row" *ngIf="isShowMTD">
+    <div class="card">
+        <div class="card-header">
+            MTD Costs
+        </div>
+        <div class="card-block">
+            <div class="googleChartDiv" *ngIf="isShowMTD">
+                <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
+            </div> 
+        </div>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-outline" (click)="isShowMTD = false">Close</button>
-    </div>
-</clr-modal>
+</div>
 
-<clr-modal [(clrModalOpen)]="isShowProjected" [clrModalSize]="'lg'">
-    <h3 class="modal-title">Projected Costs</h3>
-    <div class="modal-body">
-        <div class="googleChartDiv" *ngIf="isShowProjected">
-            <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
-        </div>        
+<div class="clr-row" *ngIf="isShowProjected">
+    <div class="card">
+        <div class="card-header">
+            Projected Costs
+        </div>
+        <div class="card-block">
+            <div class="googleChartDiv" *ngIf="isShowProjected">
+                <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
+            </div>
+        </div>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-outline" (click)="isShowProjected = false">Close</button>
-    </div>
-</clr-modal>
+</div>
 
 

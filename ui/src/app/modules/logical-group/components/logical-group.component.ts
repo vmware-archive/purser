@@ -170,6 +170,7 @@ export class LogicalGroupComponent implements OnInit {
 
   public showMTD() {
     this.isShowMTD = true;
+    this.isShowProjected = false;
     this.donutData = {
       "data": [
         ['CPU', this.groupToFocus.mtdCPUCost],
@@ -195,6 +196,7 @@ export class LogicalGroupComponent implements OnInit {
 
   public showProjected() {
     this.isShowProjected = true;
+    this.isShowMTD = false;
     this.donutData = {
       "data": [
         ['CPU', this.groupToFocus.projectedCPUCost],
