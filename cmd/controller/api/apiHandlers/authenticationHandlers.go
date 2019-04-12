@@ -53,7 +53,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !query.CheckLogin(cred.Username, cred.Password) {
+	if !query.Authenticate(cred.Username, cred.Password) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -115,7 +115,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !query.UpdateLogin(cred.Username, cred.Password, cred.NewPassword) {
+	if !query.UpdatePassword(cred.Username, cred.Password, cred.NewPassword) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
