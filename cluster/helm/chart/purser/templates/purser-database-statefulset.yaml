@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "purser.fullname" . }}-database
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "purser.name" . }}-database
+    helm.sh/chart: {{ include "purser.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  serviceName: "dgraph"
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "purser.name" . }}-database
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "purser.name" . }}-database
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-zero
+          image: "{{ .Values.database.zero.image.repository }}:{{ .Values.database.zero.image.tag }}"
+          imagePullPolicy: {{ .Values.database.zero.image.pullPolicy }}
+          ports:
+          - containerPort: 5080
+            name: zero-grpc
+          - containerPort: 6080
+            name: zero-http
+          volumeMounts:
+          - name: datadir
+            mountPath: /dgraph
+          command:
+            - bash
+            - "-c"
+            - |
+              set -ex
+              dgraph zero --my=0.0.0.0:5080
+          resources:
+            {{- toYaml .Values.database.zero.resources | nindent 12 }}
+        - name: {{ .Chart.Name }}-server
+          image: "{{ .Values.database.zero.image.repository }}:{{ .Values.database.zero.image.tag }}"
+          imagePullPolicy: {{ .Values.database.zero.image.pullPolicy }}
+          ports:
+          - containerPort: 8080
+            name: server-http
+          - containerPort: 9080
+            name: server-grpc
+          volumeMounts:
+          - name: datadir
+            mountPath: /dgraph
+          command:
+            - bash
+            - "-c"
+            - |
+              set -ex
+              dgraph server --my=0.0.0.0:7080 --lru_mb 2048 --zero 0.0.0.0:5080
+          resources:
+            {{- toYaml .Values.database.server.resources | nindent 12 }}
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - name: datadir
+        persistentVolumeClaim:
+          claimName: datadir
+      {{- with .Values.database.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.database.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.database.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+      annotations:
+        volume.alpha.kubernetes.io/storage-class: anything
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: {{ .Values.database.storage | default "10Gi" }}

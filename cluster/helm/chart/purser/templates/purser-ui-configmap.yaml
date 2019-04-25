@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "purser.fullname" . }}-ui
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "purser.name" . }}-ui
+    helm.sh/chart: {{ include "purser.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    upstream purser {
+        server {{ include "purser.fullname" . }}-controller:3030;
+    }
+    server {
+        listen 4200;
+
+        location /auth {
+            proxy_pass http://purser;
+        }
+
+        location /api {
+            proxy_pass http://purser;
+        }
+
+        location / {
+            root /usr/share/nginx/html/purser;
+            index index.html index.htm;
+            try_files $uri $uri/ /index.html =404;
+        }
+    }
