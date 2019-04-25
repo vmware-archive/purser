@@ -89,6 +89,7 @@ func CreateSchema() error {
 	op := &api.Operation{}
 	op.Schema = `
 		name: string @index(term) .
+		username: string @index(term) .
 		xid:  string @index(term) .
 		startTime: dateTime @index(hour) .
 		endTime: dateTime @index(hour) .

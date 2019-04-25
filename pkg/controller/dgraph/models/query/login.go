@@ -76,7 +76,7 @@ func getLoginCredentials(username string) (dgraph.Login, error) {
 		LoginList []dgraph.Login `json:"login"`
 	}
 	newRoot := root{}
-	if err := executeQuery(q, &newRoot); err != nil {
+	if err := executeQuery(q, &newRoot); err != nil || newRoot.LoginList == nil {
 		return dgraph.Login{}, err
 	}
 	return newRoot.LoginList[0], nil
