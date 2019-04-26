@@ -19,10 +19,12 @@ package apiHandlers
 
 import (
 	"encoding/json"
+	"encoding/gob"
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/sessions"
+	"github.com/gorilla/securecookie"
 	"github.com/vmware/purser/pkg/controller/dgraph/models/query"
 )
 
@@ -33,14 +35,35 @@ type Credentials struct {
 	NewPassword string `json:"newPassword"`
 }
 
-var cookieName = "purser-session-token"
+// User structure
+type User struct {
+	Username string
+	Authenticated bool
+}
 
-var store sessions.Store
+var cookieName = "purser-token-new"
 
-// SetCookieStore initialises cookie store
-func SetCookieStore(cookieKey, cookiename string) {
-	store = sessions.NewCookieStore([]byte(cookieKey))
-	cookieName = cookiename
+var store *sessions.CookieStore
+
+// initialises cookie store
+func init() {
+	authKeyOne := securecookie.GenerateRandomKey(64)
+	encryptionKeyOne := securecookie.GenerateRandomKey(32)
+
+	// TODO: Do we need to persist authKey and encryptionKey?
+
+	// TODO: Do we need to periodically change authKey and encryptionKey?
+
+	store = sessions.NewCookieStore(
+		authKeyOne,
+		encryptionKeyOne,
+	)
+
+	store.Options = &sessions.Options{
+		MaxAge:   60 * 15,
+		HttpOnly: true,
+	}
+	gob.Register(User{})
 }
 
 // LoginUser listens on /auth/login endpoint
@@ -54,6 +77,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !query.Authenticate(cred.Username, cred.Password) {
+		logrus.Errorf("wrong credentials")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -64,8 +88,19 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	session.Values["authenticated"] = true
-	saveSession(session, w, r)
+	session.Values["user"] = User{
+		Username: cred.Username,
+		Authenticated: true,
+	}
+
+	err = session.Save(r, w)
+	if err != nil {
+		logrus.Errorf("unable to get session from cookie store, err: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	logrus.Infof("login success")
+	w.WriteHeader(http.StatusOK)
 }
 
 // LogoutUser listens on /auth/logout endpoint
@@ -77,17 +112,16 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	session.Values["authenticated"] = false
-	saveSession(session, w, r)
-}
+	session.Values["user"] = User{}
+	session.Options.MaxAge = -1
 
-func saveSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) {
-	err := session.Save(r, w)
+	err = session.Save(r, w)
 	if err != nil {
 		logrus.Errorf("unable to get session from cookie store, err: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func isUserAuthenticated(w http.ResponseWriter, r *http.Request) bool {
@@ -98,8 +132,10 @@ func isUserAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	// Check if user is authenticated
-	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	var usr User
+	usr, convertionSuccess := session.Values["user"].(User)
+	if !convertionSuccess || !usr.Authenticated {
+		http.Redirect(w, r, "/", http.StatusForbidden)
 		return false
 	}
 	return true

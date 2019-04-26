@@ -80,4 +80,4 @@ spec:
             - name: http
               containerPort: 3030
           command: ["/controller"]
-          args: ["--cookieKey=purser-super-secret-key", "--cookieName=purser-session-token", "--log=info", "--interactions=disable", "--dgraphURL=purser-db", "--dgraphPort=9080"]
+          args: ["--log=info", "--interactions=disable", "--dgraphURL=purser-db", "--dgraphPort=9080"]
