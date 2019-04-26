@@ -86,6 +86,14 @@ func CreateOrUpdateGroup(group *groups_v1.Group, podsCount int) (*api.Assigned, 
 		ProjectedMemoryCost:  group.Spec.MTDCost.MemoryCost + group.Spec.PerHourCost.MemoryCost*hoursRemainingInCurrentMonth,
 		ProjectedStorageCost: group.Spec.MTDCost.StorageCost + group.Spec.PerHourCost.StorageCost*hoursRemainingInCurrentMonth,
 		ProjectedCost:        group.Spec.MTDCost.TotalCost + group.Spec.PerHourCost.TotalCost*hoursRemainingInCurrentMonth,
+		LastMonthCPUCost:           group.Spec.LastMonthCost.CPUCost,
+		LastMonthMemoryCost:        group.Spec.LastMonthCost.MemoryCost,
+		LastMonthStorageCost:       group.Spec.LastMonthCost.StorageCost,
+		LastMonthCost:              group.Spec.LastMonthCost.TotalCost,
+		LastLastMonthCPUCost:           group.Spec.LastLastMonthCost.CPUCost,
+		LastLastMonthMemoryCost:        group.Spec.LastLastMonthCost.MemoryCost,
+		LastLastMonthStorageCost:       group.Spec.LastLastMonthCost.StorageCost,
+		LastLastMonthCost:              group.Spec.LastLastMonthCost.TotalCost,
 	}
 	if uid != "" {
 		grp.ID = dgraph.ID{Xid: xid, UID: uid}

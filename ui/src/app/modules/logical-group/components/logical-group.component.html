@@ -1,37 +1,23 @@
 <h3>Custom Groups</h3>
 
-<div class="clr-row" style="margin-top: 2%;">
-    <div class="clr-col-10">
-        <button type="button" (click)="changeCurrentMonthView()" class="label clickable {{ getCurrentMonthStatus() }}" style="margin-bottom: -1%;cursor:pointer;font-size: 10pt;">
-            Current Month Cost
-            <clr-signpost>
-                <clr-signpost-content *clrIfOpen>
-                    <h3>Current Month Cost</h3>
-                    <p>This is the running cost for this month <br/>i.e., from start of this month</p>
-                </clr-signpost-content>
-            </clr-signpost>
-        </button>
-        <button type="button" (click)="changeLastMonthView()" class="label clickable {{ getLastMonthStatus() }}" style="margin-bottom: -1%;cursor:pointer;font-size: 10pt;">
-            Last Month Cost
-        </button>
-        <button type="button" (click)="changeLast3MonthView()" class="label clickable {{ getLast3MonthStatus() }}" style="margin-bottom: -1%;cursor:pointer;font-size: 10pt;">
-            3 Months Cost
-            <clr-signpost>
-                <clr-signpost-content *clrIfOpen>
-                    <h3>3 Months Cost</h3>
-                    <p>This cost includes last two months cost<br/> and current month running cost.</p>
-                </clr-signpost-content>
-            </clr-signpost>
-        </button>
-        <button type="button" (click)="changeProjectedMonthView()" class="label clickable {{ getProjectedMonthStatus() }}" style="margin-bottom: -1%;cursor:pointer;font-size: 10pt;">
-            Projected Cost
-        </button>
-    </div>
-
-    <div class="clr-col-1">
+<div class="clr-row" style="margin-top: 2%; margin-bottom: 1%">
+    <div class="clr-col-4">
         <button [clrLoading]="submitBtnState" type="submit" class="btn btn-success-outline" (click)="fillGroupData()"><clr-icon shape="plus"></clr-icon> ADD GROUP</button>
     </div>
 </div>
+
+<button type="button" (click)="changeCurrentMonthView()" class="label clickable {{ getCurrentMonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+    Current Month Cost
+</button>
+<button type="button" (click)="changeLastMonthView()" class="label clickable {{ getLastMonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+    Last Month Cost
+</button>
+<button type="button" (click)="changeLast3MonthView()" class="label clickable {{ getLast3MonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+    3 Months Cost
+</button>
+<button type="button" (click)="changeProjectedMonthView()" class="label clickable {{ getProjectedMonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+    Projected Cost
+</button>
 
 <clr-datagrid>
     <clr-dg-column [clrDgField]="'name'">Group Name</clr-dg-column>
