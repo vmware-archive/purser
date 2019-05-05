@@ -50,30 +50,22 @@ Purser with its robust CLI and UI capabilities provides a set of features includ
 
 ## Setup and Installation
 
-Follow the instructions below to set up Purser in your environment.  
-
 ### Prerequisites
-
 - Kubernetes version 1.9 or greater.
-- `kubectl` installed and configured. For details see [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-
-### Installation
-
-#### Prerequisites
 - `kubectl` installed and configured. For details see [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 - `curl` installed. Download it [here](https://curl.haxx.se/download.html)
 
-#### Linux/Mac Users:
+### Linux/Mac Users:
 ```bash
 curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-setup.sh -O && sh purser-setup.sh
 ```
 
-#### Windows/Other Users:
+### Windows/Other Users:
 
 For detailed installation steps follow the instructions in the [manual installation guide](./docs/manual-installation.md).
 
 
-#### Purser Plugin Setup (Optional)
+### Purser Plugin Setup (Optional)
 _NOTE: This Plugin installation is optional._
 
 If you want to install and use Purser's command line interface
@@ -81,11 +73,11 @@ If you want to install and use Purser's command line interface
 - [Plugin Usage](./docs/plugin-usage.md).
 
 
-#### Other Installation Methods
+### Other Installation Methods
 
 For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs).
 
-## Uninstalling
+### Uninstalling
 
 ``` bash
 kubectl delete ns purser
