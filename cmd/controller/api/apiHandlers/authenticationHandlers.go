@@ -50,10 +50,6 @@ func init() {
 	authKeyOne := securecookie.GenerateRandomKey(64)
 	encryptionKeyOne := securecookie.GenerateRandomKey(32)
 
-	// TODO: Do we need to persist authKey and encryptionKey?
-
-	// TODO: Do we need to periodically change authKey and encryptionKey?
-
 	store = sessions.NewCookieStore(
 		authKeyOne,
 		encryptionKeyOne,
