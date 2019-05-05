@@ -77,6 +77,7 @@ curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-setup.s
 ```
 
 **Windows/Other Users:**
+
 For detailed installation steps follow the steps in the [manual installation guide](./docs/manual-installation.md).
 
 
@@ -104,12 +105,8 @@ For other installation methods such as **manual installation** or **installation
 ### Uninstalling Purser
 
 ``` bash
-kubectl --namespace=purser delete -f purser-database-setup.yaml
-kubectl --namespace=purser delete -f purser-controller-setup.yaml
-kubectl --namespace=purser delete -f purser-ui-setup.yaml
-kubectl --namespace=purser delete pvc datadir-purser-dgraph-0
+kubectl delete ns purser
 ```
-
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 

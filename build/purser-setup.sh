@@ -14,30 +14,38 @@
 # limitations under the License.
 
 
+# Kubeconfig location
+read -p "Location for cluster's configuration (Press 'Enter' to take default $HOME/.kube/config): " readConfig
+if [ -z "$readConfig" ];
+then
+    kubeConfig="$HOME/.kube/config"
+else
+    kubeConfig=$readConfig
+fi
+
 # Realease Version
 releaseVersion=1.0.2
-
 echo "Installing Purser version: ${releaseVersion}"
 
 # Namespace setup
 echo "Creating namespace purser"
-kubectl create ns purser
+kubectl --kubeconfig=$kubeConfig create ns purser
 
 # DB setup
 echo "Setting up database for Purser"
 curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-database-setup.yaml -O
-kubectl --namespace=purser create -f purser-database-setup.yaml
+kubectl --kubeconfig=$kubeConfig --namespace=purser create -f purser-database-setup.yaml
 echo "Waiting for database containers to be in running state... (1 minute)"
 sleep 60s
 
 # Purser controller setup
 echo "Setting up controller for Purser"
 curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-controller-setup.yaml -O
-kubectl --namespace=purser create -f purser-controller-setup.yaml
+kubectl --kubeconfig=$kubeConfig --namespace=purser create -f purser-controller-setup.yaml
 
 # Purser UI setup
 echo "Setting up UI for Purser"
 curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-ui-setup.yaml -O
-kubectl --namespace=purser create -f purser-ui-setup.yaml
+kubectl --kubeconfig=$kubeConfig --namespace=purser create -f purser-ui-setup.yaml
 
 echo "Purser setup is completed"
