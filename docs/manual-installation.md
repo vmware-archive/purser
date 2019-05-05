@@ -37,7 +37,7 @@ The following settings can be customized before Controller installation:
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
-## Purser Plugin Installation
+## Purser Plugin Installation (Optional)
 
 - Download the purser plugin descriptor for your environment from the [releases page](https://github.com/vmware/purser/releases/download/v1.0.0/plugin.yaml).
 

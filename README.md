@@ -59,42 +59,27 @@ Follow the instructions below to set up Purser in your environment.
 
 ### Installation
 
-Purser has two components to install.
-
-- [Purser Setup](./README.md#Purser-Setup)
-- [Purser Plugin Setup](./README.md#Purser-Plugin-Setup)
-
-#### Purser Setup
-
-**Prerequisites**
+#### Prerequisites
 - `kubectl` installed and configured. For details see [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 - `curl` installed. Download it [here](https://curl.haxx.se/download.html)
 
-**Linux/Mac Users:**
+#### Linux/Mac Users:
 ```bash
-# Linux/Mac users
 curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-setup.sh -O && sh purser-setup.sh
 ```
 
-**Windows/Other Users:**
+#### Windows/Other Users:
 
-For detailed installation steps follow the steps in the [manual installation guide](./docs/manual-installation.md).
+For detailed installation steps follow the instructions in the [manual installation guide](./docs/manual-installation.md).
 
 
-#### Purser Plugin Setup
+#### Purser Plugin Setup (Optional)
+_NOTE: This Plugin installation is optional._
 
-#### Linux and macOS
+If you want to install and use Purser's command line interface
+- [Plugin installation guide](./docs/plugin-installation.md).
+- [Plugin Usage](./docs/plugin-usage.md).
 
-``` bash
-# Binary installation
-wget -q https://github.com/vmware/purser/blob/master/build/purser-binary-install.sh && sh purser-binary-install.sh
-```
-
-Enter your cluster's configuration path when prompted. The plugin binary needs to be in your `PATH` environment variable, so once the download of the binary is finished the script tries to move it to `/usr/local/bin`. This may need your sudo permission.
-
-#### Windows
-
-For installation on Windows follow the steps in the [manual installation guide](./docs/manual-installation.md).
 
 #### Other Installation Methods
 
@@ -102,21 +87,12 @@ For other installation methods such as **manual installation** or **installation
 
 ## Uninstalling
 
-### Uninstalling Purser
-
 ``` bash
 kubectl delete ns purser
 ```
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
-### Uninstalling Purser Binary
-
-### Linux/macOS
-
-``` bash
-wget -q https://github.com/vmware/purser/blob/master/build/purser-binary-uninstall.sh && sh purser-binary-uninstall.sh
-```
 
 ## API Documentation
 
