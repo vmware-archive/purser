@@ -41,7 +41,7 @@ type User struct {
 	Authenticated bool
 }
 
-var cookieName = "purser-token-new"
+var cookieName = "purser-session-token"
 
 var store *sessions.CookieStore
 
