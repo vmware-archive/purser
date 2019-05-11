@@ -50,95 +50,41 @@ Purser with its robust CLI and UI capabilities provides a set of features includ
 
 ## Setup and Installation
 
-Follow the instructions below to set up Purser in your environment.  
-
 ### Prerequisites
-
 - Kubernetes version 1.9 or greater.
 - `kubectl` installed and configured. For details see [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+- `curl` installed. Download it [here](https://curl.haxx.se/download.html)
 
-### Installation
-
-Purser has three components to install.
-
-- [Purser Setup](./README.md#Purser-Setup)
-- [Purser Plugin Setup](./README.md#Purser-Plugin-Setup)
-
-#### Purser Setup
-The following steps will install Purser in your cluster at namespace `purser`.
-Creation of this namespace is needed because purser needs to create a service-account which requires namespace.
-Also, the frontend will use kubernetes DNS to call backend for data and this DNS contains a field for namespace.
-``` bash
-# Namespace setup
-kubectl create ns purser
-
-# DB setup
-curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-database-setup.yaml -O
-kubectl --namespace=purser create -f purser-database-setup.yaml
-
-# Purser controller setup
-curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-controller-setup.yaml -O
-kubectl --namespace=purser create -f purser-controller-setup.yaml
-
-# Purser UI setup
-curl https://raw.githubusercontent.com/vmware/purser/master/cluster/purser-ui-setup.yaml -O
-kubectl --namespace=purser create -f purser-ui-setup.yaml
-```
-**NOTE:** If you don't have `curl` installed you can download `purser-database-setup.yaml` from [here](./cluster/purser-database-setup.yaml), `purser-controller-setup.yaml` from [here](cluster/purser-controller-setup.yaml) and `purser-ui-setup.yaml` from [here](cluster/purser-ui-setup.yaml). 
-Then `kubectl create -f purser-database-setup.yaml` ,
-`kubectl create -f purser-controller-setup.yaml` and `kubectl create -f purser-ui-setup.yaml` will setup purser in your cluster.
-
-##### Change Settings and Enable/Disable Purser Features
-
-The following settings can be customized before Controller installation:
-
-- Change the default **log level**, **dgraph url** and **dgraph port** by editing `args` field in the [purser-controller-setup.yaml](cluster/purser-controller-setup.yaml). (Default: `--log=info`, `--dgraphURL=purser-db`, `--dgraphPort=9080`)
-- Enable/Disable **resource interactions** capability by editing `args` field in the [purser-controller-setup.yaml](cluster/purser-controller-setup.yaml) and uncommenting `pods/exec` rule from purser-permissions. (Default: `disabled`)
-- Enable **subscription to inventory changes** capability by creating an object of custom resource kind `Subscriber`. (Refer: [example-subscriber.yaml](./cluster/artifacts/example-subscriber.yaml))
-- Enable **customized logical grouping of resources** by creating an object of custom resource kind `Group`. (Refer: [docs](docs/custom-group-installation-and-usage.md) for custom group installation and usage)
-
-_**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
-
-#### Purser Plugin Setup
-
-#### Linux and macOS
-
-``` bash
-# Binary installation
-wget -q https://github.com/vmware/purser/blob/master/build/purser-binary-install.sh && sh purser-binary-install.sh
+### Linux/Mac Users:
+```bash
+curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-setup.sh -O && sh purser-setup.sh
 ```
 
-Enter your cluster's configuration path when prompted. The plugin binary needs to be in your `PATH` environment variable, so once the download of the binary is finished the script tries to move it to `/usr/local/bin`. This may need your sudo permission.
+### Windows/Other Users:
 
-#### Windows
+For detailed installation steps follow the instructions in the [manual installation guide](./docs/manual-installation.md).
 
-For installation on Windows follow the steps in the [manual installation guide](./docs/manual-installation.md).
 
-#### Other Installation Methods
+### Purser Plugin Setup (Optional)
+_NOTE: This Plugin installation is optional._
+
+If you want to install and use Purser's command line interface
+- [Plugin installation guide](./docs/plugin-installation.md).
+- [Plugin Usage](./docs/plugin-usage.md).
+
+
+### Other Installation Methods
 
 For other installation methods such as **manual installation** or **installation from source code** refer guides in [docs](./docs).
 
-## Uninstalling
-
-### Uninstalling Purser
+### Uninstalling
 
 ``` bash
-kubectl --namespace=purser delete -f purser-database-setup.yaml
-kubectl --namespace=purser delete -f purser-controller-setup.yaml
-kubectl --namespace=purser delete -f purser-ui-setup.yaml
-kubectl --namespace=purser delete pvc datadir-purser-dgraph-0
+kubectl delete ns purser
 ```
-
 
 _**NOTE:** Use flag `--kubeconfig=<absolute path to config>` if your cluster configuration is not at the [default location](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable)._
 
-### Uninstalling Purser Binary
-
-### Linux/macOS
-
-``` bash
-wget -q https://github.com/vmware/purser/blob/master/build/purser-binary-uninstall.sh && sh purser-binary-uninstall.sh
-```
 
 ## API Documentation
 
