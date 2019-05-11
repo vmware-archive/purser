@@ -19,5 +19,5 @@ For installation on Windows follow the steps in the [manual installation guide](
 ### Linux/macOS
 
 ``` bash
-wget -q https://github.com/vmware/purser/blob/master/build/purser-binary-uninstall.sh && sh purser-binary-uninstall.sh
+curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-binary-install.sh -O && sh purser-binary-uninstall.sh
 ```
