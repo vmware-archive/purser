@@ -27,9 +27,8 @@ import (
 )
 
 // StartServer starts api server
-func StartServer(cookieStoreKey, cookieName string, conf controller.Config) {
+func StartServer(conf controller.Config) {
 	apiHandlers.SetKubeClientAndGroupClient(conf)
-	apiHandlers.SetCookieStore(cookieStoreKey, cookieName)
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedCredentials := handlers.AllowCredentials()
 	router := NewRouter()

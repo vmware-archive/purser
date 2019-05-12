@@ -45,7 +45,7 @@
     <clr-dg-column [clrDgField]="'lastThreeMonthsCost'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months Cost (US $)</ng-container></clr-dg-column>
 
 
-    <clr-dg-placeholder>We couldn't find any custom groups! Logged out? Click here to <a href="./login">Signin</a> </clr-dg-placeholder>
+    <clr-dg-placeholder>We couldn't find any custom groups!</clr-dg-placeholder>
 
     <clr-dg-row *clrDgItems="let group of groups">
       <clr-dg-cell><button class="btn btn-sm btn-link" style="padding:-4%; margin:-4%; text-align: left" (click)="showGroupDetails(group)">{{ group.name }}</button></clr-dg-cell>
