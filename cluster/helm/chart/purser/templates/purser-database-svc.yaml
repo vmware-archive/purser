@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "purser.fullname" . }}-database
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "purser.name" . }}
+    helm.sh/chart: {{ include "purser.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.database.service.type }}
+  ports:
+  - port: 5080
+    targetPort: 5080
+    name: zero-grpc
+  - port: 6080
+    targetPort: 6080
+    name: zero-http
+  - port: 8080
+    targetPort: 8080
+    name: server-http
+  - port: 9080
+    targetPort: 9080
+    name: server-grpc
+  selector:
+    app.kubernetes.io/name: {{ include "purser.name" . }}-database
+    app.kubernetes.io/instance: {{ .Release.Name }}

@@ -1,0 +1,43 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: {{ include "purser.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "purser.name" . }}
+    helm.sh/chart: {{ include "purser.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "watch", "list", "update", "create", "delete"]
+  - apiGroups: ["vmware.purser.com"]
+    resources: ["groups", "subscribers"]
+    verbs: ["get", "watch", "list", "update", "create", "delete"]
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "watch", "list"]
+{{- if .Values.controller.interaction }}
+  - apiGroups: ["*"]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+{{- end }}
+---
+# ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "purser.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "purser.name" . }}
+    helm.sh/chart: {{ include "purser.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "purser.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "purser.fullname" . }}
+    namespace: {{ .Release.Namespace }}
