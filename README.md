@@ -64,6 +64,9 @@ curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-setup.s
 
 For detailed installation steps follow the instructions in the [manual installation guide](./docs/manual-installation.md).
 
+### Default Login
+To login default username is `admin` and password is `purser!123`.
+_NOTE: Please change password after first login.
 
 ### Purser Plugin Setup (Optional)
 _NOTE: This Plugin installation is optional._
