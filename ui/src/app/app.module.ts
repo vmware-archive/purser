@@ -21,10 +21,14 @@ import { HomeModule } from './modules/home/home.module';
 import { CookieService } from 'ngx-cookie-service';
 
 import { GoogleChartsModule } from 'angular-google-charts';
+import { WhatIfComponent } from './what-if/what-if.component';
+import { MigrateComponent } from './migrate/migrate.component';
 
 @NgModule({
     declarations: [
         AppComponent,
+        WhatIfComponent,
+        MigrateComponent,
     ],
     imports: [
         BrowserModule,
