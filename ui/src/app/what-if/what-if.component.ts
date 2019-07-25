@@ -10,7 +10,7 @@ export class WhatIfComponent implements OnInit {
   addWorkload : string = "Add Workload"
   appProfile : string = "Application Profile"
   scenarioName : string;
-  profile_labels = ["CPU", "Memory", "Disk Space", "Annual Project Growth", "Number of VMs"];
+  profile_labels = ["CPU", "Memory", "Disk Space", "Annual Project Growth", "Replicas"];
   profile_units = ["vCPU", "GB", "GB", "%", ""];
   profile : any[] = [];
   profile_values : number[] = [];
@@ -22,6 +22,8 @@ export class WhatIfComponent implements OnInit {
 
   runScenario(): void{
     console.log("------given values------" + this.profile_values);
+    console.log("----scene names-----" + this.scenarioName);
+    console.log("----start date ---end date-------" + this.startDate + this.endDate);
   }
 
   ngOnInit() {
@@ -32,5 +34,4 @@ export class WhatIfComponent implements OnInit {
         });
     }
   }
-
 }

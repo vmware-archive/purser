@@ -12,10 +12,6 @@
     left : 150px;
     top : 5px;
 }
-::placeholder{
-    color : #85C81A;
-    opacity : 1;
-}
 #scene_name, #start_label, #end_label{
     color : #0095D3;
     font-size : 15px;
@@ -38,7 +34,7 @@
 .single_unit{
     color : #60B515;
     position : relative;
-    left : 390px;
+    left : 430px;
     top : -50px;
 }
 .single_input {
@@ -62,7 +58,7 @@
 }
 .workload_btn{
     position: absolute;
-    bottom : -60px;
+    top : 460px;
     right : 50px;
 }
 #date{
@@ -75,11 +71,7 @@
     top : 95px;
     right : 100px;
 }
-#start_label{
-    position : absolute;
-    top : -50px;
-    right : -150px;
-}
+
 #end_date{
     position : absolute;
     top : 170px;
@@ -88,5 +80,13 @@
 #start_label{
     position : relative;
     top : -50px;
-    right : -100px;
+    right : -70px;
+}
+#end_label{
+    position : relative;
+    top : 120px;
+    left : 600px;
+}
+.whatif{
+    position : relative;
 }
