@@ -1,0 +1,92 @@
+#workload_title{
+    font-weight: bold;
+    color : #495A67;
+    font-size: 20px;
+}
+#profile_title{
+    position : absolute;
+    top : 140px;
+}
+#scene_input{
+    position : absolute;
+    left : 150px;
+    top : 5px;
+}
+::placeholder{
+    color : #85C81A;
+    opacity : 1;
+}
+#scene_name, #start_label, #end_label{
+    color : #0095D3;
+    font-size : 15px;
+}
+#profile_title, #date{
+    color : #003D79;
+    font-size : 15px;
+}
+.name{
+    position : absolute;
+    top : 50px;
+}
+.app_entries{
+    position :absolute;
+    top : 200px;
+}
+.single_label{
+    color : #0095D3;
+}
+.single_unit{
+    color : #60B515;
+    position : relative;
+    left : 390px;
+    top : -50px;
+}
+.single_input {
+    position : relative;
+    left : 200px;
+    top : -30px;  
+}
+#run{
+    background-color : #60B515;
+}
+#cancel{
+    background-color : #0095D3;
+}
+#run:hover{
+    background-color : #C7E59C;
+    color : #60B515;
+}
+#cancel:hover{
+    background-color : #A6D8E7;
+    color : #0095D3;
+}
+.workload_btn{
+    position: absolute;
+    bottom : -60px;
+    right : 50px;
+}
+#date{
+    position : absolute;
+    top : 60px;
+    right : 400px;  
+}
+#start_date{
+    position : absolute;
+    top : 95px;
+    right : 100px;
+}
+#start_label{
+    position : absolute;
+    top : -50px;
+    right : -150px;
+}
+#end_date{
+    position : absolute;
+    top : 170px;
+    right: 100px;
+}
+#start_label{
+    position : relative;
+    top : -50px;
+    right : -100px;
+}

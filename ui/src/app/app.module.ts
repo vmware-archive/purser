@@ -23,6 +23,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { WhatIfComponent } from './what-if/what-if.component';
 import { MigrateComponent } from './migrate/migrate.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
@@ -46,6 +47,7 @@ import { MigrateComponent } from './migrate/migrate.component';
         LeftNavigationModule,
         HomeModule,
         OptionsModule,
+        FormsModule,
         GoogleChartsModule.forRoot()
     ],
     providers: [ CookieService ],
