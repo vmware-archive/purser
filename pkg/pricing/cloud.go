@@ -21,6 +21,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/pricing/aws"
+	"github.com/vmware/purser/pkg/pricing/gcp"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -34,17 +35,26 @@ type Cloud struct {
 // GetClusterProviderAndRegion returns cluster provider(ex: aws) and region(ex: us-east-1)
 func GetClusterProviderAndRegion() (string, string) {
 	// TODO: https://github.com/vmware/purser/issues/143
-	cloudProvider := models.AWS
-	region := "us-east-1"
+	cloudProvider := models.GCP
+	region := "us-central1"
 	logrus.Infof("CloudProvider: %s, Region: %s", cloudProvider, region)
 	return cloudProvider, region
 }
 
 // PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph
 func (c *Cloud) PopulateRateCard() {
+	var rateCard *models.RateCard
+
 	switch c.CloudProvider {
 	case models.AWS:
-		rateCard := aws.GetRateCardForAWS(c.Region)
+		rateCard = aws.GetRateCardForAWS(c.Region)
+	case models.GCP:
+		rateCard = gcp.GetRateCardForGCP(c.Region)
+	}
+
+	if rateCard != nil {
 		models.StoreRateCard(rateCard)
+	} else {
+		logrus.Printf("Could not get rate card")
 	}
 }

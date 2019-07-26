@@ -187,6 +187,7 @@ func getPerUnitResourcePriceForNode(nodeName string) (float64, float64) {
 }
 
 func getPricePerUnitResourceFromNodePrice(node Node) (float64, float64) {
+	// TODO: Get correct node price reliably
 	nodePriceXID := node.InstanceType + "-" + node.OS
 	nodePrice, err := retrieveNodePrice(nodePriceXID)
 	if err == nil {
