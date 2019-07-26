@@ -21,6 +21,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/pricing/aws"
+	"github.com/vmware/purser/pkg/pricing/gcp"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -42,9 +43,18 @@ func GetClusterProviderAndRegion() (string, string) {
 
 // PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph
 func (c *Cloud) PopulateRateCard() {
+	var rateCard *models.RateCard
+
 	switch c.CloudProvider {
 	case models.AWS:
-		rateCard := aws.GetRateCardForAWS(c.Region)
+		rateCard = aws.GetRateCardForAWS(c.Region)
+	case models.GCP:
+		rateCard = gcp.GetRateCardForGCP(c.Region)
+	}
+
+	if rateCard != nil {
 		models.StoreRateCard(rateCard)
+	} else {
+		logrus.Printf("Could not get rate card")
 	}
 }
