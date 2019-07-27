@@ -11,7 +11,7 @@ import { OptionsComponent } from './modules/options/components/options.component
 import { ChangepasswordComponent } from './modules/changepassword/components/changepassword.component'
 import { WhatIfComponent } from './modules/what-if/components/whatif/what-if.component';
 import { MigrateComponent } from './migrate/migrate.component';
-import { RunScenarioComponent } from './run-scenario/run-scenario.component';
+import { RunScenarioComponent } from './modules/what-if/components/run-scenario/run-scenario.component';
 
 export const ROUTES: Routes = [
     { path: 'group', component: LogicalGroupComponent },
