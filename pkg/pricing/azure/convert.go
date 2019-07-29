@@ -43,7 +43,9 @@ func GetRateCardForAzure(region string) *models.RateCard {
 	if err == nil {
 		return getPurserRateCard(region, azurePricingArray)
 	}
+
 	return nil
+
 }
 
 //getPurserRateCard take region and pricingArray as input and returns RateCard for Azure of that region.
