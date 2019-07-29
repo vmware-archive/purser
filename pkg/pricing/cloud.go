@@ -21,6 +21,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/pricing/aws"
+	"github.com/vmware/purser/pkg/pricing/azure"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -36,6 +37,7 @@ func GetClusterProviderAndRegion() (string, string) {
 	// TODO: https://github.com/vmware/purser/issues/143
 	cloudProvider := models.AWS
 	region := "us-east-1"
+
 	logrus.Infof("CloudProvider: %s, Region: %s", cloudProvider, region)
 	return cloudProvider, region
 }
@@ -46,5 +48,14 @@ func (c *Cloud) PopulateRateCard() {
 	case models.AWS:
 		rateCard := aws.GetRateCardForAWS(c.Region)
 		models.StoreRateCard(rateCard)
+	case models.AZURE:
+		rateCard := azure.GetRateCardForAzure(c.Region)
+		models.StoreRateCard(rateCard)
 	}
+}
+
+//PopulateAllRateCards take region as input and saves the rate card for all cloud providers
+func PopulateAllRateCards(region string) {
+	go models.StoreRateCard(azure.GetRateCardForAzure(region))
+	go models.StoreRateCard(aws.GetRateCardForAWS(region))
 }
