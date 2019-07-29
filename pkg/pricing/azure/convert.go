@@ -38,12 +38,12 @@ type ProductAttributes struct {
 }
 
 // GetRateCardForAzure takes region as input and returns RateCard and error if any.
-func GetRateCardForAzure(region string) (*models.RateCard, error) {
+func GetRateCardForAzure(region string) *models.RateCard {
 	azurePricingArray, err := getAzureRateCard(region)
 	if err == nil {
-		return getPurserRateCard(region, azurePricingArray), nil
+		return getPurserRateCard(region, azurePricingArray)
 	}
-	return nil, err
+	return nil
 }
 
 //getPurserRateCard take region and pricingArray as input and returns RateCard for Azure of that region.
@@ -65,6 +65,7 @@ func getResourceRateCard(azurePricing []*Pricing) ([]*models.NodePrice, []*model
 	var storagePrices []*models.StoragePrice
 
 	for _, azurePrice := range azurePricing {
+
 		nodePrices = updateComputePrices(azurePrice, nodePrices, "linux")
 		nodePrices = updateComputePrices(azurePrice, nodePrices, "windows")
 		storagePrices = updateStoragePrices(azurePrice, storagePrices)

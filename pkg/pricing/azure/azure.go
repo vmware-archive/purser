@@ -46,6 +46,7 @@ func getAzureRateCard(region string) ([]*Pricing, error) {
 		json.Unmarshal([]byte(jsonStringEnd), &Pricing)
 	}
 	return Pricing, nil
+
 }
 
 //GetAzurePricingUrl function details
