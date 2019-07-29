@@ -43,7 +43,9 @@ func GetRateCardForAzure(region string) *models.RateCard {
 	if err == nil {
 		return getPurserRateCard(region, azurePricingArray)
 	}
+
 	return nil
+
 }
 
 //getPurserRateCard take region and pricingArray as input and returns RateCard for Azure of that region.
@@ -129,5 +131,5 @@ func getPriceForUnitResources(azurePrice *Pricing, operatingSystem string) (floa
 			pricePerMemory = float64(azurePrice.MaxDataDiskCount) * azurePrice.PricePerMemoryWindows
 		}
 	}
-	return float64(pricePerCPU), float64(pricePerMemory)
+	return pricePerCPU, pricePerMemory
 }

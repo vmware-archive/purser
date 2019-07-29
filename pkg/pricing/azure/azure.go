@@ -2,6 +2,7 @@ package azure
 
 import (
 	json "encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,7 +33,8 @@ func getAzureRateCard(region string) ([]*Pricing, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer Check(resp.Body.Close)
+
 	var Pricing []*Pricing
 	if resp.StatusCode == http.StatusOK {
 		bodyBytes, err := ioutil.ReadAll(resp.Body)
@@ -43,10 +45,12 @@ func getAzureRateCard(region string) ([]*Pricing, error) {
 		bodyString := string(bodyBytes)
 		jsonStringStart := s.Split(bodyString, "json = ")[1]
 		jsonStringEnd := s.Replace(s.Split(jsonStringStart, "</script>")[0], ";", "", 1)
-		json.Unmarshal([]byte(jsonStringEnd), &Pricing)
+		error := json.Unmarshal([]byte(jsonStringEnd), &Pricing)
+		if error == nil {
+			return Pricing, nil
+		}
 	}
-	return Pricing, nil
-
+	return nil, nil
 }
 
 //GetAzurePricingUrl function details
@@ -54,4 +58,11 @@ func getAzureRateCard(region string) ([]*Pricing, error) {
 //return azurePrice url for the region
 func getAzureURLForRegion(region string) string {
 	return "https://www.azureprice.net/?region=" + region + "&timeoption=hour"
+}
+
+//Check takes a fuction as input and checks if it returns an error
+func Check(f func() error) {
+	if err := f(); err != nil {
+		fmt.Println("Received error:", err)
+	}
 }
