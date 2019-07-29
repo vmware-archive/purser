@@ -11,7 +11,8 @@ const (
 	DefaultStorageCostInFloat64    = 0.00013888888
 
 	// Cloud provider constants
-	AWS = "aws"
+	AWS   = "aws"
+	AZURE = "azure"
 
 	// Time constants
 	HoursInMonth = 720
