@@ -50,7 +50,7 @@ func GetRateCardForAWS(region string) *models.RateCard {
 func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *models.RateCard {
 	nodePrices, storagePrices := getResourcePricesFromAWSPricing(awsPricing)
 	return &models.RateCard{
-		ID:            dgraph.ID{Xid: models.RateCardXID},
+		ID:            dgraph.ID{Xid: models.RateCardXID},  //look into dgraph
 		IsRateCard:    true,
 		CloudProvider: models.AWS,
 		Region:        region,
@@ -62,6 +62,8 @@ func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *mode
 func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, []*models.StoragePrice) {
 	var nodePrices []*models.NodePrice
 	var storagePrices []*models.StoragePrice
+
+	//doubt
 	products := awsPricing.Products
 	planList := awsPricing.Terms
 

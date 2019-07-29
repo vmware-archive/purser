@@ -1,0 +1,45 @@
+[
+	
+	{
+				"Name":"PKS-US-West-2",
+				"Region": "US-West-2",
+				"vCPU": 0.0481,
+				"GBMemory": 0.0036,
+				"GBStorage": 0.13,
+				"LoadBalancer": 0.025,
+				"DevelopmentCluster": 0.2436,
+				"ProductionCluster": 0.7162,
+				"PKStoAWS": 0.02,
+				"PKStoInternet": 0.05,
+				"DataI/O": 0.01
+			},
+			{
+				"Name":"PKS-US-East-1",
+				"Region": "US-East-1",
+				"vCPU": 0.0481,
+				"GBMemory": 0.0036,
+				"GBStorage": 0.13,
+				"LoadBalancer": 0.025,
+				"DevelopmentCluster": 0.2436,
+				"ProductionCluster": 0.7162,
+				"PKStoAWS": 0.02,
+				"PKStoInternet": 0.05,
+				"DataI/O": 0.01
+			},
+			{
+				"Name":"PKS-EU-West-1",
+				"Region": "EU-West-1",
+				"vCPU": 0.0553,
+				"GBMemory": 0.0036,
+				"GBStorage": 0.1430,
+				"LoadBalancer": 0.028,
+				"DevelopmentCluster": 0.2716,
+				"ProductionCluster": 0.7888,
+				"PKStoAWS": 0.02,
+				"PKStoInternet": 0.05,
+				"DataI/O": 0.01
+			
+		}
+
+]
+
