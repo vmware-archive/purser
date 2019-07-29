@@ -65,6 +65,7 @@ func getResourceRateCard(azurePricing []*Pricing) ([]*models.NodePrice, []*model
 	var storagePrices []*models.StoragePrice
 
 	for _, azurePrice := range azurePricing {
+
 		nodePrices = updateComputePrices(azurePrice, nodePrices, "linux")
 		nodePrices = updateComputePrices(azurePrice, nodePrices, "windows")
 		storagePrices = updateStoragePrices(azurePrice, storagePrices)
