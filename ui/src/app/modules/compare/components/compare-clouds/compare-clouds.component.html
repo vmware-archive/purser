@@ -1,3 +1,17 @@
-<p>
-  compare-clouds works!
-</p>
+<div class="row">
+  <div class="col-md-2" *ngFor = "let cloud of cloudRegions ; let c = index">
+        <div class="card" [ngStyle]="myStyles[c%4]">
+            <div class="card-block">
+                <div class="card-title">
+                    <label>{{cloud.cloud}}</label>
+                    <img class = "cloudImg" src = "../../../../../assets/images/{{images[c]}}">
+                </div>
+                <div class="card-text">
+                  <select clrSelect name="options" [(ngModel)]="options" placeholder = "Select Region">
+                    <option value = "one" *ngFor = "let region of cloudRegions; let r = index">{{region.region[r]}}</option>    <!--how did this work-->
+                  </select>
+                </div>
+            </div>
+        </div>      
+  </div>
+</div>

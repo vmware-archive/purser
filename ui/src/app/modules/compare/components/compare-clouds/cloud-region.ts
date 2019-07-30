@@ -1,4 +1,4 @@
 export class CloudRegion{
     cloud : string;
-    region : string;
+    region : string[];
 }
