@@ -16,24 +16,24 @@ export class RunScenarioComponent implements OnInit {
 
   cloudCost : CloudCost[] = [
     {
-      "cloud" : "AWS",
-      "cost" : 120
+      cloud : "AWS",
+      cost : 120
     },
     {
-      "cloud" : "Azure",
-      "cost" : 150      
+      cloud : "Azure",
+      cost : 150      
     },
     {
-      "cloud" : "GCP",
-      "cost" : 100     
+      cloud : "GCP",
+      cost : 100     
     },
     {
-      "cloud" : "IBM",
-      "cost" : 200      
+      cloud : "IBM",
+      cost : 200      
     },
     {
-      "cloud" : "VMC",
-      "cost" : 190      
+      cloud : "VMC",
+      cost : 190      
     }  
   ]
 
