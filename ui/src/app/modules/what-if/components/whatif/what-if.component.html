@@ -1,0 +1,65 @@
+<div class="clr-row">
+  <div class="clr-col-12">
+      <label id = "workload_title">{{addWorkload}}</label>
+      <form clrForm clrLayout="horizontal">
+        <clr-input-container>
+          <label class = "inputL">Scenario Name :</label>
+          <input clrInput placeholder="What's your scenario?" name="name" class = "input"[(ngModel)]="scenarioName" />
+        </clr-input-container>
+      </form>
+      <div id = "profile_title"><label >{{appProfileTitle}}</label></div>      
+  </div>
+</div>
+
+<div class="clr-row">
+  <div class="clr-col-md-8">
+      <form clrForm clrLayout="horizontal" #profileForm="ngForm">
+          <clr-input-container>           
+            <label class = "inputL clr-col-md-4 ">CPU :</label>
+            <input clrInput class=" input clr-col-md-8"  required type = "number" min="0" onkeypress="preventNonNumericalInput(event)" placeholder="How many vCPU?" name="Icpu" [(ngModel)]="appProfile.cpu"/>
+          </clr-input-container>
+          <clr-input-container>           
+            <label class = "inputL clr-col-md-4">Memory :</label>
+            <input clrInput class=" input clr-col-md-8"  required type = "number" min="0" placeholder="How many GB?"onkeypress="preventNonNumericalInput(event)"  name="Imem" [(ngModel)]="appProfile.memory"/>           
+          </clr-input-container>
+          <clr-input-container>           
+            <label class = "inputL clr-col-md-4">Disk Space:</label>
+            <input clrInput class=" input clr-col-md-8"  required type = "number" min="0" placeholder="How many GB?"onkeypress="preventNonNumericalInput(event)"  name="IdispSpace" [(ngModel)]="appProfile.diskSpace"/>           
+          </clr-input-container>
+          <clr-input-container>           
+            <label class = "inputL clr-col-md-4">Annual Projected Growth :</label>
+            <input class = "input  clr-col-md-8" clrInput type = "number" min="0" placeholder="%?" name="Igrowth" onkeypress="preventNonNumericalInput(event)"  [(ngModel)]="appProfile.growth"/>           
+          </clr-input-container>
+          <clr-input-container>           
+            <label class = "inputL clr-col-md-4">Replicas :</label>
+            <input clrInput class="input clr-col-md-8"  required type = "number" min="0" placeholder="How many replicas?" onkeypress="preventNonNumericalInput(event)"  name="Ireplicas" [(ngModel)]="appProfile.replicas"/>           
+            </clr-input-container>      
+      </form>
+  </div>
+
+  <div class="clr-col-md-4 date">  
+      <label class = "dateL" >Date : &nbsp;&nbsp; Start Date</label>
+      <div class = "startDate">
+        <input type="date" [(clrDate)] = "appProfile.startDate"> 
+      </div> 
+
+      <div class="clr-col-md-6 endDate">
+          <div  class = "endDateLabel">
+              <label>End Date</label>
+          </div>
+          <div >
+              <input type="date" clrDate [(ngModel)] = "appProfile.endDate"> 
+          </div> 
+      </div>
+  </div> 
+
+</div>
+
+<div class="clr-row">
+    <div class="clr-col-md-8" >
+    </div>
+    <div class="clr-col-md-4" >
+        <button class="btn btn-success" (click) = "runScenario()" [disabled]="profileForm.invalid">Run Scenario</button>
+        <button class="btn btn-outline" routerLink = "/group">Cancel</button>
+    </div>
+</div>

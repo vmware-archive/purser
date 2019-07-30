@@ -1,0 +1,36 @@
+#name{
+    font-weight: bold;
+    color : #004A70;
+    font-size : 25px;
+}
+.resource, .column{
+    font-size : 16px;
+    color : #004A70;
+}
+.info, .cell{
+    font-size : 16px;
+}
+.cost{
+    font-weight: bold;
+    font-size : 20px;
+}
+.cloud{
+    padding-top: 10px; 
+    color : #004A70;
+    font-weight: bold;
+    font-size : 20px;  
+}
+.card-title{
+    display: flex;
+    justify-content: space-between;
+}
+
+.card{
+    height: 200px;   
+}
+.card-text{
+    display: flex;
+    flex-direction: column;
+    text-align :center;
+    padding-top : 40px;
+}   

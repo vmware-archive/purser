@@ -7,7 +7,7 @@ import { MCommon } from './common/messages/common.messages';
 const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
 
 // development environment
-// const BACKEND_BASE_URL = 'http://localhost:3030'
+//const BACKEND_BASE_URL = 'http://localhost:3030'
 
 export const BACKEND_URL = BACKEND_BASE_URL + '/api/'
 export const BACKEND_AUTH_URL = BACKEND_BASE_URL + '/auth/'

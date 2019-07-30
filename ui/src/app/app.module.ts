@@ -21,10 +21,17 @@ import { HomeModule } from './modules/home/home.module';
 import { CookieService } from 'ngx-cookie-service';
 
 import { GoogleChartsModule } from 'angular-google-charts';
+import { WhatIfComponent } from './modules/what-if/components/whatif/what-if.component';
+import { MigrateComponent } from './migrate/migrate.component';
+import { FormsModule } from '@angular/forms';
+import { RunScenarioComponent } from './modules/what-if/components/run-scenario/run-scenario.component';
+import { WhatIfModule } from './modules/what-if/what-if.module';
 
 @NgModule({
     declarations: [
         AppComponent,
+        MigrateComponent,
+        RunScenarioComponent,
     ],
     imports: [
         BrowserModule,
@@ -40,8 +47,10 @@ import { GoogleChartsModule } from 'angular-google-charts';
         LogicalGroupModule,
         ChangepasswordModule,
         LeftNavigationModule,
+        WhatIfModule,
         HomeModule,
         OptionsModule,
+        FormsModule,
         GoogleChartsModule.forRoot()
     ],
     providers: [ CookieService ],
