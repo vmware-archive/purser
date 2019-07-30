@@ -23,11 +23,12 @@ import { CookieService } from 'ngx-cookie-service';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { WhatIfModule } from './modules/what-if/what-if.module';
 import { CompareCloudsComponent } from './modules/compare/components/compare-clouds/compare-clouds.component';
+import { CompareModule } from './modules/compare/compare.module';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
-        AppComponent,
-        CompareCloudsComponent,
+        AppComponent
     ],
     imports: [
         BrowserModule,
@@ -46,6 +47,7 @@ import { CompareCloudsComponent } from './modules/compare/components/compare-clo
         HomeModule,
         OptionsModule,
         WhatIfModule,
+        CompareModule,
         GoogleChartsModule.forRoot()
     ],
     providers: [ CookieService ],
