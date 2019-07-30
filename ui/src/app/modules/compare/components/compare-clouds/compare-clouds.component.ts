@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CloudRegion } from './cloud-region';
 
 @Component({
   selector: 'app-compare-clouds',
@@ -7,6 +8,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CompareCloudsComponent implements OnInit {
 
+  cloudRegions : CloudRegion[];
+  
   constructor() { }
 
   ngOnInit() {
