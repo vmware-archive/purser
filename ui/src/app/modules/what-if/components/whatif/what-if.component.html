@@ -16,23 +16,23 @@
       <form clrForm clrLayout="horizontal" #profileForm="ngForm">
           <clr-input-container>           
             <label class = "inputL clr-col-md-4 ">CPU :</label>
-            <input clrInput class=" input clr-col-md-8"  required type = "number"  onkeypress="preventNonNumericalInput(event)" placeholder="How many vCPU?" name="Icpu" [(ngModel)]="appProfile.cpu"/>
+            <input clrInput class=" input clr-col-md-8"  required type = "number" min="0" onkeypress="preventNonNumericalInput(event)" placeholder="How many vCPU?" name="Icpu" [(ngModel)]="appProfile.cpu"/>
           </clr-input-container>
           <clr-input-container>           
             <label class = "inputL clr-col-md-4">Memory :</label>
-            <input clrInput class=" input clr-col-md-8"  required type = "number" placeholder="How many GB?"onkeypress="preventNonNumericalInput(event)"  name="Imem" [(ngModel)]="appProfile.memory"/>           
+            <input clrInput class=" input clr-col-md-8"  required type = "number" min="0" placeholder="How many GB?"onkeypress="preventNonNumericalInput(event)"  name="Imem" [(ngModel)]="appProfile.memory"/>           
           </clr-input-container>
           <clr-input-container>           
             <label class = "inputL clr-col-md-4">Disk Space:</label>
-            <input clrInput class=" input clr-col-md-8"  required type = "number" placeholder="How many GB?"onkeypress="preventNonNumericalInput(event)"  name="IdispSpace" [(ngModel)]="appProfile.diskSpace"/>           
+            <input clrInput class=" input clr-col-md-8"  required type = "number" min="0" placeholder="How many GB?"onkeypress="preventNonNumericalInput(event)"  name="IdispSpace" [(ngModel)]="appProfile.diskSpace"/>           
           </clr-input-container>
           <clr-input-container>           
             <label class = "inputL clr-col-md-4">Annual Projected Growth :</label>
-            <input class = "input  clr-col-md-8" clrInput type = "number" placeholder="%?" name="Igrowth" onkeypress="preventNonNumericalInput(event)"  [(ngModel)]="appProfile.growth"/>           
+            <input class = "input  clr-col-md-8" clrInput type = "number" min="0" placeholder="%?" name="Igrowth" onkeypress="preventNonNumericalInput(event)"  [(ngModel)]="appProfile.growth"/>           
           </clr-input-container>
           <clr-input-container>           
             <label class = "inputL clr-col-md-4">Replicas :</label>
-            <input clrInput class="input clr-col-md-8"  required type = "number" placeholder="How many replicas?" onkeypress="preventNonNumericalInput(event)"  name="Ireplicas" [(ngModel)]="appProfile.replicas"/>           
+            <input clrInput class="input clr-col-md-8"  required type = "number" min="0" placeholder="How many replicas?" onkeypress="preventNonNumericalInput(event)"  name="Ireplicas" [(ngModel)]="appProfile.replicas"/>           
             </clr-input-container>      
       </form>
   </div>
