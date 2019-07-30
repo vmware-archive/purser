@@ -14,8 +14,7 @@ export class AppProfileService {
   url_submit_spec : string;
 
   constructor(private http: HttpClient) {
-    //this.url_submit_spec = BACKEND_URL  + 'submit/whatif'
-    this.url_submit_spec = 'http://localhost:3030/api/submit/whatif'
+    this.url_submit_spec = BACKEND_URL  + 'submit/whatif'
    }
 
    submitSpec(appProfile) : Observable<AppProfile>{
