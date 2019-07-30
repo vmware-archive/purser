@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/purser/pkg/pricing/aws"
 	"github.com/vmware/purser/pkg/pricing/azure"
 	"github.com/vmware/purser/pkg/pricing/pks"
+	"github.com/vmware/purser/pkg/pricing/gcp"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -45,9 +46,14 @@ func GetClusterProviderAndRegion() (string, string) {
 
 // PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph
 func (c *Cloud) PopulateRateCard() {
+	var rateCard *models.RateCard
+
 	switch c.CloudProvider {
 	case models.AWS:
-		rateCard := aws.GetRateCardForAWS(c.Region)
+		rateCard = aws.GetRateCardForAWS(c.Region)
+	case models.GCP:
+		rateCard = gcp.GetRateCardForGCP(c.Region)
+	if rateCard != nil {
 		models.StoreRateCard(rateCard)
 	case models.AZURE:
 		rateCard := azure.GetRateCardForAzure(c.Region)
@@ -55,7 +61,7 @@ func (c *Cloud) PopulateRateCard() {
 	case models.PKS:
 		rateCard := pks.GetRateCardForPKS(c.Region)
 		models.StoreRateCard(rateCard)
-	}
+	} 
 
 }
 
@@ -63,4 +69,5 @@ func (c *Cloud) PopulateRateCard() {
 func PopulateAllRateCards(region string) {
 	go models.StoreRateCard(azure.GetRateCardForAzure(region))
 	go models.StoreRateCard(aws.GetRateCardForAWS(region))
+	go models.StoreRateCard(pks.GetRateCardForPKS(region))
 }

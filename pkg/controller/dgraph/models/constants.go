@@ -13,8 +13,8 @@ const (
 	// Cloud provider constants
 	AWS   = "aws"
 	AZURE = "azure"
-
-	PKS = "pks"
+	PKS   = "pks"
+	GCP   = "gcp"
 
 	// Time constants
 	HoursInMonth = 720
