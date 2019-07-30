@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CloudRegion } from './cloud-region';
+import { CompareService } from '../../services/compare.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-compare-clouds',
@@ -7,6 +9,8 @@ import { CloudRegion } from './cloud-region';
   styleUrls: ['./compare-clouds.component.scss']
 })
 export class CompareCloudsComponent implements OnInit {
+  regions :any;
+  showCloud : boolean = false;
 
   cloudRegions : CloudRegion[] = [
     {
@@ -45,14 +49,20 @@ export class CompareCloudsComponent implements OnInit {
 
   cardColors = [
     "'backgroudColor' : '#E1F1F6'",
-    "'backgroudColor' : '#DFF0D0'",
-    "'backgroudColor' : '#F5DBD9'",
     "'backgroudColor' : '#FEF3B5'",
+    "'backgroudColor' : '#F5DBD9'",
+    "'backgroudColor' : '#DFF0D0'",
   ]
   
-  constructor() { }
+  constructor(private compareService : CompareService) { }
 
   ngOnInit() {
+    this.regions = this.compareService.getRegions().subscribe(response => {
+      console.log("Regions for clouds" + this.regions);
+    });
   }
 
+  showClouds(){
+    this.showCloud = true;
+  }
 }
