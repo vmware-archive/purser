@@ -1,4 +1,4 @@
- package pks
+package pks
 
 import (
 	"encoding/json"
@@ -28,7 +28,7 @@ func getPricingAttributes() []*Pricing {
 	gp := os.Getenv("GOPATH")
 	ap := filepath.Join(gp, "src/github.com/vmware/purser")
 	fp := filepath.Join(ap, "pkg/utils/Cost.json")
-	raw, err := ioutil.ReadFile(fp)
+	raw, err := ioutil.ReadFile(filepath.Clean(fp))
 	if err != nil {
 		return nil
 	}

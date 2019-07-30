@@ -35,8 +35,8 @@ type Cloud struct {
 // GetClusterProviderAndRegion returns cluster provider(ex: aws) and region(ex: us-east-1)
 func GetClusterProviderAndRegion() (string, string) {
 	// TODO: https://github.com/vmware/purser/issues/143
-	cloudProvider := models.AWS
-	region := "us-east-1"
+	cloudProvider := models.PKS
+	region := "US-West-2"
 	logrus.Infof("CloudProvider: %s, Region: %s", cloudProvider, region)
 	return cloudProvider, region
 }
