@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CloudRegion } from './cloud-region';
 import { CompareService } from '../../services/compare.service';
 import { Observable } from 'rxjs';
+import { CloudDetails } from './cloud-details';
 
 @Component({
   selector: 'app-compare-clouds',
@@ -11,6 +12,42 @@ import { Observable } from 'rxjs';
 export class CompareCloudsComponent implements OnInit {
   regions :any;
   showCloud : boolean = false;
+  detailsL = ["CPU", "Memory", "CPU Cost", "Memory Cost", "Total Cost"];
+
+  cloudDetails = [
+    {
+      cloud : "AWS",
+      cpu : 1,
+      cpuCost : 100,
+      memory : 20,
+      memoryCost : 40,
+      totalCost : 100
+    },
+    {
+      cloud : "AWS",
+      cpu : 1,
+      cpuCost : 100,
+      memory : 20,
+      memoryCost : 40,
+      totalCost : 100
+    },
+    {
+      cloud : "AWS",
+      cpu : 1,
+      cpuCost : 100,
+      memory : 20,
+      memoryCost : 40,
+      totalCost : 100
+    },
+    {
+      cloud : "AWS",
+      cpu : 1,
+      cpuCost : 100,
+      memory : 20,
+      memoryCost : 40,
+      totalCost : 100
+    }
+  ]
 
   cloudRegions : CloudRegion[] = [
     {
