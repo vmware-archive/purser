@@ -21,6 +21,7 @@ import { HomeModule } from './modules/home/home.module';
 import { CookieService } from 'ngx-cookie-service';
 
 import { GoogleChartsModule } from 'angular-google-charts';
+import { WhatIfModule } from './modules/what-if/what-if.module';
 
 @NgModule({
     declarations: [
@@ -42,6 +43,7 @@ import { GoogleChartsModule } from 'angular-google-charts';
         LeftNavigationModule,
         HomeModule,
         OptionsModule,
+        WhatIfModule,
         GoogleChartsModule.forRoot()
     ],
     providers: [ CookieService ],

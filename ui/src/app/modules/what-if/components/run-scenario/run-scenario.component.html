@@ -1,0 +1,67 @@
+<div class="clr-row">
+  <div class="clr-col-md-12">
+      <label id = "name">{{scenarioName}}</label>
+  </div>
+</div>
+
+<div class = "table">
+  <div class="clr-row">
+    <div class="clr-col-md-12">
+      <clr-datagrid >
+        <clr-dg-column class = "column">Resource</clr-dg-column>
+        <clr-dg-column class = "column">Quantity</clr-dg-column>
+    
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">CPU</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.cpu}} &nbsp; vCPU</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">Memory</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.memory}}&nbsp;GB</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">Disk Space</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.diskSpace}}&nbsp;GB</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">Annual Projected Growth</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.growth}}&nbsp;%</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">Replicas</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.replicas}}</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">Start Date</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.startDate}}</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">End Date</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.endDate}}</clr-dg-cell>
+        </clr-dg-row>
+        <clr-dg-row>
+            <clr-dg-cell class = "cell">Region</clr-dg-cell>
+            <clr-dg-cell class = "cell">{{appProfile.region}}</clr-dg-cell>
+        </clr-dg-row>  
+
+    </clr-datagrid>
+    </div>
+  </div> 
+</div>
+
+<div class="row">
+    <div class="col-md-2" *ngFor = "let cloud of cloudCost, let x = index">
+        <div class="card">
+            <div class="card-block">
+                <div class="card-title">
+                    <label class = "cloud">{{cloud.cloud}}</label>
+                    <img class = "cloudImg" src = "../../../../../assets/images/{{images[x]}}">
+                </div>
+                <div class="card-text">
+                    <div class = "cost"><label >Cost :{{cloud.cost}}$ </label></div>
+                    <label class = "cunit">/month</label>    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
