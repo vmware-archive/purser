@@ -14,6 +14,8 @@ const (
 	AWS   = "aws"
 	AZURE = "azure"
 
+	PKS = "pks"
+
 	// Time constants
 	HoursInMonth = 720
 

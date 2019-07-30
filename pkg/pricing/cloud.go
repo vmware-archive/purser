@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/pricing/aws"
 	"github.com/vmware/purser/pkg/pricing/azure"
+	"github.com/vmware/purser/pkg/pricing/pks"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -51,7 +52,11 @@ func (c *Cloud) PopulateRateCard() {
 	case models.AZURE:
 		rateCard := azure.GetRateCardForAzure(c.Region)
 		models.StoreRateCard(rateCard)
+	case models.PKS:
+		rateCard := pks.GetRateCardForPKS(c.Region)
+		models.StoreRateCard(rateCard)
 	}
+
 }
 
 //PopulateAllRateCards take region as input and saves the rate card for all cloud providers
