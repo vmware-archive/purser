@@ -51,7 +51,6 @@
 
 <div class="row">
     <div class="col-md-2" *ngFor = "let dummy of ' '.repeat(cloudCost.length).split(''), let x = index">
-      <div >
         <div class="card">
             <div class="card-block">
                 <div class="card-title">
@@ -60,11 +59,9 @@
                 </div>
                 <div class="card-text">
                     <div class = "cost"><label >Cost :{{cloudCost[x].cost}}$ </label></div>
-                    <label class = "cunit">/month</label>
-                    
+                    <label class = "cunit">/month</label>    
                 </div>
             </div>
         </div>
-      </div>
     </div>
 </div>
