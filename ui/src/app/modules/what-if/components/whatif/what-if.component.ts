@@ -35,7 +35,6 @@ export class WhatIfComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log("---init-----");
     console.log(this.appProfile);
     this.appProfile.startDate = new Date();
   }
