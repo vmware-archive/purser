@@ -22,10 +22,12 @@ import { CookieService } from 'ngx-cookie-service';
 
 import { GoogleChartsModule } from 'angular-google-charts';
 import { WhatIfModule } from './modules/what-if/what-if.module';
+import { CompareCloudsComponent } from './modules/compare/components/compare-clouds/compare-clouds.component';
 
 @NgModule({
     declarations: [
         AppComponent,
+        CompareCloudsComponent,
     ],
     imports: [
         BrowserModule,
