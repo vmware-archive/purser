@@ -70,7 +70,10 @@ func (c *Cloud) PopulateRateCard() {
 		rateCard := pks.GetRateCardForPKS(c.Region)
 		models.StoreRateCard(rateCard)
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3d5f37cc84d3c7337a5ca501f50feb394818c426
 }
 
 //PopulateAllRateCards take region as input and saves the rate card for all cloud providers

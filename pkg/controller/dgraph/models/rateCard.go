@@ -96,7 +96,7 @@ type bestNodePrice struct {
 	CPUPrice    float64
 	MemoryPrice float64
 	Total       float64
-	NodePrice   *models.NodePrice
+	NodePrice   *NodePrice
 }
 
 // StoreRateCard given a cloudProvider and region it gets rate card and stores(create/update) in dgraph
@@ -344,7 +344,7 @@ func GetCost(region string) []Cost {
 
 // GetAwsNodesCost ..
 func GetAwsNodesCost(nodes []Node, region string) []ClusterNodePrice {
-	nodePrices, _ := GetRateCardForRegion(models.AWS, region)
+	nodePrices, _ := GetRateCardForRegion(AWS, region)
 	var clusterNodePrices []ClusterNodePrice
 	for _, node := range nodes {
 		nodePrice, _ := getBestNodePriceForNode(node, nodePrices)
@@ -363,7 +363,7 @@ func GetAwsNodesCost(nodes []Node, region string) []ClusterNodePrice {
 }
 
 //getBestNodePriceForNode ..
-func getBestNodePriceForNode(node Node, nodePrices NodePrice) (NodePrice, error) {
+func getBestNodePriceForNode(node Node, nodePrices []*NodePrice) (NodePrice, error) {
 	var bestNP bestNodePrice
 	logrus.Printf("%#v", node)
 
