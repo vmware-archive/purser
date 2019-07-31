@@ -14,14 +14,9 @@
             </div>
         </div>      
   </div>
-  <div class = "addCloud">
-    <button type="button" class="btn btn-icon">
-      <clr-icon shape="plus"></clr-icon>
-    </button>
-  </div>
 </div>
 
-<div class="row" *ngIf = "showCloud">
+<div class="row btnRow" *ngIf = "showCloud">
   <div class="col-md-2" *ngFor = "let cloud of cloudRegions ; let c = index">
       <div class="card">
           <div class="card-block">
