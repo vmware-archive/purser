@@ -50,5 +50,7 @@ export class PlanInfraComponent implements OnInit {
 
   ngOnInit() {
   }
-
+  uploadFile(){
+    console.log("yo");
+  }
 }
