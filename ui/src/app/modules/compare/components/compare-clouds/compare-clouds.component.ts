@@ -13,6 +13,9 @@ export class CompareCloudsComponent implements OnInit {
   regions :any;
   showCloud : boolean = false;
   detailsL = ["CPU", "Memory", "CPU Cost", "Memory Cost", "Total Cost"];
+  basic : boolean = false;
+
+  selectedRegions : any[] = Object.create(null);
 
   cloudDetails = [
     {
@@ -68,7 +71,7 @@ export class CompareCloudsComponent implements OnInit {
     }
   ];
 
-  images = ["aws.jpg", "gcp.jpg", "pks.jpg", "azure.png"];
+  images = ["awst.png", "gcpt.png", "pkst.png", "azuret.png"];
 
   myStyles = [{
     'background-color': '#FEF3B5',
@@ -94,12 +97,24 @@ export class CompareCloudsComponent implements OnInit {
   constructor(private compareService : CompareService) { }
 
   ngOnInit() {
+
+    var c;
+    for(c = 0;c < this.cloudRegions.length; c++){
+        this.selectedRegions[c] = "US-East-1";
+    }
+
     this.regions = this.compareService.getRegions().subscribe(response => {
-      console.log("Regions for clouds" + this.regions);
+      console.log("Regions for clouds" + response);
     });
+    
+  }
+  
+  showClouds(){
+    console.log("----selected values-----" + JSON.stringify(this.selectedRegions))
+    this.showCloud = true;
   }
 
-  showClouds(){
-    this.showCloud = true;
+  showDetails(){
+    this.basic = true;
   }
 }
