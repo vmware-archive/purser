@@ -29,7 +29,7 @@
                   <div>Memory Cost : {{cloud.memoryCost}} $/month</div>
                   <!--<div>Existing Cost : {{cloudDetails[c].exisitingCost}} $/month</div>-->
                   <div style = "font-weight: bold;">Total Cost : {{cloudDetails[c].totalCost}} $/month</div>
-                  <div id = "change{{c}}" >{{cloud.costDiff}}</div>
+                  <div id = "change{{c}}" [ngClass]="{'costDiffNeg': cloud.costDiff < 0,'costDiffPos' : cloud.costDiff > 0, 'costDiffZero' : cloud.costDiff == 0}" >{{cloud.costDiff}}</div>
               </div>
           </div>
           <div class="card-footer">
