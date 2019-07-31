@@ -17,7 +17,7 @@ export class AppProfileService {
     this.url_submit_spec = BACKEND_URL  + 'submit/whatif'
    }
 
-   submitSpec(appProfile) : Observable<AppProfile>{
+  submitSpec(appProfile) : Observable<AppProfile>{
      return this.http.post<AppProfile>(this.url_submit_spec, appProfile);
    }
 }
