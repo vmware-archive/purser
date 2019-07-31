@@ -15,7 +15,6 @@ export class CompareCloudsComponent implements OnInit {
 
   regions :any;
   showCloud : boolean = false;
-  detailsL = ["CPU", "Memory", "CPU Cost", "Memory Cost", "Total Cost"];
   showDetailsModal : boolean = false;
   showBtn : boolean = true;
   showBack : boolean = false;
