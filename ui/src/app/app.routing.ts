@@ -23,6 +23,7 @@ export const ROUTES: Routes = [
     { path: 'options', component: OptionsComponent },
     { path: 'whatif', component: WhatIfComponent},
     { path: 'compare', component : CompareCloudsComponent},
+    { path: 'plan/infra', component: CompareCloudsComponent},
     { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];
 
