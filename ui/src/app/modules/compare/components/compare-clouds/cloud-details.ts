@@ -1,3 +1,5 @@
+import { NodeDetails } from "./node-details";
+
 export class CloudDetails{
     cloud : string;
     cpu : number;
@@ -5,4 +7,6 @@ export class CloudDetails{
     cpuCost : number;
     memoryCost : number;
     totalCost : number;
+    existingCost : number;
+    nodes : NodeDetails[];
 }
