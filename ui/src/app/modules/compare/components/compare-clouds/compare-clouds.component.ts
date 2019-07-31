@@ -22,6 +22,8 @@ export class CompareCloudsComponent implements OnInit {
   selectedRegions : any[] = Object.create(null);
   cloudDetails : any[] = [];
   cloudRegions : any[] = [];
+  diffPercent : any[] = [];
+  costDiff : any[] = [];
 
   images = ["awst.png", "gcpt.png", "pkst.png", "azuret.png"];
 
@@ -74,7 +76,7 @@ export class CompareCloudsComponent implements OnInit {
         existingCost : 20
       },
       {
-        cloud : "AWS",
+        cloud : "GCP",
         cpu : 1,
         cpuCost : 100,
         memory : 20,
@@ -83,7 +85,7 @@ export class CompareCloudsComponent implements OnInit {
         existingCost : 100
       },
       {
-        cloud : "AWS",
+        cloud : "PKS",
         cpu : 1,
         cpuCost : 100,
         memory : 20,
@@ -92,7 +94,7 @@ export class CompareCloudsComponent implements OnInit {
         existingCost : 200
       },
       {
-        cloud : "AWS",
+        cloud : "Azure",
         cpu : 1,
         cpuCost : 100,
         memory : 20,
@@ -123,6 +125,13 @@ export class CompareCloudsComponent implements OnInit {
   
   showClouds(){
     console.log("----selected values-----" + JSON.stringify(this.selectedRegions))
+    for(var cd = 0; cd < this.cloudDetails.length; cd++){
+      this.costDiff[cd] = this.cloudDetails[cd].totalCost - this.cloudDetails[cd].existingCost;
+      if(this.costDiff[cd] < 0){
+
+      }
+    }
+
     this.showBtn = false;
     this.showCloud = true;
     this.showBack = true;

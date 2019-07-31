@@ -27,8 +27,9 @@
                   <div>CPU Cost: {{cloudDetails[c].cpuCost}} $/month</div>
                   <div>Memory : {{cloudDetails[c].memory}} GB</div>
                   <div>Memory Cost : {{cloudDetails[c].memoryCost}} $/month</div>
-                  <div>Existing Cost : {{cloudDetails[c].exisitingCost}} $/month</div>
+                  <!--<div>Existing Cost : {{cloudDetails[c].exisitingCost}} $/month</div>-->
                   <div style = "font-weight: bold;">Total Cost : {{cloudDetails[c].totalCost}} $/month</div>
+                  <div id = "change{{c}}">{{costDiff[c]}}</div>
               </div>
           </div>
           <div class="card-footer">
