@@ -6,7 +6,12 @@ import { AppProfile } from '../app-profile';
 @Component({
   selector: 'app-what-if',
   templateUrl: './what-if.component.html',
+<<<<<<< HEAD
   styleUrls: ['./what-if.component.scss']
+=======
+  styleUrls: ['./what-if.component.scss'],
+  providers: [AppProfileService]
+>>>>>>> 4ea81595b1dadaf4490c3806fbf7f9fc056bb883
 })
 export class WhatIfComponent implements OnInit {
 

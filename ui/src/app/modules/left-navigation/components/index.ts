@@ -1,1 +1,0 @@
-export * from './left-navigation.component';

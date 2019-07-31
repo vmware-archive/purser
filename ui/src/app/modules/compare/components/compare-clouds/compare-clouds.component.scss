@@ -1,0 +1,28 @@
+.card-title{
+    display: flex;
+    justify-content: space-between;
+}
+.run, .back{
+    font-size : 16px;
+}
+.btnRow{
+    padding-top : 20px;
+}
+.backRow{
+    padding-top : 20px;
+}
+.costDiffNeg{
+    color : red;
+    font-weight: bold;
+    font-size : 16px;
+}
+.costDiffPos{
+    color : green;
+    font-weight: bold;
+    font-size : 16px;
+}
+.costDiffZero{
+    color : #0095D3;
+    font-weight: bold;
+    font-size : 16px;
+}
