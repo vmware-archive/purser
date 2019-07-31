@@ -25,7 +25,8 @@ export class CompareCloudsComponent implements OnInit {
       cpuCost : 100,
       memory : 20,
       memoryCost : 40,
-      totalCost : 100
+      totalCost : 100,
+      existingCost : 20
     },
     {
       cloud : "AWS",
@@ -33,7 +34,8 @@ export class CompareCloudsComponent implements OnInit {
       cpuCost : 100,
       memory : 20,
       memoryCost : 40,
-      totalCost : 100
+      totalCost : 100,
+      existingCost : 100
     },
     {
       cloud : "AWS",
@@ -41,7 +43,8 @@ export class CompareCloudsComponent implements OnInit {
       cpuCost : 100,
       memory : 20,
       memoryCost : 40,
-      totalCost : 100
+      totalCost : 100,
+      existingCost : 200
     },
     {
       cloud : "AWS",
@@ -49,7 +52,8 @@ export class CompareCloudsComponent implements OnInit {
       cpuCost : 100,
       memory : 20,
       memoryCost : 40,
-      totalCost : 100
+      totalCost : 100,
+      existingCost : 120
     }
   ]
 

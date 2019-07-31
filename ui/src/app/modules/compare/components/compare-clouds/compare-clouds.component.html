@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" >
   <div class="col-md-2" *ngFor = "let cloud of cloudRegions ; let c = index">
         <div class="card cloudCard" [ngStyle]="myStyles[c%4]">
             <div class="card-block">
@@ -16,23 +16,20 @@
   </div>
 </div>
 
-<div class="clr-row" class = "btnRow" *ngIf = "showBtn">
-  <div class="clr-col-12">
-    <button class="btn btn-primary" (click) = "showClouds()"><label class = "run">Run</label></button>      
-  </div>
-</div>
-
 <div class="row" *ngIf = "showCloud">
   <div class="col-md-2" *ngFor = "let cloud of cloudRegions ; let c = index">
-      <div class="card" >
+      <div class="card">
           <div class="card-block">
               <div class="card-title">
                   {{cloud.cloud}}
               </div>
               <div class="card-text">
-                  <div>CPU : {{cloudDetails[c].cpu}}</div>
-                  <div>CPU Cost: {{cloudDetails[c].cpuCost}}</div>
-                  <div>Memory : {{cloudDetails[c].memory}}</div>
+                  <div>CPU : {{cloudDetails[c].cpu}} vCPU</div>
+                  <div>CPU Cost: {{cloudDetails[c].cpuCost}} $/month</div>
+                  <div>Memory : {{cloudDetails[c].memory}} GB</div>
+                  <div>Memory Cost : {{cloudDetails[c].memoryCost}} $/month</div>
+                  <div>Existing Cost : {{cloudDetails[c].exisitingCost}} $/month</div>
+                  <div style = "font-weight: bold;">Total Cost : {{cloudDetails[c].totalCost}} $/month</div>
               </div>
           </div>
           <div class="card-footer">
@@ -40,6 +37,12 @@
         </div>
       </div>
   </div>
+</div>
+
+<div class="clr-row" class = "btnRow" *ngIf = "showBtn">
+    <div class="clr-col-12">
+      <button class="btn btn-primary" (click) = "showClouds()"><label class = "run">Run</label></button>      
+    </div>
 </div>
 
 <clr-modal [(clrModalOpen)]="basic">
