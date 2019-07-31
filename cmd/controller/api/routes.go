@@ -18,8 +18,9 @@
 package api
 
 import (
-	"github.com/vmware/purser/cmd/controller/api/apiHandlers"
 	"net/http"
+
+	"github.com/vmware/purser/cmd/controller/api/apiHandlers"
 )
 
 // Route structure
@@ -249,5 +250,18 @@ var routes = Routes{
 		"GET",
 		"/api/sync",
 		apiHandlers.SyncCluster,
+	},
+
+	Route{
+		"CloudRegions",
+		"GET",
+		"/api/clouds/regions",
+		apiHandlers.GetCloudRegionList,
+	},
+	Route{
+		"CloudCompare",
+		"POST",
+		"/api/clouds/compare",
+		apiHandlers.CompareCloud,
 	},
 }
