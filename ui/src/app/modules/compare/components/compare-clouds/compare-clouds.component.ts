@@ -154,11 +154,13 @@ export class CompareCloudsComponent implements OnInit {
       });
     }
     */
+
     /*
     this.compareService.sendCloudRegion(this.sendCloudRegion).subscribe(data => {
         console.log(data);
     });
-    */ 
+    */
+    
     console.log("--------post data-------" + JSON.stringify(this.cloudRegions));
   }
 
