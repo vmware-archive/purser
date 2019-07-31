@@ -46,12 +46,11 @@
 </div>
 
 <clr-modal [(clrModalOpen)]="basic">
-    <h3 class="modal-title">I have a nice title</h3>
+    <h3 class="modal-title">Summary</h3>
     <div class="modal-body">
-        <p>But not much to say...</p>
+        <label>Instance Type:</label>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline" (click)="basic = false">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="basic = false">Ok</button>
+        <button type="button" class="btn btn-outline" (click)="basic = false">Done</button>
     </div>
 </clr-modal>
