@@ -19,7 +19,6 @@ export class CompareCloudsComponent implements OnInit {
   showBtn : boolean = true;
   showBack : boolean = false;
 
-  selectedRegions : any[] = Object.create(null);
   cloudDetails : any[] = [];
   cloudRegions : any[] = [];
   diffPercent : any[] = [];
@@ -70,19 +69,23 @@ export class CompareCloudsComponent implements OnInit {
     this.cloudRegions = [
       {
         cloud : "Amazon Web Services",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]
+        region : ["US-East-1", "US-West-2", "EU-West-1"],
+        selectedRegion : "US-East-1"
       },
       {
         cloud : "Google Cloud Platform",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]      
+        region : ["US-East-1", "US-West-2", "EU-West-1"],
+        selectedRegion : "US-East-1"      
       },
       {
         cloud : "Pivotal Container Service",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]
+        region : ["US-East-1", "US-West-2", "EU-West-1"],
+        selectedRegion : "US-East-1"
       },
       {
         cloud : "Microsoft Azure",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]      
+        region : ["US-East-1", "US-West-2", "EU-West-1"] ,
+        selectedRegion : "US-East-1"     
       }
     ];
     this.cloudDetails = [
@@ -123,13 +126,13 @@ export class CompareCloudsComponent implements OnInit {
         existingCost : 120
       }
     ]
-
+    /*
     var c;
     for(c = 0;c < this.cloudRegions.length; c++){
         this.selectedRegions[c] = "US-East-1";
     }
-    console.log("------default-------" + JSON.stringify(this.selectedRegions))
-    
+    */
+    console.log("------default-------" + JSON.stringify(this.cloudRegions))  
   }
   
   showClouds(){
@@ -143,20 +146,20 @@ export class CompareCloudsComponent implements OnInit {
       if(this.costDiff[cd] < 0){
       }
     }
-
+    /*
     for(var c in this.cloudRegions ){
       this.sendCloudRegion.push({
         'cloud': this.cloudRegions[c].cloud,
         'region': this.selectedRegions[c]
       });
     }
+    */
     /*
     this.compareService.sendCloudRegion(this.sendCloudRegion).subscribe(data => {
         console.log(data);
     });
-    */
-    
-    console.log("--------post data-------" + JSON.stringify(this.sendCloudRegion));
+    */ 
+    console.log("--------post data-------" + JSON.stringify(this.cloudRegions));
   }
 
   showDetails(){

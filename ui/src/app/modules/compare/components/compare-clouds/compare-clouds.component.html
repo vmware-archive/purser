@@ -7,8 +7,8 @@
                     <img class = "cloudImg" src = "../../../../../assets/images/{{images[c]}}">
                 </div>
                 <div class="card-text">
-                  <select clrSelect name="options" [(ngModel)]="selectedRegions[c]">
-                    <option  *ngFor = "let region of cloudRegions; let r = index" value = "{{region.region[r]}}">{{region.region[r]}}</option>    <!--how did this work-->
+                  <select clrSelect name="options" [(ngModel)]="cloud.selectedRegion">
+                    <option  *ngFor = "let region of cloud.region; let r = index" value = "{{region}}">{{region}}</option>
                   </select>
                 </div>
             </div>
@@ -29,7 +29,7 @@
                   <div>Memory Cost : {{cloudDetails[c].memoryCost}} $/month</div>
                   <!--<div>Existing Cost : {{cloudDetails[c].exisitingCost}} $/month</div>-->
                   <div style = "font-weight: bold;">Total Cost : {{cloudDetails[c].totalCost}} $/month</div>
-                  <div id = "change{{c}}">{{costDiff[c]}}</div>
+                  <div id = "change{{c}}" >{{costDiff[c]}}</div>
               </div>
           </div>
           <div class="card-footer">
