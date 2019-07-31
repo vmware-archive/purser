@@ -96,7 +96,7 @@ export class CompareCloudsComponent implements OnInit {
         cpuCost : 100,
         memory : 20,
         memoryCost : 40,
-        totalCost : 100,
+        totalCost : 500,
         existingCost : 20
       },
       {
@@ -105,7 +105,7 @@ export class CompareCloudsComponent implements OnInit {
         cpuCost : 100,
         memory : 20,
         memoryCost : 40,
-        totalCost : 100,
+        totalCost : 300,
         existingCost : 100
       },
       {
@@ -123,7 +123,7 @@ export class CompareCloudsComponent implements OnInit {
         cpuCost : 100,
         memory : 20,
         memoryCost : 40,
-        totalCost : 100,
+        totalCost : 200,
         existingCost : 120
       }
     ]
@@ -144,7 +144,10 @@ export class CompareCloudsComponent implements OnInit {
     
     for(let cd of this.cloudDetails){
       cd.costDiff = cd.totalCost - cd.existingCost;
-      console.log("-----cloud details---" + JSON.stringify(cd));
+      cd.costPercent = ((cd.costDiff / cd.totalCost) * 100).toFixed(2);
+      console.log("-----percent total cost---" + JSON.stringify(cd.totalCost));
+      console.log("-----peercent cost diff---" + JSON.stringify(cd.costDiff));
+      console.log("-----cost percent ---" + JSON.stringify(cd.costPercent));
     }
     /*
     for(var c in this.cloudRegions ){
@@ -160,8 +163,8 @@ export class CompareCloudsComponent implements OnInit {
         console.log(data);
     });
     */
-    
-    console.log("--------post data-------" + JSON.stringify(this.cloudRegions));
+
+    console.log("--------cost Percent-------" + JSON.stringify(this.cloudDetails));
   }
 
   showDetails(){

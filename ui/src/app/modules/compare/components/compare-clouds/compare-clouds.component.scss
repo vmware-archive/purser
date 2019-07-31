@@ -14,15 +14,18 @@
 .costDiffNeg{
     color : red;
     font-weight: bold;
-    font-size : 16px;
+    font-size : 18px;
 }
 .costDiffPos{
     color : green;
     font-weight: bold;
-    font-size : 16px;
+    font-size : 18px;
 }
 .costDiffZero{
     color : #0095D3;
     font-weight: bold;
-    font-size : 16px;
+    font-size : 18px;
+}
+.change{
+    display: flex;
 }
