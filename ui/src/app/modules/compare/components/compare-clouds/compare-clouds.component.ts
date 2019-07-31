@@ -8,7 +8,8 @@ import { setDefaultService } from 'selenium-webdriver/opera';
 @Component({
   selector: 'app-compare-clouds',
   templateUrl: './compare-clouds.component.html',
-  styleUrls: ['./compare-clouds.component.scss']
+  styleUrls: ['./compare-clouds.component.scss'],
+  providers:[CompareService]
 })
 export class CompareCloudsComponent implements OnInit {
 

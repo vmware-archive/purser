@@ -5,10 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CloudRegion } from '../components/compare-clouds/cloud-region';
 
-@Injectable({
-  providedIn: 'root'
-}
-)
+@Injectable()
 
 export class CompareService{
 

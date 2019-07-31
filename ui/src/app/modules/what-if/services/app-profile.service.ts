@@ -4,10 +4,7 @@ import { BACKEND_URL } from '../../../app.component'
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-}
-)
+@Injectable()
 export class AppProfileService {
   appProfile : AppProfile;
   scenarioName : string;
