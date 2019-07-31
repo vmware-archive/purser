@@ -80,6 +80,7 @@ type ClusterNodePrice struct {
 
 //Cost Structure
 type Cost struct {
+<<<<<<< HEAD
 	CloudProvider string             `json:"cloud"`
 	TotalCost     float64            `json:"totalCost"`
 	CPUCost       float64            `json:"cpuCost"`
@@ -87,6 +88,15 @@ type Cost struct {
 	CPU           float64            `json:"cpu"`
 	Memory        float64            `json:"memory"`
 	Nodes         []ClusterNodePrice `json:"nodes"`
+=======
+	CloudProvider string `json:"cloudProvider"`
+	TotalCost     float64
+	CPUCost       float64
+	MemoryCost    float64
+	CPU           float64
+	Memory        float64
+	Nodes         []ClusterNodePrice
+>>>>>>> ebb243240d2d2b65ff41009b518e3ff56356c096
 }
 
 //
