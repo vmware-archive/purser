@@ -338,12 +338,41 @@ func RetriveAllNodes() ([]Node, error) {
 //GetCost ...
 func GetCost(region string) []Cost {
 	var costs []Cost
+	nodes, _ := RetriveAllNodes()
+	cloudProviders := []string{
+		AWS
+		AZURE
+		GCP
+		PKS
+	}
+
+	for _, cp := range cloudProviders {
+		clusterNodePrices := GetNodesCost(nodes, region, cp)
+		var totalCost, cpuCost, memoryCost float64
+		var cpu int
+		var memory float64
+		for _, clusterNodePrice := clusterNodePrices {
+			cpu += clusterNodePrice.CPU
+			memory += clusterNodePrice.Memory
+			cpuCost += clusterNodePrice.CPUCost
+			memoryCost += clusterNodePrice.MemoryCost
+			totalCost += cpuCost + memoryCost
+		}
+		append(costs, Cost{
+			CloudProvider = cp
+			TotalCost = totalCost
+			CPUCost =  cpuCost
+			MemoryCost = memoryCost
+			CPU = cpu
+			Memory = memory
+		})
+	}
 
 	return costs
 }
 
-// GetAwsNodesCost ..
-func GetAwsNodesCost(nodes []Node, region string) []ClusterNodePrice {
+// GetNodesCost ..
+func GetNodesCost(nodes []Node, region string) []ClusterNodePrice {
 	nodePrices, _ := GetRateCardForRegion(AWS, region)
 	var clusterNodePrices []ClusterNodePrice
 	for _, node := range nodes {
