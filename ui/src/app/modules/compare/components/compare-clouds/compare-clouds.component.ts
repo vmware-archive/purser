@@ -14,6 +14,7 @@ export class CompareCloudsComponent implements OnInit {
   showCloud : boolean = false;
   detailsL = ["CPU", "Memory", "CPU Cost", "Memory Cost", "Total Cost"];
   basic : boolean = false;
+  showBtn : boolean = true;
 
   selectedRegions : any[] = Object.create(null);
 
@@ -106,11 +107,12 @@ export class CompareCloudsComponent implements OnInit {
     this.regions = this.compareService.getRegions().subscribe(response => {
       console.log("Regions for clouds" + response);
     });
-    
+
   }
   
   showClouds(){
     console.log("----selected values-----" + JSON.stringify(this.selectedRegions))
+    this.showBtn = false;
     this.showCloud = true;
   }
 

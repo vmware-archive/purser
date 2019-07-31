@@ -16,13 +16,11 @@
   </div>
 </div>
 
-<div class="clr-row" class = "btnRow">
+<div class="clr-row" class = "btnRow" *ngIf = "showBtn">
   <div class="clr-col-12">
     <button class="btn btn-primary" (click) = "showClouds()"><label class = "run">Run</label></button>      
   </div>
 </div>
-
-<hr *ngIf = "showCloud" style = "color:#F2F2F2">
 
 <div class="row" *ngIf = "showCloud">
   <div class="col-md-2" *ngFor = "let cloud of cloudRegions ; let c = index">
