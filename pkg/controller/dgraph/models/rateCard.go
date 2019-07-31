@@ -53,6 +53,8 @@ type NodePrice struct {
 	Price           float64 `json:"price,omitempty"`
 	PricePerCPU     float64 `json:"cpuPrice,omitempty"`
 	PricePerMemory  float64 `json:"memoryPrice,omitempty"`
+	CPU             float64 `json:"cpu,omitempty"`
+	Memory          float64 `json:"memory,omitempty"`
 }
 
 // StoragePrice structure
@@ -63,6 +65,28 @@ type StoragePrice struct {
 	VolumeType     string  `json:"volumeType,omitempty"`
 	UsageType      string  `json:"usageType,omitempty"`
 	Price          float64 `json:"price,omitempty"`
+}
+
+//ClusterNodePrice Structure
+type ClusterNodePrice struct {
+	InstanceType    string  `json:"instanceType,omitempty"`
+	OperatingSystem string  `json:"operatingSystem,omitempty"`
+	Price           float64 `json:"price,omitempty"`
+	CPUCost         float64 `json:"cpuPrice,omitempty"`
+	MemoryCost      float64 `json:"memoryPrice,omitempty"`
+	CPU             float64 `json:"cpu,omitempty"`
+	Memory          float64 `json:"memory,omitempty"`
+}
+
+//Cost Structure
+type Cost struct {
+	CloudProvider string `json:"cloudProvider"`
+	TotalCost     float64
+	CPUCost       float64
+	MemoryCost    float64
+	CPU           int
+	Memory        float64
+	Nodes         []ClusterNodePrice
 }
 
 // StoreRateCard given a cloudProvider and region it gets rate card and stores(create/update) in dgraph
@@ -177,6 +201,32 @@ func retrieveNodePrice(xid string) (*NodePrice, error) {
 	return &newRoot.NodePrices[0], nil
 }
 
+// // RetrieveNodePriceForCPUMemory given a node name it returns pointer to models.Node - nil in case of error
+// func RetrieveNodePriceForCPUMemory(cpu float64, memory float64) (*NodePrice, error) {
+// 	query := `query {
+// 		nodePrices(func: has(isNodePrice)) @filter(gt(memory, "` + (fmt.Sprintf("%f", memory)) + `")) {
+// 			instanceType
+// 			instanceFamily
+// 			operatingSystem
+// 			price
+// 			cpuPrice
+// 			memoryPrice
+//         }
+//     }`
+// 	type root struct {
+// 		NodePrices []NodePrice `json:"nodePrices"`
+// 	}
+// 	newRoot := root{}
+// 	err := dgraph.ExecuteQuery(query, &newRoot)
+// 	if err != nil {
+// 		return nil, err
+// 	} else if len(newRoot.NodePrices) < 1 {
+// 		return nil, fmt.Errorf("no node")
+// 	}
+// 	fmt.Println("Node Prices    ", newRoot.NodePrices)
+// 	return &newRoot.NodePrices[0], nil
+// }
+
 // getPerUnitResourcePriceForNode returns price per cpu and price per memory
 func getPerUnitResourcePriceForNode(nodeName string) (float64, float64) {
 	node, err := retrieveNode(nodeName)
@@ -200,4 +250,84 @@ func getPricePerUnitResourceFromNodePrice(node Node) (float64, float64) {
 		}
 	}
 	return DefaultCPUCostInFloat64, DefaultMemCostInFloat64
+}
+
+// retrieveNodePriceByInstanceType given a node name it returns pointer to models.Node - nil in case of error
+func retrieveNodePriceByInstanceType(instanceType string) (*NodePrice, error) {
+	query := `query {
+		nodePrices(func: has(isNodePrice)) @filter(eq(instanceType, "` + instanceType + `")) {
+			instanceType
+			instanceFamily
+			operatingSystem
+			price
+			cpuPrice
+			memoryPrice
+        }
+    }`
+	type root struct {
+		NodePrices []NodePrice `json:"nodePrices"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil {
+		return nil, err
+	} else if len(newRoot.NodePrices) < 1 {
+		return nil, fmt.Errorf("no node with xid: %v", instanceType)
+	}
+	return &newRoot.NodePrices[0], nil
+}
+
+//GetRateCardForRegion ...
+func GetRateCardForRegion(cloudProvider string, region string) ([]*NodePrice, error) {
+	query := `query {
+        rateCard(func: has(isRateCard))@filter(eq(cloudProvider, "aws")) {
+		expand(_all_) {expand(_all_)}
+ 		}
+ 	}`
+	type root struct {
+		RateCard []RateCard `json:"rateCard"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+
+	if err != nil {
+		return nil, err
+	} else if len(newRoot.RateCard[0].NodePrices) < 1 {
+
+	}
+	return newRoot.RateCard[0].NodePrices, nil
+}
+
+//RetriveAllNodes ...
+func RetriveAllNodes() ([]Node, error) {
+	query := `query {
+		nodes(func: has(isNode)) {
+			name
+			type
+			startTime
+			endTime
+			cpuCapacity
+			memoryCapacity
+			instanceType
+			os
+        }
+    }`
+	type root struct {
+		Nodes []Node `json:"nodes"`
+	}
+	newRoot := root{}
+	err := dgraph.ExecuteQuery(query, &newRoot)
+	if err != nil {
+		return nil, err
+	} else if len(newRoot.Nodes) < 1 {
+		// return nil, fmt.Errorf("no node with name: %v", name)
+	}
+	return newRoot.Nodes, nil
+}
+
+//GetCost ...
+func GetCost(region string) []Cost {
+	var costs []Cost
+	// for()
+	return costs
 }

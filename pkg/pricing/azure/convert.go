@@ -87,6 +87,8 @@ func updateComputePrices(azurePrice *Pricing, nodePrices []*models.NodePrice, op
 		Price:           azurePrice.LinuxPrice,
 		PricePerCPU:     pricePerCPU,
 		PricePerMemory:  pricePerGB,
+		CPU:             azurePrice.NumberOfCores,
+		Memory:          azurePrice.MemoryInMB / 1024,
 	}
 	uid := models.StoreNodePrice(nodePrice, productXID)
 	if uid != "" {
