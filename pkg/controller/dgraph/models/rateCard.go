@@ -84,7 +84,7 @@ type Cost struct {
 	TotalCost     float64
 	CPUCost       float64
 	MemoryCost    float64
-	CPU           int
+	CPU           float64
 	Memory        float64
 	Nodes         []ClusterNodePrice
 }
@@ -99,21 +99,32 @@ type bestNodePrice struct {
 	NodePrice   *NodePrice
 }
 
+// CloudRegionInfo struct
+type CloudRegionInfo struct {
+	CloudRegions []CloudRegion
+}
+
+// CloudRegion struct
+type CloudRegion struct {
+	CloudProvider string `json:"cloudProvider"`
+	Region        string `json:"region"`
+}
+
 // StoreRateCard given a cloudProvider and region it gets rate card and stores(create/update) in dgraph
 func StoreRateCard(rateCard *RateCard) {
 	logrus.Debugf("IsRateCardNil: %v", rateCard == nil)
 	if rateCard != nil {
-		uid := dgraph.GetUID(RateCardXID, IsRateCard)
+		uid := dgraph.GetUID(rateCard.CloudProvider+"-"+rateCard.Region+"-rateCard", IsRateCard)
 		if uid != "" {
 			rateCard.ID = dgraph.ID{UID: uid, Xid: RateCardXID}
 		}
 		logrus.Debugf("RateCard: (%v)", rateCard)
 		_, err := dgraph.MutateNode(rateCard, dgraph.CREATE)
 		if err != nil {
-			logrus.Errorf("Unable to store rateCard reason: %v", err)
+			logrus.Errorf("Unable to store %s %s rateCard reason: %v", rateCard.CloudProvider, rateCard.Region, err)
 			return
 		}
-		logrus.Infof("Successfully stored/updated rateCard")
+		logrus.Infof("Successfully stored/updated %s %s rateCard", rateCard.CloudProvider, rateCard.Region)
 	}
 }
 
@@ -290,7 +301,7 @@ func retrieveNodePriceByInstanceType(instanceType string) (*NodePrice, error) {
 //GetRateCardForRegion ...
 func GetRateCardForRegion(cloudProvider string, region string) ([]*NodePrice, error) {
 	query := `query {
-        rateCard(func: has(isRateCard))@filter(eq(cloudProvider, "aws")) {
+        rateCard(func: has(isRateCard))@filter(eq(cloudProvider, "` + cloudProvider + `") AND eq(region, "` + region + `")) {
 		expand(_all_) {expand(_all_)}
  		}
  	}`
@@ -302,8 +313,8 @@ func GetRateCardForRegion(cloudProvider string, region string) ([]*NodePrice, er
 
 	if err != nil {
 		return nil, err
-	} else if len(newRoot.RateCard[0].NodePrices) < 1 {
-
+	} else if len(newRoot.RateCard) < 1 {
+		return nil, fmt.Errorf("no rate card")
 	}
 	return newRoot.RateCard[0].NodePrices, nil
 }
@@ -336,17 +347,42 @@ func RetriveAllNodes() ([]Node, error) {
 }
 
 //GetCost ...
-func GetCost(region string) []Cost {
+func GetCost(crInfo []CloudRegion) []Cost {
 	var costs []Cost
+	nodes, _ := RetriveAllNodes()
 
+	for _, cr := range crInfo {
+		logrus.Print("getCost for ", cr.Region, " ", cr.CloudProvider)
+		clusterNodePrices := GetNodesCost(nodes, cr.Region, cr.CloudProvider)
+		var totalCost, cpuCost, memoryCost float64
+		var cpu, memory float64
+		for _, clusterNodePrice := range clusterNodePrices {
+			cpu += clusterNodePrice.CPU
+			memory += clusterNodePrice.Memory
+			cpuCost += clusterNodePrice.CPUCost
+			memoryCost += clusterNodePrice.MemoryCost
+			totalCost += cpuCost + memoryCost
+		}
+		costs = append(costs, Cost{
+			CloudProvider: cr.CloudProvider,
+			TotalCost:     totalCost,
+			CPUCost:       cpuCost,
+			MemoryCost:    memoryCost,
+			CPU:           cpu,
+			Memory:        memory,
+			Nodes:         clusterNodePrices,
+		})
+	}
 	return costs
 }
 
 // GetNodesCost ..
 func GetNodesCost(nodes []Node, region string, cloudProvider string) []ClusterNodePrice {
 	nodePrices, _ := GetRateCardForRegion(cloudProvider, region)
+	logrus.Print("rate card fetched")
 	var nodePrice NodePrice
 	var clusterNodePrices []ClusterNodePrice
+	var effectiveCPU, effectiveMemory float64
 	for _, node := range nodes {
 		switch cloudProvider {
 		case AWS:
@@ -354,36 +390,41 @@ func GetNodesCost(nodes []Node, region string, cloudProvider string) []ClusterNo
 		case AZURE:
 			nodePrice, _ = getBestNodePriceForNode(node, nodePrices)
 		case GCP:
-			nodePrice = *nodePrices[0]
+			nodePrice, _ = getBestNodePriceForNode(node, nodePrices)
 		case PKS:
-			nodePrice = *nodePrices[0]
+			nodePrice, _ = getBestNodePriceForNode(node, nodePrices)
+		}
+		if nodePrice.CPU == 0 || nodePrice.Memory == 0 {
+			effectiveCPU = node.CPUCapacity
+			effectiveMemory = node.MemoryCapacity
+		} else {
+			effectiveCPU = nodePrice.CPU
+			effectiveMemory = nodePrice.Memory
 		}
 		clusterNodePrices = append(clusterNodePrices, ClusterNodePrice{
 			InstanceType:    nodePrice.InstanceType,
 			OperatingSystem: nodePrice.OperatingSystem,
-			Price:           nodePrice.Price,
-			CPUCost:         nodePrice.CPU * nodePrice.PricePerCPU,
-			MemoryCost:      nodePrice.Memory * nodePrice.PricePerMemory,
-			CPU:             nodePrice.CPU,
-			Memory:          nodePrice.Memory,
+			Price:           effectiveCPU*nodePrice.PricePerCPU + effectiveMemory*nodePrice.PricePerMemory,
+			CPUCost:         effectiveCPU * nodePrice.PricePerCPU,
+			MemoryCost:      effectiveMemory * nodePrice.PricePerMemory,
+			CPU:             effectiveCPU,
+			Memory:          effectiveMemory,
 		})
 	}
-	logrus.Printf("%#v", clusterNodePrices)
+	logrus.Printf("clust node prices %#v", clusterNodePrices)
 	return clusterNodePrices
 }
 
 //getBestNodePriceForNode ..
 func getBestNodePriceForNode(node Node, nodePrices []*NodePrice) (NodePrice, error) {
 	var bestNP bestNodePrice
-	logrus.Printf("%#v", node)
+	logrus.Printf(" node details %#v", node)
 
 	for _, nodePrice := range nodePrices {
-		if nodePrice.CPU == node.CPUCapacity && nodePrice.Memory == node.MemoryCapacity {
+		if (nodePrice.CPU == node.CPUCapacity && nodePrice.Memory == node.MemoryCapacity) || (nodePrice.CPU == 0 && nodePrice.Memory == 0) {
 			fmt.Println("Node with matching details found")
 			return *nodePrice, nil
 		}
-
-		// logrus.Printf("nodeprice: %v %v", nodePrice.CPU, nodePrice.Memory)
 		if nodePrice.CPU >= node.CPUCapacity && nodePrice.Memory >= node.MemoryCapacity {
 			if bestNP.NodePrice == nil || (nodePrice.CPU <= bestNP.CPU && nodePrice.Memory <= bestNP.Memory) {
 				bestNP.CPU = nodePrice.CPU
@@ -400,9 +441,3 @@ func getBestNodePriceForNode(node Node, nodePrices []*NodePrice) (NodePrice, err
 	}
 	return *bestNP.NodePrice, nil
 }
-
-// //getBestNodePriceForNodeGCP ..
-// func getBestNodePriceForNodeGCP(node Node, nodePrices []*NodePrice) (NodePrice, error)) {
-// 	for _, node
-// return nil,nil
-// }

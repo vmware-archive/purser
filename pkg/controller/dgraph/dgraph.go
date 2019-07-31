@@ -93,6 +93,8 @@ func CreateSchema() error {
 		xid:  string @index(term) .
 		startTime: dateTime @index(hour) .
 		endTime: dateTime @index(hour) .
+		cloudProvider: string @index(term) .
+		region: string @index(term) .
 		isService: bool .
 		isPod: bool .
 		isContainer: bool .

@@ -18,8 +18,6 @@
 package pricing
 
 import (
-	"fmt"
-
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/pricing/aws"
@@ -48,49 +46,38 @@ func GetClusterProviderAndRegion() (string, string) {
 
 // PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph
 func (c *Cloud) PopulateRateCard() {
-	var rateCard *models.RateCard
+	PopulateAllRateCards()
+}
 
-	switch c.CloudProvider {
-	case models.AWS:
-		rateCard = aws.GetRateCardForAWS(c.Region)
-		models.StoreRateCard(rateCard)
-		fmt.Println("getting nodes")
-		models.GetRateCardForRegion(c.CloudProvider, c.Region)
-		fmt.Println("get all nodes")
-		getPriceForAllNodes(c.Region, c.CloudProvider)
-	case models.GCP:
-		rateCard = gcp.GetRateCardForGCP(c.Region)
-		if rateCard != nil {
-			models.StoreRateCard(rateCard)
-		}
-	case models.AZURE:
-		rateCard := azure.GetRateCardForAzure(c.Region)
-		models.StoreRateCard(rateCard)
-	case models.PKS:
-		rateCard := pks.GetRateCardForPKS(c.Region)
-		models.StoreRateCard(rateCard)
-	}
-<<<<<<< HEAD
-
-=======
->>>>>>> 3d5f37cc84d3c7337a5ca501f50feb394818c426
+// TestRateCards ...
+func TestRateCards() {
+	// costs := models.GetCost(models.CloudRegionInfo{
+	// 	CloudRegions: []models.CloudRegion{
+	// 		models.CloudRegion{Region: "us-east-1", CloudProvider: models.AWS},
+	// 		models.CloudRegion{Region: "westus", CloudProvider: models.AZURE},
+	// 		models.CloudRegion{Region: "us-east1", CloudProvider: models.GCP},
+	// 		models.CloudRegion{Region: "US-East-1", CloudProvider: models.PKS},
+	// 	}})
+	// fmt.Printf("%#v", costs)
 }
 
 //PopulateAllRateCards take region as input and saves the rate card for all cloud providers
-func PopulateAllRateCards(region string) {
-	go models.StoreRateCard(azure.GetRateCardForAzure("eastus"))
-	go models.StoreRateCard(aws.GetRateCardForAWS(region))
-	go models.StoreRateCard(gcp.GetRateCardForGCP("us-east1"))
-	go models.StoreRateCard(pks.GetRateCardForPKS("US-East-1"))
-}
-
-//getPriceForAllNodes ...
-func getPriceForAllNodes(region string, cloudProvider string) {
-	// var costs []models.Cost
-	nodeList, _ := models.RetriveAllNodes()
-	switch cloudProvider {
-	case models.AWS:
-		aws.GetAwsNodesCost(nodeList, region)
+func PopulateAllRateCards() {
+	awsRegions := []string{"us-east-1", "us-west-1"}
+	azureRegions := []string{"eastus", "westus"}
+	gcpRegions := []string{"us-east1", "us-west1"}
+	pksRegions := []string{"US-East-1", "US-West-2"}
+	for _, region := range awsRegions {
+		go models.StoreRateCard(aws.GetRateCardForAWS(region))
+	}
+	for _, region := range azureRegions {
+		go models.StoreRateCard(azure.GetRateCardForAzure(region))
+	}
+	for _, region := range gcpRegions {
+		go models.StoreRateCard(gcp.GetRateCardForGCP(region))
+	}
+	for _, region := range pksRegions {
+		go models.StoreRateCard(pks.GetRateCardForPKS(region))
 	}
 }
 
@@ -101,7 +88,6 @@ func PopulateRateCard(region string, cloudProvider string) {
 	case models.AWS:
 		rateCard = aws.GetRateCardForAWS(region)
 		models.StoreRateCard(rateCard)
-		getPriceForAllNodes(region, cloudProvider)
 	case models.GCP:
 		rateCard = gcp.GetRateCardForGCP(region)
 		if rateCard != nil {

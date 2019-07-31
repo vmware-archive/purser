@@ -177,12 +177,12 @@ func filterRegion(pricing *Pricing, region string) {
 }
 
 func filterComputePricing(pricing *Pricing) {
-	exceptResourceGroups := []string{"RAM", "GPU", "CPU", "PdSnapshotEgress", "SecurityPolicy"} // put somewhere else
+	allowedResourceGroups := []string{"N1Standard"} // put somewhere else
 	var newSkus []Skus
 
 	for _, el := range pricing.Skus {
 		if el.Category.ResourceFamily == "Compute" &&
-			!contains(exceptResourceGroups, el.Category.ResourceGroup) &&
+			contains(allowedResourceGroups, el.Category.ResourceGroup) &&
 			el.Category.UsageType != "Preemptible" {
 			newSkus = append(newSkus, el)
 		}
