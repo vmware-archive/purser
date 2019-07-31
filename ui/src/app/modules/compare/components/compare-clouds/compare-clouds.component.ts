@@ -59,19 +59,19 @@ export class CompareCloudsComponent implements OnInit {
 
   cloudRegions : CloudRegion[] = [
     {
-      cloud : "AWS",
+      cloud : "Amazon Web Services",
       region : ["US-East-1", "US-West-2", "EU-West-1"]
     },
     {
-      cloud : "GCP",
+      cloud : "Google Cloud Platform",
       region : ["US-East-1", "US-West-2", "EU-West-1"]      
     },
     {
-      cloud : "PKS",
+      cloud : "Pivotal Container Service",
       region : ["US-East-1", "US-West-2", "EU-West-1"]
     },
     {
-      cloud : "Azure",
+      cloud : "Microsoft Azure",
       region : ["US-East-1", "US-West-2", "EU-West-1"]      
     }
   ];
