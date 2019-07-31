@@ -25,6 +25,10 @@ export class CompareCloudsComponent implements OnInit {
   diffPercent : any[] = [];
   costDiff : any[] = [];
 
+  detailsResponse : any[] = [];
+
+  sendCloudRegion : any[] = [];
+
   images = ["awst.png", "gcpt.png", "pkst.png", "azuret.png"];
 
   myStyles = [{
@@ -61,10 +65,26 @@ export class CompareCloudsComponent implements OnInit {
   }
 
   setDefault(){
-    var c;
-    for(c = 0;c < this.cloudRegions.length; c++){
-        this.selectedRegions[c] = "US-East-1";
-    }
+    this.sendCloudRegion = [];
+
+    this.cloudRegions = [
+      {
+        cloud : "Amazon Web Services",
+        region : ["US-East-1", "US-West-2", "EU-West-1"]
+      },
+      {
+        cloud : "Google Cloud Platform",
+        region : ["US-East-1", "US-West-2", "EU-West-1"]      
+      },
+      {
+        cloud : "Pivotal Container Service",
+        region : ["US-East-1", "US-West-2", "EU-West-1"]
+      },
+      {
+        cloud : "Microsoft Azure",
+        region : ["US-East-1", "US-West-2", "EU-West-1"]      
+      }
+    ];
     this.cloudDetails = [
       {
         cloud : "AWS",
@@ -103,38 +123,40 @@ export class CompareCloudsComponent implements OnInit {
         existingCost : 120
       }
     ]
-    this.cloudRegions = [
-      {
-        cloud : "Amazon Web Services",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]
-      },
-      {
-        cloud : "Google Cloud Platform",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]      
-      },
-      {
-        cloud : "Pivotal Container Service",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]
-      },
-      {
-        cloud : "Microsoft Azure",
-        region : ["US-East-1", "US-West-2", "EU-West-1"]      
-      }
-    ];
+
+    var c;
+    for(c = 0;c < this.cloudRegions.length; c++){
+        this.selectedRegions[c] = "US-East-1";
+    }
+    console.log("------default-------" + JSON.stringify(this.selectedRegions))
+    
   }
   
   showClouds(){
-    console.log("----selected values-----" + JSON.stringify(this.selectedRegions))
-    for(var cd = 0; cd < this.cloudDetails.length; cd++){
-      this.costDiff[cd] = this.cloudDetails[cd].totalCost - this.cloudDetails[cd].existingCost;
-      if(this.costDiff[cd] < 0){
-
-      }
-    }
 
     this.showBtn = false;
     this.showCloud = true;
     this.showBack = true;
+    
+    for(var cd = 0; cd < this.cloudDetails.length; cd++){
+      this.costDiff[cd] = this.cloudDetails[cd].totalCost - this.cloudDetails[cd].existingCost;
+      if(this.costDiff[cd] < 0){
+      }
+    }
+
+    for(var c in this.cloudRegions ){
+      this.sendCloudRegion.push({
+        'cloud': this.cloudRegions[c].cloud,
+        'region': this.selectedRegions[c]
+      });
+    }
+    /*
+    this.compareService.sendCloudRegion(this.sendCloudRegion).subscribe(data => {
+        console.log(data);
+    });
+    */
+    
+    console.log("--------post data-------" + JSON.stringify(this.sendCloudRegion));
   }
 
   showDetails(){
@@ -144,5 +166,7 @@ export class CompareCloudsComponent implements OnInit {
     this.showBtn = true;
     this.showCloud = false;
     this.showBack = false;
+
+    this.setDefault();
   }
 }
