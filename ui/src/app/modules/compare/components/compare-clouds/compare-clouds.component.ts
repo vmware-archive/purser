@@ -154,9 +154,10 @@ export class CompareCloudsComponent implements OnInit {
       });
     }
     */
-
+    this.compareService.regions = this.cloudRegions;
     this.compareService.sendCloudRegion(this.sendCloudRegion).subscribe(data => {
         console.log(data);
+        this.compareService.cloudDetails = data;
     });
 
     console.log("--------cost Percent-------" + JSON.stringify(this.cloudDetails));
