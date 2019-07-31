@@ -1,6 +1,6 @@
 <div class="row" >
   <div class="col-md-3" *ngFor = "let cloud of cloudRegions ; let c = index">
-        <div class="card cloudCard" [ngStyle]="myStyles[c%4]">
+        <div class="card" [ngStyle]="myStyles[c%4]">
             <div class="card-block">
                 <div class="card-title">
                     <label style = "font-weight : bold">{{cloud.cloud}}</label>
@@ -38,7 +38,7 @@
   </div>
 </div>
 
-<div class="clr-row" *ngIf = "showBack">
+<div class="clr-row backRow" *ngIf = "showBack">
     <div class="clr-col-12">
         <button class="btn btn-outline" (click) = "back()">Back</button>    
     </div>
