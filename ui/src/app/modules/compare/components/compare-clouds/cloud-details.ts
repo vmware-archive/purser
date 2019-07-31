@@ -8,5 +8,7 @@ export class CloudDetails{
     memoryCost : number;
     totalCost : number;
     existingCost : number;
+    costDiff : number;
+    costPercent :number;
     nodes : NodeDetails[];
 }

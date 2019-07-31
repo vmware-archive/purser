@@ -142,10 +142,9 @@ export class CompareCloudsComponent implements OnInit {
     this.showCloud = true;
     this.showBack = true;
     
-    for(var cd = 0; cd < this.cloudDetails.length; cd++){
-      this.costDiff[cd] = this.cloudDetails[cd].totalCost - this.cloudDetails[cd].existingCost;
-      if(this.costDiff[cd] < 0){
-      }
+    for(let cd of this.cloudDetails){
+      cd.costDiff = cd.totalCost - cd.existingCost;
+      console.log("-----cloud details---" + JSON.stringify(cd));
     }
     /*
     for(var c in this.cloudRegions ){

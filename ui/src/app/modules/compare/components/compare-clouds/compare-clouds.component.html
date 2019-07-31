@@ -17,19 +17,19 @@
 </div>
 
 <div class="row btnRow" *ngIf = "showCloud">
-  <div class="col-md-3" *ngFor = "let cloud of cloudRegions ; let c = index">
+  <div class="col-md-3" *ngFor = "let cloud of cloudDetails ; let c = index">
       <div class="card">
           <div class="card-block">
               <div class="card-title">
               </div>
               <div class="card-text">
-                  <div>CPU : {{cloudDetails[c].cpu}} vCPU</div>
-                  <div>CPU Cost: {{cloudDetails[c].cpuCost}} $/month</div>
-                  <div>Memory : {{cloudDetails[c].memory}} GB</div>
-                  <div>Memory Cost : {{cloudDetails[c].memoryCost}} $/month</div>
+                  <div>CPU : {{cloud.cpu}} vCPU</div>
+                  <div>CPU Cost: {{cloud.cpuCost}} $/month</div>
+                  <div>Memory : {{cloud.memory}} GB</div>
+                  <div>Memory Cost : {{cloud.memoryCost}} $/month</div>
                   <!--<div>Existing Cost : {{cloudDetails[c].exisitingCost}} $/month</div>-->
                   <div style = "font-weight: bold;">Total Cost : {{cloudDetails[c].totalCost}} $/month</div>
-                  <div id = "change{{c}}" >{{costDiff[c]}}</div>
+                  <div id = "change{{c}}" >{{cloud.costDiff}}</div>
               </div>
           </div>
           <div class="card-footer">
