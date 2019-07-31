@@ -145,9 +145,6 @@ export class CompareCloudsComponent implements OnInit {
     for(let cd of this.cloudDetails){
       cd.costDiff = cd.totalCost - cd.existingCost;
       cd.costPercent = ((cd.costDiff / cd.totalCost) * 100).toFixed(2);
-      console.log("-----percent total cost---" + JSON.stringify(cd.totalCost));
-      console.log("-----peercent cost diff---" + JSON.stringify(cd.costDiff));
-      console.log("-----cost percent ---" + JSON.stringify(cd.costPercent));
     }
     /*
     for(var c in this.cloudRegions ){
@@ -158,11 +155,9 @@ export class CompareCloudsComponent implements OnInit {
     }
     */
 
-    /*
     this.compareService.sendCloudRegion(this.sendCloudRegion).subscribe(data => {
         console.log(data);
     });
-    */
 
     console.log("--------cost Percent-------" + JSON.stringify(this.cloudDetails));
   }
@@ -170,11 +165,11 @@ export class CompareCloudsComponent implements OnInit {
   showDetails(){
     this.showDetailsModal = true;
   }
+
   back(){
     this.showBtn = true;
     this.showCloud = false;
     this.showBack = false;
-
     this.setDefault();
   }
 }
