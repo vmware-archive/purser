@@ -38,18 +38,25 @@
   </div>
 </div>
 
+<div class="clr-row" *ngIf = "showBack">
+    <div class="clr-col-12">
+        <button class="btn btn-outline" (click) = "back()">Back</button>    
+    </div>
+</div>
+
+
 <div class="clr-row" class = "btnRow" *ngIf = "showBtn">
     <div class="clr-col-12">
       <button class="btn btn-primary" (click) = "showClouds()"><label class = "run">Run</label></button>      
     </div>
 </div>
 
-<clr-modal [(clrModalOpen)]="basic">
+<clr-modal [(clrModalOpen)]="showDetailsModal">
     <h3 class="modal-title">Summary</h3>
     <div class="modal-body">
         <label>Instance Type:</label>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline" (click)="basic = false">Done</button>
+        <button type="button" class="btn btn-outline" (click)="showDetailsModal = false">Done</button>
     </div>
 </clr-modal>
