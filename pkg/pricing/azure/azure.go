@@ -13,10 +13,10 @@ import (
 type Pricing struct {
 	Name                  string  `json:"name"`
 	CanonicalName         string  `json:"canonicalname"`
-	NumberOfCores         int     `json:"numberOfCores"`
+	NumberOfCores         float64 `json:"numberOfCores"`
 	OsDiskSizeInMB        int     `json:"osDiskSizeInMB"`
 	ResourceDiskSizeInMB  int     `json:"resourceDiskSizeInMB"`
-	MemoryInMB            int     `json:"memoryInMB"`
+	MemoryInMB            float64 `json:"memoryInMB"`
 	MaxDataDiskCount      int     `json:"maxDataDiskCount"`
 	RegionName            string  `json:"regionName"`
 	LinuxPrice            float64 `json:"linuxPrice"`

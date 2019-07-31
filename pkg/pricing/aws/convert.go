@@ -50,7 +50,7 @@ func GetRateCardForAWS(region string) *models.RateCard {
 func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *models.RateCard {
 	nodePrices, storagePrices := getResourcePricesFromAWSPricing(awsPricing)
 	return &models.RateCard{
-		ID:            dgraph.ID{Xid: models.RateCardXID},  //look into dgraph
+		ID:            dgraph.ID{Xid: models.RateCardXID}, //look into dgraph
 		IsRateCard:    true,
 		CloudProvider: models.AWS,
 		Region:        region,
@@ -63,7 +63,6 @@ func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, 
 	var nodePrices []*models.NodePrice
 	var storagePrices []*models.StoragePrice
 
-	//doubt
 	products := awsPricing.Products
 	planList := awsPricing.Terms
 
@@ -102,6 +101,8 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 		// Unit of Compute price USD-perHour
 		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.OperatingSystem
 		pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
+		nCPU, _ := strconv.ParseFloat(product.Attributes.Vcpu, 64)
+		nMemory, _ := strconv.ParseFloat(strings.Split(product.Attributes.Memory, " ")[0], 64)
 		nodePrice := &models.NodePrice{
 			ID:              dgraph.ID{Xid: productXID},
 			IsNodePrice:     true,
@@ -111,6 +112,8 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 			Price:           priceInFloat64,
 			PricePerCPU:     pricePerCPU,
 			PricePerMemory:  pricePerGB,
+			CPU:             nCPU,
+			Memory:          nMemory,
 		}
 		duplicateComputeInstanceChecker[key] = true
 		uid := models.StoreNodePrice(nodePrice, productXID)

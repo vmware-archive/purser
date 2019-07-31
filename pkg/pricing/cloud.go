@@ -18,12 +18,14 @@
 package pricing
 
 import (
+	"fmt"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/pricing/aws"
 	"github.com/vmware/purser/pkg/pricing/azure"
-	"github.com/vmware/purser/pkg/pricing/pks"
 	"github.com/vmware/purser/pkg/pricing/gcp"
+	"github.com/vmware/purser/pkg/pricing/pks"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -51,23 +53,63 @@ func (c *Cloud) PopulateRateCard() {
 	switch c.CloudProvider {
 	case models.AWS:
 		rateCard = aws.GetRateCardForAWS(c.Region)
+		models.StoreRateCard(rateCard)
+		fmt.Println("getting nodes")
+		models.GetRateCardForRegion(c.CloudProvider, c.Region)
+		fmt.Println("get all nodes")
+		getPriceForAllNodes(c.Region, c.CloudProvider)
 	case models.GCP:
 		rateCard = gcp.GetRateCardForGCP(c.Region)
-	if rateCard != nil {
-		models.StoreRateCard(rateCard)
+		if rateCard != nil {
+			models.StoreRateCard(rateCard)
+		}
 	case models.AZURE:
 		rateCard := azure.GetRateCardForAzure(c.Region)
 		models.StoreRateCard(rateCard)
 	case models.PKS:
 		rateCard := pks.GetRateCardForPKS(c.Region)
 		models.StoreRateCard(rateCard)
-	} 
+	}
 
 }
 
 //PopulateAllRateCards take region as input and saves the rate card for all cloud providers
 func PopulateAllRateCards(region string) {
-	go models.StoreRateCard(azure.GetRateCardForAzure(region))
+	go models.StoreRateCard(azure.GetRateCardForAzure("eastus"))
 	go models.StoreRateCard(aws.GetRateCardForAWS(region))
-	go models.StoreRateCard(pks.GetRateCardForPKS(region))
+	go models.StoreRateCard(gcp.GetRateCardForGCP("us-east1"))
+	go models.StoreRateCard(pks.GetRateCardForPKS("US-East-1"))
+}
+
+//getPriceForAllNodes ...
+func getPriceForAllNodes(region string, cloudProvider string) {
+	// var costs []models.Cost
+	nodeList, _ := models.RetriveAllNodes()
+	switch cloudProvider {
+	case models.AWS:
+		aws.GetAwsNodesCost(nodeList, region)
+	}
+}
+
+//PopulateRateCard ...
+func PopulateRateCard(region string, cloudProvider string) {
+	var rateCard *models.RateCard
+	switch cloudProvider {
+	case models.AWS:
+		rateCard = aws.GetRateCardForAWS(region)
+		models.StoreRateCard(rateCard)
+		getPriceForAllNodes(region, cloudProvider)
+	case models.GCP:
+		rateCard = gcp.GetRateCardForGCP(region)
+		if rateCard != nil {
+			models.StoreRateCard(rateCard)
+		}
+	case models.AZURE:
+		rateCard := azure.GetRateCardForAzure(region)
+		models.StoreRateCard(rateCard)
+	case models.PKS:
+		rateCard := pks.GetRateCardForPKS(region)
+		models.StoreRateCard(rateCard)
+	}
+
 }
