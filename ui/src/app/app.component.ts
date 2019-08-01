@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { MCommon } from './common/messages/common.messages';
 
-// production environment
+//production environment
 const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
 
 // development environment
