@@ -21,6 +21,9 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/vmware/purser/pkg/controller/dgraph/models"
 	"github.com/vmware/purser/pkg/pricing/aws"
+	"github.com/vmware/purser/pkg/pricing/azure"
+	"github.com/vmware/purser/pkg/pricing/gcp"
+	"github.com/vmware/purser/pkg/pricing/pks"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -36,15 +39,66 @@ func GetClusterProviderAndRegion() (string, string) {
 	// TODO: https://github.com/vmware/purser/issues/143
 	cloudProvider := models.AWS
 	region := "us-east-1"
+
 	logrus.Infof("CloudProvider: %s, Region: %s", cloudProvider, region)
 	return cloudProvider, region
 }
 
 // PopulateRateCard given a cloud (cloudProvider and region) it populates corresponding rate card in dgraph
 func (c *Cloud) PopulateRateCard() {
-	switch c.CloudProvider {
+	PopulateAllRateCards()
+}
+
+// TestRateCards ...
+func TestRateCards() {
+	// costs := models.GetCost(models.CloudRegionInfo{
+	// 	CloudRegions: []models.CloudRegion{
+	// 		models.CloudRegion{Region: "us-east-1", CloudProvider: models.AWS},
+	// 		models.CloudRegion{Region: "westus", CloudProvider: models.AZURE},
+	// 		models.CloudRegion{Region: "us-east1", CloudProvider: models.GCP},
+	// 		models.CloudRegion{Region: "US-East-1", CloudProvider: models.PKS},
+	// 	}})
+	// fmt.Printf("%#v", costs)
+}
+
+//PopulateAllRateCards take region as input and saves the rate card for all cloud providers
+func PopulateAllRateCards() {
+	awsRegions := []string{"us-east-1", "us-west-1"}
+	azureRegions := []string{"eastus", "westus"}
+	gcpRegions := []string{"us-east1", "us-west1"}
+	pksRegions := []string{"US-East-1", "US-West-2"}
+	for _, region := range awsRegions {
+		go models.StoreRateCard(aws.GetRateCardForAWS(region))
+	}
+	for _, region := range azureRegions {
+		go models.StoreRateCard(azure.GetRateCardForAzure(region))
+	}
+	for _, region := range gcpRegions {
+		go models.StoreRateCard(gcp.GetRateCardForGCP(region))
+	}
+	for _, region := range pksRegions {
+		go models.StoreRateCard(pks.GetRateCardForPKS(region))
+	}
+}
+
+//PopulateRateCard ...
+func PopulateRateCard(region string, cloudProvider string) {
+	var rateCard *models.RateCard
+	switch cloudProvider {
 	case models.AWS:
-		rateCard := aws.GetRateCardForAWS(c.Region)
+		rateCard = aws.GetRateCardForAWS(region)
+		models.StoreRateCard(rateCard)
+	case models.GCP:
+		rateCard = gcp.GetRateCardForGCP(region)
+		if rateCard != nil {
+			models.StoreRateCard(rateCard)
+		}
+	case models.AZURE:
+		rateCard := azure.GetRateCardForAzure(region)
+		models.StoreRateCard(rateCard)
+	case models.PKS:
+		rateCard := pks.GetRateCardForPKS(region)
 		models.StoreRateCard(rateCard)
 	}
+
 }

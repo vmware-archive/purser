@@ -18,6 +18,7 @@
 package aws
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -38,6 +39,16 @@ const (
 	priceSplitRatio = 0.5
 )
 
+//
+type bestNodePrice struct {
+	CPU         float64
+	Memory      float64
+	CPUPrice    float64
+	MemoryPrice float64
+	Total       float64
+	NodePrice   *models.NodePrice
+}
+
 // GetRateCardForAWS takes region as input and returns RateCard and error if any
 func GetRateCardForAWS(region string) *models.RateCard {
 	awsPricing, err := GetAWSPricing(region)
@@ -50,7 +61,7 @@ func GetRateCardForAWS(region string) *models.RateCard {
 func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *models.RateCard {
 	nodePrices, storagePrices := getResourcePricesFromAWSPricing(awsPricing)
 	return &models.RateCard{
-		ID:            dgraph.ID{Xid: models.RateCardXID},
+		ID:            dgraph.ID{Xid: models.RateCardXID}, //look into dgraph
 		IsRateCard:    true,
 		CloudProvider: models.AWS,
 		Region:        region,
@@ -62,6 +73,7 @@ func convertAWSPricingToPurserRateCard(region string, awsPricing *Pricing) *mode
 func getResourcePricesFromAWSPricing(awsPricing *Pricing) ([]*models.NodePrice, []*models.StoragePrice) {
 	var nodePrices []*models.NodePrice
 	var storagePrices []*models.StoragePrice
+
 	products := awsPricing.Products
 	planList := awsPricing.Terms
 
@@ -100,6 +112,8 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 		// Unit of Compute price USD-perHour
 		productXID := product.Attributes.InstanceType + deliminator + product.Attributes.OperatingSystem
 		pricePerCPU, pricePerGB := getPriceForUnitResource(product, priceInFloat64)
+		nCPU, _ := strconv.ParseFloat(product.Attributes.Vcpu, 64)
+		nMemory, _ := strconv.ParseFloat(strings.Split(product.Attributes.Memory, " ")[0], 64)
 		nodePrice := &models.NodePrice{
 			ID:              dgraph.ID{Xid: productXID},
 			IsNodePrice:     true,
@@ -109,6 +123,8 @@ func updateComputeInstancePrices(product Product, priceInFloat64 float64, duplic
 			Price:           priceInFloat64,
 			PricePerCPU:     pricePerCPU,
 			PricePerMemory:  pricePerGB,
+			CPU:             nCPU,
+			Memory:          nMemory,
 		}
 		duplicateComputeInstanceChecker[key] = true
 		uid := models.StoreNodePrice(nodePrice, productXID)
@@ -163,4 +179,53 @@ func getPriceForUnitResource(product Product, priceInFloat64 float64) (float64, 
 		}
 	}
 	return pricePerCPU, pricePerGB
+}
+
+// GetAwsNodesCost ..
+func GetAwsNodesCost(nodes []models.Node, region string) []models.ClusterNodePrice {
+	nodePrices, _ := models.GetRateCardForRegion(models.AWS, region)
+	var clusterNodePrices []models.ClusterNodePrice
+	for _, node := range nodes {
+		nodePrice, _ := getBestNodePriceForNode(node, nodePrices)
+		clusterNodePrices = append(clusterNodePrices, models.ClusterNodePrice{
+			InstanceType:    nodePrice.InstanceType,
+			OperatingSystem: nodePrice.OperatingSystem,
+			Price:           nodePrice.Price,
+			CPUCost:         nodePrice.CPU * nodePrice.PricePerCPU,
+			MemoryCost:      nodePrice.Memory * nodePrice.PricePerMemory,
+			CPU:             nodePrice.CPU,
+			Memory:          nodePrice.Memory,
+		})
+	}
+	logrus.Printf("%#v", clusterNodePrices)
+	return clusterNodePrices
+}
+
+//getBestNodePriceForNode ..
+func getBestNodePriceForNode(node models.Node, nodePrices []*models.NodePrice) (models.NodePrice, error) {
+	var bestNP bestNodePrice
+	logrus.Printf("%#v", node)
+
+	for _, nodePrice := range nodePrices {
+		if nodePrice.CPU == node.CPUCapacity && nodePrice.Memory == node.MemoryCapacity {
+			fmt.Println("Node with matching details found")
+			return *nodePrice, nil
+		}
+
+		// logrus.Printf("nodeprice: %v %v", nodePrice.CPU, nodePrice.Memory)
+		if nodePrice.CPU >= node.CPUCapacity && nodePrice.Memory >= node.MemoryCapacity {
+			if bestNP.NodePrice == nil || (nodePrice.CPU <= bestNP.CPU && nodePrice.Memory <= bestNP.Memory) {
+				bestNP.CPU = nodePrice.CPU
+				bestNP.CPUPrice = nodePrice.PricePerCPU
+				bestNP.Memory = nodePrice.Memory
+				bestNP.MemoryPrice = nodePrice.PricePerMemory
+				bestNP.NodePrice = nodePrice
+			}
+		}
+	}
+	if bestNP.NodePrice == nil {
+		logrus.Printf("no satisfying node price found")
+		return *nodePrices[0], nil
+	}
+	return *bestNP.NodePrice, nil
 }

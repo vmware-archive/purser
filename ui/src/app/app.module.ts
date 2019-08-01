@@ -21,10 +21,14 @@ import { HomeModule } from './modules/home/home.module';
 import { CookieService } from 'ngx-cookie-service';
 
 import { GoogleChartsModule } from 'angular-google-charts';
+import { WhatIfModule } from './modules/what-if/what-if.module';
+import { CompareCloudsComponent } from './modules/compare/components/compare-clouds/compare-clouds.component';
+import { CompareModule } from './modules/compare/compare.module';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
-        AppComponent,
+        AppComponent
     ],
     imports: [
         BrowserModule,
@@ -40,8 +44,11 @@ import { GoogleChartsModule } from 'angular-google-charts';
         LogicalGroupModule,
         ChangepasswordModule,
         LeftNavigationModule,
+        WhatIfModule,
         HomeModule,
         OptionsModule,
+        WhatIfModule,
+        CompareModule,
         GoogleChartsModule.forRoot()
     ],
     providers: [ CookieService ],
