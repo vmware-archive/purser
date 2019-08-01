@@ -22,8 +22,12 @@
   </div>
 </div>
 
-<div class="clr-row uploadBtn" >
+<div class="clr-row inputFile" >
   <div class="clr-col-12">
-    <button class="btn btn-primary" (click) = "previewFile($event)"><label class = "run">Choose File</label></button>      
+      <input type="file" id="myFile" multiple (change)="handleFileInput($event.target.files)">
+  </div>
+  <div class="clr-col-12">    
+      <button class="btn btn-primary " (click)="uploadFileToActivity()">Upload</button>
   </div>
 </div>
+

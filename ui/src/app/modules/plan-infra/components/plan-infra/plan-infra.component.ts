@@ -1,11 +1,17 @@
 import { Component, OnInit } from '@angular/core';
+import * as $ from 'jquery';
+import { Observable } from 'rxjs';
+import { PlanInfraService } from '../../services/plan-infra.service';
 
 @Component({
   selector: 'app-plan-infra',
   templateUrl: './plan-infra.component.html',
-  styleUrls: ['./plan-infra.component.scss']
+  styleUrls: ['./plan-infra.component.scss'],
+  providers:[PlanInfraService]
 })
 export class PlanInfraComponent implements OnInit {
+
+  fileToUpload: File = null;
 
   cloudRegions = [
     {
@@ -46,11 +52,22 @@ export class PlanInfraComponent implements OnInit {
     }
   ]
 
-  constructor() { }
+  constructor(private planInfraService : PlanInfraService) { }
 
   ngOnInit() {
   }
-  uploadFile(){
-    console.log("yo");
+
+  handleFileInput(files: FileList) {
+    this.fileToUpload = files.item(0);
   }
+  
+  uploadFileToActivity() {
+    this.planInfraService.postFile(this.fileToUpload).subscribe(data => {
+      // do something, if upload success
+      }, error => {
+        console.log(error);
+      });
+  }
+
+
 }
