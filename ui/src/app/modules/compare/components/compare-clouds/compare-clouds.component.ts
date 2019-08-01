@@ -18,7 +18,7 @@ export class CompareCloudsComponent implements OnInit {
   showDetailsModal : boolean = false;
   showBtn : boolean = true;
   showBack : boolean = false;
-
+  nodes : any[] = [];
   cloudDetails : any[] = [];
   cloudRegions : any[] = [];
   diffPercent : any[] = [];
@@ -88,51 +88,229 @@ export class CompareCloudsComponent implements OnInit {
         selectedRegion : "US-East-1"     
       }
     ];
-    this.cloudDetails = [
+    this.cloudDetails = 
+
+    [
+    
       {
-        cloud : "AWS",
-        cpu : 1,
-        cpuCost : 100,
-        memory : 20,
-        memoryCost : 40,
-        totalCost : 500,
-        existingCost : 20
+    
+        "cloud": "aws",
+    
+        "existingCost": 1000,
+    
+        "totalCost": 48.96,
+    
+        "cpuCost": 34.56,
+    
+        "memoryCost": 14.4,
+    
+        "cpu": 2,
+    
+        "memory": 2,
+    
+        "nodes": [
+    
+          {
+    
+            "instanceType": "t3.small",
+    
+            "os": "Windows",
+    
+            "totalNodeCost": 48.96,
+    
+            "cpuNodeCost": 34.56,
+    
+            "memoryNodeCost": 14.4,
+    
+            "cpuNode": 2,
+    
+            "memoryNode": 2
+    
+          },
+          {
+    
+            "instanceType": "t3.small",
+    
+            "os": "Windows",
+    
+            "totalNodeCost": 48.96,
+    
+            "cpuNodeCost": 34.56,
+    
+            "memoryNodeCost": 14.4,
+    
+            "cpuNode": 2,
+    
+            "memoryNode": 2
+    
+          },
+          {
+    
+            "instanceType": "t3.small",
+    
+            "os": "Windows",
+    
+            "totalNodeCost": 48.96,
+    
+            "cpuNodeCost": 34.56,
+    
+            "memoryNodeCost": 14.4,
+    
+            "cpuNode": 2,
+    
+            "memoryNode": 2
+    
+          },
+          {
+    
+            "instanceType": "t3.small",
+    
+            "os": "Windows",
+    
+            "totalNodeCost": 48.96,
+    
+            "cpuNodeCost": 34.56,
+    
+            "memoryNodeCost": 14.4,
+    
+            "cpuNode": 2,
+    
+            "memoryNode": 2
+    
+          }
+    
+        ]
+    
       },
+    
       {
-        cloud : "GCP",
-        cpu : 1,
-        cpuCost : 100,
-        memory : 20,
-        memoryCost : 40,
-        totalCost : 300,
-        existingCost : 100
+    
+        "cloud": "gcp",
+    
+        "existingCost": 1000,
+    
+        "totalCost": 51.621120000000005,
+    
+        "cpuCost": 45.51984,
+    
+        "memoryCost": 6.10128,
+    
+        "cpu": 2,
+    
+        "memory": 2,
+    
+        "nodes": [
+    
+          {
+    
+            "instanceType": "n1-standard",
+    
+            "os": "linux",
+    
+            "totalNodeCost": 51.62112,
+    
+            "cpuNodeCost": 45.51984,
+    
+            "memoryNodeCost": 6.10128,
+    
+            "cpuNode": 2,
+    
+            "memoryNode": 2
+    
+          }
+    
+        ]
+    
       },
+    
       {
-        cloud : "PKS",
-        cpu : 1,
-        cpuCost : 100,
-        memory : 20,
-        memoryCost : 40,
-        totalCost : 100,
-        existingCost : 200
+    
+        "cloud": "pks",
+    
+        "existingCost": 1000,
+    
+        "totalCost": 74.448,
+    
+        "cpuCost": 69.264,
+    
+        "memoryCost": 5.184,
+    
+        "cpu": 2,
+    
+        "memory": 2,
+    
+        "nodes": [
+    
+          {
+    
+            "instanceType": "PKS-US-East-1",
+    
+            "os": "linux",
+    
+            "totalNodeCost": 74.448,
+    
+            "cpuNodeCost": 69.264,
+    
+            "memoryNodeCost": 5.184,
+    
+            "cpuNode": 2,
+    
+            "memoryNode": 2
+    
+          }
+    
+        ]
+    
       },
+    
       {
-        cloud : "Azure",
-        cpu : 1,
-        cpuCost : 100,
-        memory : 20,
-        memoryCost : 40,
-        totalCost : 200,
-        existingCost : 120
+    
+        "cloud": "azure",
+    
+        "existingCost": 1000,
+    
+        "totalCost": 59.760000000000005,
+    
+        "cpuCost": 34.56,
+    
+        "memoryCost": 25.200000000000003,
+    
+        "cpu": 2,
+    
+        "memory": 3.5,
+    
+        "nodes": [
+    
+          {
+    
+            "instanceType": "Basic_A2",
+    
+            "os": "windows",
+    
+            "totalNodeCost": 59.760000000000005,
+    
+            "cpuNodeCost": 34.56,
+    
+            "memoryNodeCost": 25.200000000000003,
+    
+            "cpuNode": 2,
+    
+            "memoryNode": 3.5
+    
+          }
+    
+        ]
+    
       }
+    
     ]
+        
     /*
     var c;
     for(c = 0;c < this.cloudRegions.length; c++){
         this.selectedRegions[c] = "US-East-1";
     }
-    */
-    console.log("------default-------" + JSON.stringify(this.cloudRegions))  
+    */  
   }
   
   showClouds(){
@@ -142,7 +320,7 @@ export class CompareCloudsComponent implements OnInit {
     this.showBack = true;
     
     for(let cd of this.cloudDetails){
-      cd.costDiff = cd.totalCost - cd.existingCost;
+      cd.costDiff = (cd.totalCost - cd.existingCost).toFixed(2);
       cd.costPercent = ((cd.costDiff / cd.totalCost) * 100).toFixed(2);
     }
     /*
@@ -158,11 +336,10 @@ export class CompareCloudsComponent implements OnInit {
         console.log(data);
         this.compareService.cloudDetails = data;
     });
-
-    console.log("--------cost Percent-------" + JSON.stringify(this.cloudDetails));
   }
 
-  showDetails(){
+  showDetails(cloud){
+    this.nodes = cloud.nodes;
     this.showDetailsModal = true;
   }
 
