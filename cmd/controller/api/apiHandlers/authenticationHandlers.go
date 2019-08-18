@@ -120,6 +120,7 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+// TODO: Enhance
 func isUserAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
