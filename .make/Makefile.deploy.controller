@@ -1,4 +1,4 @@
-IMAGE := $(DOCKER_REPO)/$(BIN)-$(ARCH)
+IMAGE := $(DOCKER_REPO)/purser
 OUTPUT_DIR := tmp
 DOCKER_OUT := $(OUTPUT_DIR)/docker
 
