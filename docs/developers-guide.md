@@ -123,7 +123,7 @@ cd $GOPATH/src/github.com/vmware/purser/ui
 npm install
 
 # run purser UI at localhost:4200
-npm start
+npm run startdev
 ```
 _Refer [UI docs](../ui/README.md) for more details._
 
