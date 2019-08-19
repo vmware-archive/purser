@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AppProfileService } from '../../services/app-profile.service';
 import {  Router } from '@angular/router';
 import { AppProfile } from '../app-profile';
-
+//Checking git pull request
 @Component({
   selector: 'app-what-if',
   templateUrl: './what-if.component.html',
