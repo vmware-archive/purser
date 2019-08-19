@@ -4,7 +4,7 @@ import { CompareService } from '../../services/compare.service';
 import { Observable } from 'rxjs';
 import { CloudDetails } from './cloud-details';
 import { setDefaultService } from 'selenium-webdriver/opera';
-
+//Creating a PR for compare
 @Component({
   selector: 'app-compare-clouds',
   templateUrl: './compare-clouds.component.html',
