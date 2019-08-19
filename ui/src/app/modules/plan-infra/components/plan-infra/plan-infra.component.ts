@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as $ from 'jquery';
 import { Observable } from 'rxjs';
 import { PlanInfraService } from '../../services/plan-infra.service';
-
+//Creating PR for infra
 @Component({
   selector: 'app-plan-infra',
   templateUrl: './plan-infra.component.html',
