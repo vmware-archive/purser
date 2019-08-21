@@ -109,8 +109,8 @@ To run purser controller execute following commands
 # change directory to purser main folder
 cd $GOPATH/src/github.com/vmware/purser
 
-# run purser with log level as info
-go run cmd/controller/purserctrl.go --kubeconfig=<path-to-your-cluster-config> --interactions=enable --dgraphURL=localhost --log=info
+# run purser with log level as info and interactions as disabled by default
+go run cmd/controller/purserctrl.go --kubeconfig=<path-to-your-cluster-config> --interactions=disable --dgraphURL=localhost --log=info
 ```
 
 ## Running Purser UI
@@ -123,7 +123,7 @@ cd $GOPATH/src/github.com/vmware/purser/ui
 npm install
 
 # run purser UI at localhost:4200
-npm start
+npm run startdev
 ```
 _Refer [UI docs](../ui/README.md) for more details._
 

@@ -5,8 +5,6 @@ import { LogicalGroupComponent } from './modules/logical-group/components/logica
 import { TopologyGraphComponent } from './modules/topologyGraph/components/topologyGraph.component'
 import { TopoGraphComponent } from './modules/topo-graph/components/topo-graph.component'
 import { CapactiyGraphComponent } from './modules/capacity-graph/components/capactiy-graph.component'
-import { LoginComponent } from './modules/login/components/login.component'
-import { LogoutComponent } from './modules/logout/components/logout.component'
 import { OptionsComponent } from './modules/options/components/options.component'
 import { ChangepasswordComponent } from './modules/changepassword/components/changepassword.component'
 import { WhatIfComponent } from './modules/what-if/components/whatif/what-if.component';
@@ -18,8 +16,6 @@ export const ROUTES: Routes = [
     { path: 'network', component: TopologyGraphComponent },
     { path: 'hierarchy', component: TopoGraphComponent },
     { path: 'capacity', component: CapactiyGraphComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'logout', component: LogoutComponent },
     { path: 'changepassword', component: ChangepasswordComponent },
     { path: 'options', component: OptionsComponent },
     { path: 'whatif', component: WhatIfComponent},

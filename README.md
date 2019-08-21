@@ -60,13 +60,22 @@ Purser with its robust CLI and UI capabilities provides a set of features includ
 curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-setup.sh -O && sh purser-setup.sh
 ```
 
+_NOTE: If you want to try out purser on minikube, you can do the following steps instead._
+```bash
+curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-minmal-setup.sh -O && sh purser-minimal-setup.sh
+
+# Wait for containers to start, around 30s
+# Open Purser in browser
+minikube service purser-ui -n purser
+```
+
 ### Windows/Other Users:
 
 For detailed installation steps follow the instructions in the [manual installation guide](./docs/manual-installation.md).
 
 
 ### Purser Plugin Setup (Optional)
-_NOTE: This Plugin installation is optional._
+_NOTE: This Plugin installation is optional. This feature is not actively maintained and will be deprecated soon._
 
 If you want to install and use Purser's command line interface
 - [Plugin installation guide](./docs/plugin-installation.md).
