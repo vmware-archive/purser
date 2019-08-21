@@ -120,20 +120,8 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+// TODO: Enhance
 func isUserAuthenticated(w http.ResponseWriter, r *http.Request) bool {
-	session, err := store.Get(r, cookieName)
-	if err != nil {
-		logrus.Errorf("unable to get session from cookie store, err: %v", err)
-		http.Error(w, "Internal Error", http.StatusInternalServerError)
-		return false
-	}
-	// Check if user is authenticated
-	var usr User
-	usr, convertionSuccess := session.Values["user"].(User)
-	if !convertionSuccess || !usr.Authenticated {
-		http.Redirect(w, r, "/", http.StatusForbidden)
-		return false
-	}
 	return true
 }
 
