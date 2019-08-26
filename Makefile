@@ -31,7 +31,7 @@ DOCKER_REPO?=kreddyj
 ARCH?= amd64
 
 # This version-strategy uses a manual value to set the version string
-VERSION := 1.0.2
+VERSION := controller-1.0.2
 
 ###
 ### These variables should not need tweaking.

@@ -3,11 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { MCommon } from './common/messages/common.messages';
 
-//production environment
-const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
 
-// development environment
-// const BACKEND_BASE_URL = 'http://localhost:3030'
+const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
 
 export const BACKEND_URL = BACKEND_BASE_URL + '/api/'
 export const BACKEND_AUTH_URL = BACKEND_BASE_URL + '/auth/'

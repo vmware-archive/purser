@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: purser-ui
-        image: kreddyj/purser-ui:1.0.2
+        image: kreddyj/purser:ui-1.0.2
         imagePullPolicy: Always
         resources:
           limits:
