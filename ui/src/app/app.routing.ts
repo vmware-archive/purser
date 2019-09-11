@@ -7,6 +7,9 @@ import { TopoGraphComponent } from './modules/topo-graph/components/topo-graph.c
 import { CapactiyGraphComponent } from './modules/capacity-graph/components/capactiy-graph.component'
 import { OptionsComponent } from './modules/options/components/options.component'
 import { ChangepasswordComponent } from './modules/changepassword/components/changepassword.component'
+import { WhatIfComponent } from './modules/what-if/components/whatif/what-if.component';
+import { CompareCloudsComponent } from './modules/compare/components/compare-clouds/compare-clouds.component';
+import { PlanInfraComponent } from './modules/plan-infra/components/plan-infra/plan-infra.component';
 
 export const ROUTES: Routes = [
     { path: 'group', component: LogicalGroupComponent },
@@ -15,7 +18,10 @@ export const ROUTES: Routes = [
     { path: 'capacity', component: CapactiyGraphComponent },
     { path: 'changepassword', component: ChangepasswordComponent },
     { path: 'options', component: OptionsComponent },
-    { path: '**', redirectTo: 'group', pathMatch: 'full' }
+    { path: 'whatif', component: WhatIfComponent},
+    { path: 'compare', component : CompareCloudsComponent},
+    { path: 'plan/infra', component: PlanInfraComponent},
+    { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];
 
 export const ROUTING: ModuleWithProviders = RouterModule.forRoot(ROUTES);

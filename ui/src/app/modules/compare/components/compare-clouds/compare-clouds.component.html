@@ -1,0 +1,92 @@
+<div class="clr-row">
+    <div class="clr-col-12">
+        <label class = "compareTitle">Compare Clouds</label>
+    </div>
+</div>
+
+<div class="row" >
+  <div class="col-md-3" *ngFor = "let cloud of cloudRegions ; let c = index">
+        <div class="card" [ngStyle]="myStyles[c%4]">
+            <div class="card-block">
+                <div class="card-title">
+                    <label style = "font-weight : bold">{{cloud.cloud}}</label>
+                    <img class = "cloudImg" src = "../../../../../assets/images/{{images[c]}}">
+                </div>
+                <div class="card-text">
+                  <select clrSelect name="options" [(ngModel)]="cloud.selectedRegion">
+                    <option  *ngFor = "let region of cloud.region; let r = index" value = "{{region}}">{{region}}</option>
+                  </select>
+                </div>
+            </div>
+        </div>      
+  </div>
+</div>
+
+<div class="row btnRow" *ngIf = "showCloud">
+  <div class="col-md-3" *ngFor = "let cloud of cloudDetails ; let c = index">
+      <div class="card">
+          <div class="card-block">
+              <div class="card-title">
+              </div>
+              <div class="card-text">
+                  <div>CPU : {{cloud.cpu.toFixed(2)}} vCPU</div>
+                  <div>CPU Cost: {{cloud.cpuCost.toFixed(2)}} $/month</div>
+                  <div>Memory : {{cloud.memory.toFixed(2)}} GB</div>
+                  <div>Memory Cost : {{cloud.memoryCost.toFixed(2)}} $/month</div>
+                  <!--<div>Existing Cost : {{cloudDetails[c].exisitingCost}} $/month</div>-->
+                  <div class = "cost">Total Cost : {{cloudDetails[c].totalCost.toFixed(2)}} $/month</div>
+                  
+                  <div class = "change">
+                        <div class = "cost"><label>Savings : &nbsp;</label></div>
+                    <div id = "change{{c}}" [ngClass]="{'costDiffNeg': cloud.costDiff < 0,'costDiffPos' : cloud.costDiff > 0, 'costDiffZero' : cloud.costDiff == 0}" >{{cloud.costDiff}}</div>
+                    <div id = "changePercent{{c}}" [ngClass]="{'costDiffNeg': cloud.costDiff < 0,'costDiffPos' : cloud.costDiff > 0, 'costDiffZero' : cloud.costDiff == 0}" >({{cloud.costPercent}} %)</div>
+                  </div>
+              </div>
+          </div>
+          <div class="card-footer">
+              <button class="btn btn-link" (click) = "showDetails(cloud)">View Details</button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<div class="clr-row backRow" *ngIf = "showBack">
+    <div class="clr-col-12">
+        <button class="btn btn-outline" (click) = "back()"><label class = "back">Back</label></button>    
+    </div>
+</div>
+
+
+<div class="clr-row btnRow" *ngIf = "showBtn">
+    <div class="clr-col-12">
+      <button class="btn btn-primary" (click) = "showClouds()"><label class = "run">Run</label></button>      
+    </div>
+</div>
+
+<clr-modal [(clrModalOpen)]="showDetailsModal" [clrModalSize]="'lg'">
+    <h3 class="modal-title">Node Details</h3>
+    <div class="modal-body">
+            <clr-datagrid>
+                    <clr-dg-column>Instance Type</clr-dg-column>
+                    <clr-dg-column>OS</clr-dg-column>
+                    <clr-dg-column>CPU </clr-dg-column>
+                    <clr-dg-column>Memory </clr-dg-column>
+                    <clr-dg-column>CPU Cost</clr-dg-column>
+                    <clr-dg-column>Memory Cost</clr-dg-column>
+                    <clr-dg-column>Total Cost</clr-dg-column>
+                
+                    <clr-dg-row *ngFor="let node of nodes">
+                        <clr-dg-cell>{{node.instanceType}}</clr-dg-cell>
+                        <clr-dg-cell>{{node.os}}</clr-dg-cell>
+                        <clr-dg-cell>{{node.cpuNode}}</clr-dg-cell>
+                        <clr-dg-cell>{{node.memoryNode}}</clr-dg-cell>
+                        <clr-dg-cell>{{node.cpuNodeCost}}</clr-dg-cell>
+                        <clr-dg-cell>{{node.memoryNodeCost}}</clr-dg-cell>
+                        <clr-dg-cell>{{node.totalNodeCost}}</clr-dg-cell>
+                    </clr-dg-row>
+                </clr-datagrid>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="showDetailsModal = false">Done</button>
+    </div>
+</clr-modal>

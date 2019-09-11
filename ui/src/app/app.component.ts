@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { MCommon } from './common/messages/common.messages';
 
+
 const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
 
 export const BACKEND_URL = BACKEND_BASE_URL + '/api/'

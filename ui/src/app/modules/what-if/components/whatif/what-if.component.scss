@@ -1,0 +1,35 @@
+#workload_title{
+    font-weight: bold;
+    color : #495A67;
+    font-size: 25px;
+}
+.inputL{
+    font-size : 16px;
+}
+.date{
+    display: flex;
+    flex-direction: column;
+    padding-top : 35px;
+}
+#profile_title{
+    font-weight: 800;
+    font-size : 16px;
+    padding-top : 40px;
+}
+.dateL{
+    float : left;
+    font-weight : bold;
+    font-size : 16px;     
+}
+.startDate{
+   float : left;
+   clear : left;
+   padding-left : 60px;
+}
+.endDateLabel{
+    font-weight : bold;
+    font-size : 16px
+}
+.endDate{
+    padding-left : 60px;
+}
