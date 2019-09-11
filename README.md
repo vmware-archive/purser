@@ -62,7 +62,7 @@ curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-setup.s
 
 _NOTE: If you want to try out purser on minikube, you can do the following steps instead._
 ```bash
-curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-minmal-setup.sh -O && sh purser-minimal-setup.sh
+curl https://raw.githubusercontent.com/vmware/purser/master/build/purser-minimal-setup.sh -O && sh purser-minimal-setup.sh
 
 # Wait for containers to start, around 30s
 # Open Purser in browser
