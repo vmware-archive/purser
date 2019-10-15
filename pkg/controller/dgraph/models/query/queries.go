@@ -359,7 +359,7 @@ func getQueryForSubscribersRetrieval() string {
 	return `query {
 		subscribers(func: has(isSubscriber)) @filter(NOT(has(endTime))) {
 			name
-			Spec {
+			spec {
 				headers
 				url
 			}
