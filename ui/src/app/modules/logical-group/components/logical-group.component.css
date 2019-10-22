@@ -1,0 +1,14 @@
+.header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 15px;
+}
+
+.quick-filters {
+  font-weight: bold;
+}
+
+::ng-deep .datagrid-overlay-wrapper {
+  overflow-x: hidden;
+}

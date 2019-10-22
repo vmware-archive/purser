@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 import { LogicalGroupService } from '../services/logical-group.service';
 
 const STATUS_WAIT = 'WAIT',
-    STATUS_READY = 'READY',
-    STATUS_NODATA = 'NO_DATA';
+  STATUS_READY = 'READY',
+  STATUS_NODATA = 'NO_DATA';
 
 @Component({
   selector: 'app-logical-group',
@@ -13,9 +13,7 @@ const STATUS_WAIT = 'WAIT',
   styleUrls: ['./logical-group.component.css']
 })
 export class LogicalGroupComponent implements OnInit {
-
-  title = 'my-app';
-  groups: Object[];
+  public groups: Object[];
   public GROUP_STATUS = STATUS_WAIT;
   public isCreateGroup = false;
   public isDeleteGroup = false;
@@ -30,7 +28,7 @@ export class LogicalGroupComponent implements OnInit {
   public isShowMTD = false;
   public isShowProjected = false;
   public donutOptions = {};
-  public donutData = {"data": []};
+  public donutData = { "data": [] };
   public group: any;
   public costRatio = 100;
 
@@ -92,17 +90,17 @@ export class LogicalGroupComponent implements OnInit {
 
 
   private getLogicalGroupData() {
-      let observableEntity: Observable<any> = this.logicalGroupService.getLogicalGroupData();
-      this.GROUP_STATUS = STATUS_WAIT;
-      observableEntity.subscribe((response) => {
-          if (!response) {
-            console.log("empty response")
-              return;
-          }
-          this.groups = JSON.parse(JSON.stringify(response));
-      }, (err) => {
-          this.GROUP_STATUS = STATUS_NODATA;
-      });
+    let observableEntity: Observable<any> = this.logicalGroupService.getLogicalGroupData();
+    this.GROUP_STATUS = STATUS_WAIT;
+    observableEntity.subscribe((response) => {
+      if (!response) {
+        console.log("empty response")
+        return;
+      }
+      this.groups = JSON.parse(JSON.stringify(response));
+    }, (err) => {
+      this.GROUP_STATUS = STATUS_NODATA;
+    });
   }
 
   public fillGroupData() {
@@ -117,31 +115,31 @@ export class LogicalGroupComponent implements OnInit {
 
   public createGroup() {
     let observableEntity: Observable<any> = this.logicalGroupService.createCustomGroup(this.group);
-      observableEntity.subscribe((response) => {
-          console.log("successfully created group");
-          this.groupCreation = 'success';
-          setTimeout(() => this.ngOnInit(), 6000);
-      }, (err) => {
-          console.log("failed to create group", err);
-          this.groupCreation = 'fail';
-          this.creationError = err["error"];
-          ;
-      });
+    observableEntity.subscribe((response) => {
+      console.log("successfully created group");
+      this.groupCreation = 'success';
+      setTimeout(() => this.ngOnInit(), 6000);
+    }, (err) => {
+      console.log("failed to create group", err);
+      this.groupCreation = 'fail';
+      this.creationError = err["error"];
+      ;
+    });
     this.isCreateGroup = false;
   }
 
   public deleteGroup() {
     console.log("deleting group ", this.toBeDeletedGroup)
     let observableEntity: Observable<any> = this.logicalGroupService.deleteCustomGroup(this.toBeDeletedGroup);
-      observableEntity.subscribe((response) => {
-          console.log("successfully deleted group");
-          this.groupDeletion = 'success';
-          setTimeout(() => this.ngOnInit(), 6000);
-      }, (err) => {
-          console.log("failed to delete group", err);
-          this.groupDeletion = 'fail';
-          this.deletionError = err["error"];
-      });
+    observableEntity.subscribe((response) => {
+      console.log("successfully deleted group");
+      this.groupDeletion = 'success';
+      setTimeout(() => this.ngOnInit(), 6000);
+    }, (err) => {
+      console.log("failed to delete group", err);
+      this.groupDeletion = 'fail';
+      this.deletionError = err["error"];
+    });
     this.isDeleteGroup = false;
   }
 

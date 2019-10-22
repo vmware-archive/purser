@@ -1,51 +1,45 @@
+import { HttpClientModule } from '@angular/common/http';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { ClarityModule } from '@clr/angular';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
-
-
+import { GoogleChartsModule } from 'angular-google-charts';
+import { CookieService } from 'ngx-cookie-service';
 import { AppComponent } from './app.component';
 import { ROUTING } from "./app.routing";
-
-import { TopologyGraphModule } from './modules/topologyGraph/modules';
-import { TopoGraphModule } from './modules/topo-graph/modules';
-import { LeftNavigationModule } from './modules/left-navigation/modules';
+import { CapacityGraphModule } from './modules/capacity-graph/capacity-graph.module';
+import { ChangepasswordModule } from './modules/changepassword/changepassword.module';
+import { LogicalGroupModule } from './modules/logical-group/logical-group.module';
 import { LoginModule } from './modules/login/login.module';
 import { LogoutModule } from './modules/logout/logout.module';
 import { OptionsModule } from './modules/options/options.module';
-import { ChangepasswordModule } from './modules/changepassword/changepassword.module';
-import { LogicalGroupModule } from './modules/logical-group/logical-group.module'
-import { HomeModule } from './modules/home/home.module';
-import { CookieService } from 'ngx-cookie-service';
-
-import { GoogleChartsModule } from 'angular-google-charts';
+import { TopoGraphModule } from './modules/topo-graph/modules';
+import { TopologyGraphModule } from './modules/topologyGraph/modules';
 
 @NgModule({
-    declarations: [
-        AppComponent,
-    ],
-    imports: [
-        BrowserModule,
-        ClarityModule,
-        BrowserAnimationsModule,
-        RouterModule,
-        HttpClientModule,
-        ROUTING,
-        TopologyGraphModule,
-        TopoGraphModule,
-        LoginModule,
-        LogoutModule,
-        LogicalGroupModule,
-        ChangepasswordModule,
-        LeftNavigationModule,
-        HomeModule,
-        OptionsModule,
-        GoogleChartsModule.forRoot()
-    ],
-    providers: [ CookieService ],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
-    bootstrap: [AppComponent]
+  declarations: [
+    AppComponent,
+  ],
+  imports: [
+    BrowserModule,
+    ClarityModule,
+    BrowserAnimationsModule,
+    RouterModule,
+    HttpClientModule,
+    ROUTING,
+    CapacityGraphModule,
+    TopologyGraphModule,
+    TopoGraphModule,
+    LoginModule,
+    LogoutModule,
+    LogicalGroupModule,
+    ChangepasswordModule,
+    OptionsModule,
+    GoogleChartsModule.forRoot()
+  ],
+  providers: [CookieService],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

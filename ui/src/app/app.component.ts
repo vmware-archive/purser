@@ -1,55 +1,49 @@
-import { Component, OnInit} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router, RouterEvent, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterEvent } from '@angular/router';
 import { MCommon } from './common/messages/common.messages';
 
-const BACKEND_BASE_URL = window.location.protocol + '//' + window.location.host
-
-export const BACKEND_URL = BACKEND_BASE_URL + '/api/'
-export const BACKEND_AUTH_URL = BACKEND_BASE_URL + '/auth/'
-
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
 
-    public routeLoading: boolean = false;
-    public messages: any = {};
-    public IS_LOGEDIN = true;
+  public routeLoading: boolean = false;
+  public messages: any = {};
+  public IS_LOGEDIN = true;
 
-    constructor(public router: Router) {
-        this.messages = {
-            'common': MCommon
-        }
+  constructor(public router: Router) {
+    this.messages = {
+      'common': MCommon
+    }
+  }
+
+  private loadApp() {
+    this.router.events.subscribe((event: RouterEvent) => {
+      this.navigationEventHandler(event);
+    });
+  }
+
+  private navigationEventHandler(event: RouterEvent): void {
+    if (event instanceof NavigationStart) {
+      this.routeLoading = true;
+    }
+    if (event instanceof NavigationEnd) {
+      this.routeLoading = false;
     }
 
-    private loadApp() {
-        this.router.events.subscribe((event: RouterEvent) => {
-            this.navigationEventHandler(event);
-        });
+    // Set loading state to false in both of the below events to hide the spinner in case a request fails.
+    if (event instanceof NavigationCancel) {
+      this.routeLoading = false;
     }
-
-    private navigationEventHandler(event: RouterEvent): void {
-        if (event instanceof NavigationStart) {
-            this.routeLoading = true;
-        }
-        if (event instanceof NavigationEnd) {
-            this.routeLoading = false;
-        }
-
-        // Set loading state to false in both of the below events to hide the spinner in case a request fails.
-        if (event instanceof NavigationCancel) {
-            this.routeLoading = false;
-        }
-        if (event instanceof NavigationError) {
-            this.routeLoading = false;
-        }
+    if (event instanceof NavigationError) {
+      this.routeLoading = false;
     }
+  }
 
-    ngOnInit() {
-        this.loadApp();
-    }
+  ngOnInit() {
+    this.loadApp();
+  }
 
 }

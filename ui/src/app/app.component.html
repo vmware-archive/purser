@@ -1,72 +1,48 @@
 <div class="main-container">
-    <header class="header header-6">
-        <div class="branding appHeader">
-            <span>{{messages && messages.common.appHeader}}</span>
-        </div>
-    </header>
-    <div class="content-container">
-        <div class="main-body">
-            <div class="content-area" *ngIf="routeLoading">
-                <div class="app-loader">
-                    <span class="spinner"> Loading... </span>
-                </div>
-            </div>
-            <div class="content-area" *ngIf="!routeLoading">
-                <div class="page-area">
-                    <router-outlet></router-outlet>
-                </div>
-            </div>
-            <clr-vertical-nav *ngIf="IS_LOGEDIN">
-                <a clrVerticalNavLink routerLink="./group" routerLinkActive="active">
-                    <clr-icon clrVerticalNavIcon shape="blocks-group"></clr-icon>
-                    Custom Groups
-                </a>
-                <a clrVerticalNavLink routerLink="./capacity" routerLinkActive="active">
-                    <clr-icon clrVerticalNavIcon shape="resource-pool"></clr-icon>
-                    Capacity
-                </a>
-                <a clrVerticalNavLink routerLink="./hierarchy" routerLinkActive="active">
-                    <clr-icon clrVerticalNavIcon shape="organization"></clr-icon>
-                    Hierarchy
-                </a>
-                <a clrVerticalNavLink routerLink="./network" routerLinkActive="active">
-                    <clr-icon clrVerticalNavIcon shape="network-globe"></clr-icon>
-                    Interactions
-                </a>
-                <clr-vertical-nav-group routerLinkActive="active">
-                    <clr-icon shape="administrator" clrVerticalNavIcon></clr-icon>
-                    Admin
-                    <clr-vertical-nav-group-children>
-                        <a clrVerticalNavLink
-                        routerLink="./options"
-                        routerLinkActive="active">
-                        <clr-icon shape="cog" clrVerticalNavIcon></clr-icon>
-                            Options
-                        </a>
-                        <a clrVerticalNavLink
-                        routerLink="./changepassword"
-                        routerLinkActive="active">
-                        <clr-icon shape="lock" clrVerticalNavIcon></clr-icon>
-                            Change Password
-                        </a>
-                        <a clrVerticalNavLink
-                        routerLink="./logout"
-                        routerLinkActive="active">
-                        <clr-icon shape="logout" clrVerticalNavIcon></clr-icon>
-                            Log Out
-                        </a>
-                    </clr-vertical-nav-group-children>
-                </clr-vertical-nav-group>
-                <div class="nav-divider"></div>
-                <a clrVerticalNavLink href="https://github.com/vmware/purser" routerLinkActive="active">
-                    <img src="../assets/images/GitHub-Mark-32px.png" alt="GitHub" width="15" height="15">
-                    GitHub
-                </a>
-                <a clrVerticalNavLink href="https://github.com/vmware/purser/issues/new" routerLinkActive="active">
-                    <clr-icon shape="plus-circle"></clr-icon>
-                    New Issue
-                </a>
-            </clr-vertical-nav>
-        </div>
+  <header class="header header-6">
+    <div class="branding appHeader">
+      <span>{{messages && messages.common.appHeader}}</span>
     </div>
+  </header>
+  <div class="content-container">
+    <div class="main-body">
+      <div class="content-area" *ngIf="routeLoading">
+        <div class="app-loader">
+          <span class="spinner"> Loading... </span>
+        </div>
+      </div>
+      <div class="content-area" *ngIf="!routeLoading">
+        <div class="page-area">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+      <clr-vertical-nav *ngIf="IS_LOGEDIN">
+        <a clrVerticalNavLink routerLink="./group" routerLinkActive="active">
+          <clr-icon clrVerticalNavIcon shape="blocks-group"></clr-icon>
+          Custom Groups
+        </a>
+        <a clrVerticalNavLink routerLink="./capacity" routerLinkActive="active">
+          <clr-icon clrVerticalNavIcon shape="resource-pool"></clr-icon>
+          Capacity
+        </a>
+        <a clrVerticalNavLink routerLink="./hierarchy" routerLinkActive="active">
+          <clr-icon clrVerticalNavIcon shape="organization"></clr-icon>
+          Hierarchy
+        </a>
+        <a clrVerticalNavLink routerLink="./network" routerLinkActive="active">
+          <clr-icon clrVerticalNavIcon shape="network-globe"></clr-icon>
+          Interactions
+        </a>
+        <div class="nav-divider"></div>
+        <a clrVerticalNavLink href="https://github.com/vmware/purser" routerLinkActive="active">
+          <img src="../assets/images/GitHub-Mark-32px.png" alt="GitHub" width="15" height="15">
+          GitHub
+        </a>
+        <a clrVerticalNavLink href="https://github.com/vmware/purser/issues/new" routerLinkActive="active">
+          <clr-icon shape="plus-circle"></clr-icon>
+          New Issue
+        </a>
+      </clr-vertical-nav>
+    </div>
+  </div>
 </div>

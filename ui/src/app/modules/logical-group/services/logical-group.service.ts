@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BACKEND_URL } from '../../../app.component'
+import { Injectable } from '@angular/core';
+import { BACKEND_URL } from '../../../app.constants';
 
 @Injectable()
 export class LogicalGroupService {
@@ -28,11 +28,11 @@ export class LogicalGroupService {
 
     public deleteCustomGroup(name) {
         let _url: string = BACKEND_URL + 'group/delete?name=' + name;
-        return this.http.post(_url, null, {withCredentials: true})
+        return this.http.post(_url, null, { withCredentials: true })
     }
 
     public createCustomGroup(groupDef) {
         let _url: string = BACKEND_URL + 'group/create';
-        return this.http.post(_url, groupDef, {withCredentials: true})
+        return this.http.post(_url, groupDef, { withCredentials: true })
     }
 }
