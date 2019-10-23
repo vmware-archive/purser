@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BACKEND_URL } from '../../../app.component'
+import { Injectable } from '@angular/core';
+import { BACKEND_URL } from '../../../app.constants';
 
 @Injectable()
 export class CapacityGraphService {

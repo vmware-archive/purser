@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BACKEND_URL } from '../../../app.component';
+import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
+import { BACKEND_URL } from '../../../app.constants';
 
 @Injectable()
 export class TopoGraphService {

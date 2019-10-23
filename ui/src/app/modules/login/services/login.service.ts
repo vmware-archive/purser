@@ -1,6 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BACKEND_AUTH_URL } from '../../../app.component'
+import { BACKEND_AUTH_URL } from '../../../app.constants';
 
 @Injectable()
 export class LoginService {
@@ -12,7 +12,7 @@ export class LoginService {
 
     public sendLoginCredential(credentials) {
         const httpPostOptions =
-        {   
+        {
             withCredentials: true,
         }
         return this.http.post(this.url, credentials, httpPostOptions);

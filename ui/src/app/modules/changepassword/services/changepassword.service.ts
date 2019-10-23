@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BACKEND_AUTH_URL } from '../../../app.component'
+import { Injectable } from '@angular/core';
+import { BACKEND_AUTH_URL } from '../../../app.constants';
 
 @Injectable()
 export class ChangepasswordService {

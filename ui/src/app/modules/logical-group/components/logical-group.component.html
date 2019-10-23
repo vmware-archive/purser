@@ -1,248 +1,317 @@
-<h3>Custom Groups</h3>
-
-<div class="clr-row" style="margin-top: 2%; margin-bottom: 1%">
-    <div class="clr-col-4">
-        <button [clrLoading]="submitBtnState" type="submit" class="btn btn-success-outline" (click)="fillGroupData()"><clr-icon shape="plus"></clr-icon> ADD GROUP</button>
-    </div>
+<div class="header-wrapper">
+  <h3>Custom Groups</h3>
+  <div>
+    <button [clrLoading]="submitBtnState" type="submit" class="btn btn-primary-outline" (click)="fillGroupData()">
+      <clr-icon shape="plus"></clr-icon> ADD GROUP
+    </button>
+  </div>
 </div>
 
-<button type="button" (click)="changeCurrentMonthView()" class="label clickable {{ getCurrentMonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+<div>
+  <span class="quick-filters">Quick Filters: </span>
+  <button type="button" (click)="changeCurrentMonthView()" class="label clickable {{ getCurrentMonthStatus() }}"
+    style="cursor:pointer;font-size: 10pt;">
     Current Month Cost
-</button>
-<button type="button" (click)="changeLastMonthView()" class="label clickable {{ getLastMonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+  </button>
+  <button type="button" (click)="changeLastMonthView()" class="label clickable {{ getLastMonthStatus() }}"
+    style="cursor:pointer;font-size: 10pt;">
     Last Month Cost
-</button>
-<button type="button" (click)="changeLast3MonthView()" class="label clickable {{ getLast3MonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+  </button>
+  <button type="button" (click)="changeLast3MonthView()" class="label clickable {{ getLast3MonthStatus() }}"
+    style="cursor:pointer;font-size: 10pt;">
     3 Months Cost
-</button>
-<button type="button" (click)="changeProjectedMonthView()" class="label clickable {{ getProjectedMonthStatus() }}" style="cursor:pointer;font-size: 10pt;">
+  </button>
+  <button type="button" (click)="changeProjectedMonthView()" class="label clickable {{ getProjectedMonthStatus() }}"
+    style="cursor:pointer;font-size: 10pt;">
     Projected Cost
-</button>
+  </button>
+</div>
 
 <clr-datagrid>
-    <clr-dg-column [clrDgField]="'name'">Group Name</clr-dg-column>
-    <clr-dg-column [clrDgField]="'podsCount'"><ng-container *clrDgHideableColumn="{hidden: true}">Pods</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'cpu'"><ng-container *clrDgHideableColumn="{hidden: false}">CPU (vCPU)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'memory'"><ng-container *clrDgHideableColumn="{hidden: false}">Memory (GB)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'storage'"><ng-container *clrDgHideableColumn="{hidden: false}">Storage (GB)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdCPU'"><ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">CPU Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdMemory'"><ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">Memory Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdStorage'"><ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">Storage Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'mtdCost'"><ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">Total Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'projectedCPU'"><ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected CPU Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'projectedMemory'"><ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected Memory Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'projectedStorage'"><ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected Storage Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'projectedCost'"><ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected Cost (US $)</ng-container></clr-dg-column>
+  <clr-dg-column [clrDgField]="'name'">Group Name</clr-dg-column>
+  <clr-dg-column [clrDgField]="'podsCount'">
+    <ng-container *clrDgHideableColumn="{hidden: true}">Pods</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'cpu'">
+    <ng-container *clrDgHideableColumn="{hidden: false}">CPU (vCPU)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'memory'">
+    <ng-container *clrDgHideableColumn="{hidden: false}">Memory (GB)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'storage'">
+    <ng-container *clrDgHideableColumn="{hidden: false}">Storage (GB)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'mtdCPU'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">CPU Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'mtdMemory'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">Memory Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'mtdStorage'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">Storage Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'mtdCost'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewCurrentMonth}">Total Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'projectedCPU'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected CPU Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'projectedMemory'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected Memory Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'projectedStorage'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected Storage Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'projectedCost'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewProjected}">Projected Cost (US $)</ng-container>
+  </clr-dg-column>
 
-    <clr-dg-column [clrDgField]="'lastMonthCPU'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month CPU Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'lastMonthMemory'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month Memory Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'lastMonthStorage'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month Storage Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'lastMonthCost'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month Cost (US $)</ng-container></clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastMonthCPU'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month CPU Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastMonthMemory'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month Memory Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastMonthStorage'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month Storage Cost (US $)</ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastMonthCost'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastMonth}">Last Month Cost (US $)</ng-container>
+  </clr-dg-column>
 
-    <clr-dg-column [clrDgField]="'lastThreeMonthsCPU'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months CPU Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'lastThreeMonthsMemory'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months Memory Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'lastThreeMonthsStorage'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months Storage Cost (US $)</ng-container></clr-dg-column>
-    <clr-dg-column [clrDgField]="'lastThreeMonthsCost'"><ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months Cost (US $)</ng-container></clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastThreeMonthsCPU'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months CPU Cost (US $)
+    </ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastThreeMonthsMemory'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months Memory Cost (US $)
+    </ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastThreeMonthsStorage'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months Storage Cost (US $)
+    </ng-container>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'lastThreeMonthsCost'">
+    <ng-container *clrDgHideableColumn="{hidden: !isViewLastThreeMonth}">Last three months Cost (US $)
+    </ng-container>
+  </clr-dg-column>
 
 
-    <clr-dg-placeholder>We couldn't find any custom groups!</clr-dg-placeholder>
+  <clr-dg-placeholder>We couldn't find any custom groups!</clr-dg-placeholder>
 
-    <clr-dg-row *clrDgItems="let group of groups">
-      <clr-dg-cell><button class="btn btn-sm btn-link" style="padding:-4%; margin:-4%; text-align: left" (click)="showGroupDetails(group)">{{ group.name }}</button></clr-dg-cell>
-      <clr-dg-cell>{{ group.podsCount }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.cpu | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.memory | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.storage | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.mtdCPUCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.mtdMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.mtdStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.mtdCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.projectedCPUCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.projectedMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.projectedStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.projectedCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+  <clr-dg-row *clrDgItems="let group of groups">
+    <clr-dg-cell><button class="btn btn-sm btn-link" style="padding:-4%; margin:-4%; text-align: left"
+        (click)="showGroupDetails(group)">{{ group.name }}</button></clr-dg-cell>
+    <clr-dg-cell>{{ group.podsCount }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.cpu | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.memory | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.storage | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.mtdCPUCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.mtdMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.mtdStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.mtdCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.projectedCPUCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.projectedMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.projectedStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.projectedCost | number: '1.0-2') || 0 }}</clr-dg-cell>
 
-      <clr-dg-cell>{{ (group.lastMonthCPUCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.lastMonthMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.lastMonthStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (group.lastMonthCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.lastMonthCPUCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.lastMonthMemoryCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.lastMonthStorageCost | number: '1.0-2') || 0 }}</clr-dg-cell>
+    <clr-dg-cell>{{ (group.lastMonthCost | number: '1.0-2') || 0 }}</clr-dg-cell>
 
-      <clr-dg-cell>{{ (((group.mtdCPUCost || 0) + (group.lastMonthCPUCost || 0) + (group.lastLastMonthCPUCost || 0)) | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (((group.mtdMemoryCost || 0) + (group.lastMonthMemoryCost || 0) + (group.lastLastMonthMemoryCost || 0))| number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (((group.mtdStorageCost || 0) + (group.lastMonthStorageCost || 0) + (group.lastLastMonthStorageCost || 0)) | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-cell>{{ (((group.mtdCost || 0) + (group.lastMonthCost || 0) + (group.lastLastMonthCost || 0)) | number: '1.0-2') || 0 }}</clr-dg-cell>
-      <clr-dg-action-overflow>
-            <button class="action-item" (click)="setToBeDeletedGroup(group.name)"><clr-icon shape="trash"></clr-icon>  DELETE</button>
-        </clr-dg-action-overflow>
-    </clr-dg-row>
+    <clr-dg-cell>
+      {{ (((group.mtdCPUCost || 0) + (group.lastMonthCPUCost || 0) + (group.lastLastMonthCPUCost || 0)) | number: '1.0-2') || 0 }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ (((group.mtdMemoryCost || 0) + (group.lastMonthMemoryCost || 0) + (group.lastLastMonthMemoryCost || 0))| number: '1.0-2') || 0 }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ (((group.mtdStorageCost || 0) + (group.lastMonthStorageCost || 0) + (group.lastLastMonthStorageCost || 0)) | number: '1.0-2') || 0 }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ (((group.mtdCost || 0) + (group.lastMonthCost || 0) + (group.lastLastMonthCost || 0)) | number: '1.0-2') || 0 }}
+    </clr-dg-cell>
+    <clr-dg-action-overflow>
+      <button class="action-item" (click)="setToBeDeletedGroup(group.name)">
+        <clr-icon shape="trash"></clr-icon> DELETE
+      </button>
+    </clr-dg-action-overflow>
+  </clr-dg-row>
 
-    <clr-dg-footer>
-        <clr-dg-column-toggle>
-            <clr-dg-column-toggle-title>Hide/Show Features</clr-dg-column-toggle-title>
-            <clr-dg-column-toggle-button>Select All</clr-dg-column-toggle-button>
-        </clr-dg-column-toggle>
-        {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
-        of {{pagination.totalItems}} groups
-        <clr-dg-pagination #pagination [clrDgPageSize]="currentPageSize"></clr-dg-pagination>
-    </clr-dg-footer>
+  <clr-dg-footer>
+    <clr-dg-column-toggle>
+      <clr-dg-column-toggle-title>Hide/Show Features</clr-dg-column-toggle-title>
+      <clr-dg-column-toggle-button>Select All</clr-dg-column-toggle-button>
+    </clr-dg-column-toggle>
+    {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+    of {{pagination.totalItems}} groups
+    <clr-dg-pagination #pagination [clrDgPageSize]="currentPageSize"></clr-dg-pagination>
+  </clr-dg-footer>
 </clr-datagrid>
 
 <form novalidate #f="ngForm" (ngSubmit)="createGroup();">
-    <clr-modal [(clrModalOpen)]="isCreateGroup" [clrModalSize]="'lg'">
+  <clr-modal [(clrModalOpen)]="isCreateGroup" [clrModalSize]="'lg'">
     <h3 class="modal-title">New Custom Group</h3>
     <div class="modal-body">
-        <form clrForm>
-            <clr-textarea-container>
-                <textarea clrTextarea [(ngModel)]="group" name="group" placeholder="Group Definition in JSON or YAML" rows="15" required></textarea>
-            </clr-textarea-container>
-          </form>
+      <form clrForm>
+        <clr-textarea-container>
+          <textarea clrTextarea [(ngModel)]="group" name="group" placeholder="Group Definition in JSON or YAML"
+            rows="15" required></textarea>
+        </clr-textarea-container>
+      </form>
 
-        <p class="p5">For group template click <a href="https://github.com/vmware/purser/blob/master/cluster/artifacts/group-template.json">here</a>.<br/>
-            To read more about groups check <a href="https://github.com/vmware/purser/blob/master/docs/custom-group-installation-and-usage.md">this</a>.</p>
+      <p class="p5">For group template click <a
+          href="https://github.com/vmware/purser/blob/master/cluster/artifacts/group-template.json">here</a>.<br />
+        To read more about groups check <a
+          href="https://github.com/vmware/purser/blob/master/docs/custom-group-installation-and-usage.md">this</a>.
+      </p>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline" (click)="isCreateGroup = false">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="createGroup()">Create</button>
+      <button type="button" class="btn btn-outline" (click)="isCreateGroup = false">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="createGroup()">Create</button>
     </div>
-    </clr-modal>
+  </clr-modal>
 </form>
 
 <clr-modal [(clrModalOpen)]="isDeleteGroup">
-    <h3 class="modal-title">Delete group {{ toBeDeletedGroup }}?</h3>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-outline" (click)="isDeleteGroup = false">Cancel</button>
-        <button type="button" class="btn btn-danger" (click)="deleteGroup()">Delete</button>
-    </div>
+  <h3 class="modal-title">Delete group {{ toBeDeletedGroup }}?</h3>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="isDeleteGroup = false">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="deleteGroup()">Delete</button>
+  </div>
 </clr-modal>
 
 <div *ngIf="groupCreation === 'fail'">
-    <div class="clr-row">
-        <div class="clr-col-8">
-            <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
-                <clr-alert-item>
-                    <div class="alert-item static">
-                        <span class="alert-text">
-                            Group creation failed<br/><br/>
-                            Error: {{ creationError }}
-                        </span>
-                    </div>
-                </clr-alert-item>
-            </clr-alert>
-        </div>
+  <div class="clr-row">
+    <div class="clr-col-8">
+      <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
+        <clr-alert-item>
+          <div class="alert-item static">
+            <span class="alert-text">
+              Group creation failed<br /><br />
+              Error: {{ creationError }}
+            </span>
+          </div>
+        </clr-alert-item>
+      </clr-alert>
     </div>
+  </div>
 </div>
 
 <div *ngIf="groupCreation === 'success'">
-    <div class="clr-row">
-        <div class="clr-col-4">
-            <clr-alert clrAlertType="success" [clrAlertClosable]="true">
-                <clr-alert-item>
-                    <div class="alert-item static">
-                        <span class="alert-text">
-                                Successfully created group.
-                        </span>
-                    </div>
-                </clr-alert-item>
-            </clr-alert>
-        </div>
+  <div class="clr-row">
+    <div class="clr-col-4">
+      <clr-alert clrAlertType="success" [clrAlertClosable]="true">
+        <clr-alert-item>
+          <div class="alert-item static">
+            <span class="alert-text">
+              Successfully created group.
+            </span>
+          </div>
+        </clr-alert-item>
+      </clr-alert>
     </div>
+  </div>
 </div>
 
 <div *ngIf="groupDeletion === 'success'">
-    <div class="clr-row">
-        <div class="clr-col-4">
-            <clr-alert clrAlertType="success" [clrAlertClosable]="true">
-                <clr-alert-item>
-                    <div class="alert-item static">
-                        <span class="alert-text">
-                                Successfully deleted group.
-                        </span>
-                    </div>
-                </clr-alert-item>
-            </clr-alert>
-        </div>
+  <div class="clr-row">
+    <div class="clr-col-4">
+      <clr-alert clrAlertType="success" [clrAlertClosable]="true">
+        <clr-alert-item>
+          <div class="alert-item static">
+            <span class="alert-text">
+              Successfully deleted group.
+            </span>
+          </div>
+        </clr-alert-item>
+      </clr-alert>
     </div>
+  </div>
 </div>
 
 <div *ngIf="groupDeletion === 'fail'">
-    <div class="clr-row">
-        <div class="clr-col-8">
-            <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
-                <clr-alert-item>
-                    <div class="alert-item static">
-                        <span class="alert-text">
-                                Group deletion failed<br/><br/>
-                                Error: {{ deletionError }}
-                        </span>
-                    </div>
-                </clr-alert-item>
-            </clr-alert>
-        </div>
+  <div class="clr-row">
+    <div class="clr-col-8">
+      <clr-alert clrAlertType="danger" [clrAlertClosable]="true">
+        <clr-alert-item>
+          <div class="alert-item static">
+            <span class="alert-text">
+              Group deletion failed<br /><br />
+              Error: {{ deletionError }}
+            </span>
+          </div>
+        </clr-alert-item>
+      </clr-alert>
     </div>
+  </div>
 </div>
 
 <div class="clr-row" *ngIf="isShowGroupDetails">
-    <div class="clr-col-lg-12 clr-col-md-12 clr-col-12">
-        <div class="card">
-            <div class="card-header">
-                Resource Details for <b style="text-transform: uppercase;">{{ groupToFocus.name }}</b>
+  <div class="clr-col-lg-12 clr-col-md-12 clr-col-12">
+    <div class="card">
+      <div class="card-header">
+        Resource Details for <b style="text-transform: uppercase;">{{ groupToFocus.name }}</b>
+      </div>
+      <div class="card-block">
+        <div class="card-text">
+          <div class="row">
+            <div class="clr-col-4">
+              <b>Pods</b> : {{ groupToFocus.podsCount }}<br />
+              <b>CPU</b> : {{ groupToFocus.cpu }}<br />
+              <b>Memory</b> : {{ groupToFocus.memory }}<br />
+              <b>Storage</b> : {{ groupToFocus.storage }}<br />
+              <b>CurrentMonth Cost</b> : {{ groupToFocus.mtdCost }}<br />
+              <b>Last Month Cost</b> : {{ groupToFocus.lastMonthCost || 0 }}<br />
+              <b>Last 3 Months Cost</b> :
+              {{ (groupToFocus.mtdCost || 0) + (groupToFocus.lastMonthCost || 0) + (groupToFocus.lastLastMonthCost || 0) }}
             </div>
-            <div class="card-block">
-                <div class="card-text">
-                <div class="row">
-                    <div class="clr-col-4">
-                        <b>Pods</b>      : {{ groupToFocus.podsCount }}<br/>
-                        <b>CPU</b>       : {{ groupToFocus.cpu }}<br/>
-                        <b>Memory</b>    : {{ groupToFocus.memory }}<br/>
-                        <b>Storage</b>   : {{ groupToFocus.storage }}<br/>
-                        <b>CurrentMonth Cost</b> : {{ groupToFocus.mtdCost }}<br/>
-                        <b>Last Month Cost</b> : {{ groupToFocus.lastMonthCost || 0 }}<br/>
-                        <b>Last 3 Months Cost</b> : {{ (groupToFocus.mtdCost || 0) + (groupToFocus.lastMonthCost || 0) + (groupToFocus.lastLastMonthCost || 0) }}
-                    </div>
-                    <div class="clr-col-2"></div>
-                    <div class="clr-col-4 progress-block">
-                            <label>Current Cost vs Projected</label>
-                            <div class="progress-static labeled">
-                                <div class="progress-meter" [attr.data-value]="costRatio" [attr.data-displayval]="costRatio + '%'"></div>
-                            </div>
-                            <span style="margin: 1%">{{ costRatio }}%</span>
-                        </div>
-                    </div>
+            <div class="clr-col-2"></div>
+            <div class="clr-col-4 progress-block">
+              <label>Current Cost vs Projected</label>
+              <div class="progress-static labeled">
+                <div class="progress-meter" [attr.data-value]="costRatio" [attr.data-displayval]="costRatio + '%'">
                 </div>
+              </div>
+              <span style="margin: 1%">{{ costRatio }}%</span>
             </div>
-
-            <div class="card-footer">
-                <button class="btn btn-sm btn-link" (click)="showMTD()">MTD Costs</button>
-                <button class="btn btn-sm btn-link" (click)="showProjected()">Projected Costs</button>
-            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn btn-sm btn-link" (click)="showMTD()">MTD Costs</button>
+        <button class="btn btn-sm btn-link" (click)="showProjected()">Projected Costs</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="clr-row" *ngIf="isShowMTD">
-    <div class="card">
-        <div class="card-header">
-            MTD Costs
-        </div>
-        <div class="card-block">
-            <div class="googleChartDiv" *ngIf="isShowMTD">
-                <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
-            </div> 
-        </div>
+  <div class="card">
+    <div class="card-header">
+      MTD Costs
     </div>
+    <div class="card-block">
+      <div class="googleChartDiv" *ngIf="isShowMTD">
+        <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions"
+          [dynamicResize]="true"></google-chart>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="clr-row" *ngIf="isShowProjected">
-    <div class="card">
-        <div class="card-header">
-            Projected Costs
-        </div>
-        <div class="card-block">
-            <div class="googleChartDiv" *ngIf="isShowProjected">
-                <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions" [dynamicResize]="true"></google-chart>
-            </div>
-        </div>
+  <div class="card">
+    <div class="card-header">
+      Projected Costs
     </div>
+    <div class="card-block">
+      <div class="googleChartDiv" *ngIf="isShowProjected">
+        <google-chart class="googleChart" [type]="'PieChart'" [data]="donutData.data" [options]="donutOptions"
+          [dynamicResize]="true"></google-chart>
+      </div>
+    </div>
+  </div>
 </div>
-
-
