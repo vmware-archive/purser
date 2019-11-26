@@ -19,6 +19,7 @@ export class LogicalGroupComponent implements OnInit {
   public isDeleteGroup = false;
   public isShowGroupDetails = false;
   public toBeDeletedGroup = "Custom Group";
+  public toBeEditedGroup = "";
   public groupToFocus: any;
   public groupCreation = 'wait';
   public groupDeletion = 'wait';
@@ -36,6 +37,8 @@ export class LogicalGroupComponent implements OnInit {
   public isViewLastMonth = false;
   public isViewLastThreeMonth = false;
   public isViewProjected = false;
+
+  public editGroup : boolean = false;
 
   constructor(private router: Router, private logicalGroupService: LogicalGroupService) {
   }
@@ -146,6 +149,11 @@ export class LogicalGroupComponent implements OnInit {
   public setToBeDeletedGroup(grpName) {
     this.toBeDeletedGroup = grpName;
     this.isDeleteGroup = true;
+  }
+
+  public setToBeModifiedGroup(grpName){
+    this.toBeEditedGroup = grpName
+    this.editGroup = true;
   }
 
   public showGroupDetails(group) {
