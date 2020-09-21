@@ -36,7 +36,7 @@ const (
 // Proc schema in dgraph
 type Proc struct {
 	dgraph.ID
-	IsProc    bool       `json:"isProc,omitemtpy"`
+	IsProc    bool       `json:"isProc,omitempty"`
 	Name      string     `json:"name,omitempty"`
 	Interacts []*Pod     `json:"interacts,omitempty"`
 	Container Container  `json:"container,omitempty"`
