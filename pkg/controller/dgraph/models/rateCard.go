@@ -187,10 +187,17 @@ func getPerUnitResourcePriceForNode(nodeName string) (float64, float64) {
 }
 
 func getPricePerUnitResourceFromNodePrice(node Node) (float64, float64) {
-	nodePriceXID := node.InstanceType + "-" + node.OS
-	nodePrice, err := retrieveNodePrice(nodePriceXID)
-	if err == nil {
-		return nodePrice.PricePerCPU, nodePrice.PricePerMemory
+	xidsToTry := []string{
+		node.InstanceType + "-" + node.OS,
+		node.InstanceType + "-linux",
+		node.InstanceType + "-ANY",
+		node.InstanceType,
+	}
+	for _, xid := range xidsToTry {
+		nodePrice, err := retrieveNodePrice(xid)
+		if err == nil {
+			return nodePrice.PricePerCPU, nodePrice.PricePerMemory
+		}
 	}
 	return DefaultCPUCostInFloat64, DefaultMemCostInFloat64
 }
