@@ -136,6 +136,9 @@
       <button class="action-item" (click)="setToBeDeletedGroup(group.name)">
         <clr-icon shape="trash"></clr-icon> DELETE
       </button>
+      <button class="action-item" (click)="setToBeModifiedGroup(group.name)">
+        <clr-icon shape="pencil"></clr-icon> EDIT
+      </button>
     </clr-dg-action-overflow>
   </clr-dg-row>
 
@@ -179,6 +182,17 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="isDeleteGroup = false">Cancel</button>
     <button type="button" class="btn btn-danger" (click)="deleteGroup()">Delete</button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="editGroup" [clrModalSize]="'lg'">
+  <h3 class="modal-title">Edit Group  {{toBeEditedGroup | uppercase}}</h3>
+  <div class="modal-body">
+      <p>But not much to say...</p>
+  </div>
+  <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="editGroup = false">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="editGroup = false">Done</button>
   </div>
 </clr-modal>
 
